@@ -12,7 +12,7 @@ const categories = [
 
 export function CategoryRail() {
   return (
-    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hidden pb-2">
+    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {categories.map((category) => (
         <Link key={category.label} to={category.href}>
           <CategoryCard
