@@ -25,7 +25,7 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
   ];
 
   return (
-    <div className="bg-primary px-4 py-6 flex items-center justify-between">
+    <div className="md:hidden bg-primary px-4 py-6 flex items-center justify-between">
       <h1 className="text-2xl font-bold text-primary-foreground">
         {title}
       </h1>

@@ -17,7 +17,7 @@ export function BottomNav({ activeTab }: BottomNavProps) {
   const location = useLocation();
   const currentPath = activeTab || location.pathname;
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav md:hidden">
       <div className="max-w-md mx-auto px-4 py-2">
         <div className="flex items-center justify-around">
           {navItems.map((item) => {

@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { ProductGrid } from "@/components/ProductGrid";
 import { BottomNav } from "@/components/BottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -25,11 +26,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <DesktopHeader />
       <MobileHeader title="DankDealsMN.com" />
 
       {/* Main Content */}
-      <div className="max-w-md mx-auto px-4 space-y-6 pt-6">
+      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-6 pt-6 md:pt-8">
         
         {/* Welcome message for new users */}
         {!user && (
@@ -58,7 +60,7 @@ const Index = () => {
 
         {/* Categories Section */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Categories</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">Categories</h2>
           <CategoryRail />
         </div>
 
@@ -68,7 +70,7 @@ const Index = () => {
         {/* Hot Products */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground">Featured Products</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">Featured Products</h2>
             {!user && (
               <Button size="sm" onClick={handleOrderAction}>
                 <ShoppingCart className="w-4 h-4 mr-1" />

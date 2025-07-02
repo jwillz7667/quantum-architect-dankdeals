@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { IDVerification } from "@/components/IDVerification";
 import { useAuth } from "@/hooks/useAuth";
 import { signInSchema, signUpSchema, type SignInForm, type SignUpForm } from "@/lib/validation";
@@ -110,9 +111,10 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background">
+      <DesktopHeader />
       <MobileHeader title="Account" showMenu={false} />
 
-      <div className="max-w-md mx-auto px-4 pt-6">
+      <div className="max-w-md mx-auto px-4 md:px-6 pt-6 md:pt-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Shield className="w-5 h-5 text-primary" />
