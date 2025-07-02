@@ -20,7 +20,7 @@ export function ProductCard({ id, name, price, type, image }: ProductCardProps) 
             className="w-full h-full object-cover"
           />
           <div className="absolute top-2 left-2">
-            <Badge variant="secondary" className="bg-accent-mint text-accent-mint-foreground text-xs">
+            <Badge variant="secondary" className="bg-primary text-primary-foreground text-xs">
               {type}
             </Badge>
           </div>
