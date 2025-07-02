@@ -35,7 +35,11 @@ const hotProducts = [
   },
 ];
 
-export function ProductGrid() {
+interface ProductGridProps {
+  onProductSelect?: () => void;
+}
+
+export function ProductGrid({ onProductSelect }: ProductGridProps) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-foreground">Hot right now</h3>
@@ -44,7 +48,7 @@ export function ProductGrid() {
           <ProductCard
             key={product.id}
             {...product}
-            onClick={() => console.log(`View ${product.name}`)}
+            onClick={onProductSelect || (() => console.log(`View ${product.name}`))}
           />
         ))}
       </div>

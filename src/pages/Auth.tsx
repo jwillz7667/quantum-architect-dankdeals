@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MobileHeader } from "@/components/MobileHeader";
+import { IDVerification } from "@/components/IDVerification";
 import { useAuth } from "@/hooks/useAuth";
 import { signInSchema, signUpSchema, type SignInForm, type SignUpForm } from "@/lib/validation";
 import { Eye, EyeOff, AlertTriangle, Shield } from "lucide-react";
@@ -19,6 +20,9 @@ export default function Auth() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [rateLimitInfo, setRateLimitInfo] = useState<{ lockedUntil?: number } | null>(null);
+  const [showIDVerification, setShowIDVerification] = useState(false);
+  const [verificationCompleted, setVerificationCompleted] = useState(false);
+  const [verifiedDateOfBirth, setVerifiedDateOfBirth] = useState<string | null>(null);
   
   const { signIn, signUp, user, loading, csrfToken } = useAuth();
   const navigate = useNavigate();
@@ -69,6 +73,25 @@ export default function Auth() {
     setAuthError(null);
     setRateLimitInfo(null);
     
+    // For signup, we'll first show ID verification
+    setShowIDVerification(true);
+  };
+
+  const handleVerificationComplete = (isVerified: boolean, dateOfBirth?: string) => {
+    if (isVerified && dateOfBirth) {
+      setVerificationCompleted(true);
+      setVerifiedDateOfBirth(dateOfBirth);
+      setShowIDVerification(false);
+      // Proceed with actual signup
+      proceedWithSignup();
+    } else {
+      setAuthError("ID verification failed. You must be 21+ to create an account.");
+      setShowIDVerification(false);
+    }
+  };
+
+  const proceedWithSignup = async () => {
+    const data = signUpForm.getValues();
     const result = await signUp(data.email, data.password, data.firstName, data.lastName);
     
     if (result.rateLimited) {
@@ -78,6 +101,11 @@ export default function Auth() {
     if (result.error && !result.rateLimited) {
       setAuthError(result.error.message);
     }
+  };
+
+  const handleSkipVerification = () => {
+    setShowIDVerification(false);
+    setAuthError("ID verification is required to create an account for cannabis delivery.");
   };
 
   return (
@@ -115,6 +143,12 @@ export default function Auth() {
           </Alert>
         )}
 
+        {showIDVerification ? (
+          <IDVerification 
+            onVerificationComplete={handleVerificationComplete}
+            onSkip={handleSkipVerification}
+          />
+        ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -328,7 +362,8 @@ export default function Auth() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        )}
       </div>
     </div>
   );
