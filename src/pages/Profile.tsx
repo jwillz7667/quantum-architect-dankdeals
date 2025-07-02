@@ -2,6 +2,7 @@ import { User, MapPin, CreditCard, Settings, LogOut, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
@@ -62,7 +63,8 @@ export default function Profile() {
     : 'Welcome Back!';
 
   return (
-    <div className="min-h-screen bg-background pb-20 animate-fade-in">
+    <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
+      <DesktopHeader />
       <MobileHeader title="Profile" />
 
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6">

@@ -1,9 +1,11 @@
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { BottomNav } from "@/components/BottomNav";
 
 export default function Legal() {
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <DesktopHeader />
       <MobileHeader title="Legal Information" />
       
       <div className="max-w-md mx-auto px-4 py-6">

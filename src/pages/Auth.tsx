@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { BottomNav } from "@/components/BottomNav";
 import { IDVerification } from "@/components/IDVerification";
 import { useAuth } from "@/hooks/useAuth";
 import { signInSchema, signUpSchema, type SignInForm, type SignUpForm } from "@/lib/validation";
@@ -367,6 +368,9 @@ export default function Auth() {
           </Tabs>
         )}
       </div>
+      
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }

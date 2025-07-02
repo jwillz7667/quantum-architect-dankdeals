@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import blueDreamImg from "@/assets/blue-dream.jpg";
 import prerollsImg from "@/assets/prerolls.jpg";
 
@@ -52,7 +53,8 @@ export default function Cart() {
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
-    <div className="min-h-screen bg-background pb-32 animate-fade-in">
+    <div className="min-h-screen bg-background pb-32 md:pb-0 animate-fade-in">
+      <DesktopHeader />
       <MobileHeader title="Shopping Cart" />
 
       <div className="max-w-md mx-auto px-4 pt-6">

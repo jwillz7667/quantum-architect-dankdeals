@@ -1,4 +1,5 @@
 import { MobileHeader } from "@/components/MobileHeader";
+import { DesktopHeader } from "@/components/DesktopHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,8 @@ const blogPosts = [
 
 export default function Blog() {
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <DesktopHeader />
       <MobileHeader title="Blog" />
       
       <div className="max-w-md mx-auto px-4 py-6">
