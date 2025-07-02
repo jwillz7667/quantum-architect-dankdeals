@@ -8,7 +8,7 @@ export function HeroSection() {
       <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-primary to-primary-light shadow-elevated cursor-pointer hover:shadow-glow transition-all duration-300">
         <div className="absolute inset-0 gradient-overlay" />
         <div className="relative aspect-[16/9] flex items-end p-6">
-          <div className="absolute top-1/2 right-4 transform -translate-y-1/2 w-32 h-32">
+          <div className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32">
             <img
               src={blueDreamImg}
               alt="Blue Dream Cannabis"
