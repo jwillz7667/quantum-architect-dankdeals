@@ -1,21 +1,22 @@
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useProductsFilter } from "@/hooks/useProductsFilter";
 
 interface SearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
   onFilter?: () => void;
 }
 
-export function SearchBar({ value, onChange, onFilter }: SearchBarProps) {
+export function SearchBar({ onFilter }: SearchBarProps) {
+  const { searchQuery, setSearchQuery } = useProductsFilter();
+
   return (
     <div className="search-bar">
       <Search className="h-5 w-5 text-muted-foreground" />
       <Input
-        placeholder="I'm willing to find..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search products..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
         className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
       />
       <Button

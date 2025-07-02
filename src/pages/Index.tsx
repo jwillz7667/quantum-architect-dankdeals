@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { ShoppingCart, User } from "lucide-react";
 
 const Index = () => {
-  const [searchValue, setSearchValue] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -53,8 +52,6 @@ const Index = () => {
         )}
         {/* Search Bar */}
         <SearchBar
-          value={searchValue}
-          onChange={setSearchValue}
           onFilter={() => console.log("Open filters")}
         />
 
