@@ -16,10 +16,10 @@
     --popover-foreground: 155 85% 6%;
 
     /* Primary Cannabis Green */
-    --primary: 155 100% 15%;
+    --primary: 123 45% 28%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 155 100% 12%;
-    --primary-light: 155 100% 20%;
+    --primary-hover: 123 45% 25%;
+    --primary-light: 123 45% 35%;
 
     /* Accent Mint */
     --accent-mint: 166 94% 47%;
@@ -39,7 +39,7 @@
 
     --border: 155 20% 90%;
     --input: 155 20% 90%;
-    --ring: 155 100% 15%;
+    --ring: 123 45% 28%;
 
     --radius: 0.75rem;
 
@@ -67,9 +67,9 @@
     --popover: 155 50% 8%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 166 94% 47%;
-    --primary-foreground: 155 85% 6%;
-    --primary-hover: 166 94% 40%;
+    --primary: 123 45% 40%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 123 45% 35%;
 
     --secondary: 155 25% 15%;
     --secondary-foreground: 0 0% 98%;
@@ -85,7 +85,7 @@
 
     --border: 155 25% 18%;
     --input: 155 25% 18%;
-    --ring: 166 94% 47%;
+    --ring: 123 45% 40%;
   }
 }
 
