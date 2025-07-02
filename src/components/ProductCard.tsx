@@ -25,8 +25,8 @@ export function ProductCard({ id, name, price, type, image }: ProductCardProps) 
             </Badge>
           </div>
         </div>
-        <div className="p-3">
-          <h3 className="font-semibold text-sm text-foreground mb-1">{name}</h3>
+        <div className="p-3 h-16 flex flex-col justify-between">
+          <h3 className="font-semibold text-sm text-foreground mb-1 line-clamp-2">{name}</h3>
           <p className="text-muted-foreground text-sm">From ${price.toFixed(2)}</p>
         </div>
       </div>
