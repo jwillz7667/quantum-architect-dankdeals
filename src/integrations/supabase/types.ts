@@ -549,7 +549,10 @@ export type Database = {
           first_name: string | null
           government_id_verified: boolean | null
           id: string
+          id_verification_data: Json | null
+          id_verification_date: string | null
           is_age_verified: boolean | null
+          is_id_verified: boolean | null
           last_name: string | null
           phone: string | null
           preferred_delivery_instructions: string | null
@@ -564,7 +567,10 @@ export type Database = {
           first_name?: string | null
           government_id_verified?: boolean | null
           id?: string
+          id_verification_data?: Json | null
+          id_verification_date?: string | null
           is_age_verified?: boolean | null
+          is_id_verified?: boolean | null
           last_name?: string | null
           phone?: string | null
           preferred_delivery_instructions?: string | null
@@ -579,7 +585,10 @@ export type Database = {
           first_name?: string | null
           government_id_verified?: boolean | null
           id?: string
+          id_verification_data?: Json | null
+          id_verification_date?: string | null
           is_age_verified?: boolean | null
+          is_id_verified?: boolean | null
           last_name?: string | null
           phone?: string | null
           preferred_delivery_instructions?: string | null
