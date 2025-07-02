@@ -11,11 +11,11 @@ interface CategoryCardProps {
 export function CategoryCard({ icon: Icon, label, onClick, isActive = false }: CategoryCardProps) {
   return (
     <Button
-      variant={isActive ? "default" : "outline"}
+      variant="default"
       size="category"
       onClick={onClick}
       className={`category-card min-w-[5rem] shrink-0 ${
-        isActive ? "bg-primary text-primary-foreground" : ""
+        isActive ? "bg-primary-hover" : "bg-primary"
       }`}
     >
       <Icon className="h-6 w-6" />
