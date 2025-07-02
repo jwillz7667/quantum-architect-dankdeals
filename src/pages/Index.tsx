@@ -28,7 +28,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <DesktopHeader />
-      <MobileHeader title="DankDealsMN.com" />
+      <MobileHeader title="DankDeals" />
 
       {/* Main Content */}
       <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-6 pt-6 md:pt-8">
