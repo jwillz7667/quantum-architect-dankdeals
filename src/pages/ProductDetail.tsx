@@ -1,14 +1,27 @@
 import { ArrowLeft, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 import blueDreamImg from "@/assets/blue-dream.jpg";
 
 export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleQuantityChange = (delta: number) => {
     setQuantity(Math.max(1, quantity + delta));
+  };
+
+  const handleAddToCart = () => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      // Add to cart logic here
+      navigate('/cart');
+    }
   };
 
   return (
@@ -109,7 +122,7 @@ export default function ProductDetail() {
 
       {/* Add to Cart Button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-primary">
-        <Button variant="cart" className="w-full h-14 text-lg">
+        <Button variant="cart" className="w-full h-14 text-lg" onClick={handleAddToCart}>
           »»» Add to cart
         </Button>
       </div>
