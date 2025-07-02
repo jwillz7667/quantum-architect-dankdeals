@@ -1,68 +1,180 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MobileHeader } from "@/components/MobileHeader";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [activeTab, setActiveTab] = useState("signin");
+  
+  const { signIn, signUp, user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    
+    await signIn(email, password);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || !firstName || !lastName) return;
+    
+    await signUp(email, password, firstName, lastName);
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Cannabis Background */}
-      <div className="flex-1 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-primary/60" />
-        <div className="absolute top-0 right-0 w-96 h-96 opacity-30">
-          <div className="w-full h-full bg-[url('/src/assets/blue-dream.jpg')] bg-cover bg-center rounded-full blur-sm" />
-        </div>
-        
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6">
-            <span className="text-2xl">🌿</span>
-          </div>
-          
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            Login and find great weed near you
-          </h1>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background">
+      <MobileHeader title="Account" showMenu={false} />
 
-      {/* Auth Form */}
-      <div className="bg-background rounded-t-3xl p-6 space-y-6 shadow-elevated">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="Enter your email" />
-          </div>
-          
-          {!isLogin && (
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" type="text" placeholder="Enter your full name" />
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="Enter your password" />
-          </div>
+      <div className="max-w-md mx-auto px-4 pt-6">
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-bold text-foreground mb-2">
+            Welcome to DankDeals
+          </h2>
+          <p className="text-muted-foreground">
+            Premium cannabis delivery in Minnesota
+          </p>
         </div>
 
-        <Button variant="cannabis" className="w-full h-12 text-lg">
-          {isLogin ? "Log in" : "Sign up"}
-        </Button>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
 
-        <div className="text-center">
-          <span className="text-muted-foreground">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-          </span>
-          <Button
-            variant="link"
-            onClick={() => setIsLogin(!isLogin)}
-            className="p-0 text-primary font-semibold"
-          >
-            {isLogin ? "Sign up" : "Log in"}
-          </Button>
-        </div>
+          <TabsContent value="signin">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sign In</CardTitle>
+                <CardDescription>
+                  Enter your credentials to access your account
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="Your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12" 
+                    disabled={loading || !email || !password}
+                  >
+                    {loading ? "Signing in..." : "Sign In"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="signup">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create Account</CardTitle>
+                <CardDescription>
+                  Join DankDeals to start shopping premium cannabis
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-firstname">First Name</Label>
+                      <Input
+                        id="signup-firstname"
+                        type="text"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-lastname">Last Name</Label>
+                      <Input
+                        id="signup-lastname"
+                        type="text"
+                        placeholder="Doe"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a strong password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    By creating an account, you agree to our terms and confirm you are 21+ years old.
+                  </p>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12"
+                    disabled={loading || !email || !password || !firstName || !lastName}
+                  >
+                    {loading ? "Creating account..." : "Create Account"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
