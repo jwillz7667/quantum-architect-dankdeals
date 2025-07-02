@@ -76,7 +76,7 @@ const Index = () => {
               </Button>
             )}
           </div>
-          <ProductGrid onProductSelect={handleOrderAction} />
+          <ProductGrid />
         </div>
       </div>
 

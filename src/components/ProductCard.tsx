@@ -7,12 +7,11 @@ interface ProductCardProps {
   price: number;
   type: string;
   image: string;
-  onClick?: () => void;
 }
 
-export function ProductCard({ id, name, price, type, image, onClick }: ProductCardProps) {
+export function ProductCard({ id, name, price, type, image }: ProductCardProps) {
   return (
-    <Link to={`/product/${id}`} onClick={onClick}>
+    <Link to={`/product/${id}`}>
       <div className="product-card cursor-pointer">
         <div className="relative aspect-square overflow-hidden">
           <img
