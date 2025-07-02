@@ -16,10 +16,10 @@
     --popover-foreground: 155 85% 6%;
 
     /* Primary Cannabis Green */
-    --primary: 123 45% 28%;
+    --primary: 96 72% 37%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 123 45% 25%;
-    --primary-light: 123 45% 35%;
+    --primary-hover: 96 72% 32%;
+    --primary-light: 96 72% 42%;
 
     /* Accent Mint */
     --accent-mint: 166 94% 47%;
@@ -39,7 +39,7 @@
 
     --border: 155 20% 90%;
     --input: 155 20% 90%;
-    --ring: 123 45% 28%;
+    --ring: 96 72% 37%;
 
     --radius: 0.75rem;
 
@@ -47,6 +47,7 @@
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
     --gradient-card: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
     --gradient-overlay: linear-gradient(to top, hsl(0 0% 0% / 0.6), hsl(0 0% 0% / 0.3), transparent);
+    --gradient-mobile-header: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--primary-hover)));
 
     /* Shadows */
     --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.08);
@@ -67,9 +68,9 @@
     --popover: 155 50% 8%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 123 45% 40%;
+    --primary: 96 72% 42%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 123 45% 35%;
+    --primary-hover: 96 72% 37%;
 
     --secondary: 155 25% 15%;
     --secondary-foreground: 0 0% 98%;
@@ -85,7 +86,7 @@
 
     --border: 155 25% 18%;
     --input: 155 25% 18%;
-    --ring: 123 45% 40%;
+    --ring: 96 72% 42%;
   }
 }
 
