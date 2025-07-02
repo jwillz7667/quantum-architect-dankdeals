@@ -2,6 +2,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductGrid } from "@/components/ProductGrid";
 import { CategoryRail } from "@/components/CategoryRail";
+import { MobileHeader } from "@/components/MobileHeader";
 import { useState } from "react";
 
 export default function Categories() {
@@ -9,12 +10,7 @@ export default function Categories() {
 
   return (
     <div className="min-h-screen bg-background pb-20 animate-fade-in">
-      {/* Header */}
-      <div className="bg-primary px-4 py-6 text-center">
-        <h1 className="text-2xl font-bold text-primary-foreground">
-          Categories
-        </h1>
-      </div>
+      <MobileHeader title="Categories" />
 
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4 space-y-6 pt-6">

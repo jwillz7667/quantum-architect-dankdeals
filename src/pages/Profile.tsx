@@ -1,6 +1,7 @@
 import { User, MapPin, CreditCard, Settings, LogOut, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
+import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 
 const menuItems = [
@@ -14,12 +15,7 @@ const menuItems = [
 export default function Profile() {
   return (
     <div className="min-h-screen bg-background pb-20 animate-fade-in">
-      {/* Header */}
-      <div className="bg-primary px-4 py-6 text-center">
-        <h1 className="text-2xl font-bold text-primary-foreground">
-          Profile
-        </h1>
-      </div>
+      <MobileHeader title="Profile" />
 
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
         {/* User Info */}

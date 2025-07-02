@@ -2,6 +2,7 @@ import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
+import { MobileHeader } from "@/components/MobileHeader";
 import blueDreamImg from "@/assets/blue-dream.jpg";
 import prerollsImg from "@/assets/prerolls.jpg";
 
@@ -52,12 +53,7 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-background pb-32 animate-fade-in">
-      {/* Header */}
-      <div className="bg-primary px-4 py-6 text-center">
-        <h1 className="text-2xl font-bold text-primary-foreground">
-          Shopping Cart
-        </h1>
-      </div>
+      <MobileHeader title="Shopping Cart" />
 
       <div className="max-w-md mx-auto px-4 pt-6">
         {cartItems.length === 0 ? (

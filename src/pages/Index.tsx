@@ -4,18 +4,14 @@ import { CategoryRail } from "@/components/CategoryRail";
 import { HeroSection } from "@/components/HeroSection";
 import { ProductGrid } from "@/components/ProductGrid";
 import { BottomNav } from "@/components/BottomNav";
+import { MobileHeader } from "@/components/MobileHeader";
 
 const Index = () => {
   const [searchValue, setSearchValue] = useState("");
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-primary px-4 py-6 text-center">
-        <h1 className="text-2xl font-bold text-primary-foreground">
-          DankDealsMN.com
-        </h1>
-      </div>
+      <MobileHeader title="DankDealsMN.com" />
 
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4 space-y-6 pt-6">
