@@ -10,6 +10,9 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SEOHead } from "@/components/SEOHead";
+import { generateProductSchema, generateBreadcrumbSchema } from "@/lib/seo";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import blueDreamImg from "@/assets/blue-dream.jpg";
 import prerollsImg from "@/assets/prerolls.jpg";
 import wellnessImg from "@/assets/wellness.jpg";
@@ -184,17 +187,42 @@ export default function ProductDetail() {
     );
   }
 
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://dankdealsmn.com/' },
+    { name: 'Categories', url: 'https://dankdealsmn.com/categories' },
+    { name: product.category, url: `https://dankdealsmn.com/categories?category=${product.category}` },
+    { name: product.name, url: `https://dankdealsmn.com/product/${product.id}` }
+  ]);
+
+  const productSchema = generateProductSchema({
+    ...product,
+    variants: product.variants || []
+  });
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
+      <SEOHead
+        title={`${product.name} - ${product.category} | DankDeals`}
+        description={product.description || `Premium ${product.category} - ${product.name}. ${product.thc_content ? `THC: ${product.thc_content}%` : ''} ${product.cbd_content ? `CBD: ${product.cbd_content}%` : ''}. Same-day cannabis delivery in Minneapolis & St. Paul.`}
+        keywords={`${product.name}, ${product.category}, cannabis delivery Minnesota, ${product.thc_content ? 'THC' : ''} ${product.cbd_content ? 'CBD' : ''}`}
+        url={`https://dankdealsmn.com/product/${product.id}`}
+        image={product.image_url || getImageForProduct(product)}
+        type="product"
+        structuredData={[breadcrumbSchema, productSchema]}
+      />
       <DesktopHeader />
       <MobileHeader title="Product Details" />
 
       {/* Product Image */}
       <div className="aspect-[4/3] overflow-hidden relative">
-        <img
+        <OptimizedImage
           src={getImageForProduct(product)}
-          alt={product.name}
+          alt={`${product.name} - ${product.category} cannabis product`}
           className="w-full h-full object-cover"
+          width="100%"
+          height="100%"
+          priority
+          sizes="100vw"
         />
       </div>
 

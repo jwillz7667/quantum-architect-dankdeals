@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 interface ProductCardProps {
   id: string;
@@ -14,10 +15,13 @@ export function ProductCard({ id, name, price, type, image }: ProductCardProps) 
     <Link to={`/product/${id}`}>
       <div className="product-card cursor-pointer">
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <OptimizedImage
             src={image}
-            alt={name}
+            alt={`${name} - ${type} cannabis product`}
             className="w-full h-full object-cover"
+            width="100%"
+            height="100%"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
           />
           <div className="absolute top-2 left-2">
             <Badge variant="secondary" className="bg-primary text-primary-foreground text-xs">

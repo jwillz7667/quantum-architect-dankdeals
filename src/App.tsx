@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProductsFilterProvider } from "@/hooks/useProductsFilter";
 import { CartProvider } from "@/hooks/useCart";
@@ -32,13 +33,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <CartProvider>
-          <ProductsFilterProvider>
-            <BrowserRouter>
+    <HelmetProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <CartProvider>
+            <ProductsFilterProvider>
+              <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Index />} />
@@ -66,7 +68,8 @@ const App = () => (
             </ProductsFilterProvider>
           </CartProvider>
         </AuthProvider>
-    </TooltipProvider>
+      </TooltipProvider>
+    </HelmetProvider>
   </QueryClientProvider>
 );
 

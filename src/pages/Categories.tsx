@@ -4,10 +4,23 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { CategoryRail } from "@/components/CategoryRail";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
+import { SEOHead } from "@/components/SEOHead";
+import { generateBreadcrumbSchema } from "@/lib/seo";
 export default function Categories() {
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://dankdealsmn.com/' },
+    { name: 'Categories', url: 'https://dankdealsmn.com/categories' }
+  ]);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
+      <SEOHead
+        title="Cannabis Product Categories | DankDeals Minnesota"
+        description="Browse our selection of premium cannabis products by category. Shop flower, edibles, pre-rolls, concentrates, and wellness products. Same-day delivery in Minneapolis & St. Paul."
+        keywords="cannabis categories, marijuana products Minnesota, weed types, flower, edibles, pre-rolls, concentrates, CBD products"
+        url="https://dankdealsmn.com/categories"
+        structuredData={breadcrumbSchema}
+      />
       <DesktopHeader />
       <MobileHeader title="Categories" />
 
