@@ -11,10 +11,11 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://ralbzuvkyexortqngv
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseAnonKey) {
-  console.log('Warning: VITE_SUPABASE_ANON_KEY not found, generating sitemap without products');
+  console.log('Info: VITE_SUPABASE_ANON_KEY not found, generating static sitemap without products');
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Only create Supabase client if we have the key
+const supabase = supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 const staticPages = [
   { url: '/', changefreq: 'daily', priority: 1.0 },
@@ -30,15 +31,21 @@ const staticPages = [
 
 async function generateSitemap() {
   try {
-    // Fetch all active products
-    const { data: products, error } = await supabase
-      .from('products')
-      .select('id, updated_at, category')
-      .eq('is_active', true);
+    let products = null;
+    
+    // Only fetch products if we have Supabase connection
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, updated_at, category')
+        .eq('is_active', true);
 
-    if (error) {
-      console.error('Error fetching products:', error);
-      return;
+      if (error) {
+        console.error('Error fetching products:', error);
+        console.log('Continuing with static sitemap generation...');
+      } else {
+        products = data;
+      }
     }
 
     const baseUrl = 'https://dankdealsmn.com';
@@ -79,9 +86,15 @@ async function generateSitemap() {
     // Write sitemap to public directory
     const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
     fs.writeFileSync(sitemapPath, sitemap);
-    console.log('Sitemap generated successfully!');
+    
+    if (products) {
+      console.log(`Sitemap generated successfully with ${staticPages.length} static pages and ${products.length} product pages!`);
+    } else {
+      console.log(`Sitemap generated successfully with ${staticPages.length} static pages (no products - database not available)!`);
+    }
   } catch (error) {
     console.error('Error generating sitemap:', error);
+    process.exit(1);
   }
 }
 
