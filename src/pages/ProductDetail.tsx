@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
 import { BottomNav } from "@/components/BottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -53,6 +54,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { addItem } = useCart();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -111,10 +113,18 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (!user) {
       navigate('/auth');
-    } else {
-      // Add to cart logic here
-      navigate('/cart');
+      return;
     }
+
+    if (!product || !selectedVariant) {
+      return;
+    }
+
+    // Add item to cart
+    addItem(product, selectedVariant, quantity);
+    
+    // Optionally navigate to cart or show success message
+    navigate('/cart');
   };
 
   const getImageForProduct = (product: Product | null): string => {
