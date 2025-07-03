@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -14,6 +15,7 @@ const navItems = [
 export function DesktopHeader() {
   const location = useLocation();
   const { user } = useAuth();
+  const { isAdmin } = useAdminAuth();
 
   return (
     <header className="hidden md:flex bg-background border-b border-border">
@@ -38,6 +40,21 @@ export function DesktopHeader() {
               {item.label}
             </Link>
           ))}
+          
+          {/* Admin Dashboard Link - Only visible to admin users */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 ${
+                location.pathname.startsWith("/admin") 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              }`}
+            >
+              <Settings className="h-4 w-4" />
+              Admin Dashboard
+            </Link>
+          )}
         </nav>
 
         {/* Actions */}

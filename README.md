@@ -1,73 +1,126 @@
-# Welcome to your Lovable project
+# DankDeals - Cannabis Delivery E-commerce Platform
 
-## Project info
+## 🔴 IMPORTANT: Admin Dashboard Setup
 
-**URL**: https://lovable.dev/projects/d9bfb677-34d0-4e69-814d-fdaf7e736d6b
+**Admin access is restricted to: `admin@dankdealsmn.com`**
 
-## How can I edit this code?
+See `ADMIN_SETUP_GUIDE.md` for detailed instructions on:
+- Running database migrations
+- Creating the admin account  
+- Accessing the admin dashboard at `/admin`
 
-There are several ways of editing your application.
+## Project Overview
 
-**Use Lovable**
+DankDeals is a modern cannabis delivery e-commerce platform built with React, TypeScript, and Supabase. Features include:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d9bfb677-34d0-4e69-814d-fdaf7e736d6b) and start prompting.
+- 🛒 Product catalog with categories and variants
+- 🚚 Delivery zone management (Minneapolis area)
+- 💳 Cash-on-delivery payment system
+- 🔐 Age verification (21+)
+- 📊 Admin dashboard with real-time analytics
+- 📱 Mobile-responsive design
 
-Changes made via Lovable will be committed automatically to this repo.
+## Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **UI Components**: Radix UI, shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time)
+- **State Management**: React Query, Context API
+- **Build Tool**: Vite
+- **Deployment**: Vercel/Lovable
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to project directory
+cd quantum-architect-dankdeals
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Set up environment variables
+cp .env.example .env.local
+# Add your Supabase credentials to .env.local
+
+# Run database migrations (see ADMIN_SETUP_GUIDE.md)
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Environment Variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Create a `.env.local` file with:
 
-**Use GitHub Codespaces**
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Admin Dashboard
 
-## What technologies are used for this project?
+The admin dashboard is available at `/admin` and includes:
 
-This project is built with:
+- Real-time order management
+- Inventory control with low stock alerts
+- Customer management
+- Analytics and reporting
+- Store settings configuration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+**Only `admin@dankdealsmn.com` can access the admin panel.**
 
-## How can I deploy this project?
+## Database Setup
 
-Simply open [Lovable](https://lovable.dev/projects/d9bfb677-34d0-4e69-814d-fdaf7e736d6b) and click on Share -> Publish.
+Run the migrations in order through Supabase SQL Editor:
 
-## Can I connect a custom domain to my Lovable project?
+**If you get errors about missing columns**, first run:
+- `supabase/migrations/20250703000000-cleanup.sql`
 
-Yes, you can!
+Then run these in order:
+1. `supabase/migrations/20250703000000-admin-dashboard.sql`
+2. `supabase/migrations/20250703000001-store-settings.sql`
+3. `supabase/migrations/20250703000002-admin-notifications.sql`
+4. `supabase/migrations/20250703000003-setup-admin-user.sql`
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Development
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+# Run tests
+npm test
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Deployment
+
+### Lovable Platform
+Open [Lovable](https://lovable.dev/projects/d9bfb677-34d0-4e69-814d-fdaf7e736d6b) and click Share → Publish
+
+### Vercel
+1. Connect your GitHub repository
+2. Add environment variables
+3. Deploy
+
+## Legal Compliance
+
+- 21+ age verification required
+- Minnesota cannabis delivery regulations
+- Cash-only transactions
+- Delivery zones limited to Minneapolis area
+
+## Support
+
+- Admin Email: admin@dankdealsmn.com
+- Documentation: See `ADMIN_DASHBOARD_README.md`
+- Setup Guide: See `ADMIN_SETUP_GUIDE.md`
+
+## License
+
+Proprietary - All rights reserved

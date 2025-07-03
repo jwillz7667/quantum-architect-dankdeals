@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProductsFilterProvider } from "@/hooks/useProductsFilter";
 import { CartProvider } from "@/hooks/useCart";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
 import Auth from "./pages/Auth";
@@ -28,6 +29,17 @@ import CheckoutComplete from "./pages/checkout/CheckoutComplete";
 import ProfileOrders from "./pages/profile/ProfileOrders";
 import ProfilePersonal from "./pages/profile/ProfilePersonal";
 import NotFound from "./pages/NotFound";
+
+// Admin imports
+import { AdminDashboard } from "./pages/admin/AdminDashboard";
+import { Overview } from "./pages/admin/Overview";
+import { AdminOrders } from "./pages/admin/AdminOrders";
+import { AdminProducts } from "./pages/admin/AdminProducts";
+import { AdminUsers } from "./pages/admin/AdminUsers";
+import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
+import { AdminActivity } from "./pages/admin/AdminActivity";
+import { AdminReports } from "./pages/admin/AdminReports";
+import { AdminSettings } from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -54,13 +66,25 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/legal" element={<Legal />} />
-              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               <Route path="/checkout/address" element={<ProtectedRoute><CheckoutAddress /></ProtectedRoute>} />
               <Route path="/checkout/payment" element={<ProtectedRoute><CheckoutPayment /></ProtectedRoute>} />
               <Route path="/checkout/review" element={<ProtectedRoute><CheckoutReview /></ProtectedRoute>} />
               <Route path="/checkout/complete" element={<ProtectedRoute><CheckoutComplete /></ProtectedRoute>} />
               <Route path="/profile/orders" element={<ProtectedRoute><ProfileOrders /></ProtectedRoute>} />
               <Route path="/profile/personal" element={<ProtectedRoute><ProfilePersonal /></ProtectedRoute>} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
+                <Route index element={<Overview />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="activity" element={<AdminActivity />} />
+                <Route path="reports" element={<AdminReports />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

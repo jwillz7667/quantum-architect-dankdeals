@@ -1,7 +1,8 @@
-import { Home, Grid3X3, ShoppingCart, User, MapPin, LogIn } from "lucide-react";
+import { Home, Grid3X3, ShoppingCart, User, MapPin, LogIn, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const navItems = [
   { icon: Home, label: "Home", href: "/" },
@@ -18,6 +19,7 @@ export function BottomNav({ activeTab }: BottomNavProps) {
   const location = useLocation();
   const currentPath = activeTab || location.pathname;
   const { user } = useAuth();
+  const { isAdmin } = useAdminAuth();
 
   return (
     <nav className="bottom-nav md:hidden">
@@ -47,6 +49,26 @@ export function BottomNav({ activeTab }: BottomNavProps) {
               );
             })}
           </div>
+
+          {/* Admin Dashboard - Only visible to admin users */}
+          {isAdmin && (
+            <Link to="/admin">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`flex flex-col items-center gap-1 p-2 h-auto ${
+                  currentPath.startsWith("/admin") ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <Settings 
+                  className={`h-5 w-5 transition-transform ${
+                    currentPath.startsWith("/admin") ? "scale-110" : ""
+                  }`} 
+                />
+                <span className="text-xs font-medium">Admin</span>
+              </Button>
+            </Link>
+          )}
 
           {/* Authentication section */}
           <div className="flex items-center">

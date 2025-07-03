@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface MobileHeaderProps {
   title: string;
@@ -11,6 +12,7 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAdmin } = useAdminAuth();
 
   const menuItems = [
     { label: "Home", href: "/" },
@@ -56,6 +58,18 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
                   {item.label}
                 </Link>
               ))}
+              
+              {/* Admin Dashboard Link - Only visible to admin users */}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-lg text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-2"
+                >
+                  <Settings className="h-5 w-5" />
+                  Admin Dashboard
+                </Link>
+              )}
             </nav>
           </SheetContent>
         </Sheet>

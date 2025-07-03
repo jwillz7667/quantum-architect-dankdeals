@@ -1,381 +1,290 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { IDVerification } from "@/components/IDVerification";
-import { useAuth } from "@/hooks/useAuth";
-import { signInSchema, signUpSchema, type SignInForm, type SignUpForm } from "@/lib/validation";
-import { Eye, EyeOff, AlertTriangle, Shield } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Lock, Mail, User, Phone, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import { SEOHead } from '@/components/SEOHead';
 
 export default function Auth() {
-  const [activeTab, setActiveTab] = useState("signin");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [rateLimitInfo, setRateLimitInfo] = useState<{ lockedUntil?: number } | null>(null);
-  const [showIDVerification, setShowIDVerification] = useState(false);
-  const [verificationCompleted, setVerificationCompleted] = useState(false);
-  const [verifiedDateOfBirth, setVerifiedDateOfBirth] = useState<string | null>(null);
-  
-  const { signIn, signUp, user, loading, csrfToken } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  
-  // Form validation
-  const signInForm = useForm<SignInForm>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "" }
-  });
-  
-  const signUpForm = useForm<SignUpForm>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" }
-  });
+  const location = useLocation();
+  const { session } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('signin');
 
-  // Check for session timeout or other auth reasons
+  const from = location.state?.from?.pathname || '/';
+
   useEffect(() => {
-    const reason = searchParams.get('reason');
-    if (reason === 'inactive') {
-      setAuthError('Your session expired due to inactivity. Please sign in again.');
+    if (session) {
+      navigate(from, { replace: true });
     }
-  }, [searchParams]);
+  }, [session, navigate, from]);
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
 
-  const handleSignIn = async (data: SignInForm) => {
-    setAuthError(null);
-    setRateLimitInfo(null);
-    
-    const result = await signIn(data.email, data.password);
-    
-    if (result.rateLimited) {
-      setRateLimitInfo({ lockedUntil: result.lockedUntil });
-    }
-    
-    if (result.error && !result.rateLimited) {
-      setAuthError(result.error.message);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+
+      setSuccess('Successfully signed in!');
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSignUp = async (data: SignUpForm) => {
-    setAuthError(null);
-    setRateLimitInfo(null);
-    
-    // For signup, we'll first show ID verification
-    setShowIDVerification(true);
-  };
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
 
-  const handleVerificationComplete = (isVerified: boolean, isSubmitted?: boolean) => {
-    if (isSubmitted) {
-      // ID was submitted for review, allow account creation to proceed
-      setVerificationCompleted(true);
-      setShowIDVerification(false);
-      // Proceed with actual signup
-      proceedWithSignup();
-    } else if (isVerified) {
-      // This would be for instant verification (not currently used)
-      setVerificationCompleted(true);
-      setShowIDVerification(false);
-      proceedWithSignup();
-    } else {
-      setAuthError("ID verification submission failed. Please try again.");
-      setShowIDVerification(false);
-    }
-  };
+    try {
+      // Create auth user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-  const proceedWithSignup = async () => {
-    const data = signUpForm.getValues();
-    const result = await signUp(data.email, data.password, data.firstName, data.lastName);
-    
-    if (result.rateLimited) {
-      setRateLimitInfo({ lockedUntil: result.lockedUntil });
-    }
-    
-    if (result.error && !result.rateLimited) {
-      setAuthError(result.error.message);
-    }
-  };
+      if (signUpError) throw signUpError;
 
-  const handleSkipVerification = () => {
-    setShowIDVerification(false);
-    setAuthError("ID verification is required to create an account for cannabis delivery.");
+      if (authData.user) {
+        // Create profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: authData.user.id,
+            email,
+            first_name: firstName,
+            last_name: lastName,
+            phone,
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Don't throw here, profile might already exist
+        }
+
+        setSuccess('Account created successfully! You can now sign in.');
+        setActiveTab('signin');
+        
+        // Clear form
+        setPassword('');
+        setFirstName('');
+        setLastName('');
+        setPhone('');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <DesktopHeader />
-      <MobileHeader title="Account" showMenu={false} />
+    <>
+      <SEOHead 
+        title="Sign In - DankDeals"
+        description="Sign in to your DankDeals account to access exclusive cannabis deals in Minneapolis"
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-12 w-12 rounded-full bg-green-600 flex items-center justify-center">
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl text-center">Welcome to DankDeals</CardTitle>
+            <CardDescription className="text-center">
+              Sign in to your account or create a new one
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {success && (
+              <Alert className="mb-4 border-green-200 bg-green-50">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">{success}</AlertDescription>
+              </Alert>
+            )}
 
-      <div className="max-w-md mx-auto px-4 md:px-6 pt-6 md:pt-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold text-foreground">
-              Welcome to DankDeals
-            </h2>
-          </div>
-          <p className="text-muted-foreground">
-            Premium cannabis delivery in Minnesota
-          </p>
-        </div>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
 
-        {/* Security alerts */}
-        {authError && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{authError}</AlertDescription>
-          </Alert>
-        )}
-        
-        {rateLimitInfo?.lockedUntil && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Account temporarily locked due to too many failed attempts. 
-              Try again after {new Date(rateLimitInfo.lockedUntil).toLocaleTimeString()}.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {showIDVerification ? (
-          <IDVerification 
-            onVerificationComplete={handleVerificationComplete}
-            onSkip={handleSkipVerification}
-          />
-        ) : (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="signin">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sign In</CardTitle>
-                <CardDescription>
-                  Enter your credentials to access your account
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
-                  <input type="hidden" name="csrf_token" value={csrfToken} />
-                  
-                  <div className="space-y-2">
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div>
                     <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      {...signInForm.register("email")}
-                      className={signInForm.formState.errors.email ? "border-destructive" : ""}
-                    />
-                    {signInForm.formState.errors.email && (
-                      <p className="text-sm text-destructive">{signInForm.formState.errors.email.message}</p>
-                    )}
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="signin-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="space-y-2">
+                  <div>
                     <Label htmlFor="signin-password">Password</Label>
                     <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="signin-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Your password"
-                        {...signInForm.register("password")}
-                        className={signInForm.formState.errors.password ? "border-destructive pr-10" : "pr-10"}
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pl-10"
                       />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
                     </div>
-                    {signInForm.formState.errors.password && (
-                      <p className="text-sm text-destructive">{signInForm.formState.errors.password.message}</p>
-                    )}
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12" 
-                    disabled={loading || signInForm.formState.isSubmitting}
-                  >
-                    {loading || signInForm.formState.isSubmitting ? "Signing in..." : "Sign In"}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Signing in...' : 'Sign In'}
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </TabsContent>
 
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Account</CardTitle>
-                <CardDescription>
-                  Join DankDeals to start shopping premium cannabis
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
-                  <input type="hidden" name="csrf_token" value={csrfToken} />
-                  
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-firstname">First Name</Label>
-                      <Input
-                        id="signup-firstname"
-                        type="text"
-                        placeholder="John"
-                        {...signUpForm.register("firstName")}
-                        className={signUpForm.formState.errors.firstName ? "border-destructive" : ""}
-                      />
-                      {signUpForm.formState.errors.firstName && (
-                        <p className="text-sm text-destructive">{signUpForm.formState.errors.firstName.message}</p>
-                      )}
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="firstName"
+                          type="text"
+                          placeholder="John"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          required
+                          className="pl-10"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-lastname">Last Name</Label>
-                      <Input
-                        id="signup-lastname"
-                        type="text"
-                        placeholder="Doe"
-                        {...signUpForm.register("lastName")}
-                        className={signUpForm.formState.errors.lastName ? "border-destructive" : ""}
-                      />
-                      {signUpForm.formState.errors.lastName && (
-                        <p className="text-sm text-destructive">{signUpForm.formState.errors.lastName.message}</p>
-                      )}
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="lastName"
+                          type="text"
+                          placeholder="Doe"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          required
+                          className="pl-10"
+                        />
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="space-y-2">
+                  <div>
                     <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      {...signUpForm.register("email")}
-                      className={signUpForm.formState.errors.email ? "border-destructive" : ""}
-                    />
-                    {signUpForm.formState.errors.email && (
-                      <p className="text-sm text-destructive">{signUpForm.formState.errors.email.message}</p>
-                    )}
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="space-y-2">
+                  <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="(555) 123-4567"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <div>
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a strong password"
-                        {...signUpForm.register("password")}
-                        className={signUpForm.formState.errors.password ? "border-destructive pr-10" : "pr-10"}
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pl-10"
                       />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
-                    </div>
-                    {signUpForm.formState.errors.password && (
-                      <p className="text-sm text-destructive">{signUpForm.formState.errors.password.message}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm-password">Confirm Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
-                        {...signUpForm.register("confirmPassword")}
-                        className={signUpForm.formState.errors.confirmPassword ? "border-destructive pr-10" : "pr-10"}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
-                    </div>
-                    {signUpForm.formState.errors.confirmPassword && (
-                      <p className="text-sm text-destructive">{signUpForm.formState.errors.confirmPassword.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                      <p className="font-medium mb-1">Password requirements:</p>
-                      <ul className="space-y-1">
-                        <li>• At least 8 characters long</li>
-                        <li>• Contains uppercase and lowercase letters</li>
-                        <li>• Contains at least one number</li>
-                        <li>• Contains at least one special character</li>
-                      </ul>
                     </div>
                   </div>
-                  
-                  <p className="text-xs text-muted-foreground">
-                    By creating an account, you agree to our terms and confirm you are 21+ years old.
-                  </p>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12"
-                    disabled={loading || signUpForm.formState.isSubmitting}
-                  >
-                    {loading || signUpForm.formState.isSubmitting ? "Creating account..." : "Create Account"}
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      You must be 21 or older to create an account. By signing up, you confirm that you meet the age requirement.
+                    </AlertDescription>
+                  </Alert>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Creating account...' : 'Create Account'}
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          </Tabs>
-        )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+          <CardFooter className="text-center text-sm text-gray-600">
+            By continuing, you agree to our{' '}
+            <a href="/terms" className="text-green-600 hover:underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" className="text-green-600 hover:underline">
+              Privacy Policy
+            </a>
+          </CardFooter>
+        </Card>
       </div>
-      
-      {/* Bottom Navigation */}
-      <BottomNav />
-    </div>
+    </>
   );
 }
