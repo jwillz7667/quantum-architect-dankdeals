@@ -114,3 +114,78 @@ BEGIN
         (product4_id, '5-Pack', 5000, 5.0, 15, true);
 
 END $$;
+
+-- Enable UUID extension if not already enabled
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create storage bucket for ID documents
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'id-documents',
+  'id-documents',
+  false, -- Private bucket
+  10485760, -- 10MB limit
+  ARRAY['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+) ON CONFLICT (id) DO NOTHING;
+
+-- Create policy for users to upload their own ID documents
+CREATE POLICY "Users can upload their own ID documents" ON storage.objects
+FOR INSERT WITH CHECK (bucket_id = 'id-documents' AND auth.uid()::text = (storage.foldername(name))[2]);
+
+-- Create policy for users to view their own ID documents
+CREATE POLICY "Users can view their own ID documents" ON storage.objects
+FOR SELECT USING (bucket_id = 'id-documents' AND auth.uid()::text = (storage.foldername(name))[2]);
+
+-- Create policy for admins to view all ID documents (for manual review)
+CREATE POLICY "Admins can view all ID documents" ON storage.objects
+FOR SELECT USING (
+  bucket_id = 'id-documents' 
+  AND EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE user_id = auth.uid() 
+    AND (profiles.id_verification_data->>'role' = 'admin' OR profiles.id_verification_data->>'role' = 'reviewer')
+  )
+);
+
+-- Update profiles table to include admin roles in verification data
+ALTER TABLE public.profiles 
+ADD COLUMN IF NOT EXISTS verification_status text DEFAULT 'not_submitted' CHECK (verification_status IN ('not_submitted', 'pending_review', 'approved', 'rejected'));
+
+-- Add index for efficient querying of verification status
+CREATE INDEX IF NOT EXISTS idx_profiles_verification_status ON public.profiles(verification_status);
+
+-- Add index for efficient querying of ID verification data
+CREATE INDEX IF NOT EXISTS idx_profiles_id_verification_data ON public.profiles USING GIN (id_verification_data);
+
+-- Update the existing RLS policies for profiles table to ensure security
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+
+CREATE POLICY "Users can view own profile" ON public.profiles
+FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own profile" ON public.profiles
+FOR UPDATE USING (auth.uid() = user_id);
+
+-- Create policy for admins to view all profiles for verification purposes
+CREATE POLICY "Admins can view profiles for verification" ON public.profiles
+FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles admin_profile
+    WHERE admin_profile.user_id = auth.uid() 
+    AND (admin_profile.id_verification_data->>'role' = 'admin' OR admin_profile.id_verification_data->>'role' = 'reviewer')
+  )
+);
+
+-- Create policy for admins to update verification status
+CREATE POLICY "Admins can update verification status" ON public.profiles
+FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles admin_profile
+    WHERE admin_profile.user_id = auth.uid() 
+    AND (admin_profile.id_verification_data->>'role' = 'admin' OR admin_profile.id_verification_data->>'role' = 'reviewer')
+  )
+);
+
+-- Enable RLS on profiles table if not already enabled
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;

@@ -79,15 +79,20 @@ export default function Auth() {
     setShowIDVerification(true);
   };
 
-  const handleVerificationComplete = (isVerified: boolean, dateOfBirth?: string) => {
-    if (isVerified && dateOfBirth) {
+  const handleVerificationComplete = (isVerified: boolean, isSubmitted?: boolean) => {
+    if (isSubmitted) {
+      // ID was submitted for review, allow account creation to proceed
       setVerificationCompleted(true);
-      setVerifiedDateOfBirth(dateOfBirth);
       setShowIDVerification(false);
       // Proceed with actual signup
       proceedWithSignup();
+    } else if (isVerified) {
+      // This would be for instant verification (not currently used)
+      setVerificationCompleted(true);
+      setShowIDVerification(false);
+      proceedWithSignup();
     } else {
-      setAuthError("ID verification failed. You must be 21+ to create an account.");
+      setAuthError("ID verification submission failed. Please try again.");
       setShowIDVerification(false);
     }
   };
