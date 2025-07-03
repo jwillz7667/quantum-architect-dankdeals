@@ -53,4 +53,8 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 
+# Primary sitemap (dynamically generated)
 Sitemap: https://dankdealsmn.com/sitemap.xml
+
+# Static sitemap (fallback)
+Sitemap: https://dankdealsmn.com/sitemap-static.xml
