@@ -39,9 +39,12 @@ export default function CheckoutComplete() {
             <CheckCircle className="w-12 h-12 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Order Confirmed!</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground mb-2">Thank You For Your Order!</h1>
+            <p className="text-muted-foreground mb-2">
               Your cannabis order has been placed successfully
+            </p>
+            <p className="text-primary font-medium">
+              A team member will contact you within 5 minutes to confirm your order
             </p>
           </div>
         </div>
@@ -98,9 +101,9 @@ export default function CheckoutComplete() {
                 1
               </div>
               <div>
-                <p className="font-medium">Order Processing</p>
+                <p className="font-medium">Order Confirmation Call</p>
                 <p className="text-sm text-muted-foreground">
-                  Your order is being prepared by our licensed dispensary
+                  A team member will call you within 5 minutes to confirm your order details
                 </p>
               </div>
             </div>
@@ -108,6 +111,18 @@ export default function CheckoutComplete() {
             <div className="flex gap-3">
               <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
                 2
+              </div>
+              <div>
+                <p className="font-medium">Order Processing</p>
+                <p className="text-sm text-muted-foreground">
+                  Your order will be prepared by our licensed dispensary
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
+                3
               </div>
               <div>
                 <p className="font-medium">Driver Assignment</p>
@@ -119,7 +134,7 @@ export default function CheckoutComplete() {
 
             <div className="flex gap-3">
               <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-medium">
-                3
+                4
               </div>
               <div>
                 <p className="font-medium">Delivery</p>
@@ -138,6 +153,7 @@ export default function CheckoutComplete() {
             <div className="space-y-2">
               <p className="font-medium">Important Reminders:</p>
               <ul className="text-sm space-y-1">
+                <li>• Please answer your phone - we'll call within 5 minutes to confirm</li>
                 <li>• Have your valid ID ready for age verification</li>
                 <li>• Have exact change ready if paying with cash</li>
                 <li>• Be available at your delivery address</li>
