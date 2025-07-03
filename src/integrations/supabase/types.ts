@@ -12,93 +12,66 @@ export interface Database {
       profiles: {
         Row: {
           id: string
-          user_id: string
           email: string | null
           first_name: string | null
           last_name: string | null
           phone: string | null
-          address: string | null
-          city: string | null
-          state: string | null
-          zip_code: string | null
-          role: string | null
-          is_id_verified: boolean | null
-          id_verification_date: string | null
-          id_verification_data: Json | null
-          verification_status: string | null
+          date_of_birth: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
+          id: string
           email?: string | null
           first_name?: string | null
           last_name?: string | null
           phone?: string | null
-          address?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          role?: string | null
-          is_id_verified?: boolean | null
-          id_verification_date?: string | null
-          id_verification_data?: Json | null
-          verification_status?: string | null
+          date_of_birth?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          user_id?: string
           email?: string | null
           first_name?: string | null
           last_name?: string | null
           phone?: string | null
-          address?: string | null
-          city?: string | null
-          state?: string | null
-          zip_code?: string | null
-          role?: string | null
-          is_id_verified?: boolean | null
-          id_verification_date?: string | null
-          id_verification_data?: Json | null
-          verification_status?: string | null
+          date_of_birth?: string | null
           created_at?: string
           updated_at?: string
         }
       }
-      vendors: {
+      categories: {
         Row: {
           id: string
           name: string
-          email: string | null
-          phone: string | null
-          license_number: string | null
-          slug: string | null
-          status: string
+          slug: string
+          description: string | null
+          image_url: string | null
+          sort_order: number
+          is_active: boolean
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           name: string
-          email?: string | null
-          phone?: string | null
-          license_number?: string | null
-          slug?: string | null
-          status?: string
+          slug: string
+          description?: string | null
+          image_url?: string | null
+          sort_order?: number
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           name?: string
-          email?: string | null
-          phone?: string | null
-          license_number?: string | null
-          slug?: string | null
-          status?: string
+          slug?: string
+          description?: string | null
+          image_url?: string | null
+          sort_order?: number
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -107,77 +80,122 @@ export interface Database {
         Row: {
           id: string
           name: string
+          slug: string
           description: string | null
-          category: string
+          category_id: string | null
+          price: number
+          thc_percentage: number | null
+          cbd_percentage: number | null
+          strain_type: string | null
+          effects: string[] | null
+          flavors: string[] | null
           image_url: string | null
-          thc_content: number | null
-          cbd_content: number | null
-          vendor_id: string
-          slug: string | null
+          gallery_urls: string[] | null
+          stock_quantity: number
+          is_featured: boolean
           is_active: boolean
+          weight_grams: number | null
+          lab_tested: boolean
+          lab_results_url: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           name: string
+          slug: string
           description?: string | null
-          category: string
+          category_id?: string | null
+          price: number
+          thc_percentage?: number | null
+          cbd_percentage?: number | null
+          strain_type?: string | null
+          effects?: string[] | null
+          flavors?: string[] | null
           image_url?: string | null
-          thc_content?: number | null
-          cbd_content?: number | null
-          vendor_id: string
-          slug?: string | null
+          gallery_urls?: string[] | null
+          stock_quantity?: number
+          is_featured?: boolean
           is_active?: boolean
+          weight_grams?: number | null
+          lab_tested?: boolean
+          lab_results_url?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           name?: string
+          slug?: string
           description?: string | null
-          category?: string
+          category_id?: string | null
+          price?: number
+          thc_percentage?: number | null
+          cbd_percentage?: number | null
+          strain_type?: string | null
+          effects?: string[] | null
+          flavors?: string[] | null
           image_url?: string | null
-          thc_content?: number | null
-          cbd_content?: number | null
-          vendor_id?: string
-          slug?: string | null
+          gallery_urls?: string[] | null
+          stock_quantity?: number
+          is_featured?: boolean
           is_active?: boolean
+          weight_grams?: number | null
+          lab_tested?: boolean
+          lab_results_url?: string | null
           created_at?: string
           updated_at?: string
         }
       }
-      product_variants: {
+      addresses: {
         Row: {
           id: string
-          product_id: string
-          name: string
-          weight_grams: number | null
-          price: number
-          inventory_count: number | null
-          is_active: boolean
+          user_id: string
+          type: string
+          first_name: string
+          last_name: string
+          street_address: string
+          apartment: string | null
+          city: string
+          state: string
+          zip_code: string
+          phone: string | null
+          delivery_instructions: string | null
+          is_default: boolean
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          product_id: string
-          name: string
-          weight_grams?: number | null
-          price: number
-          inventory_count?: number | null
-          is_active?: boolean
+          user_id: string
+          type?: string
+          first_name: string
+          last_name: string
+          street_address: string
+          apartment?: string | null
+          city: string
+          state?: string
+          zip_code: string
+          phone?: string | null
+          delivery_instructions?: string | null
+          is_default?: boolean
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          product_id?: string
-          name?: string
-          weight_grams?: number | null
-          price?: number
-          inventory_count?: number | null
-          is_active?: boolean
+          user_id?: string
+          type?: string
+          first_name?: string
+          last_name?: string
+          street_address?: string
+          apartment?: string | null
+          city?: string
+          state?: string
+          zip_code?: string
+          phone?: string | null
+          delivery_instructions?: string | null
+          is_default?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -185,28 +203,88 @@ export interface Database {
       orders: {
         Row: {
           id: string
-          order_number: string
           user_id: string
+          order_number: string
           status: string
+          subtotal: number
+          tax_amount: number
+          delivery_fee: number
           total_amount: number
+          delivery_first_name: string
+          delivery_last_name: string
+          delivery_street_address: string
+          delivery_apartment: string | null
+          delivery_city: string
+          delivery_state: string
+          delivery_zip_code: string
+          delivery_phone: string | null
+          delivery_instructions: string | null
+          payment_method: string
+          payment_status: string
+          delivery_date: string | null
+          delivery_time_start: string | null
+          delivery_time_end: string | null
+          estimated_delivery_at: string | null
+          delivered_at: string | null
+          notes: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          order_number: string
           user_id: string
-          status: string
+          order_number?: string
+          status?: string
+          subtotal: number
+          tax_amount?: number
+          delivery_fee?: number
           total_amount: number
+          delivery_first_name: string
+          delivery_last_name: string
+          delivery_street_address: string
+          delivery_apartment?: string | null
+          delivery_city: string
+          delivery_state?: string
+          delivery_zip_code: string
+          delivery_phone?: string | null
+          delivery_instructions?: string | null
+          payment_method?: string
+          payment_status?: string
+          delivery_date?: string | null
+          delivery_time_start?: string | null
+          delivery_time_end?: string | null
+          estimated_delivery_at?: string | null
+          delivered_at?: string | null
+          notes?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          order_number?: string
           user_id?: string
+          order_number?: string
           status?: string
+          subtotal?: number
+          tax_amount?: number
+          delivery_fee?: number
           total_amount?: number
+          delivery_first_name?: string
+          delivery_last_name?: string
+          delivery_street_address?: string
+          delivery_apartment?: string | null
+          delivery_city?: string
+          delivery_state?: string
+          delivery_zip_code?: string
+          delivery_phone?: string | null
+          delivery_instructions?: string | null
+          payment_method?: string
+          payment_status?: string
+          delivery_date?: string | null
+          delivery_time_start?: string | null
+          delivery_time_end?: string | null
+          estimated_delivery_at?: string | null
+          delivered_at?: string | null
+          notes?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -216,6 +294,12 @@ export interface Database {
           id: string
           order_id: string
           product_id: string
+          product_name: string
+          product_price: number
+          product_weight_grams: number | null
+          product_thc_percentage: number | null
+          product_cbd_percentage: number | null
+          product_strain_type: string | null
           quantity: number
           unit_price: number
           total_price: number
@@ -225,6 +309,12 @@ export interface Database {
           id?: string
           order_id: string
           product_id: string
+          product_name: string
+          product_price: number
+          product_weight_grams?: number | null
+          product_thc_percentage?: number | null
+          product_cbd_percentage?: number | null
+          product_strain_type?: string | null
           quantity: number
           unit_price: number
           total_price: number
@@ -234,189 +324,40 @@ export interface Database {
           id?: string
           order_id?: string
           product_id?: string
+          product_name?: string
+          product_price?: number
+          product_weight_grams?: number | null
+          product_thc_percentage?: number | null
+          product_cbd_percentage?: number | null
+          product_strain_type?: string | null
           quantity?: number
           unit_price?: number
           total_price?: number
           created_at?: string
         }
       }
-      store_settings: {
-        Row: {
-          id: string
-          store_name: string
-          store_email: string
-          store_phone: string | null
-          store_address: string | null
-          business_hours: Json
-          timezone: string
-          currency: string
-          order_minimum: number
-          delivery_fee: number
-          tax_rate: number
-          max_delivery_radius: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          store_name: string
-          store_email: string
-          store_phone?: string | null
-          store_address?: string | null
-          business_hours: Json
-          timezone: string
-          currency: string
-          order_minimum: number
-          delivery_fee: number
-          tax_rate: number
-          max_delivery_radius: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          store_name?: string
-          store_email?: string
-          store_phone?: string | null
-          store_address?: string | null
-          business_hours?: Json
-          timezone?: string
-          currency?: string
-          order_minimum?: number
-          delivery_fee?: number
-          tax_rate?: number
-          max_delivery_radius?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      admin_notifications: {
-        Row: {
-          id: string
-          admin_id: string
-          type: string
-          title: string
-          message: string
-          is_read: boolean
-          metadata: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          admin_id: string
-          type: string
-          title: string
-          message: string
-          is_read?: boolean
-          metadata?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          admin_id?: string
-          type?: string
-          title?: string
-          message?: string
-          is_read?: boolean
-          metadata?: Json | null
-          created_at?: string
-        }
-      }
-      admin_activity_logs: {
-        Row: {
-          id: string
-          admin_id: string
-          action: string
-          entity_type: string | null
-          entity_id: string | null
-          details: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          admin_id: string
-          action: string
-          entity_type?: string | null
-          entity_id?: string | null
-          details?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          admin_id?: string
-          action?: string
-          entity_type?: string | null
-          entity_id?: string | null
-          details?: Json | null
-          created_at?: string
-        }
-      }
-      product_metrics: {
-        Row: {
-          id: string
-          product_id: string
-          date: string
-          views: number
-          cart_additions: number
-          purchases: number
-          revenue: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          product_id: string
-          date: string
-          views?: number
-          cart_additions?: number
-          purchases?: number
-          revenue?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          product_id?: string
-          date?: string
-          views?: number
-          cart_additions?: number
-          purchases?: number
-          revenue?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      user_metrics: {
+      cart_items: {
         Row: {
           id: string
           user_id: string
-          date: string
-          login_count: number
-          page_views: number
-          orders_placed: number
-          total_spent: number
+          product_id: string
+          quantity: number
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          date: string
-          login_count?: number
-          page_views?: number
-          orders_placed?: number
-          total_spent?: number
+          product_id: string
+          quantity: number
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          date?: string
-          login_count?: number
-          page_views?: number
-          orders_placed?: number
-          total_spent?: number
+          product_id?: string
+          quantity?: number
           created_at?: string
           updated_at?: string
         }
@@ -442,27 +383,48 @@ export type Tables<T extends keyof Database['public']['Tables']> = Database['pub
 export type Inserts<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
 export type Updates<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
 
-// Additional types for admin use
-export type OrderWithProfile = Database['public']['Tables']['orders']['Row'] & {
-  profiles: Database['public']['Tables']['profiles']['Row']
+// Product types with relations
+export type ProductWithCategory = Database['public']['Tables']['products']['Row'] & {
+  categories: Database['public']['Tables']['categories']['Row'] | null
 }
 
-export type OrderItemWithRelations = Database['public']['Tables']['order_items']['Row'] & {
+export type CartItemWithProduct = Database['public']['Tables']['cart_items']['Row'] & {
   products: Database['public']['Tables']['products']['Row']
 }
 
-export type AdminActivityLog = Database['public']['Tables']['admin_activity_logs']['Row'] & {
-  admin: Pick<Database['public']['Tables']['profiles']['Row'], 'user_id' | 'first_name' | 'last_name'> & {
-    email: string;
-  };
+export type OrderWithItems = Database['public']['Tables']['orders']['Row'] & {
+  order_items: Database['public']['Tables']['order_items']['Row'][]
 }
 
-// Product types with relations
-export type ProductWithVariants = Database['public']['Tables']['products']['Row'] & {
-  variants: Database['public']['Tables']['product_variants']['Row'][]
-  vendor: Database['public']['Tables']['vendors']['Row']
+export type OrderItemWithProduct = Database['public']['Tables']['order_items']['Row'] & {
+  products: Database['public']['Tables']['products']['Row']
 }
 
-export type ProductVariantWithProduct = Database['public']['Tables']['product_variants']['Row'] & {
-  product: Database['public']['Tables']['products']['Row']
+// User types with relations
+export type UserProfile = Database['public']['Tables']['profiles']['Row']
+export type UserAddress = Database['public']['Tables']['addresses']['Row']
+export type UserOrder = Database['public']['Tables']['orders']['Row']
+
+// Cart types
+export type CartItem = Database['public']['Tables']['cart_items']['Row']
+export type Cart = {
+  items: CartItemWithProduct[]
+  total: number
+  itemCount: number
 }
+
+// Order types
+export type Order = Database['public']['Tables']['orders']['Row']
+export type OrderItem = Database['public']['Tables']['order_items']['Row']
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'out_for_delivery' | 'delivered' | 'cancelled'
+export type PaymentMethod = 'cash' | 'card' | 'other'
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
+
+// Product types
+export type Product = Database['public']['Tables']['products']['Row']
+export type Category = Database['public']['Tables']['categories']['Row']
+export type StrainType = 'indica' | 'sativa' | 'hybrid'
+
+// Address types
+export type Address = Database['public']['Tables']['addresses']['Row']
+export type AddressType = 'billing' | 'delivery'
