@@ -22,6 +22,10 @@ export interface Database {
           state: string | null
           zip_code: string | null
           role: string | null
+          is_id_verified: boolean | null
+          id_verification_date: string | null
+          id_verification_data: Json | null
+          verification_status: string | null
           created_at: string
           updated_at: string
         }
@@ -37,6 +41,10 @@ export interface Database {
           state?: string | null
           zip_code?: string | null
           role?: string | null
+          is_id_verified?: boolean | null
+          id_verification_date?: string | null
+          id_verification_data?: Json | null
+          verification_status?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -52,6 +60,45 @@ export interface Database {
           state?: string | null
           zip_code?: string | null
           role?: string | null
+          is_id_verified?: boolean | null
+          id_verification_date?: string | null
+          id_verification_data?: Json | null
+          verification_status?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      vendors: {
+        Row: {
+          id: string
+          name: string
+          email: string | null
+          phone: string | null
+          license_number: string | null
+          slug: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email?: string | null
+          phone?: string | null
+          license_number?: string | null
+          slug?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string | null
+          phone?: string | null
+          license_number?: string | null
+          slug?: string | null
+          status?: string
           created_at?: string
           updated_at?: string
         }
@@ -61,10 +108,12 @@ export interface Database {
           id: string
           name: string
           description: string | null
-          category: string | null
-          price: number
-          stock_quantity: number
+          category: string
           image_url: string | null
+          thc_content: number | null
+          cbd_content: number | null
+          vendor_id: string
+          slug: string | null
           is_active: boolean
           created_at: string
           updated_at: string
@@ -73,10 +122,12 @@ export interface Database {
           id?: string
           name: string
           description?: string | null
-          category?: string | null
-          price: number
-          stock_quantity: number
+          category: string
           image_url?: string | null
+          thc_content?: number | null
+          cbd_content?: number | null
+          vendor_id: string
+          slug?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -85,10 +136,47 @@ export interface Database {
           id?: string
           name?: string
           description?: string | null
-          category?: string | null
-          price?: number
-          stock_quantity?: number
+          category?: string
           image_url?: string | null
+          thc_content?: number | null
+          cbd_content?: number | null
+          vendor_id?: string
+          slug?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      product_variants: {
+        Row: {
+          id: string
+          product_id: string
+          name: string
+          weight_grams: number | null
+          price: number
+          inventory_count: number | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          name: string
+          weight_grams?: number | null
+          price: number
+          inventory_count?: number | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          name?: string
+          weight_grams?: number | null
+          price?: number
+          inventory_count?: number | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -234,6 +322,105 @@ export interface Database {
           created_at?: string
         }
       }
+      admin_activity_logs: {
+        Row: {
+          id: string
+          admin_id: string
+          action: string
+          entity_type: string | null
+          entity_id: string | null
+          details: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_id: string
+          action: string
+          entity_type?: string | null
+          entity_id?: string | null
+          details?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_id?: string
+          action?: string
+          entity_type?: string | null
+          entity_id?: string | null
+          details?: Json | null
+          created_at?: string
+        }
+      }
+      product_metrics: {
+        Row: {
+          id: string
+          product_id: string
+          date: string
+          views: number
+          cart_additions: number
+          purchases: number
+          revenue: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          date: string
+          views?: number
+          cart_additions?: number
+          purchases?: number
+          revenue?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          date?: string
+          views?: number
+          cart_additions?: number
+          purchases?: number
+          revenue?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      user_metrics: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          login_count: number
+          page_views: number
+          orders_placed: number
+          total_spent: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          date: string
+          login_count?: number
+          page_views?: number
+          orders_placed?: number
+          total_spent?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          date?: string
+          login_count?: number
+          page_views?: number
+          orders_placed?: number
+          total_spent?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -262,4 +449,20 @@ export type OrderWithProfile = Database['public']['Tables']['orders']['Row'] & {
 
 export type OrderItemWithRelations = Database['public']['Tables']['order_items']['Row'] & {
   products: Database['public']['Tables']['products']['Row']
+}
+
+export type AdminActivityLog = Database['public']['Tables']['admin_activity_logs']['Row'] & {
+  admin: Pick<Database['public']['Tables']['profiles']['Row'], 'user_id' | 'first_name' | 'last_name'> & {
+    email: string;
+  };
+}
+
+// Product types with relations
+export type ProductWithVariants = Database['public']['Tables']['products']['Row'] & {
+  variants: Database['public']['Tables']['product_variants']['Row'][]
+  vendor: Database['public']['Tables']['vendors']['Row']
+}
+
+export type ProductVariantWithProduct = Database['public']['Tables']['product_variants']['Row'] & {
+  product: Database['public']['Tables']['products']['Row']
 }

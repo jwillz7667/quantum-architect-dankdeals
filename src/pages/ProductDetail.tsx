@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import { Product, ProductVariant } from "@/hooks/useProducts";
 import { BottomNav } from "@/components/BottomNav";
 import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
@@ -22,33 +23,9 @@ import ediblesImg from "@/assets/edibles-hero.jpg";
 const categoryImages: Record<string, string> = {
   flower: blueDreamImg,
   prerolls: prerollsImg,
-  wellness: wellnessImg,
+  topicals: wellnessImg,
   edibles: ediblesImg,
 };
-
-interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  image_url: string | null;
-  category: string;
-  thc_content: number | null;
-  cbd_content: number | null;
-  vendor_id: string;
-  variants: ProductVariant[];
-  vendor: {
-    name: string;
-  };
-}
-
-interface ProductVariant {
-  id: string;
-  name: string;
-  price: number;
-  weight_grams: number;
-  inventory_count: number | null;
-  is_active: boolean;
-}
 
 export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
@@ -78,7 +55,7 @@ export default function ProductDetail() {
           .select(`
             *,
             variants:product_variants(*),
-            vendor:vendors(name)
+            vendor:vendors(name, status)
           `)
           .eq('id', id)
           .eq('is_active', true)

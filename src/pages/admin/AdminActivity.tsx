@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -17,16 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, FileText } from 'lucide-react';
-import { Database } from '@/integrations/supabase/types';
-
-type ActivityLogRow = Database['public']['Tables']['admin_activity_logs']['Row'];
-type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-
-interface ActivityLog extends ActivityLogRow {
-  admin: Pick<ProfileRow, 'user_id' | 'first_name' | 'last_name'> & {
-    email: string;
-  };
-}
+import { AdminActivityLog } from '@/integrations/supabase/types';
 
 const actionColors: Record<string, string> = {
   INSERT: 'bg-green-100 text-green-800',
@@ -34,22 +25,19 @@ const actionColors: Record<string, string> = {
   DELETE: 'bg-red-100 text-red-800',
 };
 
+interface AuthUser {
+  id: string;
+  email: string;
+}
+
 export function AdminActivity() {
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [filteredActivities, setFilteredActivities] = useState<ActivityLog[]>([]);
+  const [activities, setActivities] = useState<AdminActivityLog[]>([]);
+  const [filteredActivities, setFilteredActivities] = useState<AdminActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchActivityLogs();
-  }, []);
-
-  useEffect(() => {
-    filterActivities();
-  }, [activities, searchTerm]);
-
-  const fetchActivityLogs = async () => {
+  const fetchActivityLogs = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -72,23 +60,23 @@ export function AdminActivity() {
         const adminIds = [...new Set(data.map(log => log.admin_id))];
         
         // Try to fetch auth data, but continue if it fails
-        let authData: any = null;
+        let authData: { users: AuthUser[] } | null = null;
         try {
           const authResponse = await supabase.auth.admin.listUsers();
-          authData = authResponse.data;
+          authData = authResponse.data as { users: AuthUser[] };
         } catch (authError) {
           console.error('Could not fetch auth data:', authError);
         }
         
-        const enrichedData = data.map((log: any) => {
-          const authUser = authData?.users?.find((u: any) => u.id === log.admin_id);
+        const enrichedData = data.map((log) => {
+          const authUser = authData?.users?.find((u) => u.id === log.admin_id);
           return {
             ...log,
             admin: {
               ...log.admin,
               email: authUser?.email || 'Unknown',
             }
-          } as ActivityLog;
+          } as AdminActivityLog;
         });
 
         setActivities(enrichedData);
@@ -103,9 +91,9 @@ export function AdminActivity() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const filterActivities = () => {
+  const filterActivities = useCallback(() => {
     if (!searchTerm) {
       setFilteredActivities(activities);
       return;
@@ -123,7 +111,15 @@ export function AdminActivity() {
     });
 
     setFilteredActivities(filtered);
-  };
+  }, [activities, searchTerm]);
+
+  useEffect(() => {
+    fetchActivityLogs();
+  }, [fetchActivityLogs]);
+
+  useEffect(() => {
+    filterActivities();
+  }, [filterActivities]);
 
   const exportLogs = () => {
     const csv = [
