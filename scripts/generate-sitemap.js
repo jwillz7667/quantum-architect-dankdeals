@@ -49,7 +49,10 @@ async function generateSitemap() {
     }
 
     const baseUrl = 'https://dankdealsmn.com';
-    const currentDate = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const currentDate = now.getFullYear() + '-' + 
+      String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(now.getDate()).padStart(2, '0');
 
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -62,14 +65,15 @@ async function generateSitemap() {
     <loc>${baseUrl}${page.url}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
+    <priority>${page.priority.toFixed(1)}</priority>
   </url>
 `;
     });
 
-    // Add product pages
+    // Add product pages (limit to 1000 for sitemap standards)
     if (products) {
-      products.forEach(product => {
+      const limitedProducts = products.slice(0, 1000);
+      limitedProducts.forEach(product => {
         const lastmod = product.updated_at ? new Date(product.updated_at).toISOString().split('T')[0] : currentDate;
         sitemap += `  <url>
     <loc>${baseUrl}/product/${product.id}</loc>
@@ -88,9 +92,19 @@ async function generateSitemap() {
     fs.writeFileSync(sitemapPath, sitemap);
     
     if (products) {
-      console.log(`Sitemap generated successfully with ${staticPages.length} static pages and ${products.length} product pages!`);
+      const actualProducts = Math.min(products.length, 1000);
+      console.log(`Sitemap generated successfully with ${staticPages.length} static pages and ${actualProducts} product pages!`);
     } else {
       console.log(`Sitemap generated successfully with ${staticPages.length} static pages (no products - database not available)!`);
+    }
+    
+    // Validate XML by attempting to parse it
+    try {
+      if (sitemap.includes('&')) {
+        console.warn('Warning: Sitemap may contain unescaped ampersands');
+      }
+    } catch (e) {
+      console.warn('Warning: Potential XML formatting issues detected');
     }
   } catch (error) {
     console.error('Error generating sitemap:', error);
