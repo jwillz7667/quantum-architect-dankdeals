@@ -22,18 +22,7 @@ const staticPages = [
   { url: '/legal', changefreq: 'yearly', priority: 0.5 },
   { url: '/privacy', changefreq: 'yearly', priority: 0.5 },
   { url: '/terms', changefreq: 'yearly', priority: 0.5 },
-  { url: '/auth', changefreq: 'monthly', priority: 0.4 },
-];
-
-// Product categories for better organization
-const productCategories = [
-  'flower',
-  'edibles', 
-  'concentrates',
-  'vape',
-  'pre-rolls',
-  'accessories',
-  'topicals'
+  // Removed /auth - not needed in sitemap (login page)
 ];
 
 function escapeXml(unsafe) {
@@ -90,20 +79,6 @@ async function generateSitemap() {
   </url>`;
         totalUrls++;
       }
-    });
-
-    // Add category pages
-    console.log('🏷️ Adding category pages...');
-    productCategories.forEach(category => {
-      const categoryUrl = `${baseUrl}/categories?category=${encodeURIComponent(category)}`;
-      sitemap += `
-  <url>
-    <loc>${escapeXml(categoryUrl)}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-      totalUrls++;
     });
 
     // Fetch and add product pages
