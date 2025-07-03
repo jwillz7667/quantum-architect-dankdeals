@@ -70,10 +70,9 @@ async function generateSitemap() {
     const baseUrl = 'https://dankdealsmn.com';
     const currentDate = formatDateForXml(new Date());
     
-    // Start XML sitemap
+    // Start XML sitemap with proper declaration
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
     let totalUrls = 0;
 
@@ -82,13 +81,13 @@ async function generateSitemap() {
     staticPages.forEach(page => {
       const fullUrl = `${baseUrl}${page.url}`;
       if (validateUrl(fullUrl)) {
-        sitemap += `  <url>
+        sitemap += `
+  <url>
     <loc>${escapeXml(fullUrl)}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>
-`;
+  </url>`;
         totalUrls++;
       }
     });
@@ -97,13 +96,13 @@ async function generateSitemap() {
     console.log('🏷️ Adding category pages...');
     productCategories.forEach(category => {
       const categoryUrl = `${baseUrl}/categories?category=${encodeURIComponent(category)}`;
-      sitemap += `  <url>
+      sitemap += `
+  <url>
     <loc>${escapeXml(categoryUrl)}</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-`;
+  </url>`;
       totalUrls++;
     });
 
@@ -128,7 +127,8 @@ async function generateSitemap() {
               const productUrl = `${baseUrl}/product/${product.id}`;
               const lastmod = formatDateForXml(product.updated_at || new Date());
               
-              sitemap += `  <url>
+              sitemap += `
+  <url>
     <loc>${escapeXml(productUrl)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
@@ -150,8 +150,7 @@ async function generateSitemap() {
               }
               
               sitemap += `
-  </url>
-`;
+  </url>`;
               totalUrls++;
             }
           });
@@ -164,11 +163,21 @@ async function generateSitemap() {
     }
 
     // Close sitemap
-    sitemap += '</urlset>';
+    sitemap += `
+</urlset>`;
 
     // Validate XML
     if (!sitemap.includes('<?xml') || !sitemap.includes('</urlset>')) {
       throw new Error('Invalid XML structure generated');
+    }
+
+    // Additional validation - check for line breaks in URLs
+    const lines = sitemap.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line.startsWith('<loc>') && !line.endsWith('</loc>')) {
+        throw new Error(`Invalid URL formatting at line ${i + 1}: URLs cannot span multiple lines`);
+      }
     }
 
     // Write main sitemap
