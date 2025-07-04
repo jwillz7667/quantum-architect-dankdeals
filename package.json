@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate:sitemap && vite build",
+    "build": "npm run sitemap:prod && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "sitemap": "node scripts/generate-sitemap.js",
+    "sitemap:dev": "NODE_ENV=development node scripts/generate-sitemap.js",
+    "sitemap:prod": "NODE_ENV=production node scripts/generate-sitemap.js",
     "generate:sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {

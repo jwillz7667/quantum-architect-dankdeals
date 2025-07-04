@@ -1,41 +1,94 @@
 # https://dankdealsmn.com/robots.txt
+# Optimized for Google Search Console and SEO best practices
 
+# Default crawl rules for all bots
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /checkout/
 Disallow: /profile/
+Disallow: /auth/
+Disallow: /cart/
+Disallow: /search?
+Disallow: /*?*
+Disallow: /404/
+Disallow: /500/
+Disallow: /_next/
+Disallow: /manifest.json
+Disallow: /sw.js
+Disallow: /workbox-*
 Crawl-delay: 1
 
+# Google Search bots (priority treatment)
 User-agent: Googlebot
 Allow: /
+Allow: /api/sitemap
+Allow: /api/products/sitemap
 Disallow: /api/
 Disallow: /admin/
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /auth/
+Disallow: /cart/
+Disallow: /search?
+Disallow: /*?*
 Crawl-delay: 0
 
+# Google Images
 User-agent: Googlebot-Image
 Allow: /
+Allow: /assets/
+Allow: /images/
 Crawl-delay: 0
 
+# Google News (for blog content)
+User-agent: Googlebot-News
+Allow: /
+Allow: /blog/
+Crawl-delay: 0
+
+# Bing
 User-agent: Bingbot
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /auth/
 Crawl-delay: 1
 
+# Yahoo
 User-agent: Slurp
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /auth/
 Crawl-delay: 1
 
+# DuckDuckGo
 User-agent: DuckDuckBot
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /auth/
 Crawl-delay: 1
 
+# Yandex
+User-agent: YandexBot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /profile/
+Disallow: /auth/
+Crawl-delay: 1
+
+# Social Media Crawlers (no restrictions)
 User-agent: Twitterbot
 Allow: /
 
@@ -53,5 +106,27 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 
-# Main sitemap
+# Block problematic bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Cannabis industry compliance
+User-agent: *
+Disallow: /age-gate/
+Disallow: /verify-age/
+
+# Preferred domain and sitemaps
+Host: dankdealsmn.com
 Sitemap: https://dankdealsmn.com/sitemap.xml
+Sitemap: https://dankdealsmn.com/sitemap-products.xml
+Sitemap: https://dankdealsmn.com/sitemap-blog.xml
+Sitemap: https://dankdealsmn.com/sitemap-images.xml

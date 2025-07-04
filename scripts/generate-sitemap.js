@@ -12,17 +12,33 @@ const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 const supabase = supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
-// Comprehensive static pages with proper SEO priorities
+const BASE_URL = 'https://dankdealsmn.com';
+const CURRENT_DATE = new Date().toISOString().split('T')[0];
+
+// Optimized static pages with SEO-focused priorities
 const staticPages = [
   { url: '/', changefreq: 'daily', priority: 1.0 },
   { url: '/categories', changefreq: 'daily', priority: 0.9 },
   { url: '/delivery-area', changefreq: 'weekly', priority: 0.8 },
-  { url: '/faq', changefreq: 'monthly', priority: 0.7 },
   { url: '/blog', changefreq: 'weekly', priority: 0.8 },
+  { url: '/faq', changefreq: 'monthly', priority: 0.7 },
+  { url: '/about', changefreq: 'monthly', priority: 0.6 },
+  { url: '/contact', changefreq: 'monthly', priority: 0.6 },
   { url: '/legal', changefreq: 'yearly', priority: 0.5 },
   { url: '/privacy', changefreq: 'yearly', priority: 0.5 },
   { url: '/terms', changefreq: 'yearly', priority: 0.5 },
-  // Removed /auth - not needed in sitemap (login page)
+];
+
+// Cannabis industry specific categories for better SEO
+const productCategories = [
+  'flower',
+  'concentrates',
+  'edibles',
+  'pre-rolls',
+  'vapes',
+  'topicals',
+  'accessories',
+  'wellness'
 ];
 
 function escapeXml(unsafe) {
@@ -37,10 +53,7 @@ function escapeXml(unsafe) {
 
 function formatDateForXml(date) {
   const d = new Date(date);
-  if (isNaN(d.getTime())) {
-    return new Date().toISOString().split('T')[0];
-  }
-  return d.toISOString().split('T')[0];
+  return isNaN(d.getTime()) ? CURRENT_DATE : d.toISOString().split('T')[0];
 }
 
 function validateUrl(url) {
@@ -52,164 +65,266 @@ function validateUrl(url) {
   }
 }
 
-async function generateSitemap() {
-  try {
-    console.log('🚀 Generating comprehensive sitemap...');
-    
-    const baseUrl = 'https://dankdealsmn.com';
-    const currentDate = formatDateForXml(new Date());
-    
-    // Start XML sitemap with proper declaration
-    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
+function generateSitemapHeader() {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0">`;
+}
 
-    let totalUrls = 0;
-
-    // Add static pages
-    console.log('📄 Adding static pages...');
-    staticPages.forEach(page => {
-      const fullUrl = `${baseUrl}${page.url}`;
-      if (validateUrl(fullUrl)) {
-        sitemap += `
+function generateUrlEntry(url, lastmod, changefreq, priority, images = []) {
+  const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+  if (!validateUrl(fullUrl)) return '';
+  
+  let entry = `
   <url>
     <loc>${escapeXml(fullUrl)}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
+    <lastmod>${formatDateForXml(lastmod)}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+    <mobile:mobile/>`;
+  
+  // Add images if provided
+  images.forEach(image => {
+    if (image.url && validateUrl(image.url)) {
+      entry += `
+    <image:image>
+      <image:loc>${escapeXml(image.url)}</image:loc>
+      <image:caption>${escapeXml(image.caption || 'Product Image')}</image:caption>
+      <image:title>${escapeXml(image.title || image.caption || 'Product Image')}</image:title>
+    </image:image>`;
+    }
+  });
+  
+  entry += `
   </url>`;
+  return entry;
+}
+
+async function generateMainSitemap() {
+  console.log('🚀 Generating main sitemap...');
+  
+  let sitemap = generateSitemapHeader();
+  let totalUrls = 0;
+  
+  // Add static pages
+  staticPages.forEach(page => {
+    const entry = generateUrlEntry(page.url, CURRENT_DATE, page.changefreq, page.priority);
+    if (entry) {
+      sitemap += entry;
+      totalUrls++;
+    }
+  });
+  
+  // Add category pages
+  productCategories.forEach(category => {
+    const entry = generateUrlEntry(`/categories/${category}`, CURRENT_DATE, 'weekly', 0.7);
+    if (entry) {
+      sitemap += entry;
+      totalUrls++;
+    }
+  });
+  
+  sitemap += `
+</urlset>`;
+  
+  fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap.xml'), sitemap, 'utf8');
+  console.log(`✅ Main sitemap generated with ${totalUrls} URLs`);
+  
+  return totalUrls;
+}
+
+async function generateProductSitemap() {
+  if (!supabase) {
+    console.log('⚠️ No database connection for product sitemap');
+    return 0;
+  }
+  
+  console.log('🛍️ Generating product sitemap...');
+  
+  try {
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('id, name, category, updated_at, image_url, description')
+      .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(5000);
+    
+    if (error) throw error;
+    if (!products?.length) return 0;
+    
+    let sitemap = generateSitemapHeader();
+    let totalUrls = 0;
+    
+    products.forEach(product => {
+      const images = product.image_url ? [{
+        url: product.image_url.startsWith('http') ? product.image_url : `${BASE_URL}${product.image_url}`,
+        caption: product.name,
+        title: product.name
+      }] : [];
+      
+      const entry = generateUrlEntry(
+        `/product/${product.id}`,
+        product.updated_at,
+        'weekly',
+        0.8,
+        images
+      );
+      
+      if (entry) {
+        sitemap += entry;
         totalUrls++;
       }
     });
-
-    // Fetch and add product pages
-    if (supabase) {
-      console.log('🛍️ Fetching products from database...');
-      try {
-        const { data: products, error } = await supabase
-          .from('products')
-          .select('id, name, category, updated_at, image_url')
-          .eq('is_active', true)
-          .order('updated_at', { ascending: false })
-          .limit(5000); // Google sitemap limit
-
-        if (error) {
-          console.warn('⚠️ Could not fetch products:', error.message);
-        } else if (products && products.length > 0) {
-          console.log(`📦 Adding ${products.length} product pages...`);
-          
-          products.forEach(product => {
-            if (product.id) {
-              const productUrl = `${baseUrl}/product/${product.id}`;
-              const lastmod = formatDateForXml(product.updated_at || new Date());
-              
-              sitemap += `
-  <url>
-    <loc>${escapeXml(productUrl)}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>`;
-              
-              // Add image if available
-              if (product.image_url) {
-                const imageUrl = product.image_url.startsWith('http') 
-                  ? product.image_url 
-                  : `${baseUrl}${product.image_url}`;
-                
-                if (validateUrl(imageUrl)) {
-                  sitemap += `
-    <image:image>
-      <image:loc>${escapeXml(imageUrl)}</image:loc>
-      <image:caption>${escapeXml(product.name || 'Product Image')}</image:caption>
-    </image:image>`;
-                }
-              }
-              
-              sitemap += `
-  </url>`;
-              totalUrls++;
-            }
-          });
-        }
-      } catch (dbError) {
-        console.warn('⚠️ Database connection failed, using static sitemap only:', dbError.message);
-      }
-    } else {
-      console.log('ℹ️ No database connection, using static pages only');
-    }
-
-    // Close sitemap
+    
     sitemap += `
 </urlset>`;
+    
+    fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap-products.xml'), sitemap, 'utf8');
+    console.log(`✅ Product sitemap generated with ${totalUrls} URLs`);
+    
+    return totalUrls;
+  } catch (error) {
+    console.warn('⚠️ Product sitemap generation failed:', error.message);
+    return 0;
+  }
+}
 
-    // Validate XML
-    if (!sitemap.includes('<?xml') || !sitemap.includes('</urlset>')) {
-      throw new Error('Invalid XML structure generated');
-    }
-
-    // Additional validation - check for line breaks in URLs
-    const lines = sitemap.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.startsWith('<loc>') && !line.endsWith('</loc>')) {
-        throw new Error(`Invalid URL formatting at line ${i + 1}: URLs cannot span multiple lines`);
+async function generateBlogSitemap() {
+  if (!supabase) return 0;
+  
+  console.log('📝 Generating blog sitemap...');
+  
+  try {
+    const { data: posts, error } = await supabase
+      .from('blog_posts')
+      .select('id, title, slug, updated_at, published_at, featured_image')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(1000);
+    
+    if (error) throw error;
+    if (!posts?.length) return 0;
+    
+    let sitemap = generateSitemapHeader();
+    let totalUrls = 0;
+    
+    posts.forEach(post => {
+      const images = post.featured_image ? [{
+        url: post.featured_image.startsWith('http') ? post.featured_image : `${BASE_URL}${post.featured_image}`,
+        caption: post.title,
+        title: post.title
+      }] : [];
+      
+      const entry = generateUrlEntry(
+        `/blog/${post.slug}`,
+        post.updated_at || post.published_at,
+        'monthly',
+        0.6,
+        images
+      );
+      
+      if (entry) {
+        sitemap += entry;
+        totalUrls++;
       }
-    }
+    });
+    
+    sitemap += `
+</urlset>`;
+    
+    fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
+    console.log(`✅ Blog sitemap generated with ${totalUrls} URLs`);
+    
+    return totalUrls;
+  } catch (error) {
+    console.warn('⚠️ Blog sitemap generation failed:', error.message);
+    return 0;
+  }
+}
 
-    // Write main sitemap
-    const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
-    fs.writeFileSync(sitemapPath, sitemap, 'utf8');
-
-    // Create sitemap index if we have many URLs
-    if (totalUrls > 1000) {
-      const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+async function generateSitemapIndex(totalUrls) {
+  console.log('📑 Generating sitemap index...');
+  
+  const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${escapeXml(baseUrl)}/sitemap.xml</loc>
-    <lastmod>${currentDate}</lastmod>
+    <loc>${BASE_URL}/sitemap.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${BASE_URL}/sitemap-products.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${BASE_URL}/sitemap-blog.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${BASE_URL}/sitemap-images.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
   </sitemap>
 </sitemapindex>`;
-      
-      const indexPath = path.join(process.cwd(), 'public', 'sitemap-index.xml');
-      fs.writeFileSync(indexPath, sitemapIndex, 'utf8');
-      console.log('📑 Created sitemap index for large sitemap');
+  
+  fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap-index.xml'), sitemapIndex, 'utf8');
+  console.log('✅ Sitemap index created');
+}
+
+async function generateAllSitemaps() {
+  try {
+    console.log('🚀 Starting comprehensive sitemap generation...');
+    console.log(`📅 Date: ${CURRENT_DATE}`);
+    console.log(`🌐 Base URL: ${BASE_URL}`);
+    
+    const mainUrls = await generateMainSitemap();
+    const productUrls = await generateProductSitemap();
+    const blogUrls = await generateBlogSitemap();
+    const totalUrls = mainUrls + productUrls + blogUrls;
+    
+    // Generate sitemap index for better organization
+    if (totalUrls > 50) {
+      await generateSitemapIndex(totalUrls);
     }
-
-    // Verify file was written correctly
-    const fileSize = fs.statSync(sitemapPath).size;
     
-    console.log('✅ Sitemap generated successfully!');
-    console.log(`   📊 Total URLs: ${totalUrls}`);
-    console.log(`   📁 File size: ${(fileSize / 1024).toFixed(2)} KB`);
-    console.log(`   📍 Location: ${sitemapPath}`);
-    console.log(`   🌐 URL: ${baseUrl}/sitemap.xml`);
     console.log('');
-    console.log('🔍 Ready for Google Search Console submission!');
+    console.log('✅ All sitemaps generated successfully!');
+    console.log(`📊 Total URLs: ${totalUrls}`);
+    console.log(`   📄 Main: ${mainUrls}`);
+    console.log(`   🛍️ Products: ${productUrls}`);
+    console.log(`   📝 Blog: ${blogUrls}`);
+    console.log('');
+    console.log('🔍 Google Search Console URLs:');
+    console.log(`   ${BASE_URL}/sitemap.xml`);
+    console.log(`   ${BASE_URL}/sitemap-products.xml`);
+    console.log(`   ${BASE_URL}/sitemap-blog.xml`);
+    console.log(`   ${BASE_URL}/sitemap-index.xml`);
+    console.log('');
     console.log('📋 Next steps:');
-    console.log('   1. Submit sitemap to Google Search Console');
-    console.log('   2. Test with Google\'s sitemap validator');
-    console.log('   3. Monitor indexing status');
-
-  } catch (error) {
-    console.error('❌ Error generating sitemap:', error);
+    console.log('   1. Submit all sitemaps to Google Search Console');
+    console.log('   2. Test with Google Rich Results Test');
+    console.log('   3. Monitor Core Web Vitals');
+    console.log('   4. Check mobile usability');
+    console.log('   5. Verify structured data markup');
     
-    // Create fallback minimal sitemap
-    console.log('🆘 Creating fallback sitemap...');
-    const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  } catch (error) {
+    console.error('❌ Error generating sitemaps:', error);
+    
+    // Create minimal fallback
+    const fallback = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dankdealsmn.com/</loc>
-    <lastmod>${formatDateForXml(new Date())}</lastmod>
+    <loc>${BASE_URL}/</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 </urlset>`;
     
-    const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
-    fs.writeFileSync(sitemapPath, fallbackSitemap, 'utf8');
-    console.log('⚠️ Minimal fallback sitemap created');
-    
+    fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap.xml'), fallback, 'utf8');
+    console.log('⚠️ Fallback sitemap created');
     process.exit(1);
   }
 }
 
-generateSitemap(); 
+generateAllSitemaps(); 
