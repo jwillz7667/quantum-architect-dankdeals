@@ -12,7 +12,14 @@
     "sitemap": "node scripts/generate-sitemap.js",
     "sitemap:dev": "NODE_ENV=development node scripts/generate-sitemap.js",
     "sitemap:prod": "NODE_ENV=production node scripts/generate-sitemap.js",
-    "generate:sitemap": "node scripts/generate-sitemap.js"
+    "generate:sitemap": "node scripts/generate-sitemap.js",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "analyze": "vite-bundle-visualizer"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -86,6 +93,29 @@
     "terser": "^5.27.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
-  }
+    "vite": "^5.4.1",
+    "prettier": "^3.2.5",
+    "vitest": "^1.2.0",
+    "@playwright/test": "^1.41.0",
+    "@vitest/ui": "^1.2.0",
+    "@testing-library/react": "^14.2.0",
+    "@testing-library/jest-dom": "^6.2.0",
+    "@testing-library/user-event": "^14.5.2",
+    "vite-bundle-visualizer": "^1.0.1",
+    "husky": "^9.0.10",
+    "lint-staged": "^15.2.0",
+    "@size-limit/preset-app": "^11.0.2",
+    "size-limit": "^11.0.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "size-limit": [
+    {
+      "path": "dist/assets/*.js",
+      "limit": "250 KB"
+    }
+  ]
 }

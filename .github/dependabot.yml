@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "admin"
+    assignees:
+      - "admin"
+    labels:
+      - "dependencies"
+      - "security"
+    ignore:
+      # Ignore updates to packages that frequently publish patches
+      - dependency-name: "@types/*"
+        update-types: ["version-update:semver-patch"]
+      
+  # Enable security updates
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    target-branch: "main"
+    labels:
+      - "security"
+      - "high-priority"

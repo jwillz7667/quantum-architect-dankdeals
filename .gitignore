@@ -23,3 +23,20 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Test coverage
+coverage
+.nyc_output
+test-results
+playwright-report
+playwright/.cache
+
+# Build analysis
+.vite-bundle-visualizer
+stats.html
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

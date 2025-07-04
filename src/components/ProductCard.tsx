@@ -12,7 +12,7 @@ interface ProductCardProps {
 
 export function ProductCard({ id, name, price, type, image }: ProductCardProps) {
   return (
-    <Link to={`/product/${id}`}>
+    <Link to={`/product/${id}`} data-testid="product-card">
       <div className="product-card cursor-pointer">
         <div className="relative aspect-square overflow-hidden">
           <OptimizedImage

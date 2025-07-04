@@ -28,6 +28,9 @@ import CheckoutReview from "./pages/checkout/CheckoutReview";
 import CheckoutComplete from "./pages/checkout/CheckoutComplete";
 import ProfileOrders from "./pages/profile/ProfileOrders";
 import ProfilePersonal from "./pages/profile/ProfilePersonal";
+import ProfileAddress from "./pages/profile/ProfileAddress";
+import ProfilePayment from "./pages/profile/ProfilePayment";
+import ProfileSettings from "./pages/profile/ProfileSettings";
 import NotFound from "./pages/NotFound";
 
 // Admin imports
@@ -72,6 +75,9 @@ const App = () => (
               <Route path="/checkout/complete" element={<ProtectedRoute><CheckoutComplete /></ProtectedRoute>} />
               <Route path="/profile/orders" element={<ProtectedRoute><ProfileOrders /></ProtectedRoute>} />
               <Route path="/profile/personal" element={<ProtectedRoute><ProfilePersonal /></ProtectedRoute>} />
+              <Route path="/profile/address" element={<ProtectedRoute><ProfileAddress /></ProtectedRoute>} />
+              <Route path="/profile/payment" element={<ProtectedRoute><ProfilePayment /></ProtectedRoute>} />
+              <Route path="/profile/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
               
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>

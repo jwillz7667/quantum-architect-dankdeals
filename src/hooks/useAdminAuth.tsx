@@ -52,7 +52,8 @@ export function useAdminAuth() {
       }
 
       // Check if this is the admin email
-      if (user.email !== 'admin@dankdealsmn.com') {
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@dankdealsmn.com';
+      if (user.email !== adminEmail) {
         console.log('❌ User is not admin email');
         setIsAdmin(false);
         setAdminUser(null);
@@ -132,9 +133,10 @@ export function useAdminAuth() {
 
   const requireAdmin = () => {
     if (!isLoading && !isAdmin) {
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@dankdealsmn.com';
       toast({
         title: "Access Denied",
-        description: "Admin access is restricted to admin@dankdealsmn.com only.",
+        description: `Admin access is restricted to ${adminEmail} only.`,
         variant: "destructive",
       });
       navigate('/');
