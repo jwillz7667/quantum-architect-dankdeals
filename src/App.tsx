@@ -8,7 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProductsFilterProvider } from "@/hooks/useProductsFilter";
 import { CartProvider } from "@/hooks/useCart";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { AdminRoute } from "@/components/AdminRoute";
+// import { AdminRoute } from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
 import Auth from "./pages/Auth";
@@ -21,7 +21,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Legal from "./pages/Legal";
 import DeliveryArea from "./pages/DeliveryArea";
-import Admin from "./pages/Admin";
+// import Admin from "./pages/Admin";
 import CheckoutAddress from "./pages/checkout/CheckoutAddress";
 import CheckoutPayment from "./pages/checkout/CheckoutPayment";
 import CheckoutReview from "./pages/checkout/CheckoutReview";
@@ -32,17 +32,18 @@ import ProfileAddress from "./pages/profile/ProfileAddress";
 import ProfilePayment from "./pages/profile/ProfilePayment";
 import ProfileSettings from "./pages/profile/ProfileSettings";
 import NotFound from "./pages/NotFound";
+import HealthCheck from "./pages/HealthCheck";
 
-// Admin imports
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
-import { Overview } from "./pages/admin/Overview";
-import { AdminOrders } from "./pages/admin/AdminOrders";
-import { AdminProducts } from "./pages/admin/AdminProducts";
-import { AdminUsers } from "./pages/admin/AdminUsers";
-import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
-import { AdminActivity } from "./pages/admin/AdminActivity";
-import { AdminReports } from "./pages/admin/AdminReports";
-import { AdminSettings } from "./pages/admin/AdminSettings";
+// Admin imports - COMMENTED OUT
+// import { AdminDashboard } from "./pages/admin/AdminDashboard";
+// import { Overview } from "./pages/admin/Overview";
+// import { AdminOrders } from "./pages/admin/AdminOrders";
+// import { AdminProducts } from "./pages/admin/AdminProducts";
+// import { AdminUsers } from "./pages/admin/AdminUsers";
+// import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
+// import { AdminActivity } from "./pages/admin/AdminActivity";
+// import { AdminReports } from "./pages/admin/AdminReports";
+// import { AdminSettings } from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -79,8 +80,8 @@ const App = () => (
               <Route path="/profile/payment" element={<ProtectedRoute><ProfilePayment /></ProtectedRoute>} />
               <Route path="/profile/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
               
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
+              {/* Admin Routes - COMMENTED OUT */}
+              {/* <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
                 <Route index element={<Overview />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="products" element={<AdminProducts />} />
@@ -89,9 +90,10 @@ const App = () => (
                 <Route path="activity" element={<AdminActivity />} />
                 <Route path="reports" element={<AdminReports />} />
                 <Route path="settings" element={<AdminSettings />} />
-              </Route>
+              </Route> */}
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="/health" element={<HealthCheck />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
               </BrowserRouter>

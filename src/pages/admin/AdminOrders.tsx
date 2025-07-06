@@ -445,4 +445,6 @@ export function AdminOrders() {
       </Dialog>
     </div>
   );
-} 
+}
+
+export default AdminOrders;

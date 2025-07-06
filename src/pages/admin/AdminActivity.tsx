@@ -257,4 +257,6 @@ export function AdminActivity() {
       </Card>
     </div>
   );
-} 
+}
+
+export default AdminActivity

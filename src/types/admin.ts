@@ -1,5 +1,7 @@
 // src/types/admin.ts
 
+import type { User } from '@supabase/supabase-js';
+
 // Database Types
 export interface StoreSettings {
   id: string;
@@ -277,4 +279,12 @@ export interface ReportParameter {
   required?: boolean;
   options?: Array<{ value: string; label: string }>;
   defaultValue?: unknown;
+}
+
+export interface AdminUser extends User {
+  role: 'admin' | 'super_admin';
+  permissions?: string[];
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
 } 

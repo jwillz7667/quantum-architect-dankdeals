@@ -1,18 +1,26 @@
 import { useState } from "react";
 import { Menu, X, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAuth } from "@/hooks/useAuth";
+// import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useCart } from "@/hooks/useCart";
+import { Badge } from "@/components/ui/badge";
 
 interface MobileHeaderProps {
   title: string;
   showMenu?: boolean;
+  showBack?: boolean;
 }
 
-export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
+export function MobileHeader({ title = "DankDeals MN", showMenu = true, showBack = false }: MobileHeaderProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  // const { isAdmin } = useAdminAuth();
+  const { totalItems } = useCart();
   const [isOpen, setIsOpen] = useState(false);
-  const { isAdmin } = useAdminAuth();
 
   const menuItems = [
     { label: "Home", href: "/" },
@@ -59,17 +67,17 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
                 </Link>
               ))}
               
-              {/* Admin Dashboard Link - Only visible to admin users */}
-              {isAdmin && (
+              {/* Admin Dashboard Link - Only visible to admin users - COMMENTED OUT */}
+              {/* {isAdmin && (
                 <Link
                   to="/admin"
-                  onClick={() => setIsOpen(false)}
                   className="block px-4 py-2 text-lg text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-2"
+                  onClick={() => setIsOpen(false)}
                 >
                   <Settings className="h-5 w-5" />
                   Admin Dashboard
                 </Link>
-              )}
+              )} */}
             </nav>
           </SheetContent>
         </Sheet>

@@ -1,14 +1,26 @@
 import { useState } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, BarChart, Package, Users, ShoppingCart, LogOut } from "lucide-react";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminOrders from "./admin/AdminOrders";
+import AdminProducts from "./admin/AdminProducts";
+import AdminUsers from "./admin/AdminUsers";
+import AdminAnalytics from "./admin/AdminAnalytics";
+import AdminActivity from "./admin/AdminActivity";
+import AdminReports from "./admin/AdminReports";
+import AdminSettings from "./admin/AdminSettings";
+import AdminManagement from "./admin/AdminManagement";
 
 export default function Admin() {
-  const { adminUser, signOut } = useAdminAuth();
+  const { adminUser, isSuperAdmin } = useAdminAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  const handleSignOut = async () => {
+    window.location.href = '/';
+  };
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -18,10 +30,18 @@ export default function Admin() {
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-muted-foreground">Welcome back, {adminUser?.email}</p>
           </div>
-          <Button variant="outline" onClick={signOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-4">
+            {isSuperAdmin() && (
+              <Alert className="border-primary/50">
+                <Shield className="h-4 w-4" />
+                <AlertDescription>Super Admin</AlertDescription>
+              </Alert>
+            )}
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Exit Admin
+            </Button>
+          </div>
         </div>
 
         <Alert className="mb-8">
@@ -32,93 +52,84 @@ export default function Admin() {
         </Alert>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsList className="grid grid-cols-3 lg:grid-cols-9 gap-2 h-auto">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <BarChart className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              <span className="hidden sm:inline">Orders</span>
+            </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Products</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Activity</span>
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <BarChart className="h-4 w-4" />
+              <span className="hidden sm:inline">Reports</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
+            {isSuperAdmin() && (
+              <TabsTrigger value="admins" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Admins</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
-          <TabsContent value="dashboard">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <BarChart className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$45,231</div>
-                  <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Orders</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">1,234</div>
-                  <p className="text-xs text-muted-foreground">+15% from last month</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Products</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">89</div>
-                  <p className="text-xs text-muted-foreground">12 low stock</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">573</div>
-                  <p className="text-xs text-muted-foreground">+201 new this month</p>
-                </CardContent>
-              </Card>
-            </div>
+          <TabsContent value="dashboard" className="space-y-4">
+            <AdminDashboard />
           </TabsContent>
 
-          <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Management</CardTitle>
-                <CardDescription>View and manage customer orders</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Order management interface coming soon...</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="orders" className="space-y-4">
+            <AdminOrders />
           </TabsContent>
 
-          <TabsContent value="products">
-            <Card>
-              <CardHeader>
-                <CardTitle>Product Management</CardTitle>
-                <CardDescription>Manage your product inventory</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Product management interface coming soon...</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="products" className="space-y-4">
+            <AdminProducts />
           </TabsContent>
 
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>View and manage user accounts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">User management interface coming soon...</p>
-              </CardContent>
-            </Card>
+          <TabsContent value="users" className="space-y-4">
+            <AdminUsers />
           </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <AdminAnalytics />
+          </TabsContent>
+
+          <TabsContent value="activity" className="space-y-4">
+            <AdminActivity />
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-4">
+            <AdminReports />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-4">
+            <AdminSettings />
+          </TabsContent>
+
+          {isSuperAdmin() && (
+            <TabsContent value="admins" className="space-y-4">
+              <AdminManagement />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

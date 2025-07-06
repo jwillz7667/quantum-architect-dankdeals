@@ -535,4 +535,6 @@ export function AdminUsers() {
       </Dialog>
     </div>
   );
-} 
+}
+
+export default AdminUsers

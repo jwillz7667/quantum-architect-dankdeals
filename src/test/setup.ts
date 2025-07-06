@@ -2,6 +2,16 @@
 // Test setup file for Vitest
 // This file is loaded before each test file
 
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach, vi } from 'vitest';
+import './axe';
+
+// Cleanup after each test
+afterEach(() => {
+  cleanup();
+});
+
 // Mock localStorage
 const localStorageMock = {
   getItem: (key: string) => null,

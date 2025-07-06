@@ -747,4 +747,6 @@ export function AdminProducts() {
       </Dialog>
     </div>
   );
-} 
+}
+
+export default AdminProducts

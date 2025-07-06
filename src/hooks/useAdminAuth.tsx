@@ -1,168 +1,125 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-interface AdminUser {
-  id: string;
-  email: string;
-  role: string;
-  firstName?: string;
-  lastName?: string;
-}
+import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
+import type { AdminUser } from '@/types/admin';
 
 export function useAdminAuth() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     checkAdminStatus();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        await checkAdminStatus();
-      } else if (event === 'SIGNED_OUT') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      logger.debug('Auth state changed', { 
+        context: {
+          event, 
+          userId: session?.user?.id 
+        }
+      });
+      if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
         setAdminUser(null);
+      } else if (event === 'SIGNED_IN' && session?.user) {
+        checkAdminStatus();
       }
     });
 
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkAdminStatus = async () => {
-    console.log('🔍 Starting admin status check...');
-    setIsLoading(true);
-    
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('👤 Current user:', user?.email);
       
       if (!user) {
-        console.log('❌ No user found');
         setIsAdmin(false);
         setAdminUser(null);
         setIsLoading(false);
         return;
       }
 
-      // Check if this is the admin email
-      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@dankdealsmn.com';
-      if (user.email !== adminEmail) {
-        console.log('❌ User is not admin email');
-        setIsAdmin(false);
-        setAdminUser(null);
-        setIsLoading(false);
-        return;
-      }
+      logger.debug('Checking admin status for user', { 
+        context: { email: user.email }
+      });
 
-      console.log('✅ User has admin email, checking profile...');
-
-      // Check if user has admin role in profiles table
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, first_name, last_name')
+      // Check if user is in admins table
+      const { data: adminData, error: adminError } = await supabase
+        .from('admins')
+        .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      console.log('📊 Profile query result:', { profile, error });
-
-      if (error) {
-        console.error('❌ Error fetching admin profile:', error);
-        
-        // If profile doesn't exist, create it for the admin user
-        if (error.code === 'PGRST116') {
-          console.log('🔨 Creating admin profile...');
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              user_id: user.id,
-              role: 'admin',
-              first_name: 'Admin',
-              last_name: 'User'
-            });
-
-          if (insertError) {
-            console.error('❌ Error creating admin profile:', insertError);
-            setIsAdmin(false);
-            setAdminUser(null);
-          } else {
-            console.log('✅ Admin profile created successfully');
-            setIsAdmin(true);
-            setAdminUser({
-              id: user.id,
-              email: user.email || '',
-              role: 'admin',
-              firstName: 'Admin',
-              lastName: 'User',
-            });
+      if (adminError) {
+        logger.error('Failed to check admin status', adminError);
+        setIsAdmin(false);
+        setAdminUser(null);
+      } else if (!adminData) {
+        logger.debug('User is not an admin', { 
+          context: { message: 'No admin record found' }
+        });
+        setIsAdmin(false);
+        setAdminUser(null);
+      } else {
+        logger.info('Admin user authenticated', { 
+          userId: user.id,
+          context: {
+            email: user.email,
+            role: adminData.role
           }
-        } else {
-          setIsAdmin(false);
-          setAdminUser(null);
-        }
-      } else if (profile?.role === 'admin') {
-        console.log('✅ User is admin!');
+        });
         setIsAdmin(true);
         setAdminUser({
-          id: user.id,
-          email: user.email || '',
-          role: profile.role,
-          firstName: profile.first_name || undefined,
-          lastName: profile.last_name || undefined,
-        });
-      } else {
-        console.log('❌ User profile exists but role is not admin:', profile?.role);
-        setIsAdmin(false);
-        setAdminUser(null);
+          ...user,
+          role: adminData.role,
+          permissions: adminData.permissions
+        } as AdminUser);
       }
     } catch (error) {
-      console.error('❌ Admin auth check error:', error);
+      logger.error('Failed to check admin status', error as Error);
       setIsAdmin(false);
       setAdminUser(null);
     } finally {
-      console.log('🏁 Admin status check complete');
       setIsLoading(false);
-    }
-  };
-
-  const requireAdmin = () => {
-    if (!isLoading && !isAdmin) {
-      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@dankdealsmn.com';
-      toast({
-        title: "Access Denied",
-        description: `Admin access is restricted to ${adminEmail} only.`,
-        variant: "destructive",
-      });
-      navigate('/');
     }
   };
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      setIsAdmin(false);
+      setAdminUser(null);
       navigate('/');
+      toast.success('Signed out successfully');
     } catch (error) {
-      console.error('Sign out error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
+      logger.error('Failed to sign out', error as Error);
+      toast.error('Failed to sign out');
     }
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!adminUser) return false;
+    if (adminUser.role === 'super_admin') return true;
+    return adminUser.permissions?.includes(permission) || false;
+  };
+
+  const isSuperAdmin = (): boolean => {
+    return adminUser?.role === 'super_admin';
   };
 
   return {
     isAdmin,
     adminUser,
     isLoading,
-    requireAdmin,
-    signOut,
     checkAdminStatus,
+    hasPermission,
+    isSuperAdmin,
+    signOut
   };
 } 

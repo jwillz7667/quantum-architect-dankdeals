@@ -6,9 +6,14 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+// import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Package2, Home, Heart } from "lucide-react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
+import { SEOHead } from "@/components/SEOHead";
 
 const menuItems = [
   { icon: User, label: "Personal Information", href: "/profile/personal" },
@@ -17,13 +22,6 @@ const menuItems = [
   { icon: Phone, label: "Order History", href: "/profile/orders" },
   { icon: Settings, label: "Settings", href: "/profile/settings" },
 ];
-
-const adminMenuItem = {
-  icon: Shield,
-  label: "Admin Dashboard",
-  href: "/admin",
-  className: "bg-primary/10 hover:bg-primary/20 border border-primary/30"
-};
 
 interface UserProfile {
   first_name?: string;
@@ -34,9 +32,11 @@ interface UserProfile {
 
 export default function Profile() {
   const { user, signOut } = useAuth();
-  const { isAdmin, adminUser } = useAdminAuth();
+  // const { isAdmin, adminUser } = useAdminAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -70,8 +70,8 @@ export default function Profile() {
 
   const displayName = profile?.first_name && profile?.last_name 
     ? `${profile.first_name} ${profile.last_name}`
-    : adminUser?.firstName && adminUser?.lastName
-    ? `${adminUser.firstName} ${adminUser.lastName}`
+    // : adminUser?.firstName && adminUser?.lastName
+    // ? `${adminUser.firstName} ${adminUser.lastName}`
     : 'Welcome Back!';
 
   return (
@@ -95,12 +95,12 @@ export default function Profile() {
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
             <h2 className="text-xl font-bold text-foreground">{displayName}</h2>
-            {isAdmin && (
+            {/* {isAdmin && (
               <Badge variant="default" className="text-xs bg-primary text-primary-foreground">
                 <Shield className="h-3 w-3 mr-1" />
                 Admin
               </Badge>
-            )}
+            )} */}
           </div>
           <p className="text-muted-foreground">{user?.email}</p>
           <Button variant="outline" className="mt-4">
@@ -108,27 +108,27 @@ export default function Profile() {
           </Button>
         </div>
 
-        {/* Admin Dashboard Access - Show first if user is admin */}
-        {isAdmin && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Administration
-            </h3>
-            <Button
-              variant="ghost"
-              className={`w-full justify-start h-14 text-left ${adminMenuItem.className}`}
-              asChild
-            >
-              <Link to={adminMenuItem.href}>
-                <adminMenuItem.icon className="h-5 w-5 mr-3 text-primary" />
-                <span className="flex-1 font-medium">{adminMenuItem.label}</span>
-                <Badge variant="outline" className="text-xs">
-                  Admin Only
-                </Badge>
-              </Link>
-            </Button>
-          </div>
-        )}
+        {/* Admin Dashboard Access - Show first if user is admin - COMMENTED OUT */}
+        {/* {isAdmin && (
+          <Card className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3 text-purple-900">Administration</h3>
+              <Button
+                asChild
+                className={`w-full justify-start h-14 text-left ${adminMenuItem.className}`}
+                size="lg"
+              >
+                <Link to={adminMenuItem.href}>
+                  <adminMenuItem.icon className="h-5 w-5 mr-3 text-primary" />
+                  <span className="flex-1 font-medium">{adminMenuItem.label}</span>
+                  <Badge variant="secondary" className="ml-auto">
+                    Admin Only
+                  </Badge>
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )} */}
 
         {/* Regular Menu Items */}
         <div className="space-y-2">
@@ -166,9 +166,9 @@ export default function Profile() {
         <div className="text-center pt-8 text-muted-foreground">
           <p className="text-sm">DankDeals MN v1.0.0</p>
           <p className="text-xs">Licensed Cannabis Dispensary</p>
-          {isAdmin && (
+          {/* {isAdmin && (
             <p className="text-xs text-primary mt-1">Admin Access Enabled</p>
-          )}
+          )} */}
         </div>
       </div>
 

@@ -909,4 +909,6 @@ export function AdminSettings() {
       </Tabs>
     </div>
   );
-} 
+}
+
+export default AdminSettings

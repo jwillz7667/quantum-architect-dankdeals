@@ -511,4 +511,4 @@ export function AdminReports() {
       </Tabs>
     </div>
   );
-} 
+} export default AdminReports

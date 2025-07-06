@@ -2,11 +2,33 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://ralbzuvkyexortqngvxs.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbGJ6dXZreWV4b3J0cW5ndnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzOTk3NzEsImV4cCI6MjA2Njk3NTc3MX0.QRWwsrZGHY4HLFOlRpygtJDDd1DAJ2rBwDOt1e1m-sA";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Production environment validation
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing Supabase environment variables');
+  const errorMessage = 'Missing required Supabase environment variables. Please check your .env configuration.';
+  
+  if (import.meta.env.DEV) {
+    console.error(errorMessage);
+    console.error('Required variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY');
+  }
+  
+  throw new Error(errorMessage);
+}
+
+// Validate URL format in production
+if (import.meta.env.PROD) {
+  try {
+    new URL(SUPABASE_URL);
+  } catch {
+    throw new Error('Invalid VITE_SUPABASE_URL format');
+  }
+  
+  // Ensure we're not using example/placeholder values
+  if (SUPABASE_URL.includes('your-project') || SUPABASE_PUBLISHABLE_KEY.includes('your-')) {
+    throw new Error('Production environment detected but using placeholder Supabase credentials');
+  }
 }
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -14,5 +36,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
   }
 });

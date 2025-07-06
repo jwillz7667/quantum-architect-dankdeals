@@ -3,7 +3,6 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { NotificationBell } from '@/components/admin/NotificationBell';
 import {
   LayoutDashboard,
@@ -140,7 +139,7 @@ export function AdminDashboard() {
             <Button
               variant="ghost"
               className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={signOut}
+              onClick={() => signOut()}
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
@@ -173,4 +172,6 @@ export function AdminDashboard() {
       )}
     </div>
   );
-} 
+}
+
+export default AdminDashboard;

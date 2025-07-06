@@ -453,4 +453,6 @@ export function AdminAnalytics() {
       </Tabs>
     </div>
   );
-} 
+}
+
+export default AdminAnalytics
