@@ -1,16 +1,15 @@
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, Settings } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 // import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { SearchBar } from "@/components/SearchBar";
 
 const navItems = [
-  { label: "Home", href: "/" },
-  { label: "Categories", href: "/categories" },
-  { label: "Delivery Areas", href: "/delivery-area" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Blog", href: "/blog" },
+  { label: 'Home', href: '/' },
+  { label: 'Categories', href: '/categories' },
+  { label: 'Delivery Areas', href: '/delivery-area' },
+  { label: 'FAQ', href: '/faq' },
+  { label: 'Blog', href: '/blog' },
 ];
 
 export function DesktopHeader() {
@@ -33,15 +32,13 @@ export function DesktopHeader() {
               key={item.href}
               to={item.href}
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                location.pathname === item.href 
-                  ? "text-primary" 
-                  : "text-muted-foreground"
+                location.pathname === item.href ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
               {item.label}
             </Link>
           ))}
-          
+
           {/* Admin Dashboard Link - Only visible to admin users - COMMENTED OUT */}
           {/* {isAdmin && (
             <Link
@@ -65,8 +62,8 @@ export function DesktopHeader() {
               <ShoppingCart className="h-5 w-5" />
             </Button>
           </Link>
-          
-          <Link to={user ? "/profile" : "/auth"}>
+
+          <Link to={user ? '/profile' : '/auth'}>
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
             </Button>
@@ -74,9 +71,7 @@ export function DesktopHeader() {
 
           {!user && (
             <Link to="/auth">
-              <Button size="sm">
-                Sign In
-              </Button>
+              <Button size="sm">Sign In</Button>
             </Link>
           )}
         </div>

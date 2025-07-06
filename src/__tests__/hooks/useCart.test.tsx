@@ -3,9 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useCart, CartProvider } from '@/hooks/useCart';
 import { ReactNode } from 'react';
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <CartProvider>{children}</CartProvider>
-);
+const wrapper = ({ children }: { children: ReactNode }) => <CartProvider>{children}</CartProvider>;
 
 describe('useCart Hook', () => {
   beforeEach(() => {
@@ -15,7 +13,7 @@ describe('useCart Hook', () => {
 
   it('should initialize with empty cart', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    
+
     expect(result.current.items).toEqual([]);
     expect(result.current.totalItems).toBe(0);
     expect(result.current.totalPrice).toBe(0);
@@ -24,7 +22,7 @@ describe('useCart Hook', () => {
 
   it('should add item to cart', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    
+
     const mockProduct = {
       id: '1',
       name: 'Test Product',
@@ -38,7 +36,7 @@ describe('useCart Hook', () => {
       created_at: '2024-01-01',
       updated_at: '2024-01-01',
       variants: [],
-      vendor: { name: 'Test Vendor', status: 'active' }
+      vendor: { name: 'Test Vendor', status: 'active' },
     };
 
     const mockVariant = {
@@ -47,7 +45,7 @@ describe('useCart Hook', () => {
       price: 2000, // $20.00 in cents
       weight_grams: 1,
       inventory_count: 10,
-      is_active: true
+      is_active: true,
     };
 
     act(() => {
@@ -62,7 +60,7 @@ describe('useCart Hook', () => {
 
   it('should update item quantity', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    
+
     // First add an item
     const mockProduct = {
       id: '1',
@@ -77,7 +75,7 @@ describe('useCart Hook', () => {
       created_at: '2024-01-01',
       updated_at: '2024-01-01',
       variants: [],
-      vendor: { name: 'Test Vendor', status: 'active' }
+      vendor: { name: 'Test Vendor', status: 'active' },
     };
 
     const mockVariant = {
@@ -86,7 +84,7 @@ describe('useCart Hook', () => {
       price: 2000,
       weight_grams: 1,
       inventory_count: 10,
-      is_active: true
+      is_active: true,
     };
 
     act(() => {
@@ -105,7 +103,7 @@ describe('useCart Hook', () => {
 
   it('should remove item from cart', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    
+
     // First add an item
     const mockProduct = {
       id: '1',
@@ -120,7 +118,7 @@ describe('useCart Hook', () => {
       created_at: '2024-01-01',
       updated_at: '2024-01-01',
       variants: [],
-      vendor: { name: 'Test Vendor', status: 'active' }
+      vendor: { name: 'Test Vendor', status: 'active' },
     };
 
     const mockVariant = {
@@ -129,7 +127,7 @@ describe('useCart Hook', () => {
       price: 2000,
       weight_grams: 1,
       inventory_count: 10,
-      is_active: true
+      is_active: true,
     };
 
     act(() => {
@@ -148,7 +146,7 @@ describe('useCart Hook', () => {
 
   it('should calculate totals correctly', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    
+
     const mockProduct = {
       id: '1',
       name: 'Test Product',
@@ -162,7 +160,7 @@ describe('useCart Hook', () => {
       created_at: '2024-01-01',
       updated_at: '2024-01-01',
       variants: [],
-      vendor: { name: 'Test Vendor', status: 'active' }
+      vendor: { name: 'Test Vendor', status: 'active' },
     };
 
     const mockVariant = {
@@ -171,7 +169,7 @@ describe('useCart Hook', () => {
       price: 2000, // $20.00
       weight_grams: 1,
       inventory_count: 10,
-      is_active: true
+      is_active: true,
     };
 
     act(() => {

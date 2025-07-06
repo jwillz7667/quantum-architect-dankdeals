@@ -65,7 +65,7 @@ export function useAgeVerification() {
       if (error) throw error;
 
       const isVerified = data === true;
-      
+
       setState((prev) => ({
         ...prev,
         isVerified,
@@ -91,4 +91,4 @@ export function useAgeVerification() {
     verifyAge,
     checkVerificationStatus,
   };
-} 
+}

@@ -3,13 +3,39 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
-import { format, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import {
+  format,
+  subDays,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+} from 'date-fns';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 
@@ -96,11 +122,11 @@ export function AdminAnalytics() {
       // Fetch revenue data
       const revenuePromises = [];
       const tempRevenueData: RevenueData[] = [];
-      
+
       for (let i = parseInt(timeRange) - 1; i >= 0; i--) {
         const date = startOfDay(subDays(new Date(), i));
         const nextDate = startOfDay(subDays(new Date(), i - 1));
-        
+
         revenuePromises.push(
           supabase
             .from('orders')
@@ -127,7 +153,8 @@ export function AdminAnalytics() {
       // Fetch category performance
       const { data: categoryPerformance } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           order_items (
             total_price,
             quantity,
@@ -137,14 +164,15 @@ export function AdminAnalytics() {
               )
             )
           )
-        `)
+        `
+        )
         .gte('created_at', startDate.toISOString())
         .neq('status', 'cancelled');
 
       if (categoryPerformance) {
         const categoryTotals: Record<string, { revenue: number; quantity: number }> = {};
-        
-        (categoryPerformance as unknown as OrderWithItems[]).forEach(order => {
+
+        (categoryPerformance as unknown as OrderWithItems[]).forEach((order) => {
           order.order_items?.forEach((item) => {
             const category = item.product_variants?.products?.category || 'other';
             if (!categoryTotals[category]) {
@@ -165,27 +193,28 @@ export function AdminAnalytics() {
       }
 
       // Fetch product performance
-      const { data: productPerformance } = await supabase
-        .rpc('get_product_performance', {
-          date_from: startDate.toISOString(),
-          date_to: endDate.toISOString()
-        });
+      const { data: productPerformance } = await supabase.rpc('get_product_performance', {
+        date_from: startDate.toISOString(),
+        date_to: endDate.toISOString(),
+      });
 
       if (productPerformance) {
-        setProductData((productPerformance as ProductData[]).slice(0, 10).map((p) => ({
-          ...p,
-          total_revenue: p.total_revenue / 100
-        })));
+        setProductData(
+          (productPerformance as ProductData[]).slice(0, 10).map((p) => ({
+            ...p,
+            total_revenue: p.total_revenue / 100,
+          }))
+        );
       }
 
       // Fetch user growth data
       const userGrowthPromises = [];
       const tempUserGrowthData: UserGrowthData[] = [];
-      
+
       for (let i = parseInt(timeRange) - 1; i >= 0; i--) {
         const date = startOfDay(subDays(new Date(), i));
         const nextDate = startOfDay(subDays(new Date(), i - 1));
-        
+
         userGrowthPromises.push(
           supabase
             .from('profiles')
@@ -220,9 +249,12 @@ export function AdminAnalytics() {
         .lt('created_at', startDate.toISOString())
         .neq('status', 'cancelled');
 
-      const currentRevenue = currentPeriodOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
-      const previousRevenue = previousPeriodOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
-      const revenueGrowth = previousRevenue > 0 ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
+      const currentRevenue =
+        currentPeriodOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+      const previousRevenue =
+        previousPeriodOrders?.reduce((sum, order) => sum + order.total_amount, 0) || 0;
+      const revenueGrowth =
+        previousRevenue > 0 ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0;
 
       const { count: totalUsers } = await supabase
         .from('profiles')
@@ -233,24 +265,25 @@ export function AdminAnalytics() {
         .select('customer_id')
         .gte('created_at', startDate.toISOString());
 
-      const uniqueActiveUsers = new Set(activeUsers?.map(o => o.customer_id)).size;
+      const uniqueActiveUsers = new Set(activeUsers?.map((o) => o.customer_id)).size;
 
       setMetrics({
         totalRevenue: currentRevenue / 100,
         revenueGrowth,
         totalOrders: currentPeriodOrders?.length || 0,
-        avgOrderValue: currentPeriodOrders?.length ? currentRevenue / currentPeriodOrders.length / 100 : 0,
+        avgOrderValue: currentPeriodOrders?.length
+          ? currentRevenue / currentPeriodOrders.length / 100
+          : 0,
         totalUsers: totalUsers || 0,
         activeUsers: uniqueActiveUsers,
         conversionRate: totalUsers ? (uniqueActiveUsers / totalUsers) * 100 : 0,
       });
-
     } catch (error) {
       console.error('Analytics error:', error);
       toast({
-        title: "Error",
-        description: "Failed to load analytics data",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load analytics data',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -314,7 +347,8 @@ export function AdminAnalytics() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(metrics.totalRevenue)}</div>
             <p className="text-xs text-muted-foreground">
-              {metrics.revenueGrowth > 0 ? '+' : ''}{metrics.revenueGrowth.toFixed(1)}% from previous period
+              {metrics.revenueGrowth > 0 ? '+' : ''}
+              {metrics.revenueGrowth.toFixed(1)}% from previous period
             </p>
           </CardContent>
         </Card>
@@ -366,10 +400,10 @@ export function AdminAnalytics() {
                   <XAxis dataKey="date" />
                   <YAxis tickFormatter={(value) => `$${value}`} />
                   <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#10b981" 
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#10b981"
                     strokeWidth={2}
                     dot={{ fill: '#10b981', strokeWidth: 2 }}
                   />
@@ -455,4 +489,4 @@ export function AdminAnalytics() {
   );
 }
 
-export default AdminAnalytics
+export default AdminAnalytics;

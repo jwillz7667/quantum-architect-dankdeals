@@ -107,7 +107,8 @@ export function AdminOrders() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           profiles!orders_customer_id_fkey (
             first_name,
@@ -124,7 +125,8 @@ export function AdminOrders() {
               )
             )
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -132,9 +134,9 @@ export function AdminOrders() {
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({
-        title: "Error",
-        description: "Failed to load orders",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load orders',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -145,13 +147,14 @@ export function AdminOrders() {
     let filtered = [...orders];
 
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(order => order.status === statusFilter);
+      filtered = filtered.filter((order) => order.status === statusFilter);
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(order => {
+      filtered = filtered.filter((order) => {
         const searchLower = searchTerm.toLowerCase();
-        const fullName = `${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}`.toLowerCase();
+        const fullName =
+          `${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}`.toLowerCase();
         return (
           order.order_number.toLowerCase().includes(searchLower) ||
           fullName.includes(searchLower) ||
@@ -167,29 +170,29 @@ export function AdminOrders() {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ 
+        .update({
           status: newStatus,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', orderId);
 
       if (error) throw error;
 
       // Update local state
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
+      setOrders(
+        orders.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order))
+      );
 
       toast({
-        title: "Success",
-        description: "Order status updated successfully",
+        title: 'Success',
+        description: 'Order status updated successfully',
       });
     } catch (error) {
       console.error('Error updating order:', error);
       toast({
-        title: "Error",
-        description: "Failed to update order status",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update order status',
+        variant: 'destructive',
       });
     }
   };
@@ -202,13 +205,15 @@ export function AdminOrders() {
   const exportOrders = () => {
     const csv = [
       ['Order Number', 'Customer', 'Total', 'Status', 'Date'].join(','),
-      ...filteredOrders.map(order => [
-        order.order_number,
-        `${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}`,
-        (order.total_amount / 100).toFixed(2),
-        order.status,
-        format(new Date(order.created_at), 'yyyy-MM-dd HH:mm')
-      ].join(','))
+      ...filteredOrders.map((order) =>
+        [
+          order.order_number,
+          `${order.profiles?.first_name || ''} ${order.profiles?.last_name || ''}`,
+          (order.total_amount / 100).toFixed(2),
+          order.status,
+          format(new Date(order.created_at), 'yyyy-MM-dd HH:mm'),
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -228,7 +233,7 @@ export function AdminOrders() {
 
   const getStatusBadge = (status: string) => {
     return (
-      <Badge className={cn("capitalize", statusColors[status] || 'bg-gray-100 text-gray-800')}>
+      <Badge className={cn('capitalize', statusColors[status] || 'bg-gray-100 text-gray-800')}>
         {status.replace('_', ' ')}
       </Badge>
     );
@@ -309,9 +314,7 @@ export function AdminOrders() {
       <Card>
         <CardHeader>
           <CardTitle>Orders ({filteredOrders.length})</CardTitle>
-          <CardDescription>
-            Manage and track all customer orders
-          </CardDescription>
+          <CardDescription>Manage and track all customer orders</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -360,11 +363,7 @@ export function AdminOrders() {
                       {format(new Date(order.created_at), 'MMM dd, yyyy HH:mm')}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => viewOrderDetails(order)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => viewOrderDetails(order)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -392,9 +391,19 @@ export function AdminOrders() {
                 <div>
                   <h3 className="font-semibold mb-2">Customer Information</h3>
                   <div className="space-y-1 text-sm">
-                    <p><span className="font-medium">Name:</span> {selectedOrder.profiles?.first_name || ''} {selectedOrder.profiles?.last_name || ''}</p>
-                    <p><span className="font-medium">Phone:</span> {selectedOrder.profiles?.phone || 'N/A'}</p>
-                    <p><span className="font-medium">Address:</span> {parseDeliveryAddress(selectedOrder.delivery_address).address || 'N/A'}</p>
+                    <p>
+                      <span className="font-medium">Name:</span>{' '}
+                      {selectedOrder.profiles?.first_name || ''}{' '}
+                      {selectedOrder.profiles?.last_name || ''}
+                    </p>
+                    <p>
+                      <span className="font-medium">Phone:</span>{' '}
+                      {selectedOrder.profiles?.phone || 'N/A'}
+                    </p>
+                    <p>
+                      <span className="font-medium">Address:</span>{' '}
+                      {parseDeliveryAddress(selectedOrder.delivery_address).address || 'N/A'}
+                    </p>
                   </div>
                 </div>
 
@@ -405,7 +414,9 @@ export function AdminOrders() {
                     {selectedOrder.order_items?.map((item) => (
                       <div key={item.id} className="flex justify-between p-2 bg-gray-50 rounded">
                         <div>
-                          <p className="font-medium">{item.product_variants?.products?.name || 'Unknown Product'}</p>
+                          <p className="font-medium">
+                            {item.product_variants?.products?.name || 'Unknown Product'}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             {item.product_variants?.size || ''} × {item.quantity}
                           </p>

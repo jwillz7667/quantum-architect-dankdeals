@@ -5,10 +5,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Lock, Mail, User, Phone, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import { AlertCircle, Lock, Mail, User, Phone, CheckCircle2, XCircle } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
 
 export default function Auth() {
@@ -73,15 +80,13 @@ export default function Auth() {
 
       if (authData.user) {
         // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            email,
-            first_name: firstName,
-            last_name: lastName,
-            phone,
-          });
+        const { error: profileError } = await supabase.from('profiles').insert({
+          user_id: authData.user.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          phone,
+        });
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
@@ -90,7 +95,7 @@ export default function Auth() {
 
         setSuccess('Account created successfully! You can now sign in.');
         setActiveTab('signin');
-        
+
         // Clear form
         setPassword('');
         setFirstName('');
@@ -107,7 +112,7 @@ export default function Auth() {
 
   return (
     <>
-      <SEOHead 
+      <SEOHead
         title="Sign In - DankDeals"
         description="Sign in to your DankDeals account to access exclusive cannabis deals in Minneapolis"
       />
@@ -263,7 +268,8 @@ export default function Auth() {
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      You must be 21 or older to create an account. By signing up, you confirm that you meet the age requirement.
+                      You must be 21 or older to create an account. By signing up, you confirm that
+                      you meet the age requirement.
                     </AlertDescription>
                   </Alert>
                   <Button type="submit" className="w-full" disabled={isLoading}>

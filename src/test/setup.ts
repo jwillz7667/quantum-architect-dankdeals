@@ -4,7 +4,7 @@
 
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach } from 'vitest';
 import './axe';
 
 // Cleanup after each test
@@ -14,12 +14,12 @@ afterEach(() => {
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: (key: string) => null,
-  setItem: (key: string, value: string) => {},
-  removeItem: (key: string) => {},
+  getItem: (_key: string) => null,
+  setItem: (_key: string, _value: string) => {},
+  removeItem: (_key: string) => {},
   clear: () => {},
   length: 0,
-  key: (index: number) => null,
+  key: (_index: number) => null,
 };
 
 Object.defineProperty(window, 'localStorage', {
@@ -54,7 +54,7 @@ class IntersectionObserverMock {
   unobserve() {}
   disconnect() {}
 }
-(global as any).IntersectionObserver = IntersectionObserverMock;
+window.IntersectionObserver = IntersectionObserverMock as any;
 
 // Mock ResizeObserver
 class ResizeObserverMock {
@@ -62,4 +62,4 @@ class ResizeObserverMock {
   unobserve() {}
   disconnect() {}
 }
-(global as any).ResizeObserver = ResizeObserverMock;
+window.ResizeObserver = ResizeObserverMock as any;

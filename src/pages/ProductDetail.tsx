@@ -1,23 +1,23 @@
-import { ArrowLeft, Minus, Plus, ShoppingCart } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
-import { Product, ProductVariant } from "@/hooks/useProducts";
-import { BottomNav } from "@/components/BottomNav";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
-import { SEOHead } from "@/components/SEOHead";
-import { generateProductSchema, generateBreadcrumbSchema } from "@/lib/seo";
-import { OptimizedImage } from "@/components/OptimizedImage";
-import blueDreamImg from "@/assets/blue-dream.jpg";
-import prerollsImg from "@/assets/prerolls.jpg";
-import wellnessImg from "@/assets/wellness.jpg";
-import ediblesImg from "@/assets/edibles-hero.jpg";
+import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
+import { Product, ProductVariant } from '@/hooks/useProducts';
+import { BottomNav } from '@/components/BottomNav';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SEOHead } from '@/components/SEOHead';
+import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
+import { OptimizedImage } from '@/components/OptimizedImage';
+import blueDreamImg from '@/assets/blue-dream.jpg';
+import prerollsImg from '@/assets/prerolls.jpg';
+import wellnessImg from '@/assets/wellness.jpg';
+import ediblesImg from '@/assets/edibles-hero.jpg';
 
 // Fallback images for different categories
 const categoryImages: Record<string, string> = {
@@ -41,7 +41,7 @@ export default function ProductDetail() {
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) {
-        setError("Product ID not found");
+        setError('Product ID not found');
         setLoading(false);
         return;
       }
@@ -52,11 +52,13 @@ export default function ProductDetail() {
 
         const { data, error: fetchError } = await supabase
           .from('products')
-          .select(`
+          .select(
+            `
             *,
             variants:product_variants(*),
             vendor:vendors(name, status)
-          `)
+          `
+          )
           .eq('id', id)
           .eq('is_active', true)
           .single();
@@ -66,7 +68,7 @@ export default function ProductDetail() {
         }
 
         if (!data) {
-          setError("Product not found");
+          setError('Product not found');
           return;
         }
 
@@ -102,7 +104,7 @@ export default function ProductDetail() {
 
     // Add item to cart
     addItem(product, selectedVariant, quantity);
-    
+
     // Optionally navigate to cart or show success message
     navigate('/cart');
   };
@@ -122,7 +124,7 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-background pb-20 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Loading..." />
-        
+
         <div className="aspect-[4/3] overflow-hidden relative">
           <Skeleton className="w-full h-full" />
         </div>
@@ -137,7 +139,7 @@ export default function ProductDetail() {
             <Skeleton className="h-16 w-full" />
           </div>
         </div>
-        
+
         <BottomNav />
       </div>
     );
@@ -148,17 +150,14 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-background pb-20 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Error" />
-        
+
         <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 py-6 text-center">
-          <p className="text-muted-foreground">{error || "Product not found"}</p>
-          <Button 
-            onClick={() => navigate('/categories')} 
-            className="mt-4"
-          >
+          <p className="text-muted-foreground">{error || 'Product not found'}</p>
+          <Button onClick={() => navigate('/categories')} className="mt-4">
             Back to Products
           </Button>
         </div>
-        
+
         <BottomNav />
       </div>
     );
@@ -167,20 +166,26 @@ export default function ProductDetail() {
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: 'https://dankdealsmn.com/' },
     { name: 'Categories', url: 'https://dankdealsmn.com/categories' },
-    { name: product.category, url: `https://dankdealsmn.com/categories?category=${product.category}` },
-    { name: product.name, url: `https://dankdealsmn.com/product/${product.id}` }
+    {
+      name: product.category,
+      url: `https://dankdealsmn.com/categories?category=${product.category}`,
+    },
+    { name: product.name, url: `https://dankdealsmn.com/product/${product.id}` },
   ]);
 
   const productSchema = generateProductSchema({
     ...product,
-    variants: product.variants || []
+    variants: product.variants || [],
   });
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
       <SEOHead
         title={`${product.name} - ${product.category} | DankDeals`}
-        description={product.description || `Premium ${product.category} - ${product.name}. ${product.thc_content ? `THC: ${product.thc_content}%` : ''} ${product.cbd_content ? `CBD: ${product.cbd_content}%` : ''}. Same-day cannabis delivery in Minneapolis & St. Paul.`}
+        description={
+          product.description ||
+          `Premium ${product.category} - ${product.name}. ${product.thc_content ? `THC: ${product.thc_content}%` : ''} ${product.cbd_content ? `CBD: ${product.cbd_content}%` : ''}. Same-day cannabis delivery in Minneapolis & St. Paul.`
+        }
         keywords={`${product.name}, ${product.category}, cannabis delivery Minnesota, ${product.thc_content ? 'THC' : ''} ${product.cbd_content ? 'CBD' : ''}`}
         url={`https://dankdealsmn.com/product/${product.id}`}
         image={product.image_url || getImageForProduct(product)}
@@ -209,15 +214,13 @@ export default function ProductDetail() {
           <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
           {selectedVariant && (
             <p className="text-2xl font-semibold text-primary">
-              ${formatPrice(selectedVariant.price)} 
+              ${formatPrice(selectedVariant.price)}
               <span className="text-sm text-muted-foreground font-normal ml-1">
                 {selectedVariant.name}
               </span>
             </p>
           )}
-          <p className="text-sm text-muted-foreground mt-1">
-            by {product.vendor.name}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">by {product.vendor.name}</p>
         </div>
 
         {/* Product Category */}
@@ -231,9 +234,7 @@ export default function ProductDetail() {
         {product.description && (
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-foreground">Description</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              {product.description}
-            </p>
+            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
         )}
 
@@ -270,7 +271,7 @@ export default function ProductDetail() {
               {product.variants.map((variant) => (
                 <Button
                   key={variant.id}
-                  variant={selectedVariant?.id === variant.id ? "default" : "outline"}
+                  variant={selectedVariant?.id === variant.id ? 'default' : 'outline'}
                   className="flex flex-col h-auto p-3"
                   onClick={() => setSelectedVariant(variant)}
                 >
@@ -325,7 +326,8 @@ export default function ProductDetail() {
         <div className="pt-4">
           <Button variant="default" className="w-full h-14 text-lg" onClick={handleAddToCart}>
             <ShoppingCart className="w-5 h-5 mr-2" />
-            Add to cart - ${selectedVariant ? formatPrice(selectedVariant.price * quantity) : '0.00'}
+            Add to cart - $
+            {selectedVariant ? formatPrice(selectedVariant.price * quantity) : '0.00'}
           </Button>
         </div>
       </div>

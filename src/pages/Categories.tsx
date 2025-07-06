@@ -1,14 +1,14 @@
-import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { SearchBar } from "@/components/SearchBar";
-import { BottomNav } from "@/components/BottomNav";
-import { ProductGrid } from "@/components/ProductGrid";
-import { CategoryRail } from "@/components/CategoryRail";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { SEOHead } from "@/components/SEOHead";
-import { generateBreadcrumbSchema } from "@/lib/seo";
-import { useProductsFilter } from "@/hooks/useProductsFilter";
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SearchBar } from '@/components/SearchBar';
+import { BottomNav } from '@/components/BottomNav';
+import { ProductGrid } from '@/components/ProductGrid';
+import { CategoryRail } from '@/components/CategoryRail';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { SEOHead } from '@/components/SEOHead';
+import { generateBreadcrumbSchema } from '@/lib/seo';
+import { useProductsFilter } from '@/hooks/useProductsFilter';
 
 export default function Categories() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,26 +34,30 @@ export default function Categories() {
     }
   }, [selectedCategory, searchParams, setSearchParams]);
 
-  const categoryDisplayName = selectedCategory 
+  const categoryDisplayName = selectedCategory
     ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)
-    : "All Categories";
+    : 'All Categories';
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: 'Home', url: 'https://dankdealsmn.com/' },
     { name: 'Categories', url: 'https://dankdealsmn.com/categories' },
-    ...(selectedCategory ? [{ 
-      name: categoryDisplayName, 
-      url: `https://dankdealsmn.com/categories?category=${selectedCategory}` 
-    }] : [])
+    ...(selectedCategory
+      ? [
+          {
+            name: categoryDisplayName,
+            url: `https://dankdealsmn.com/categories?category=${selectedCategory}`,
+          },
+        ]
+      : []),
   ]);
 
-  const pageTitle = selectedCategory 
+  const pageTitle = selectedCategory
     ? `${categoryDisplayName} Cannabis Products | DankDeals Minnesota`
-    : "Cannabis Product Categories | DankDeals Minnesota";
+    : 'Cannabis Product Categories | DankDeals Minnesota';
 
   const pageDescription = selectedCategory
     ? `Shop premium ${selectedCategory} cannabis products. Same-day delivery in Minneapolis & St. Paul. Age 21+ only.`
-    : "Browse our selection of premium cannabis products by category. Shop flower, edibles, pre-rolls, concentrates, and wellness products. Same-day delivery in Minneapolis & St. Paul.";
+    : 'Browse our selection of premium cannabis products by category. Shop flower, edibles, pre-rolls, concentrates, and wellness products. Same-day delivery in Minneapolis & St. Paul.';
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
@@ -65,19 +69,17 @@ export default function Categories() {
         structuredData={breadcrumbSchema}
       />
       <DesktopHeader />
-      <MobileHeader title={selectedCategory ? categoryDisplayName : "Categories"} />
+      <MobileHeader title={selectedCategory ? categoryDisplayName : 'Categories'} />
 
       {/* Main Content */}
       <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-6 pt-6 md:pt-8">
         {/* Search Bar */}
-        <SearchBar
-          onFilter={() => console.log("Open filters")}
-        />
+        <SearchBar onFilter={() => console.log('Open filters')} />
 
         {/* Categories Section */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">
-            {selectedCategory ? `${categoryDisplayName} Products` : "Browse by Category"}
+            {selectedCategory ? `${categoryDisplayName} Products` : 'Browse by Category'}
           </h2>
           <CategoryRail />
         </div>
@@ -86,7 +88,7 @@ export default function Categories() {
         <div className="space-y-4">
           <ProductGrid />
         </div>
-        
+
         {/* More Products */}
         {!selectedCategory && (
           <div className="space-y-4">

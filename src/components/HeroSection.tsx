@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
-import { OptimizedImage } from "@/components/OptimizedImage";
-import blueDreamImg from "@/assets/blue-dream.jpg";
+import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
+import { OptimizedImage } from '@/components/OptimizedImage';
+import blueDreamImg from '@/assets/blue-dream.jpg';
 
 export function HeroSection() {
   return (

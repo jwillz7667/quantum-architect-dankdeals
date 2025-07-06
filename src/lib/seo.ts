@@ -25,17 +25,19 @@ export interface SEOProps {
 
 export const defaultSEO: SEOProps = {
   title: 'DankDeals - Premium Cannabis Delivery in Minnesota',
-  description: 'Minnesota\'s premier cannabis delivery service. Shop premium flower, edibles, concentrates & more. Same-day delivery across Minneapolis, St. Paul & surrounding areas. Age 21+ only.',
-  keywords: 'cannabis delivery Minnesota, marijuana delivery Minneapolis, weed delivery St Paul, same day cannabis delivery, dispensary near me',
+  description:
+    "Minnesota's premier cannabis delivery service. Shop premium flower, edibles, concentrates & more. Same-day delivery across Minneapolis, St. Paul & surrounding areas. Age 21+ only.",
+  keywords:
+    'cannabis delivery Minnesota, marijuana delivery Minneapolis, weed delivery St Paul, same day cannabis delivery, dispensary near me',
   image: 'https://dankdealsmn.com/og-image.png',
   url: 'https://dankdealsmn.com',
-  type: 'website'
+  type: 'website',
 };
 
 export function generateMetaTags(props: SEOProps): Record<string, string> {
   const seo = { ...defaultSEO, ...props };
   const fullTitle = seo.title === defaultSEO.title ? seo.title : `${seo.title} | DankDeals`;
-  
+
   return {
     title: fullTitle,
     description: seo.description || defaultSEO.description,
@@ -52,10 +54,10 @@ export function generateMetaTags(props: SEOProps): Record<string, string> {
 }
 
 export function generateProductSchema(product: Product) {
-  const minPrice = Math.min(...product.variants.map(v => v.price / 100));
-  const maxPrice = Math.max(...product.variants.map(v => v.price / 100));
-  const inStock = product.variants.some(v => (v.inventory_count || 0) > 0);
-  
+  const minPrice = Math.min(...product.variants.map((v) => v.price / 100));
+  const maxPrice = Math.max(...product.variants.map((v) => v.price / 100));
+  const inStock = product.variants.some((v) => (v.inventory_count || 0) > 0);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -64,7 +66,7 @@ export function generateProductSchema(product: Product) {
     image: product.image_url || '',
     brand: {
       '@type': 'Brand',
-      name: product.vendor.name
+      name: product.vendor.name,
     },
     offers: {
       '@type': 'AggregateOffer',
@@ -74,24 +76,28 @@ export function generateProductSchema(product: Product) {
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
-        name: 'DankDeals'
-      }
+        name: 'DankDeals',
+      },
     },
     category: product.category,
     ...(product.thc_content && {
-      additionalProperty: [{
-        '@type': 'PropertyValue',
-        name: 'THC Content',
-        value: `${product.thc_content}%`
-      }]
+      additionalProperty: [
+        {
+          '@type': 'PropertyValue',
+          name: 'THC Content',
+          value: `${product.thc_content}%`,
+        },
+      ],
     }),
     ...(product.cbd_content && {
-      additionalProperty: [{
-        '@type': 'PropertyValue',
-        name: 'CBD Content',
-        value: `${product.cbd_content}%`
-      }]
-    })
+      additionalProperty: [
+        {
+          '@type': 'PropertyValue',
+          name: 'CBD Content',
+          value: `${product.cbd_content}%`,
+        },
+      ],
+    }),
   };
 }
 
@@ -103,8 +109,8 @@ export function generateBreadcrumbSchema(items: Array<{ name: string; url: strin
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: item.url
-    }))
+      item: item.url,
+    })),
   };
 }
 
@@ -112,14 +118,14 @@ export function generateFAQSchema(faqs: Array<{ question: string; answer: string
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map(faq => ({
+    mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: faq.answer
-      }
-    }))
+        text: faq.answer,
+      },
+    })),
   };
 }
 
@@ -139,7 +145,7 @@ export function generateArticleSchema(article: {
     description: article.description,
     author: {
       '@type': 'Person',
-      name: article.author
+      name: article.author,
     },
     datePublished: article.publishedDate,
     dateModified: article.modifiedDate || article.publishedDate,
@@ -149,12 +155,12 @@ export function generateArticleSchema(article: {
       name: 'DankDeals',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://dankdealsmn.com/apple-touch-icon.png'
-      }
+        url: 'https://dankdealsmn.com/apple-touch-icon.png',
+      },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': article.url
-    }
+      '@id': article.url,
+    },
   };
-} 
+}

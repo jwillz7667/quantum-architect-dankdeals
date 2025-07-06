@@ -4,12 +4,33 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 import { Loader2, Plus, Shield, User } from 'lucide-react';
@@ -79,14 +100,12 @@ export default function AdminManagement() {
       }
 
       // Add to admins table
-      const { error: adminError } = await supabase
-        .from('admins')
-        .insert({
-          user_id: userData.user_id,
-          email: newAdminEmail,
-          role: newAdminRole,
-          created_by: adminUser?.id,
-        });
+      const { error: adminError } = await supabase.from('admins').insert({
+        user_id: userData.user_id,
+        email: newAdminEmail,
+        role: newAdminRole,
+        created_by: adminUser?.id,
+      });
 
       if (adminError) throw adminError;
 
@@ -147,10 +166,7 @@ export default function AdminManagement() {
 
   const updateAdminRole = async (adminId: string, newRole: 'admin' | 'super_admin') => {
     try {
-      const { error } = await supabase
-        .from('admins')
-        .update({ role: newRole })
-        .eq('id', adminId);
+      const { error } = await supabase.from('admins').update({ role: newRole }).eq('id', adminId);
 
       if (error) throw error;
 
@@ -203,11 +219,9 @@ export default function AdminManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Admin Management</h2>
-          <p className="text-muted-foreground">
-            Manage administrators and their permissions
-          </p>
+          <p className="text-muted-foreground">Manage administrators and their permissions</p>
         </div>
-        
+
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -235,7 +249,10 @@ export default function AdminManagement() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <Select value={newAdminRole} onValueChange={(value: 'admin' | 'super_admin') => setNewAdminRole(value)}>
+                <Select
+                  value={newAdminRole}
+                  onValueChange={(value: 'admin' | 'super_admin') => setNewAdminRole(value)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -293,7 +310,9 @@ export default function AdminManagement() {
                   <TableCell>
                     <Select
                       value={admin.role}
-                      onValueChange={(value: 'admin' | 'super_admin') => updateAdminRole(admin.id, value)}
+                      onValueChange={(value: 'admin' | 'super_admin') =>
+                        updateAdminRole(admin.id, value)
+                      }
                       disabled={admin.user_id === adminUser?.id}
                     >
                       <SelectTrigger className="w-32">
@@ -310,9 +329,7 @@ export default function AdminManagement() {
                       {admin.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    {new Date(admin.created_at).toLocaleDateString()}
-                  </TableCell>
+                  <TableCell>{new Date(admin.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Switch
                       checked={admin.is_active}
@@ -330,4 +347,4 @@ export default function AdminManagement() {
   );
 }
 
-export default AdminManagement
+export default AdminManagement;

@@ -35,49 +35,49 @@ class Logger {
 
   private sanitizeData(data: any): any {
     if (!data) return data;
-    
+
     // Clone to avoid modifying original
     const sanitized = JSON.parse(JSON.stringify(data));
-    
+
     // Remove sensitive fields
     const sensitiveFields = ['password', 'token', 'apiKey', 'secret', 'creditCard', 'ssn'];
-    
+
     const removeSensitive = (obj: any) => {
       if (typeof obj !== 'object' || obj === null) return;
-      
-      Object.keys(obj).forEach(key => {
-        if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
+
+      Object.keys(obj).forEach((key) => {
+        if (sensitiveFields.some((field) => key.toLowerCase().includes(field))) {
           obj[key] = '[REDACTED]';
         } else if (typeof obj[key] === 'object') {
           removeSensitive(obj[key]);
         }
       });
     };
-    
+
     removeSensitive(sanitized);
     return sanitized;
   }
 
   debug(message: string, context?: LogContext) {
     if (!this.shouldLog('debug')) return;
-    
+
     const sanitizedContext = this.sanitizeData(context);
     console.log(this.formatMessage('debug', message, sanitizedContext));
   }
 
   info(message: string, context?: LogContext) {
     if (!this.shouldLog('info')) return;
-    
+
     const sanitizedContext = this.sanitizeData(context);
     console.info(this.formatMessage('info', message, sanitizedContext));
   }
 
   warn(message: string, context?: LogContext) {
     if (!this.shouldLog('warn')) return;
-    
+
     const sanitizedContext = this.sanitizeData(context);
     console.warn(this.formatMessage('warn', message, sanitizedContext));
-    
+
     // Send to monitoring service in production
     if (this.isProduction && window.Sentry) {
       window.Sentry.captureMessage(message, 'warning');
@@ -86,10 +86,10 @@ class Logger {
 
   error(message: string, error?: Error, context?: LogContext) {
     if (!this.shouldLog('error')) return;
-    
+
     const sanitizedContext = this.sanitizeData(context);
     console.error(this.formatMessage('error', message, sanitizedContext), error);
-    
+
     // Send to monitoring service in production
     if (this.isProduction && window.Sentry) {
       window.Sentry.captureException(error || new Error(message), {
@@ -101,7 +101,7 @@ class Logger {
   // Performance logging
   performance(operation: string, duration: number, context?: LogContext) {
     const message = `Performance: ${operation} took ${duration}ms`;
-    
+
     if (duration > 1000) {
       this.warn(message, { ...context, duration, operation });
     } else if (this.isDevelopment) {
@@ -138,4 +138,4 @@ declare global {
       captureMessage: (message: string, level?: string) => void;
     };
   }
-} 
+}

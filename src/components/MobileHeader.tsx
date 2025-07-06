@@ -1,50 +1,41 @@
-import { useState } from "react";
-import { Menu, X, Settings } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from 'react';
+import { Menu } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+// import { useAuth } from "@/hooks/useAuth";
 // import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useCart } from "@/hooks/useCart";
-import { Badge } from "@/components/ui/badge";
+// import { useCart } from "@/hooks/useCart";
 
 interface MobileHeaderProps {
   title: string;
   showMenu?: boolean;
-  showBack?: boolean;
 }
 
-export function MobileHeader({ title = "DankDeals MN", showMenu = true, showBack = false }: MobileHeaderProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useAuth();
-  // const { isAdmin } = useAdminAuth();
-  const { totalItems } = useCart();
+export function MobileHeader({ title = 'DankDeals MN', showMenu = true }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { label: "Home", href: "/" },
-    { label: "Categories", href: "/categories" },
-    { label: "Cart", href: "/cart" },
-    { label: "Profile", href: "/profile" },
-    { label: "FAQ", href: "/faq" },
-    { label: "Blog", href: "/blog" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Legal", href: "/legal" },
+    { label: 'Home', href: '/' },
+    { label: 'Categories', href: '/categories' },
+    { label: 'Cart', href: '/cart' },
+    { label: 'Profile', href: '/profile' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+    { label: 'Legal', href: '/legal' },
   ];
 
   return (
     <div className="md:hidden bg-gradient-mobile-header px-4 py-6 flex items-center justify-between">
-      <h1 className="text-2xl font-bold text-primary-foreground">
-        {title}
-      </h1>
-      
+      <h1 className="text-2xl font-bold text-primary-foreground">{title}</h1>
+
       {showMenu && (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               className="text-primary-foreground hover:bg-primary-light"
             >
@@ -66,7 +57,7 @@ export function MobileHeader({ title = "DankDeals MN", showMenu = true, showBack
                   {item.label}
                 </Link>
               ))}
-              
+
               {/* Admin Dashboard Link - Only visible to admin users - COMMENTED OUT */}
               {/* {isAdmin && (
                 <Link

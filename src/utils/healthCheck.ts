@@ -8,19 +8,19 @@ export const performHealthCheck = () => {
       react: typeof React !== 'undefined',
       zod: true, // Will throw if import fails
       supabase: true, // Will throw if import fails
-      crypto: typeof crypto !== 'undefined' || typeof window?.crypto !== 'undefined'
+      crypto: typeof crypto !== 'undefined' || typeof window?.crypto !== 'undefined',
     };
-    
+
     return {
       status: 'healthy',
       checks,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     return {
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 };

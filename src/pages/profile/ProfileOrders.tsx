@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Package, Clock, CheckCircle } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { BottomNav } from '@/components/BottomNav';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowLeft, Package, Clock, CheckCircle } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -46,7 +46,7 @@ export default function ProfileOrders() {
       }
     };
 
-    fetchOrders();
+    void fetchOrders();
   }, [user]);
 
   const getStatusColor = (status: string) => {
@@ -96,11 +96,7 @@ export default function ProfileOrders() {
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/profile')}
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-semibold">Order History</h1>
@@ -115,12 +111,8 @@ export default function ProfileOrders() {
           <div className="text-center py-12">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
-            <p className="text-muted-foreground mb-6">
-              Start shopping to see your orders here
-            </p>
-            <Button onClick={() => navigate('/')}>
-              Start Shopping
-            </Button>
+            <p className="text-muted-foreground mb-6">Start shopping to see your orders here</p>
+            <Button onClick={() => navigate('/')}>Start Shopping</Button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -129,16 +121,14 @@ export default function ProfileOrders() {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">
-                        Order #{order.order_number}
-                      </CardTitle>
+                      <CardTitle className="text-lg">Order #{order.order_number}</CardTitle>
                       <p className="text-sm text-muted-foreground">
                         {new Date(order.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
                           hour: '2-digit',
-                          minute: '2-digit'
+                          minute: '2-digit',
                         })}
                       </p>
                     </div>
@@ -156,7 +146,7 @@ export default function ProfileOrders() {
                       <span className="text-muted-foreground">Total</span>
                       <span className="font-semibold">${order.total_amount.toFixed(2)}</span>
                     </div>
-                    
+
                     {order.delivery_address && (
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Delivery Address:</p>
@@ -164,7 +154,8 @@ export default function ProfileOrders() {
                           {order.delivery_address.street} {order.delivery_address.apartment}
                         </p>
                         <p className="text-sm">
-                          {order.delivery_address.city}, {order.delivery_address.state} {order.delivery_address.zipCode}
+                          {order.delivery_address.city}, {order.delivery_address.state}{' '}
+                          {order.delivery_address.zipCode}
                         </p>
                       </div>
                     )}
@@ -190,4 +181,4 @@ export default function ProfileOrders() {
       <BottomNav />
     </div>
   );
-} 
+}

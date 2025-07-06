@@ -1,16 +1,13 @@
-import { Home, Grid3X3, ShoppingCart, User, MapPin, LogIn, Settings } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Home, Grid3X3, ShoppingCart, User, MapPin, LogIn } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
-  { icon: Home, label: "Home", href: "/" },
-  { icon: Grid3X3, label: "Categories", href: "/categories" },
-  { icon: MapPin, label: "Delivery", href: "/delivery-area" },
-  { icon: ShoppingCart, label: "Cart", href: "/cart" },
+  { icon: Home, label: 'Home', href: '/' },
+  { icon: Grid3X3, label: 'Categories', href: '/categories' },
+  { icon: MapPin, label: 'Delivery', href: '/delivery-area' },
+  { icon: ShoppingCart, label: 'Cart', href: '/cart' },
 ];
 
 interface BottomNavProps {
@@ -20,7 +17,6 @@ interface BottomNavProps {
 export function BottomNav({ activeTab }: BottomNavProps) {
   const location = useLocation();
   const { user } = useAuth();
-  const { totalItems } = useCart();
 
   const currentPath = activeTab || location.pathname;
 
@@ -38,13 +34,11 @@ export function BottomNav({ activeTab }: BottomNavProps) {
                     variant="ghost"
                     size="sm"
                     className={`flex flex-col items-center gap-1 p-2 h-auto ${
-                      isActive ? "text-primary" : "text-muted-foreground"
+                      isActive ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   >
-                    <item.icon 
-                      className={`h-5 w-5 transition-transform ${
-                        isActive ? "scale-110" : ""
-                      }`} 
+                    <item.icon
+                      className={`h-5 w-5 transition-transform ${isActive ? 'scale-110' : ''}`}
                     />
                     <span className="text-xs font-medium">{item.label}</span>
                   </Button>
@@ -61,13 +55,13 @@ export function BottomNav({ activeTab }: BottomNavProps) {
                   variant="ghost"
                   size="sm"
                   className={`flex flex-col items-center gap-1 p-2 h-auto ${
-                    currentPath === "/profile" ? "text-primary" : "text-muted-foreground"
+                    currentPath === '/profile' ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
-                  <User 
+                  <User
                     className={`h-5 w-5 transition-transform ${
-                      currentPath === "/profile" ? "scale-110" : ""
-                    }`} 
+                      currentPath === '/profile' ? 'scale-110' : ''
+                    }`}
                   />
                   <span className="text-xs font-medium">Account</span>
                 </Button>
@@ -78,13 +72,13 @@ export function BottomNav({ activeTab }: BottomNavProps) {
                   variant="ghost"
                   size="sm"
                   className={`flex flex-col items-center gap-1 p-2 h-auto ${
-                    currentPath === "/auth" ? "text-primary" : "text-muted-foreground"
+                    currentPath === '/auth' ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
-                  <LogIn 
+                  <LogIn
                     className={`h-5 w-5 transition-transform ${
-                      currentPath === "/auth" ? "scale-110" : ""
-                    }`} 
+                      currentPath === '/auth' ? 'scale-110' : ''
+                    }`}
                   />
                   <span className="text-xs font-medium">Sign In</span>
                 </Button>

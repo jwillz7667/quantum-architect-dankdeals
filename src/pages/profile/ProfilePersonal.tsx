@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, User, Mail, Phone, CheckCircle } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { BottomNav } from '@/components/BottomNav';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowLeft, User, Mail, CheckCircle } from 'lucide-react';
 
 interface ProfileData {
   first_name: string;
@@ -23,11 +23,11 @@ export default function ProfilePersonal() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [profile, setProfile] = useState<ProfileData>({
     first_name: '',
     last_name: '',
-    phone: ''
+    phone: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,9 +47,9 @@ export default function ProfilePersonal() {
           console.error('Error loading profile:', error);
         } else if (data) {
           setProfile({
-            first_name: data.first_name || '',
-            last_name: data.last_name || '',
-            phone: data.phone || ''
+            first_name: (data.first_name ?? '') as string,
+            last_name: (data.last_name ?? '') as string,
+            phone: (data.phone ?? '') as string,
           });
         }
       } catch (error) {
@@ -59,46 +59,47 @@ export default function ProfilePersonal() {
       }
     };
 
-    loadProfile();
+    void loadProfile();
   }, [user]);
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+    setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {
     if (!user) return;
 
     setSaving(true);
-    
+
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: user.id,
-          first_name: profile.first_name.trim(),
-          last_name: profile.last_name.trim(),
-          phone: profile.phone.trim(),
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('profiles').upsert({
+        user_id: user.id,
+        first_name: profile.first_name.trim(),
+        last_name: profile.last_name.trim(),
+        phone: profile.phone.trim(),
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) throw error;
 
       toast({
-        title: "Profile Updated",
-        description: "Your personal information has been saved successfully.",
+        title: 'Profile Updated',
+        description: 'Your personal information has been saved successfully.',
       });
-
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
-        title: "Error",
-        description: "Failed to save your profile. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save your profile. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveClick = () => {
+    void handleSave();
   };
 
   if (!user) {
@@ -114,11 +115,7 @@ export default function ProfilePersonal() {
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/profile')}
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-semibold">Personal Information</h1>
@@ -140,11 +137,7 @@ export default function ProfilePersonal() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Input
-                    value={user.email || ''}
-                    disabled
-                    className="bg-muted"
-                  />
+                  <Input value={user.email || ''} disabled className="bg-muted" />
                   <p className="text-sm text-muted-foreground">
                     Contact support to change your email address
                   </p>
@@ -207,7 +200,8 @@ export default function ProfilePersonal() {
                 <Alert className="border-primary bg-primary/5">
                   <CheckCircle className="h-4 w-4 text-primary" />
                   <AlertDescription className="text-primary">
-                    Your ID verification is complete. You can now place orders for cannabis delivery.
+                    Your ID verification is complete. You can now place orders for cannabis
+                    delivery.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -215,11 +209,7 @@ export default function ProfilePersonal() {
 
             {/* Save Button */}
             <div className="space-y-3">
-              <Button 
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full"
-              >
+              <Button onClick={handleSaveClick} disabled={saving} className="w-full">
                 {saving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
@@ -240,4 +230,4 @@ export default function ProfilePersonal() {
       <BottomNav />
     </div>
   );
-} 
+}

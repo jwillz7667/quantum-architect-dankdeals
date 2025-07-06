@@ -1,26 +1,20 @@
-import { User, MapPin, CreditCard, Settings, LogOut, Phone, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BottomNav } from "@/components/BottomNav";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { User, MapPin, CreditCard, Settings, LogOut, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BottomNav } from '@/components/BottomNav';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 // import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Package2, Home, Heart } from "lucide-react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Separator } from "@/components/ui/separator";
-import { Card, CardContent } from "@/components/ui/card";
-import { SEOHead } from "@/components/SEOHead";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const menuItems = [
-  { icon: User, label: "Personal Information", href: "/profile/personal" },
-  { icon: MapPin, label: "Delivery Address", href: "/profile/address" },
-  { icon: CreditCard, label: "Payment Methods", href: "/profile/payment" },
-  { icon: Phone, label: "Order History", href: "/profile/orders" },
-  { icon: Settings, label: "Settings", href: "/profile/settings" },
+  { icon: User, label: 'Personal Information', href: '/profile/personal' },
+  { icon: MapPin, label: 'Delivery Address', href: '/profile/address' },
+  { icon: CreditCard, label: 'Payment Methods', href: '/profile/payment' },
+  { icon: Phone, label: 'Order History', href: '/profile/orders' },
+  { icon: Settings, label: 'Settings', href: '/profile/settings' },
 ];
 
 interface UserProfile {
@@ -34,13 +28,10 @@ export default function Profile() {
   const { user, signOut } = useAuth();
   // const { isAdmin, adminUser } = useAdminAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
+      void fetchProfile();
     }
   }, [user]);
 
@@ -59,8 +50,6 @@ export default function Profile() {
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -68,11 +57,12 @@ export default function Profile() {
     await signOut();
   };
 
-  const displayName = profile?.first_name && profile?.last_name 
-    ? `${profile.first_name} ${profile.last_name}`
-    // : adminUser?.firstName && adminUser?.lastName
-    // ? `${adminUser.firstName} ${adminUser.lastName}`
-    : 'Welcome Back!';
+  const displayName =
+    profile?.first_name && profile?.last_name
+      ? `${profile.first_name} ${profile.last_name}`
+      : // : adminUser?.firstName && adminUser?.lastName
+        // ? `${adminUser.firstName} ${adminUser.lastName}`
+        'Welcome Back!';
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
@@ -84,9 +74,9 @@ export default function Profile() {
         <div className="product-card p-6 text-center">
           <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
             {profile?.avatar_url ? (
-              <img 
-                src={profile.avatar_url} 
-                alt="Profile" 
+              <img
+                src={profile.avatar_url}
+                alt="Profile"
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
@@ -155,7 +145,7 @@ export default function Profile() {
           <Button
             variant="outline"
             className="w-full justify-start h-14 text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
-            onClick={handleSignOut}
+            onClick={() => void handleSignOut()}
           >
             <LogOut className="h-5 w-5 mr-3" />
             Sign Out

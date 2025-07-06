@@ -35,7 +35,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'dankdeals_cart';
 const TAX_RATE = 0.1025; // Minnesota cannabis tax rate (example)
-const DEFAULT_DELIVERY_FEE = 5.00;
+const DEFAULT_DELIVERY_FEE = 5.0;
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -69,17 +69,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [items, isLoading]);
 
   // Calculate totals
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const taxAmount = subtotal * TAX_RATE;
   const deliveryFee = items.length > 0 ? DEFAULT_DELIVERY_FEE : 0;
   const totalPrice = subtotal + taxAmount + deliveryFee;
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const addItem = (product: Product, variant: ProductVariant, quantity = 1) => {
-    setItems(currentItems => {
+    setItems((currentItems) => {
       // Check if item already exists in cart
       const existingItemIndex = currentItems.findIndex(
-        item => item.productId === product.id && item.variantId === variant.id
+        (item) => item.productId === product.id && item.variantId === variant.id
       );
 
       if (existingItemIndex >= 0) {
@@ -87,14 +87,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const updatedItems = [...currentItems];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + quantity
+          quantity: updatedItems[existingItemIndex].quantity + quantity,
         };
-        
+
         toast({
-          title: "Cart Updated",
+          title: 'Cart Updated',
           description: `Updated ${product.name} quantity`,
         });
-        
+
         return updatedItems;
       } else {
         // Add new item to cart
@@ -108,13 +108,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           image: product.image_url || '/placeholder.svg',
           variant: {
             name: variant.name,
-            weight_grams: variant.weight_grams
+            weight_grams: variant.weight_grams,
           },
-          category: product.category
+          category: product.category,
         };
 
         toast({
-          title: "Added to Cart",
+          title: 'Added to Cart',
           description: `${product.name} (${variant.name})`,
         });
 
@@ -129,33 +129,31 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    setItems(currentItems =>
-      currentItems.map(item =>
-        item.id === itemId ? { ...item, quantity } : item
-      )
+    setItems((currentItems) =>
+      currentItems.map((item) => (item.id === itemId ? { ...item, quantity } : item))
     );
   };
 
   const removeItem = (itemId: string) => {
-    setItems(currentItems => {
-      const removedItem = currentItems.find(item => item.id === itemId);
-      
+    setItems((currentItems) => {
+      const removedItem = currentItems.find((item) => item.id === itemId);
+
       if (removedItem) {
         toast({
-          title: "Removed from Cart",
+          title: 'Removed from Cart',
           description: removedItem.name,
         });
       }
-      
-      return currentItems.filter(item => item.id !== itemId);
+
+      return currentItems.filter((item) => item.id !== itemId);
     });
   };
 
   const clearCart = () => {
     setItems([]);
     toast({
-      title: "Cart Cleared",
-      description: "All items removed from cart",
+      title: 'Cart Cleared',
+      description: 'All items removed from cart',
     });
   };
 
@@ -170,14 +168,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     updateQuantity,
     removeItem,
     clearCart,
-    isLoading
+    isLoading,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
@@ -186,4 +180,4 @@ export const useCart = () => {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-}; 
+};

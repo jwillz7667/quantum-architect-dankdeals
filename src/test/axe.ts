@@ -1,10 +1,10 @@
 import { expect } from 'vitest';
-import * as matchers from 'jest-axe/matchers';
+import matchers from 'jest-axe';
 
-expect.extend(matchers);
+expect.extend(matchers as any);
 
 declare module 'vitest' {
   interface Assertion {
     toHaveNoViolations(): Promise<void>;
   }
-} 
+}

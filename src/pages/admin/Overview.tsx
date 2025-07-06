@@ -17,14 +17,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import {
-  DollarSign,
-  ShoppingCart,
-  Users,
-  TrendingUp,
-  Package,
-  Eye,
-} from 'lucide-react';
+import { DollarSign, ShoppingCart, Users, TrendingUp, Package, Eye } from 'lucide-react';
 import { format, subDays, startOfDay } from 'date-fns';
 import { Database } from '@/integrations/supabase/types';
 
@@ -99,23 +92,23 @@ export function Overview() {
       const totalRevenue = validOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
       const totalOrders = validOrders.length;
       const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-      const uniqueCustomers = new Set(validOrders.map(order => order.user_id)).size;
+      const uniqueCustomers = new Set(validOrders.map((order) => order.user_id)).size;
 
       setStats({
         total_revenue: totalRevenue,
         total_orders: totalOrders,
         average_order_value: averageOrderValue,
-        total_customers: uniqueCustomers
+        total_customers: uniqueCustomers,
       });
 
       // Fetch revenue data for last 30 days
       const revenuePromises = [];
       const tempRevenueData: RevenueData[] = [];
-      
+
       for (let i = 29; i >= 0; i--) {
         const date = startOfDay(subDays(new Date(), i));
         const nextDate = startOfDay(subDays(new Date(), i - 1));
-        
+
         revenuePromises.push(
           supabase
             .from('orders')
@@ -142,21 +135,23 @@ export function Overview() {
       // Fetch category revenue data
       const { data: categoryRevenue, error: categoryError } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           order_items (
             total_price,
             products (
               category
             )
           )
-        `)
+        `
+        )
         .neq('status', 'cancelled');
 
       if (!categoryError && categoryRevenue) {
         const categoryTotals: Record<string, number> = {};
         let totalRevenue = 0;
 
-        (categoryRevenue as unknown as OrderWithItems[]).forEach(order => {
+        (categoryRevenue as unknown as OrderWithItems[]).forEach((order) => {
           order.order_items?.forEach((item) => {
             const category = item.products?.category || 'other';
             categoryTotals[category] = (categoryTotals[category] || 0) + item.total_price;
@@ -175,36 +170,67 @@ export function Overview() {
 
       // Mock top products since we need to create proper aggregation
       setTopProducts([
-        { product_id: '1', product_name: 'Blue Dream', total_revenue: 500000, total_quantity: 50, order_count: 25 },
-        { product_id: '2', product_name: 'OG Kush', total_revenue: 450000, total_quantity: 45, order_count: 23 },
-        { product_id: '3', product_name: 'Sour Diesel', total_revenue: 400000, total_quantity: 40, order_count: 20 },
-        { product_id: '4', product_name: 'Wedding Cake', total_revenue: 350000, total_quantity: 35, order_count: 18 },
-        { product_id: '5', product_name: 'Gelato', total_revenue: 300000, total_quantity: 30, order_count: 15 },
+        {
+          product_id: '1',
+          product_name: 'Blue Dream',
+          total_revenue: 500000,
+          total_quantity: 50,
+          order_count: 25,
+        },
+        {
+          product_id: '2',
+          product_name: 'OG Kush',
+          total_revenue: 450000,
+          total_quantity: 45,
+          order_count: 23,
+        },
+        {
+          product_id: '3',
+          product_name: 'Sour Diesel',
+          total_revenue: 400000,
+          total_quantity: 40,
+          order_count: 20,
+        },
+        {
+          product_id: '4',
+          product_name: 'Wedding Cake',
+          total_revenue: 350000,
+          total_quantity: 35,
+          order_count: 18,
+        },
+        {
+          product_id: '5',
+          product_name: 'Gelato',
+          total_revenue: 300000,
+          total_quantity: 30,
+          order_count: 15,
+        },
       ]);
 
       // Fetch recent orders
       const { data: orders, error: ordersError2 } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           profiles (
             first_name,
             last_name
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false })
         .limit(5);
 
       if (!ordersError2 && orders) {
         setRecentOrders(orders as OrderWithProfile[]);
       }
-
     } catch (error) {
       console.error('Dashboard data error:', error);
       toast({
-        title: "Error",
-        description: "Failed to load dashboard data",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load dashboard data',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -270,9 +296,7 @@ export function Overview() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(stats?.total_revenue || 0)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(stats?.total_revenue || 0)}</div>
             <p className="text-xs text-muted-foreground">Last 30 days</p>
           </CardContent>
         </Card>
@@ -417,9 +441,7 @@ export function Overview() {
                     <p className="font-medium">
                       {order.profiles?.first_name} {order.profiles?.last_name}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      Order #{order.order_number}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Order #{order.order_number}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium">{formatCurrency(order.total_amount)}</p>
@@ -437,4 +459,4 @@ export function Overview() {
   );
 }
 
-export default Overview
+export default Overview;

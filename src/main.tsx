@@ -1,17 +1,16 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { QueryClient } from "@tanstack/react-query";
-import App from "./App.tsx";
-import "./index.css";
-import { env } from "./lib/env";
-import { initializeAxe } from "./utils/axe";
-import { analytics } from "./lib/analytics";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+import { env } from './lib/env';
+import { initializeAxe } from './utils/axe';
+import { analytics } from './lib/analytics';
 
 // Initialize accessibility testing in development
-initializeAxe();
+void initializeAxe();
 
 // Initialize analytics
-analytics.initialize();
+void analytics.initialize();
 
 // Validate environment variables on startup
 try {
@@ -20,7 +19,9 @@ try {
   console.error('Failed to start application:', error);
   // Show error page in production
   if (import.meta.env.PROD) {
-    document.getElementById("root")!.innerHTML = `
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui;">
         <div style="text-align: center;">
           <h1>Configuration Error</h1>
@@ -29,19 +30,18 @@ try {
         </div>
       </div>
     `;
+    }
     throw error;
   }
 }
 
 // Initialize error tracking in production
 if (env.VITE_ENV === 'production' && env.VITE_SENTRY_DSN) {
-  import('@sentry/react').then(({ init, browserTracingIntegration }) => {
+  void import('@sentry/react').then(({ init, browserTracingIntegration }) => {
     init({
       dsn: env.VITE_SENTRY_DSN,
       environment: env.VITE_SENTRY_ENVIRONMENT || env.VITE_ENV,
-      integrations: [
-        browserTracingIntegration(),
-      ],
+      integrations: [browserTracingIntegration()],
       tracesSampleRate: 0.1, // 10% of transactions
       beforeSend(event) {
         // Don't send events in development
@@ -70,7 +70,9 @@ if (env.VITE_ENV === 'production') {
       const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       if (perfData) {
         console.log('Page Load Performance:', {
-          domContentLoaded: Math.round(perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart),
+          domContentLoaded: Math.round(
+            perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart
+          ),
           loadComplete: Math.round(perfData.loadEventEnd - perfData.loadEventStart),
           totalTime: Math.round(perfData.loadEventEnd - perfData.fetchStart),
         });
@@ -79,24 +81,24 @@ if (env.VITE_ENV === 'production') {
   });
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: (failureCount, error: any) => {
-        // Don't retry on 4xx errors
-        if (error?.status >= 400 && error?.status < 500) {
-          return false;
-        }
-        // Retry up to 3 times for other errors
-        return failureCount < 3;
-      },
-    },
-  },
-});
+// Initialize accessibility checker
+void initializeAxe();
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+// Remove unused queryClient - it's already created inside App component
+// const queryClient = new QueryClient({
+//   defaultOptions: {
+//     queries: {
+//       staleTime: 60 * 1000,
+//       retry: 1,
+//     },
+//   },
+// });
+
+const root = document.getElementById('root');
+if (root) {
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+}

@@ -1,37 +1,49 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  ShoppingCart, 
-  MapPin, 
-  CreditCard, 
-  ArrowLeft, 
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { BottomNav } from '@/components/BottomNav';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { sendOrderConfirmationEmail } from '@/lib/email';
+import {
+  ShoppingCart,
+  MapPin,
+  CreditCard,
+  ArrowLeft,
   CheckCircle,
   AlertTriangle,
-  Clock
-} from "lucide-react";
+  Clock,
+} from 'lucide-react';
 
 export default function CheckoutReview() {
   const { items, subtotal, taxAmount, deliveryFee, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [deliveryInfo, setDeliveryInfo] = useState<any>(null);
-  
+  interface DeliveryInfo {
+    street: string;
+    apartment?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    deliveryInstructions?: string;
+    deliveryFee: number;
+    estimatedTime: string;
+  }
+
+  const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
+
   // For this demo, we'll assume tip is 18% (would be stored from payment step)
   const tipAmount = subtotal * 0.18;
   const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
@@ -40,7 +52,7 @@ export default function CheckoutReview() {
   useEffect(() => {
     const loadDeliveryInfo = async () => {
       if (!user) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -53,14 +65,14 @@ export default function CheckoutReview() {
           return;
         }
 
-        setDeliveryInfo(data.delivery_address);
+        setDeliveryInfo(data.delivery_address as DeliveryInfo);
       } catch (error) {
         console.error('Error loading delivery info:', error);
         navigate('/checkout/address');
       }
     };
 
-    loadDeliveryInfo();
+    void loadDeliveryInfo();
   }, [user, navigate]);
 
   // Redirect if cart is empty
@@ -73,23 +85,25 @@ export default function CheckoutReview() {
   const generateOrderNumber = () => {
     const prefix = 'DD';
     const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
     return `${prefix}${timestamp}${random}`;
   };
 
   const handlePlaceOrder = async () => {
     if (!agreedToTerms) return;
-    
+
     setIsPlacingOrder(true);
-    
+
     try {
       const orderNumber = generateOrderNumber();
-      
+
       // Create order in database
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          customer_id: user!.id,
+          customer_id: user?.id || '',
           order_number: orderNumber,
           delivery_address: deliveryInfo,
           subtotal: subtotal,
@@ -97,10 +111,13 @@ export default function CheckoutReview() {
           delivery_fee: deliveryFee,
           tip_amount: tipAmount,
           total_amount: totalAmount,
-          total_weight_grams: items.reduce((total, item) => total + (item.variant.weight_grams * item.quantity), 0),
+          total_weight_grams: items.reduce(
+            (total, item) => total + item.variant.weight_grams * item.quantity,
+            0
+          ),
           status: 'pending',
           payment_status: 'pending',
-          vendor_id: 'default-vendor' // In real app, this would be dynamic
+          vendor_id: 'default-vendor', // In real app, this would be dynamic
         })
         .select()
         .single();
@@ -108,27 +125,37 @@ export default function CheckoutReview() {
       if (orderError) throw orderError;
 
       // Create order items
-      const orderItems = items.map(item => ({
+      const orderItems = items.map((item) => ({
         order_id: order.id,
         product_id: item.productId,
         variant_id: item.variantId,
         quantity: item.quantity,
         unit_price: item.price,
-        total_price: item.price * item.quantity
+        total_price: item.price * item.quantity,
       }));
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
 
       if (itemsError) throw itemsError;
 
+      // Send confirmation email
+      await sendOrderConfirmationEmail({
+        to: user!.email!,
+        orderNumber: orderNumber,
+        totalAmount: totalAmount,
+        items: items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        deliveryAddress: deliveryInfo,
+      });
+
       // Clear cart
       clearCart();
-      
+
       // Navigate to success page
       navigate(`/checkout/complete?order=${orderNumber}`);
-      
     } catch (error) {
       console.error('Error placing order:', error);
       alert('Failed to place order. Please try again.');
@@ -188,16 +215,14 @@ export default function CheckoutReview() {
             {items.map((item) => (
               <div key={item.id} className="flex gap-3 p-3 rounded-lg border border-border">
                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-sm leading-tight mb-1">{item.name}</h4>
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="text-xs">{item.category}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {item.category}
+                    </Badge>
                     <span className="text-xs text-muted-foreground">{item.variant.name}</span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -220,14 +245,22 @@ export default function CheckoutReview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-1 text-sm">
-              <p className="font-medium">{deliveryInfo.street} {deliveryInfo.apartment}</p>
-              <p className="text-muted-foreground">{deliveryInfo.city}, {deliveryInfo.state} {deliveryInfo.zipCode}</p>
+              <p className="font-medium">
+                {deliveryInfo.street} {deliveryInfo.apartment}
+              </p>
+              <p className="text-muted-foreground">
+                {deliveryInfo.city}, {deliveryInfo.state} {deliveryInfo.zipCode}
+              </p>
               {deliveryInfo.deliveryInstructions && (
-                <p className="text-muted-foreground italic">"{deliveryInfo.deliveryInstructions}"</p>
+                <p className="text-muted-foreground italic">
+                  "{deliveryInfo.deliveryInstructions}"
+                </p>
               )}
               <div className="flex items-center gap-2 pt-2">
                 <Clock className="w-4 h-4" />
-                <span className="text-muted-foreground">Est. delivery: {deliveryInfo.estimatedTime}</span>
+                <span className="text-muted-foreground">
+                  Est. delivery: {deliveryInfo.estimatedTime}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -288,15 +321,18 @@ export default function CheckoutReview() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-start space-x-3">
-              <Checkbox 
-                id="terms" 
+              <Checkbox
+                id="terms"
                 checked={agreedToTerms}
                 onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
               />
               <Label htmlFor="terms" className="text-sm leading-relaxed">
-                I agree to the <a href="/terms" className="text-primary underline">Terms of Service</a> and 
-                confirm that I am 21+ years old. I understand that cannabis products are for adult use only 
-                and will provide valid ID upon delivery.
+                I agree to the{' '}
+                <a href="/terms" className="text-primary underline">
+                  Terms of Service
+                </a>{' '}
+                and confirm that I am 21+ years old. I understand that cannabis products are for
+                adult use only and will provide valid ID upon delivery.
               </Label>
             </div>
           </CardContent>
@@ -306,22 +342,23 @@ export default function CheckoutReview() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-xs">
-            <strong>Minnesota Cannabis Notice:</strong> This product has not been analyzed or approved by the FDA. 
-            Keep out of reach of children and pets. Do not operate vehicles or machinery after use.
+            <strong>Minnesota Cannabis Notice:</strong> This product has not been analyzed or
+            approved by the FDA. Keep out of reach of children and pets. Do not operate vehicles or
+            machinery after use.
           </AlertDescription>
         </Alert>
 
         {/* Navigation */}
         <div className="flex gap-3 pb-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate('/checkout/payment')}
             className="flex-1"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <Button 
+          <Button
             onClick={handlePlaceOrder}
             disabled={!agreedToTerms || isPlacingOrder}
             className="flex-1"
@@ -344,4 +381,4 @@ export default function CheckoutReview() {
       <BottomNav />
     </div>
   );
-} 
+}

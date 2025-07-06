@@ -1,14 +1,14 @@
-import { Flower, Cookie, Cigarette, Heart, MoreHorizontal } from "lucide-react";
-import { CategoryCard } from "./CategoryCard";
-import { useProductsFilter } from "@/hooks/useProductsFilter";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Flower, Cookie, Cigarette, Heart, MoreHorizontal } from 'lucide-react';
+import { CategoryCard } from './CategoryCard';
+import { useProductsFilter } from '@/hooks/useProductsFilter';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const categories = [
-  { icon: Flower, label: "Flower", category: "flower" },
-  { icon: Cookie, label: "Edibles", category: "edibles" },
-  { icon: Cigarette, label: "Prerolls", category: "prerolls" },
-  { icon: Heart, label: "Topicals", category: "topicals" },
-  { icon: MoreHorizontal, label: "All", category: null },
+  { icon: Flower, label: 'Flower', category: 'flower' },
+  { icon: Cookie, label: 'Edibles', category: 'edibles' },
+  { icon: Cigarette, label: 'Prerolls', category: 'prerolls' },
+  { icon: Heart, label: 'Topicals', category: 'topicals' },
+  { icon: MoreHorizontal, label: 'All', category: null },
 ];
 
 export function CategoryRail() {

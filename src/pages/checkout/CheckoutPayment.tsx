@@ -1,26 +1,18 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  CreditCard, 
-  DollarSign, 
-  ArrowRight, 
-  ArrowLeft, 
-  Info,
-  MapPin,
-  Clock
-} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { BottomNav } from '@/components/BottomNav';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { CreditCard, DollarSign, ArrowRight, ArrowLeft, Info, MapPin, Clock } from 'lucide-react';
 
 interface DeliveryInfo {
   street: string;
@@ -34,23 +26,23 @@ interface DeliveryInfo {
 }
 
 const TIP_OPTIONS = [
-  { label: "15%", value: 0.15 },
-  { label: "18%", value: 0.18 },
-  { label: "20%", value: 0.20 },
-  { label: "Custom", value: 0 },
-  { label: "No tip", value: 0 }
+  { label: '15%', value: 0.15 },
+  { label: '18%', value: 0.18 },
+  { label: '20%', value: 0.2 },
+  { label: 'Custom', value: 0 },
+  { label: 'No tip', value: 0 },
 ];
 
 export default function CheckoutPayment() {
   const { items, subtotal, taxAmount, deliveryFee } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
   const [tipPercentage, setTipPercentage] = useState<number>(0.18);
   const [customTip, setCustomTip] = useState<string>('');
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
-  
+
   const tipAmount = tipPercentage > 0 ? subtotal * tipPercentage : parseFloat(customTip) || 0;
   const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
 
@@ -58,7 +50,7 @@ export default function CheckoutPayment() {
   useEffect(() => {
     const loadDeliveryInfo = async () => {
       if (!user) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -79,7 +71,7 @@ export default function CheckoutPayment() {
       }
     };
 
-    loadDeliveryInfo();
+    void loadDeliveryInfo();
   }, [user, navigate]);
 
   // Redirect if cart is empty
@@ -90,9 +82,9 @@ export default function CheckoutPayment() {
   }, [items.length, navigate]);
 
   const handleTipChange = (value: string) => {
-    const tipOption = TIP_OPTIONS.find(option => option.label === value);
+    const tipOption = TIP_OPTIONS.find((option) => option.label === value);
     if (tipOption) {
-      if (tipOption.label === "Custom") {
+      if (tipOption.label === 'Custom') {
         setTipPercentage(0);
         setCustomTip('');
       } else {
@@ -111,12 +103,6 @@ export default function CheckoutPayment() {
 
   const handleContinue = () => {
     // Save payment method and tip info, then proceed to review
-    const paymentData = {
-      paymentMethod,
-      tipAmount,
-      totalAmount
-    };
-    
     // In a real app, you'd save this to session or context
     // For now, we'll just navigate to review
     navigate('/checkout/review');
@@ -171,8 +157,12 @@ export default function CheckoutPayment() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="text-sm">
-              <p className="font-medium">{deliveryInfo.street} {deliveryInfo.apartment}</p>
-              <p className="text-muted-foreground">{deliveryInfo.city}, {deliveryInfo.state} {deliveryInfo.zipCode}</p>
+              <p className="font-medium">
+                {deliveryInfo.street} {deliveryInfo.apartment}
+              </p>
+              <p className="text-muted-foreground">
+                {deliveryInfo.city}, {deliveryInfo.state} {deliveryInfo.zipCode}
+              </p>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
@@ -191,7 +181,10 @@ export default function CheckoutPayment() {
             <CardTitle>Payment Method</CardTitle>
           </CardHeader>
           <CardContent>
-            <RadioGroup value={paymentMethod} onValueChange={(value: 'cash' | 'card') => setPaymentMethod(value)}>
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={(value: 'cash' | 'card') => setPaymentMethod(value)}
+            >
               <div className="flex items-center space-x-2 p-3 rounded-lg border border-border">
                 <RadioGroupItem value="cash" id="cash" />
                 <Label htmlFor="cash" className="flex-1 cursor-pointer">
@@ -199,7 +192,9 @@ export default function CheckoutPayment() {
                     <DollarSign className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-medium">Cash on Delivery</p>
-                      <p className="text-sm text-muted-foreground">Pay with cash when your order arrives</p>
+                      <p className="text-sm text-muted-foreground">
+                        Pay with cash when your order arrives
+                      </p>
                     </div>
                   </div>
                 </Label>
@@ -236,8 +231,14 @@ export default function CheckoutPayment() {
             <CardTitle>Add a Tip for Your Driver</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <RadioGroup 
-              value={tipPercentage > 0 ? TIP_OPTIONS.find(opt => opt.value === tipPercentage)?.label : customTip ? "Custom" : "No tip"} 
+            <RadioGroup
+              value={
+                tipPercentage > 0
+                  ? TIP_OPTIONS.find((opt) => opt.value === tipPercentage)?.label
+                  : customTip
+                    ? 'Custom'
+                    : 'No tip'
+              }
               onValueChange={handleTipChange}
             >
               <div className="grid grid-cols-3 gap-2">
@@ -257,22 +258,24 @@ export default function CheckoutPayment() {
               </div>
             </RadioGroup>
 
-            {(tipPercentage === 0 && (!TIP_OPTIONS.find(opt => opt.label === "No tip" && opt.value === 0) || customTip !== '')) && (
-              <div className="space-y-2">
-                <Label htmlFor="customTip">Custom Tip Amount</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    id="customTip"
-                    type="text"
-                    placeholder="0.00"
-                    value={customTip}
-                    onChange={(e) => handleCustomTipChange(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+            {tipPercentage === 0 &&
+              (!TIP_OPTIONS.find((opt) => opt.label === 'No tip' && opt.value === 0) ||
+                customTip !== '') && (
+                <div className="space-y-2">
+                  <Label htmlFor="customTip">Custom Tip Amount</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      id="customTip"
+                      type="text"
+                      placeholder="0.00"
+                      value={customTip}
+                      onChange={(e) => handleCustomTipChange(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </CardContent>
         </Card>
 
@@ -310,18 +313,15 @@ export default function CheckoutPayment() {
 
         {/* Navigation */}
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate('/checkout/address')}
             className="flex-1"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <Button 
-            onClick={handleContinue}
-            className="flex-1"
-          >
+          <Button onClick={handleContinue} className="flex-1">
             Review Order
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -331,4 +331,4 @@ export default function CheckoutPayment() {
       <BottomNav />
     </div>
   );
-} 
+}

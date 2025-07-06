@@ -54,15 +54,9 @@ export function OptimizedImage({
   }, [priority, loading]);
 
   return (
-    <div 
-      className={cn('overflow-hidden', className)}
-      style={{ width, height }}
-    >
+    <div className={cn('overflow-hidden', className)} style={{ width, height }}>
       {!isLoaded && (
-        <div 
-          className="animate-pulse bg-muted"
-          style={{ width: '100%', height: '100%' }}
-        />
+        <div className="animate-pulse bg-muted" style={{ width: '100%', height: '100%' }} />
       )}
       <img
         ref={imgRef}
@@ -85,4 +79,4 @@ export function OptimizedImage({
       />
     </div>
   );
-} 
+}

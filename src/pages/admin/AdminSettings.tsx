@@ -9,17 +9,23 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { 
-  Store, 
-  MapPin, 
-  Clock, 
-  CreditCard, 
-  Bell, 
-  Shield, 
+import {
+  Store,
+  MapPin,
+  Clock,
+  CreditCard,
+  Bell,
+  Shield,
   Save,
   AlertTriangle,
   Check,
@@ -32,7 +38,7 @@ import {
   Truck,
   Lock,
   Key,
-  UserCheck
+  UserCheck,
 } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { Json } from '@/integrations/supabase/types';
@@ -105,7 +111,7 @@ export function AdminSettings() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const [storeSettings, setStoreSettings] = useState<StoreSettings>({
     storeName: 'DankDeals',
     storeEmail: 'admin@dankdealsmn.com',
@@ -121,9 +127,30 @@ export function AdminSettings() {
   });
 
   const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([
-    { id: '1', zipCode: '55401', city: 'Minneapolis', state: 'MN', isActive: true, deliveryFee: null },
-    { id: '2', zipCode: '55402', city: 'Minneapolis', state: 'MN', isActive: true, deliveryFee: null },
-    { id: '3', zipCode: '55403', city: 'Minneapolis', state: 'MN', isActive: true, deliveryFee: null },
+    {
+      id: '1',
+      zipCode: '55401',
+      city: 'Minneapolis',
+      state: 'MN',
+      isActive: true,
+      deliveryFee: null,
+    },
+    {
+      id: '2',
+      zipCode: '55402',
+      city: 'Minneapolis',
+      state: 'MN',
+      isActive: true,
+      deliveryFee: null,
+    },
+    {
+      id: '3',
+      zipCode: '55403',
+      city: 'Minneapolis',
+      state: 'MN',
+      isActive: true,
+      deliveryFee: null,
+    },
   ]);
 
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
@@ -160,9 +187,10 @@ export function AdminSettings() {
         .single();
 
       if (storeData && !storeError) {
-        const hours = typeof storeData.business_hours === 'object' && storeData.business_hours !== null
-          ? (storeData.business_hours as BusinessHours)
-          : defaultBusinessHours;
+        const hours =
+          typeof storeData.business_hours === 'object' && storeData.business_hours !== null
+            ? (storeData.business_hours as BusinessHours)
+            : defaultBusinessHours;
 
         setStoreSettings({
           storeName: storeData.store_name,
@@ -186,14 +214,16 @@ export function AdminSettings() {
         .order('zip_code');
 
       if (zonesData && !zonesError) {
-        setDeliveryZones(zonesData.map(zone => ({
-          id: zone.id,
-          zipCode: zone.zip_code,
-          city: zone.city,
-          state: zone.state,
-          isActive: zone.is_active,
-          deliveryFee: zone.delivery_fee,
-        })));
+        setDeliveryZones(
+          zonesData.map((zone) => ({
+            id: zone.id,
+            zipCode: zone.zip_code,
+            city: zone.city,
+            state: zone.state,
+            isActive: zone.is_active,
+            deliveryFee: zone.delivery_fee,
+          }))
+        );
       }
 
       // Load notification settings for current admin
@@ -238,9 +268,9 @@ export function AdminSettings() {
     } catch (error) {
       console.error('Error loading settings:', error);
       toast({
-        title: "Error",
-        description: "Failed to load settings. Please try again.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load settings. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -277,26 +307,24 @@ export function AdminSettings() {
 
       // Update notification settings
       if (adminUser) {
-        const { error: notifError } = await supabase
-          .from('notification_settings')
-          .upsert({
-            admin_id: adminUser.id,
-            email_new_order: notificationSettings.emailNewOrder,
-            email_order_canceled: notificationSettings.emailOrderCanceled,
-            email_low_inventory: notificationSettings.emailLowInventory,
-            email_new_user: notificationSettings.emailNewUser,
-            sms_new_order: notificationSettings.smsNewOrder,
-            sms_order_canceled: notificationSettings.smsOrderCanceled,
-            low_inventory_threshold: notificationSettings.lowInventoryThreshold,
-            sound_enabled: notificationSettings.soundEnabled,
-            desktop_notifications: notificationSettings.desktopNotifications,
-            updated_at: new Date().toISOString(),
-          });
+        const { error: notifError } = await supabase.from('notification_settings').upsert({
+          admin_id: adminUser.id,
+          email_new_order: notificationSettings.emailNewOrder,
+          email_order_canceled: notificationSettings.emailOrderCanceled,
+          email_low_inventory: notificationSettings.emailLowInventory,
+          email_new_user: notificationSettings.emailNewUser,
+          sms_new_order: notificationSettings.smsNewOrder,
+          sms_order_canceled: notificationSettings.smsOrderCanceled,
+          low_inventory_threshold: notificationSettings.lowInventoryThreshold,
+          sound_enabled: notificationSettings.soundEnabled,
+          desktop_notifications: notificationSettings.desktopNotifications,
+          updated_at: new Date().toISOString(),
+        });
 
         if (notifError) throw notifError;
       }
 
-      // Update security settings  
+      // Update security settings
       const { error: securityError } = await supabase
         .from('security_settings')
         .update({
@@ -313,15 +341,15 @@ export function AdminSettings() {
       if (securityError) throw securityError;
 
       toast({
-        title: "Settings Saved",
-        description: "All settings have been updated successfully."
+        title: 'Settings Saved',
+        description: 'All settings have been updated successfully.',
       });
     } catch (error) {
       console.error('Error saving settings:', error);
       toast({
-        title: "Error",
-        description: "Failed to save settings. Please try again.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to save settings. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
@@ -330,17 +358,17 @@ export function AdminSettings() {
 
   const addDeliveryZone = async () => {
     if (!newZipCode) return;
-    
+
     // Check if zone already exists
-    if (deliveryZones.some(zone => zone.zipCode === newZipCode)) {
+    if (deliveryZones.some((zone) => zone.zipCode === newZipCode)) {
       toast({
-        title: "Zone Exists",
+        title: 'Zone Exists',
         description: `ZIP code ${newZipCode} already exists.`,
-        variant: "destructive"
+        variant: 'destructive',
       });
       return;
     }
-    
+
     try {
       const { data, error } = await supabase
         .from('delivery_zones')
@@ -363,40 +391,40 @@ export function AdminSettings() {
         isActive: data.is_active,
         deliveryFee: data.delivery_fee,
       };
-      
+
       setDeliveryZones([...deliveryZones, newZone]);
       setNewZipCode('');
-      
+
       toast({
-        title: "Zone Added",
-        description: `ZIP code ${newZipCode} has been added.`
+        title: 'Zone Added',
+        description: `ZIP code ${newZipCode} has been added.`,
       });
     } catch (error) {
       console.error('Error adding delivery zone:', error);
       toast({
-        title: "Error",
-        description: "Failed to add delivery zone.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to add delivery zone.',
+        variant: 'destructive',
       });
     }
   };
 
   const removeDeliveryZone = (id: string) => {
-    setDeliveryZones(deliveryZones.filter(zone => zone.id !== id));
+    setDeliveryZones(deliveryZones.filter((zone) => zone.id !== id));
   };
 
   const toggleDeliveryZone = (id: string) => {
-    setDeliveryZones(deliveryZones.map(zone => 
-      zone.id === id ? { ...zone, isActive: !zone.isActive } : zone
-    ));
+    setDeliveryZones(
+      deliveryZones.map((zone) => (zone.id === id ? { ...zone, isActive: !zone.isActive } : zone))
+    );
   };
 
   const addIpToWhitelist = () => {
     if (!newIpAddress) return;
-    
+
     setSecuritySettings({
       ...securitySettings,
-      ipWhitelist: [...securitySettings.ipWhitelist, newIpAddress]
+      ipWhitelist: [...securitySettings.ipWhitelist, newIpAddress],
     });
     setNewIpAddress('');
   };
@@ -404,7 +432,7 @@ export function AdminSettings() {
   const removeIpFromWhitelist = (ip: string) => {
     setSecuritySettings({
       ...securitySettings,
-      ipWhitelist: securitySettings.ipWhitelist.filter(addr => addr !== ip)
+      ipWhitelist: securitySettings.ipWhitelist.filter((addr) => addr !== ip),
     });
   };
 
@@ -439,7 +467,9 @@ export function AdminSettings() {
                   <Input
                     id="store-name"
                     value={storeSettings.storeName}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, storeName: e.target.value })}
+                    onChange={(e) =>
+                      setStoreSettings({ ...storeSettings, storeName: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -448,7 +478,9 @@ export function AdminSettings() {
                     id="store-email"
                     type="email"
                     value={storeSettings.storeEmail}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, storeEmail: e.target.value })}
+                    onChange={(e) =>
+                      setStoreSettings({ ...storeSettings, storeEmail: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -457,14 +489,18 @@ export function AdminSettings() {
                     id="store-phone"
                     type="tel"
                     value={storeSettings.storePhone}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, storePhone: e.target.value })}
+                    onChange={(e) =>
+                      setStoreSettings({ ...storeSettings, storePhone: e.target.value })
+                    }
                   />
                 </div>
                 <div>
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Select 
-                    value={storeSettings.timezone} 
-                    onValueChange={(value) => setStoreSettings({ ...storeSettings, timezone: value })}
+                  <Select
+                    value={storeSettings.timezone}
+                    onValueChange={(value) =>
+                      setStoreSettings({ ...storeSettings, timezone: value })
+                    }
                   >
                     <SelectTrigger id="timezone">
                       <SelectValue />
@@ -483,7 +519,9 @@ export function AdminSettings() {
                 <Textarea
                   id="store-address"
                   value={storeSettings.storeAddress}
-                  onChange={(e) => setStoreSettings({ ...storeSettings, storeAddress: e.target.value })}
+                  onChange={(e) =>
+                    setStoreSettings({ ...storeSettings, storeAddress: e.target.value })
+                  }
                   rows={2}
                 />
               </div>
@@ -510,8 +548,8 @@ export function AdminSettings() {
                             ...storeSettings,
                             businessHours: {
                               ...storeSettings.businessHours,
-                              [day]: { ...hours, closed: !checked }
-                            }
+                              [day]: { ...hours, closed: !checked },
+                            },
                           });
                         }}
                       />
@@ -525,8 +563,8 @@ export function AdminSettings() {
                                 ...storeSettings,
                                 businessHours: {
                                   ...storeSettings.businessHours,
-                                  [day]: { ...hours, open: e.target.value }
-                                }
+                                  [day]: { ...hours, open: e.target.value },
+                                },
                               });
                             }}
                             className="w-32"
@@ -540,8 +578,8 @@ export function AdminSettings() {
                                 ...storeSettings,
                                 businessHours: {
                                   ...storeSettings.businessHours,
-                                  [day]: { ...hours, close: e.target.value }
-                                }
+                                  [day]: { ...hours, close: e.target.value },
+                                },
                               });
                             }}
                             className="w-32"
@@ -566,9 +604,7 @@ export function AdminSettings() {
           <Card>
             <CardHeader>
               <CardTitle>Delivery Settings</CardTitle>
-              <CardDescription>
-                Configure delivery zones and fees
-              </CardDescription>
+              <CardDescription>Configure delivery zones and fees</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -580,7 +616,12 @@ export function AdminSettings() {
                       id="delivery-fee"
                       type="number"
                       value={storeSettings.deliveryFee}
-                      onChange={(e) => setStoreSettings({ ...storeSettings, deliveryFee: parseFloat(e.target.value) })}
+                      onChange={(e) =>
+                        setStoreSettings({
+                          ...storeSettings,
+                          deliveryFee: parseFloat(e.target.value),
+                        })
+                      }
                       className="pl-9"
                     />
                   </div>
@@ -591,7 +632,12 @@ export function AdminSettings() {
                     id="max-radius"
                     type="number"
                     value={storeSettings.maxDeliveryRadius}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, maxDeliveryRadius: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setStoreSettings({
+                        ...storeSettings,
+                        maxDeliveryRadius: parseFloat(e.target.value),
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -603,7 +649,7 @@ export function AdminSettings() {
                 <p className="text-sm text-gray-600 mb-4">
                   Manage ZIP codes where delivery is available
                 </p>
-                
+
                 <div className="flex gap-2 mb-4">
                   <Input
                     placeholder="Enter ZIP code"
@@ -619,7 +665,10 @@ export function AdminSettings() {
 
                 <div className="space-y-2">
                   {deliveryZones.map((zone) => (
-                    <div key={zone.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={zone.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <Switch
                           checked={zone.isActive}
@@ -627,14 +676,12 @@ export function AdminSettings() {
                         />
                         <div>
                           <p className="font-medium">{zone.zipCode}</p>
-                          <p className="text-sm text-gray-600">{zone.city}, {zone.state}</p>
+                          <p className="text-sm text-gray-600">
+                            {zone.city}, {zone.state}
+                          </p>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeDeliveryZone(zone.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => removeDeliveryZone(zone.id)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -649,9 +696,7 @@ export function AdminSettings() {
           <Card>
             <CardHeader>
               <CardTitle>Payment Settings</CardTitle>
-              <CardDescription>
-                Configure payment options and tax rates
-              </CardDescription>
+              <CardDescription>Configure payment options and tax rates</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -663,7 +708,12 @@ export function AdminSettings() {
                       id="order-minimum"
                       type="number"
                       value={storeSettings.orderMinimum}
-                      onChange={(e) => setStoreSettings({ ...storeSettings, orderMinimum: parseFloat(e.target.value) })}
+                      onChange={(e) =>
+                        setStoreSettings({
+                          ...storeSettings,
+                          orderMinimum: parseFloat(e.target.value),
+                        })
+                      }
                       className="pl-9"
                     />
                   </div>
@@ -675,7 +725,9 @@ export function AdminSettings() {
                     type="number"
                     step="0.001"
                     value={storeSettings.taxRate}
-                    onChange={(e) => setStoreSettings({ ...storeSettings, taxRate: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setStoreSettings({ ...storeSettings, taxRate: parseFloat(e.target.value) })
+                    }
                   />
                 </div>
               </div>
@@ -694,20 +746,20 @@ export function AdminSettings() {
           <Card>
             <CardHeader>
               <CardTitle>Email Notifications</CardTitle>
-              <CardDescription>
-                Choose which events trigger email notifications
-              </CardDescription>
+              <CardDescription>Choose which events trigger email notifications</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>New Order</Label>
-                    <p className="text-sm text-gray-600">Receive email when a new order is placed</p>
+                    <p className="text-sm text-gray-600">
+                      Receive email when a new order is placed
+                    </p>
                   </div>
                   <Switch
                     checked={notificationSettings.emailNewOrder}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setNotificationSettings({ ...notificationSettings, emailNewOrder: checked })
                     }
                   />
@@ -720,8 +772,11 @@ export function AdminSettings() {
                   </div>
                   <Switch
                     checked={notificationSettings.emailOrderCanceled}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings({ ...notificationSettings, emailOrderCanceled: checked })
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        emailOrderCanceled: checked,
+                      })
                     }
                   />
                 </div>
@@ -733,8 +788,11 @@ export function AdminSettings() {
                   </div>
                   <Switch
                     checked={notificationSettings.emailLowInventory}
-                    onCheckedChange={(checked) => 
-                      setNotificationSettings({ ...notificationSettings, emailLowInventory: checked })
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        emailLowInventory: checked,
+                      })
                     }
                   />
                 </div>
@@ -746,7 +804,7 @@ export function AdminSettings() {
                   </div>
                   <Switch
                     checked={notificationSettings.emailNewUser}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setNotificationSettings({ ...notificationSettings, emailNewUser: checked })
                     }
                   />
@@ -759,10 +817,10 @@ export function AdminSettings() {
                   id="low-inventory-threshold"
                   type="number"
                   value={notificationSettings.lowInventoryThreshold}
-                  onChange={(e) => 
-                    setNotificationSettings({ 
-                      ...notificationSettings, 
-                      lowInventoryThreshold: parseInt(e.target.value) 
+                  onChange={(e) =>
+                    setNotificationSettings({
+                      ...notificationSettings,
+                      lowInventoryThreshold: parseInt(e.target.value),
                     })
                   }
                   className="w-32"
@@ -779,9 +837,7 @@ export function AdminSettings() {
           <Card>
             <CardHeader>
               <CardTitle>Security Settings</CardTitle>
-              <CardDescription>
-                Configure security policies and access controls
-              </CardDescription>
+              <CardDescription>Configure security policies and access controls</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
@@ -792,7 +848,7 @@ export function AdminSettings() {
                   </div>
                   <Switch
                     checked={securitySettings.twoFactorRequired}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       setSecuritySettings({ ...securitySettings, twoFactorRequired: checked })
                     }
                   />
@@ -805,10 +861,10 @@ export function AdminSettings() {
                       id="session-timeout"
                       type="number"
                       value={securitySettings.sessionTimeout}
-                      onChange={(e) => 
-                        setSecuritySettings({ 
-                          ...securitySettings, 
-                          sessionTimeout: parseInt(e.target.value) 
+                      onChange={(e) =>
+                        setSecuritySettings({
+                          ...securitySettings,
+                          sessionTimeout: parseInt(e.target.value),
                         })
                       }
                     />
@@ -819,10 +875,10 @@ export function AdminSettings() {
                       id="password-expiry"
                       type="number"
                       value={securitySettings.passwordExpiry}
-                      onChange={(e) => 
-                        setSecuritySettings({ 
-                          ...securitySettings, 
-                          passwordExpiry: parseInt(e.target.value) 
+                      onChange={(e) =>
+                        setSecuritySettings({
+                          ...securitySettings,
+                          passwordExpiry: parseInt(e.target.value),
                         })
                       }
                     />
@@ -833,10 +889,10 @@ export function AdminSettings() {
                       id="max-login-attempts"
                       type="number"
                       value={securitySettings.maxLoginAttempts}
-                      onChange={(e) => 
-                        setSecuritySettings({ 
-                          ...securitySettings, 
-                          maxLoginAttempts: parseInt(e.target.value) 
+                      onChange={(e) =>
+                        setSecuritySettings({
+                          ...securitySettings,
+                          maxLoginAttempts: parseInt(e.target.value),
                         })
                       }
                     />
@@ -847,10 +903,10 @@ export function AdminSettings() {
                       id="audit-retention"
                       type="number"
                       value={securitySettings.auditLogRetention}
-                      onChange={(e) => 
-                        setSecuritySettings({ 
-                          ...securitySettings, 
-                          auditLogRetention: parseInt(e.target.value) 
+                      onChange={(e) =>
+                        setSecuritySettings({
+                          ...securitySettings,
+                          auditLogRetention: parseInt(e.target.value),
                         })
                       }
                     />
@@ -865,7 +921,7 @@ export function AdminSettings() {
                 <p className="text-sm text-gray-600 mb-4">
                   Restrict admin access to specific IP addresses (leave empty to allow all)
                 </p>
-                
+
                 <div className="flex gap-2 mb-4">
                   <Input
                     placeholder="Enter IP address"
@@ -882,13 +938,12 @@ export function AdminSettings() {
                 {securitySettings.ipWhitelist.length > 0 && (
                   <div className="space-y-2">
                     {securitySettings.ipWhitelist.map((ip) => (
-                      <div key={ip} className="flex items-center justify-between p-2 border rounded">
+                      <div
+                        key={ip}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
                         <span className="font-mono text-sm">{ip}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeIpFromWhitelist(ip)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => removeIpFromWhitelist(ip)}>
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
@@ -902,7 +957,8 @@ export function AdminSettings() {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Security settings changes will take effect immediately and may require all users to re-authenticate.
+              Security settings changes will take effect immediately and may require all users to
+              re-authenticate.
             </AlertDescription>
           </Alert>
         </TabsContent>
@@ -911,4 +967,4 @@ export function AdminSettings() {
   );
 }
 
-export default AdminSettings
+export default AdminSettings;

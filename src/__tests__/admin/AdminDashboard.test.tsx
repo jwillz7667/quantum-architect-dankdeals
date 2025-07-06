@@ -14,17 +14,17 @@ vi.mock('@/integrations/supabase/client', () => ({
     auth: {
       getUser: vi.fn(),
       onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } }
-      }))
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
     },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: null, error: null }))
-        }))
-      }))
-    }))
-  }
+          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+      })),
+    })),
+  },
 }));
 
 const createWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -36,9 +36,7 @@ const createWrapper = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        {children}
-      </BrowserRouter>
+      <BrowserRouter>{children}</BrowserRouter>
     </QueryClientProvider>
   );
 };
@@ -59,8 +57,13 @@ describe('AdminDashboard', () => {
         checkAdminStatus: vi.fn(),
       });
 
-      render(<AdminRoute><div>Admin Content</div></AdminRoute>, { wrapper: createWrapper });
-      
+      render(
+        <AdminRoute>
+          <div>Admin Content</div>
+        </AdminRoute>,
+        { wrapper: createWrapper }
+      );
+
       expect(screen.queryByText('Admin Content')).not.toBeInTheDocument();
     });
 
@@ -74,8 +77,13 @@ describe('AdminDashboard', () => {
         checkAdminStatus: vi.fn(),
       });
 
-      render(<AdminRoute><div>Admin Content</div></AdminRoute>, { wrapper: createWrapper });
-      
+      render(
+        <AdminRoute>
+          <div>Admin Content</div>
+        </AdminRoute>,
+        { wrapper: createWrapper }
+      );
+
       expect(screen.getByRole('status')).toBeInTheDocument();
     });
 
@@ -93,8 +101,13 @@ describe('AdminDashboard', () => {
         checkAdminStatus: vi.fn(),
       });
 
-      render(<AdminRoute><div>Admin Content</div></AdminRoute>, { wrapper: createWrapper });
-      
+      render(
+        <AdminRoute>
+          <div>Admin Content</div>
+        </AdminRoute>,
+        { wrapper: createWrapper }
+      );
+
       expect(screen.getByText('Admin Content')).toBeInTheDocument();
     });
   });
@@ -119,7 +132,7 @@ describe('AdminDashboard', () => {
 
     it('should render all navigation items', () => {
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       expect(screen.getByText('Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Orders')).toBeInTheDocument();
       expect(screen.getByText('Products')).toBeInTheDocument();
@@ -132,17 +145,17 @@ describe('AdminDashboard', () => {
 
     it('should display admin user info', () => {
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       expect(screen.getByText('Admin User')).toBeInTheDocument();
       expect(screen.getByText('Administrator')).toBeInTheDocument();
     });
 
     it('should toggle mobile sidebar', () => {
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       const toggleButton = screen.getByRole('button', { name: /menu/i });
       fireEvent.click(toggleButton);
-      
+
       // Sidebar should be visible
       expect(screen.getByText('DankDeals Admin')).toBeInTheDocument();
     });
@@ -163,10 +176,10 @@ describe('AdminDashboard', () => {
       });
 
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       const signOutButton = screen.getByText('Sign Out');
       fireEvent.click(signOutButton);
-      
+
       expect(mockSignOut).toHaveBeenCalled();
     });
   });
@@ -177,13 +190,15 @@ describe('AdminDashboard', () => {
         on: vi.fn().mockReturnThis(),
         subscribe: vi.fn().mockReturnThis(),
       };
-      
+
       vi.mocked(supabase).channel = vi.fn(() => mockChannel);
-      
+
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       await waitFor(() => {
-        expect(supabase.channel).toHaveBeenCalledWith(expect.stringContaining('admin-notifications'));
+        expect(supabase.channel).toHaveBeenCalledWith(
+          expect.stringContaining('admin-notifications')
+        );
       });
     });
   });
@@ -206,17 +221,17 @@ describe('AdminDashboard', () => {
 
     it('should have proper ARIA labels', () => {
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       expect(screen.getByRole('navigation')).toBeInTheDocument();
       expect(screen.getByRole('main')).toBeInTheDocument();
     });
 
     it('should be keyboard navigable', () => {
       render(<AdminDashboard />, { wrapper: createWrapper });
-      
+
       const firstNavItem = screen.getByText('Dashboard');
       firstNavItem.focus();
-      
+
       expect(document.activeElement).toBe(firstNavItem);
     });
   });
@@ -243,7 +258,7 @@ describe('Admin Components Integration', () => {
   describe('StatsCard', () => {
     it('should render stats correctly', async () => {
       const { StatsCard } = await import('@/components/admin/StatsCard');
-      
+
       render(
         <StatsCard
           title="Total Revenue"
@@ -253,7 +268,7 @@ describe('Admin Components Integration', () => {
         />,
         { wrapper: createWrapper }
       );
-      
+
       expect(screen.getByText('Total Revenue')).toBeInTheDocument();
       expect(screen.getByText('$12,345')).toBeInTheDocument();
       expect(screen.getByText('Last 30 days')).toBeInTheDocument();
@@ -262,16 +277,11 @@ describe('Admin Components Integration', () => {
 
     it('should show loading state', async () => {
       const { StatsCard } = await import('@/components/admin/StatsCard');
-      
-      render(
-        <StatsCard
-          title="Total Revenue"
-          value="$0"
-          loading={true}
-        />,
-        { wrapper: createWrapper }
-      );
-      
+
+      render(<StatsCard title="Total Revenue" value="$0" loading={true} />, {
+        wrapper: createWrapper,
+      });
+
       expect(screen.getByText('Total Revenue')).toBeInTheDocument();
       expect(screen.getAllByRole('status').length).toBeGreaterThan(0);
     });
@@ -280,9 +290,9 @@ describe('Admin Components Integration', () => {
   describe('NotificationBell', () => {
     it('should show unread count', async () => {
       const { NotificationBell } = await import('@/components/admin/NotificationBell');
-      
+
       render(<NotificationBell />, { wrapper: createWrapper });
-      
+
       await waitFor(() => {
         const badge = screen.queryByText('2'); // Based on mock data
         expect(badge).toBeInTheDocument();
@@ -291,15 +301,15 @@ describe('Admin Components Integration', () => {
 
     it('should open dropdown on click', async () => {
       const { NotificationBell } = await import('@/components/admin/NotificationBell');
-      
+
       render(<NotificationBell />, { wrapper: createWrapper });
-      
+
       const bellButton = screen.getByRole('button');
       fireEvent.click(bellButton);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Notifications')).toBeInTheDocument();
       });
     });
   });
-}); 
+});

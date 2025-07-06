@@ -1,25 +1,25 @@
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BottomNav } from "@/components/BottomNav";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useCart } from "@/hooks/useCart";
-import { useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BottomNav } from '@/components/BottomNav';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useCart } from '@/hooks/useCart';
+import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 export default function Cart() {
-  const { 
-    items, 
-    totalItems, 
-    subtotal, 
-    taxAmount, 
-    deliveryFee, 
-    totalPrice, 
-    updateQuantity, 
-    removeItem, 
-    isLoading 
+  const {
+    items,
+    totalItems,
+    subtotal,
+    taxAmount,
+    deliveryFee,
+    totalPrice,
+    updateQuantity,
+    removeItem,
+    isLoading,
   } = useCart();
   const navigate = useNavigate();
 
@@ -65,11 +65,7 @@ export default function Cart() {
               <h2 className="text-lg font-semibold">
                 Your Items ({totalItems} {totalItems === 1 ? 'item' : 'items'})
               </h2>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/')}
-              >
+              <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
                 Continue Shopping
               </Button>
             </div>
@@ -87,7 +83,7 @@ export default function Cart() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1 min-w-0 pr-2">
@@ -110,7 +106,7 @@ export default function Cart() {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Button
@@ -184,7 +180,7 @@ export default function Cart() {
       {items.length > 0 && (
         <div className="fixed bottom-20 left-0 right-0 p-4 bg-background border-t border-border md:bottom-0">
           <div className="max-w-md mx-auto">
-            <Button 
+            <Button
               onClick={handleCheckout}
               className="w-full h-12 text-lg bg-primary hover:bg-primary-hover"
             >

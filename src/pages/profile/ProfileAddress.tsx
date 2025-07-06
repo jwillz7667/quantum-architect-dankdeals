@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Edit2, MapPin, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { BottomNav } from "@/components/BottomNav";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Plus, Trash2, Edit2, MapPin, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { BottomNav } from '@/components/BottomNav';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 interface Address {
   id: string;
@@ -48,19 +48,19 @@ export default function ProfileAddress() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    label: "",
-    street_address: "",
-    unit: "",
-    city: "Minneapolis",
-    state: "MN",
-    zip_code: "",
-    delivery_instructions: "",
-    is_default: false
+    label: '',
+    street_address: '',
+    unit: '',
+    city: 'Minneapolis',
+    state: 'MN',
+    zip_code: '',
+    delivery_instructions: '',
+    is_default: false,
   });
 
   useEffect(() => {
     if (user) {
-      fetchAddresses();
+      void fetchAddresses();
     }
   }, [user]);
 
@@ -78,9 +78,9 @@ export default function ProfileAddress() {
     } catch (error) {
       console.error('Error fetching addresses:', error);
       toast({
-        title: "Error",
-        description: "Failed to load addresses",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load addresses',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export default function ProfileAddress() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingId) {
         // Update existing address
@@ -97,30 +97,28 @@ export default function ProfileAddress() {
           .from('addresses')
           .update({
             ...formData,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
           .eq('id', editingId);
 
         if (error) throw error;
-        
+
         toast({
-          title: "Success",
-          description: "Address updated successfully"
+          title: 'Success',
+          description: 'Address updated successfully',
         });
       } else {
         // Create new address
-        const { error } = await supabase
-          .from('addresses')
-          .insert({
-            ...formData,
-            user_id: user?.id
-          });
+        const { error } = await supabase.from('addresses').insert({
+          ...formData,
+          user_id: user?.id,
+        });
 
         if (error) throw error;
-        
+
         toast({
-          title: "Success",
-          description: "Address added successfully"
+          title: 'Success',
+          description: 'Address added successfully',
         });
       }
 
@@ -138,9 +136,9 @@ export default function ProfileAddress() {
     } catch (error) {
       console.error('Error saving address:', error);
       toast({
-        title: "Error",
-        description: "Failed to save address",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to save address',
+        variant: 'destructive',
       });
     }
   };
@@ -149,12 +147,12 @@ export default function ProfileAddress() {
     setFormData({
       label: address.label,
       street_address: address.street_address,
-      unit: address.unit || "",
+      unit: address.unit || '',
       city: address.city,
       state: address.state,
       zip_code: address.zip_code,
-      delivery_instructions: address.delivery_instructions || "",
-      is_default: address.is_default
+      delivery_instructions: address.delivery_instructions || '',
+      is_default: address.is_default,
     });
     setEditingId(address.id);
     setIsEditing(true);
@@ -164,25 +162,22 @@ export default function ProfileAddress() {
     if (!deleteId) return;
 
     try {
-      const { error } = await supabase
-        .from('addresses')
-        .delete()
-        .eq('id', deleteId);
+      const { error } = await supabase.from('addresses').delete().eq('id', deleteId);
 
       if (error) throw error;
-      
+
       toast({
-        title: "Success",
-        description: "Address deleted successfully"
+        title: 'Success',
+        description: 'Address deleted successfully',
       });
-      
+
       fetchAddresses();
     } catch (error) {
       console.error('Error deleting address:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete address",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to delete address',
+        variant: 'destructive',
       });
     } finally {
       setDeleteId(null);
@@ -192,10 +187,7 @@ export default function ProfileAddress() {
   const handleSetDefault = async (addressId: string) => {
     try {
       // Set all addresses to non-default
-      await supabase
-        .from('addresses')
-        .update({ is_default: false })
-        .eq('user_id', user?.id);
+      await supabase.from('addresses').update({ is_default: false }).eq('user_id', user?.id);
 
       // Set selected address as default
       const { error } = await supabase
@@ -204,33 +196,33 @@ export default function ProfileAddress() {
         .eq('id', addressId);
 
       if (error) throw error;
-      
+
       toast({
-        title: "Success",
-        description: "Default address updated"
+        title: 'Success',
+        description: 'Default address updated',
       });
-      
+
       fetchAddresses();
     } catch (error) {
       console.error('Error setting default address:', error);
       toast({
-        title: "Error",
-        description: "Failed to update default address",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to update default address',
+        variant: 'destructive',
       });
     }
   };
 
   const resetForm = () => {
     setFormData({
-      label: "",
-      street_address: "",
-      unit: "",
-      city: "Minneapolis",
-      state: "MN",
-      zip_code: "",
-      delivery_instructions: "",
-      is_default: false
+      label: '',
+      street_address: '',
+      unit: '',
+      city: 'Minneapolis',
+      state: 'MN',
+      zip_code: '',
+      delivery_instructions: '',
+      is_default: false,
     });
     setIsEditing(false);
     setEditingId(null);
@@ -242,12 +234,7 @@ export default function ProfileAddress() {
       <MobileHeader title="Delivery Addresses" />
 
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/profile')}
-          className="mb-4"
-        >
+        <Button variant="ghost" size="sm" onClick={() => navigate('/profile')} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Profile
         </Button>
@@ -273,22 +260,22 @@ export default function ProfileAddress() {
                 <CardContent className="p-8 text-center">
                   <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground mb-4">No saved addresses yet</p>
-                  <Button onClick={() => setIsEditing(true)}>
-                    Add Your First Address
-                  </Button>
+                  <Button onClick={() => setIsEditing(true)}>Add Your First Address</Button>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
                 {addresses.map((address) => (
-                  <Card key={address.id} className={address.is_default ? "border-primary" : ""}>
+                  <Card key={address.id} className={address.is_default ? 'border-primary' : ''}>
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-semibold">{address.label}</h3>
                             {address.is_default && (
-                              <Badge variant="default" className="text-xs">Default</Badge>
+                              <Badge variant="default" className="text-xs">
+                                Default
+                              </Badge>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">
@@ -300,7 +287,8 @@ export default function ProfileAddress() {
                           </p>
                           {address.delivery_instructions && (
                             <p className="text-sm text-muted-foreground mt-2">
-                              <span className="font-medium">Instructions:</span> {address.delivery_instructions}
+                              <span className="font-medium">Instructions:</span>{' '}
+                              {address.delivery_instructions}
                             </p>
                           )}
                         </div>
@@ -314,18 +302,10 @@ export default function ProfileAddress() {
                               <Check className="h-4 w-4" />
                             </Button>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(address)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(address)}>
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteId(address.id)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => setDeleteId(address.id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -341,10 +321,8 @@ export default function ProfileAddress() {
         {isEditing && (
           <Card>
             <CardHeader>
-              <CardTitle>{editingId ? "Edit Address" : "Add New Address"}</CardTitle>
-              <CardDescription>
-                Enter your delivery address details
-              </CardDescription>
+              <CardTitle>{editingId ? 'Edit Address' : 'Add New Address'}</CardTitle>
+              <CardDescription>Enter your delivery address details</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -408,7 +386,9 @@ export default function ProfileAddress() {
                     id="delivery_instructions"
                     placeholder="Gate code, building entrance, etc."
                     value={formData.delivery_instructions}
-                    onChange={(e) => setFormData({ ...formData, delivery_instructions: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, delivery_instructions: e.target.value })
+                    }
                     rows={3}
                   />
                 </div>
@@ -428,7 +408,7 @@ export default function ProfileAddress() {
 
                 <div className="flex gap-4">
                   <Button type="submit" className="flex-1">
-                    {editingId ? "Update Address" : "Add Address"}
+                    {editingId ? 'Update Address' : 'Add Address'}
                   </Button>
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel

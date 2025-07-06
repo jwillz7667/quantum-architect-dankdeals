@@ -90,8 +90,8 @@ export function AdminDashboard() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          'fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex h-full flex-col">
@@ -105,16 +105,17 @@ export function AdminDashboard() {
             <nav className="space-y-1 px-3">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.href || 
+                const isActive =
+                  location.pathname === item.href ||
                   (item.href !== '/admin' && location.pathname.startsWith(item.href));
-                
+
                 return (
                   <Button
                     key={item.href}
-                    variant={isActive ? "secondary" : "ghost"}
+                    variant={isActive ? 'secondary' : 'ghost'}
                     className={cn(
-                      "w-full justify-start",
-                      isActive && "bg-green-50 text-green-700 hover:bg-green-100"
+                      'w-full justify-start',
+                      isActive && 'bg-green-50 text-green-700 hover:bg-green-100'
                     )}
                     onClick={() => handleNavigation(item.href)}
                   >

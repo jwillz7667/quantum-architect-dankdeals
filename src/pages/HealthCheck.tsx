@@ -85,11 +85,14 @@ export default function HealthCheck() {
 
       // Check auth service
       try {
-        const { data: { session }, error: authError } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error: authError,
+        } = await supabase.auth.getSession();
         results.checks.auth = !authError;
-        results.details!.auth = { 
+        results.details!.auth = {
           hasSession: !!session,
-          error: authError?.message 
+          error: authError?.message,
         };
       } catch (error) {
         results.checks.auth = false;
@@ -112,7 +115,6 @@ export default function HealthCheck() {
       results.details!.performance = {
         checkDuration: Date.now() - startTime,
       };
-
     } catch (error) {
       results.status = 'unhealthy';
       results.error = error instanceof Error ? error.message : 'Unknown error';
@@ -124,9 +126,7 @@ export default function HealthCheck() {
   // Simple text response for monitoring tools
   if (window.location.search.includes('format=simple')) {
     return (
-      <pre style={{ fontFamily: 'monospace', margin: '20px' }}>
-        {health.status.toUpperCase()}
-      </pre>
+      <pre style={{ fontFamily: 'monospace', margin: '20px' }}>{health.status.toUpperCase()}</pre>
     );
   }
 
@@ -143,22 +143,25 @@ export default function HealthCheck() {
   return (
     <div className="container mx-auto p-8 max-w-4xl">
       <h1 className="text-2xl font-bold mb-6">System Health Check</h1>
-      
-      <div className={`p-4 rounded-lg mb-6 ${
-        health.status === 'healthy' ? 'bg-green-100 text-green-800' :
-        health.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
-        health.status === 'unhealthy' ? 'bg-red-100 text-red-800' :
-        'bg-gray-100 text-gray-800'
-      }`}>
-        <p className="text-lg font-semibold">
-          Status: {health.status.toUpperCase()}
-        </p>
+
+      <div
+        className={`p-4 rounded-lg mb-6 ${
+          health.status === 'healthy'
+            ? 'bg-green-100 text-green-800'
+            : health.status === 'degraded'
+              ? 'bg-yellow-100 text-yellow-800'
+              : health.status === 'unhealthy'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-gray-100 text-gray-800'
+        }`}
+      >
+        <p className="text-lg font-semibold">Status: {health.status.toUpperCase()}</p>
         <p className="text-sm">Last checked: {health.timestamp}</p>
       </div>
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Service Checks</h2>
-        
+
         {Object.entries(health.checks).map(([service, status]) => (
           <div key={service} className="flex items-center justify-between p-3 border rounded">
             <span className="capitalize">{service.replace(/([A-Z])/g, ' $1').trim()}</span>
@@ -188,4 +191,4 @@ export default function HealthCheck() {
       )}
     </div>
   );
-} 
+}

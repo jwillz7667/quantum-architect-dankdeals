@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
-import { OptimizedImage } from "@/components/OptimizedImage";
+import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
+import { OptimizedImage } from '@/components/OptimizedImage';
 
 interface ProductCardProps {
   id: string;

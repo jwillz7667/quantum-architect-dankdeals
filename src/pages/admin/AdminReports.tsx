@@ -4,14 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  FileText, 
-  Download, 
+import {
+  FileText,
+  Download,
   Calendar,
   TrendingUp,
   Package,
@@ -19,7 +25,7 @@ import {
   ShoppingCart,
   DollarSign,
   BarChart3,
-  FileSpreadsheet
+  FileSpreadsheet,
 } from 'lucide-react';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { Database } from '@/integrations/supabase/types';
@@ -46,11 +52,15 @@ interface DateRange {
 
 interface OrderWithRelations extends OrderRow {
   profiles?: Pick<ProfileRow, 'first_name' | 'last_name' | 'email'> | null;
-  order_items?: Array<OrderItemRow & {
-    product_variant?: ProductVariantRow & {
-      product?: Pick<ProductRow, 'name' | 'category'> | null;
-    } | null;
-  }> | null;
+  order_items?: Array<
+    OrderItemRow & {
+      product_variant?:
+        | (ProductVariantRow & {
+            product?: Pick<ProductRow, 'name' | 'category'> | null;
+          })
+        | null;
+    }
+  > | null;
 }
 
 interface ProductVariantWithProduct extends ProductVariantRow {
@@ -72,50 +82,50 @@ const reportTypes: ReportType[] = [
     name: 'Sales Summary',
     description: 'Overview of sales performance including revenue, orders, and trends',
     icon: TrendingUp,
-    category: 'sales'
+    category: 'sales',
   },
   {
     id: 'order-details',
     name: 'Order Details',
     description: 'Detailed breakdown of all orders with customer information',
     icon: ShoppingCart,
-    category: 'sales'
+    category: 'sales',
   },
   {
     id: 'product-performance',
     name: 'Product Performance',
     description: 'Analysis of product sales, revenue, and popularity',
     icon: Package,
-    category: 'inventory'
+    category: 'inventory',
   },
   {
     id: 'inventory-status',
     name: 'Inventory Status',
     description: 'Current stock levels and low inventory alerts',
     icon: BarChart3,
-    category: 'inventory'
+    category: 'inventory',
   },
   {
     id: 'customer-activity',
     name: 'Customer Activity',
     description: 'User engagement, purchase patterns, and loyalty metrics',
     icon: Users,
-    category: 'users'
+    category: 'users',
   },
   {
     id: 'financial-summary',
     name: 'Financial Summary',
     description: 'Revenue, taxes, fees, and profit margins',
     icon: DollarSign,
-    category: 'financial'
-  }
+    category: 'financial',
+  },
 ];
 
 export function AdminReports() {
   const [selectedReport, setSelectedReport] = useState<string>('');
   const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-    to: new Date()
+    to: new Date(),
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
@@ -124,9 +134,9 @@ export function AdminReports() {
   const generateReport = async () => {
     if (!selectedReport) {
       toast({
-        title: "Select a Report",
-        description: "Please select a report type to generate.",
-        variant: "destructive"
+        title: 'Select a Report',
+        description: 'Please select a report type to generate.',
+        variant: 'destructive',
       });
       return;
     }
@@ -153,17 +163,17 @@ export function AdminReports() {
           await generateFinancialSummary();
           break;
       }
-      
+
       toast({
-        title: "Report Generated",
-        description: "Your report has been generated successfully."
+        title: 'Report Generated',
+        description: 'Your report has been generated successfully.',
       });
     } catch (error) {
       console.error('Error generating report:', error);
       toast({
-        title: "Error",
-        description: "Failed to generate report. Please try again.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to generate report. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsGenerating(false);
@@ -173,7 +183,8 @@ export function AdminReports() {
   const generateSalesSummary = async () => {
     const { data, error } = await supabase
       .from('orders')
-      .select(`
+      .select(
+        `
         *,
         order_items(
           quantity,
@@ -185,7 +196,8 @@ export function AdminReports() {
             products(name, category)
           )
         )
-      `)
+      `
+      )
       .gte('created_at', dateRange.from.toISOString())
       .lte('created_at', dateRange.to.toISOString())
       .neq('status', 'cancelled');
@@ -197,7 +209,8 @@ export function AdminReports() {
   const generateOrderDetails = async () => {
     const { data, error } = await supabase
       .from('orders')
-      .select(`
+      .select(
+        `
         *,
         profiles(first_name, last_name, email),
         order_items(
@@ -210,7 +223,8 @@ export function AdminReports() {
             products(name, category)
           )
         )
-      `)
+      `
+      )
       .gte('created_at', dateRange.from.toISOString())
       .lte('created_at', dateRange.to.toISOString())
       .order('created_at', { ascending: false });
@@ -220,11 +234,10 @@ export function AdminReports() {
   };
 
   const generateProductPerformance = async () => {
-    const { data: stats } = await supabase
-      .rpc('get_product_performance', {
-        date_from: dateRange.from.toISOString(),
-        date_to: dateRange.to.toISOString()
-      });
+    const { data: stats } = await supabase.rpc('get_product_performance', {
+      date_from: dateRange.from.toISOString(),
+      date_to: dateRange.to.toISOString(),
+    });
 
     setReportData({ type: 'product-performance', data: stats as Json });
   };
@@ -232,10 +245,12 @@ export function AdminReports() {
   const generateInventoryStatus = async () => {
     const { data, error } = await supabase
       .from('product_variants')
-      .select(`
+      .select(
+        `
         *,
         products(name, category)
-      `)
+      `
+      )
       .order('inventory_count', { ascending: true });
 
     if (error) throw error;
@@ -245,10 +260,12 @@ export function AdminReports() {
   const generateCustomerActivity = async () => {
     const { data, error } = await supabase
       .from('profiles')
-      .select(`
+      .select(
+        `
         *,
         orders(count)
-      `)
+      `
+      )
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -256,11 +273,10 @@ export function AdminReports() {
   };
 
   const generateFinancialSummary = async () => {
-    const { data: stats } = await supabase
-      .rpc('get_dashboard_stats', {
-        date_from: dateRange.from.toISOString(),
-        date_to: dateRange.to.toISOString()
-      });
+    const { data: stats } = await supabase.rpc('get_dashboard_stats', {
+      date_from: dateRange.from.toISOString(),
+      date_to: dateRange.to.toISOString(),
+    });
 
     setReportData({ type: 'financial-summary', data: stats as Json });
   };
@@ -268,15 +284,17 @@ export function AdminReports() {
   const exportReport = (exportFormat: 'csv' | 'json' | 'pdf') => {
     if (!reportData) {
       toast({
-        title: "No Report",
-        description: "Please generate a report first.",
-        variant: "destructive"
+        title: 'No Report',
+        description: 'Please generate a report first.',
+        variant: 'destructive',
       });
       return;
     }
 
     if (exportFormat === 'json') {
-      const blob = new Blob([JSON.stringify(reportData.data, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(reportData.data, null, 2)], {
+        type: 'application/json',
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -285,25 +303,28 @@ export function AdminReports() {
     } else if (exportFormat === 'csv') {
       // Convert data to CSV format
       let csvContent = '';
-      const reportName = reportTypes.find(r => r.id === reportData.type)?.name || 'Report';
-      
+      const reportName = reportTypes.find((r) => r.id === reportData.type)?.name || 'Report';
+
       if (Array.isArray(reportData.data)) {
         // Handle array data
         if (reportData.data.length > 0) {
           // Create headers from first object keys
           const firstItem = reportData.data[0] as Record<string, unknown>;
-          const headers = Object.keys(firstItem).filter(key => 
-            typeof firstItem[key] !== 'object' || firstItem[key] === null
+          const headers = Object.keys(firstItem).filter(
+            (key) => typeof firstItem[key] !== 'object' || firstItem[key] === null
           );
           csvContent = headers.join(',') + '\n';
-          
+
           // Add data rows
           reportData.data.forEach((row: unknown) => {
             const rowData = row as Record<string, unknown>;
-            const values = headers.map(header => {
+            const values = headers.map((header) => {
               let value = rowData[header];
               if (value === null || value === undefined) value = '';
-              if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
+              if (
+                typeof value === 'string' &&
+                (value.includes(',') || value.includes('"') || value.includes('\n'))
+              ) {
                 value = `"${value.replace(/"/g, '""')}"`;
               }
               return value;
@@ -313,7 +334,10 @@ export function AdminReports() {
         }
       } else if (typeof reportData.data === 'object') {
         // Handle object data (like dashboard stats)
-        const flattenObject = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
+        const flattenObject = (
+          obj: Record<string, unknown>,
+          prefix = ''
+        ): Record<string, unknown> => {
           return Object.keys(obj).reduce((acc: Record<string, unknown>, key) => {
             const value = obj[key];
             const newKey = prefix ? `${prefix}_${key}` : key;
@@ -323,14 +347,14 @@ export function AdminReports() {
             return { ...acc, [newKey]: value };
           }, {});
         };
-        
+
         const flattened = flattenObject(reportData.data as Record<string, unknown>);
         const headers = Object.keys(flattened);
         const values = Object.values(flattened);
-        
+
         csvContent = headers.join(',') + '\n' + values.join(',');
       }
-      
+
       if (csvContent) {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -339,18 +363,18 @@ export function AdminReports() {
         a.download = `dankdeals-${selectedReport}-${formatDate(new Date(), 'yyyy-MM-dd')}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        
+
         toast({
-          title: "Export Complete",
-          description: `${reportName} has been exported as CSV.`
+          title: 'Export Complete',
+          description: `${reportName} has been exported as CSV.`,
         });
       }
     } else if (exportFormat === 'pdf') {
       // For PDF, we'll just create a simple text version for now
       toast({
-        title: "PDF Export",
-        description: "PDF export requires additional setup. Use CSV or JSON format for now.",
-        variant: "default"
+        title: 'PDF Export',
+        description: 'PDF export requires additional setup. Use CSV or JSON format for now.',
+        variant: 'default',
       });
     }
   };
@@ -404,10 +428,7 @@ export function AdminReports() {
             </div>
 
             <div className="flex justify-between items-center">
-              <Button
-                onClick={generateReport}
-                disabled={!selectedReport || isGenerating}
-              >
+              <Button onClick={generateReport} disabled={!selectedReport || isGenerating}>
                 {isGenerating ? (
                   <>Generating Report...</>
                 ) : (
@@ -420,24 +441,15 @@ export function AdminReports() {
 
               {reportData && (
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => exportReport('json')}
-                  >
+                  <Button variant="outline" onClick={() => exportReport('json')}>
                     <FileSpreadsheet className="mr-2 h-4 w-4" />
                     Export JSON
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => exportReport('csv')}
-                  >
+                  <Button variant="outline" onClick={() => exportReport('csv')}>
                     <Download className="mr-2 h-4 w-4" />
                     Export CSV
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => exportReport('pdf')}
-                  >
+                  <Button variant="outline" onClick={() => exportReport('pdf')}>
                     <FileText className="mr-2 h-4 w-4" />
                     Export PDF
                   </Button>
@@ -453,7 +465,7 @@ export function AdminReports() {
           <CardHeader>
             <CardTitle>Report Preview</CardTitle>
             <CardDescription>
-              {reportTypes.find(r => r.id === reportData.type)?.description}
+              {reportTypes.find((r) => r.id === reportData.type)?.description}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -496,9 +508,7 @@ export function AdminReports() {
           <Card>
             <CardHeader>
               <CardTitle>Report History</CardTitle>
-              <CardDescription>
-                View and download previously generated reports
-              </CardDescription>
+              <CardDescription>View and download previously generated reports</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-gray-500">
@@ -511,4 +521,5 @@ export function AdminReports() {
       </Tabs>
     </div>
   );
-} export default AdminReports
+}
+export default AdminReports;

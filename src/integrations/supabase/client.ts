@@ -7,13 +7,14 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Production environment validation
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  const errorMessage = 'Missing required Supabase environment variables. Please check your .env configuration.';
-  
+  const errorMessage =
+    'Missing required Supabase environment variables. Please check your .env configuration.';
+
   if (import.meta.env.DEV) {
     console.error(errorMessage);
     console.error('Required variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY');
   }
-  
+
   throw new Error(errorMessage);
 }
 
@@ -24,7 +25,7 @@ if (import.meta.env.PROD) {
   } catch {
     throw new Error('Invalid VITE_SUPABASE_URL format');
   }
-  
+
   // Ensure we're not using example/placeholder values
   if (SUPABASE_URL.includes('your-project') || SUPABASE_PUBLISHABLE_KEY.includes('your-')) {
     throw new Error('Production environment detected but using placeholder Supabase credentials');
@@ -37,5 +38,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-  }
+  },
 });

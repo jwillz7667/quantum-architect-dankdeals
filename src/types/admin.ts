@@ -256,7 +256,7 @@ export interface UserFilters {
 }
 
 // Report Types
-export type ReportType = 
+export type ReportType =
   | 'sales-summary'
   | 'order-details'
   | 'product-performance'
@@ -287,4 +287,4 @@ export interface AdminUser extends User {
   firstName?: string;
   lastName?: string;
   displayName?: string;
-} 
+}

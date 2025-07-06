@@ -30,7 +30,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Eye, Shield, CheckCircle, XCircle, Mail, Phone, Calendar, MapPin, Users, Activity, UserCheck, UserX, ShoppingBag } from 'lucide-react';
+import {
+  Search,
+  Eye,
+  Shield,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Users,
+  Activity,
+  UserCheck,
+  UserX,
+  ShoppingBag,
+} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Database } from '@/integrations/supabase/types';
 import { Json } from '@/integrations/supabase/types';
@@ -82,27 +97,34 @@ export function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch profiles with order count
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
+        .select(
+          `
           *,
           orders (count)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
 
       // Attempt to fetch auth users (may fail due to permissions)
       try {
-        const { data: { users: authUsersList }, error: authError } = await supabase.auth.admin.listUsers();
+        const {
+          data: { users: authUsersList },
+          error: authError,
+        } = await supabase.auth.admin.listUsers();
         if (!authError && authUsersList) {
-          setAuthUsers(authUsersList.map(u => ({
-            id: u.id,
-            email: u.email || '',
-            created_at: u.created_at || new Date().toISOString()
-          })));
+          setAuthUsers(
+            authUsersList.map((u) => ({
+              id: u.id,
+              email: u.email || '',
+              created_at: u.created_at || new Date().toISOString(),
+            }))
+          );
         }
       } catch (authErr) {
         console.warn('Could not fetch auth users:', authErr);
@@ -110,13 +132,14 @@ export function AdminUsers() {
       }
 
       // Transform the data to include order count
-      const transformedUsers = profiles?.map(profile => {
-        const orderData = profile.orders as unknown as { count: number }[];
-        return {
-          ...profile,
-          order_count: orderData?.[0]?.count || 0
-        };
-      }) || [];
+      const transformedUsers =
+        profiles?.map((profile) => {
+          const orderData = profile.orders as unknown as { count: number }[];
+          return {
+            ...profile,
+            order_count: orderData?.[0]?.count || 0,
+          };
+        }) || [];
 
       setUsers(transformedUsers);
     } catch (err) {
@@ -128,7 +151,7 @@ export function AdminUsers() {
   };
 
   const getAuthEmail = (userId: string): string => {
-    const authUser = authUsers.find(u => u.id === userId);
+    const authUser = authUsers.find((u) => u.id === userId);
     return authUser?.email || '';
   };
 
@@ -140,7 +163,7 @@ export function AdminUsers() {
         .eq('user_id', userId);
 
       if (error) throw error;
-      
+
       await fetchUsers();
     } catch (err) {
       console.error('Error suspending user:', err);
@@ -156,7 +179,7 @@ export function AdminUsers() {
         .eq('user_id', userId);
 
       if (error) throw error;
-      
+
       await fetchUsers();
     } catch (err) {
       console.error('Error activating user:', err);
@@ -164,20 +187,20 @@ export function AdminUsers() {
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
       user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       getAuthEmail(user.user_id).toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     let matchesFilter = true;
     if (filterStatus === 'active') {
       matchesFilter = !user.is_suspended;
     } else if (filterStatus === 'suspended') {
       matchesFilter = user.is_suspended === true;
     }
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -211,8 +234,8 @@ export function AdminUsers() {
 
   const getUserStats = () => {
     const totalUsers = users.length;
-    const activeUsers = users.filter(u => !u.is_suspended).length;
-    const suspendedUsers = users.filter(u => u.is_suspended).length;
+    const activeUsers = users.filter((u) => !u.is_suspended).length;
+    const suspendedUsers = users.filter((u) => u.is_suspended).length;
 
     return { totalUsers, activeUsers, suspendedUsers };
   };
@@ -235,9 +258,7 @@ export function AdminUsers() {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          You don't have permission to manage users.
-        </AlertDescription>
+        <AlertDescription>You don't have permission to manage users.</AlertDescription>
       </Alert>
     );
   }
@@ -305,9 +326,7 @@ export function AdminUsers() {
       <Card>
         <CardHeader>
           <CardTitle>User Management</CardTitle>
-          <CardDescription>
-            View and manage all registered users
-          </CardDescription>
+          <CardDescription>View and manage all registered users</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Filters */}
@@ -349,10 +368,11 @@ export function AdminUsers() {
               <TableBody>
                 {filteredUsers.map((user) => {
                   const email = user.email || getAuthEmail(user.user_id);
-                  const name = user.first_name || user.last_name 
-                    ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
-                    : 'Unknown User';
-                  
+                  const name =
+                    user.first_name || user.last_name
+                      ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                      : 'Unknown User';
+
                   return (
                     <TableRow key={user.user_id}>
                       <TableCell>
@@ -452,7 +472,7 @@ export function AdminUsers() {
                     <TabsTrigger value="orders">Order History</TabsTrigger>
                     <TabsTrigger value="activity">Activity</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="info" className="space-y-4">
                     <div className="grid gap-4">
                       <div className="flex items-center gap-2">
@@ -466,25 +486,30 @@ export function AdminUsers() {
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                          {parseDeliveryAddress(selectedUser.delivery_address)?.address || 'No address on file'}
+                          {parseDeliveryAddress(selectedUser.delivery_address)?.address ||
+                            'No address on file'}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                          Last sign in: {selectedUser.last_sign_in_at 
+                          Last sign in:{' '}
+                          {selectedUser.last_sign_in_at
                             ? format(new Date(selectedUser.last_sign_in_at), 'PPpp')
                             : 'Never'}
                         </span>
                       </div>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="orders" className="space-y-4">
                     {orderHistory.length > 0 ? (
                       <div className="space-y-2">
                         {orderHistory.map((order) => (
-                          <div key={order.id} className="flex justify-between p-3 bg-gray-50 rounded">
+                          <div
+                            key={order.id}
+                            className="flex justify-between p-3 bg-gray-50 rounded"
+                          >
                             <div>
                               <p className="font-medium">Order #{order.order_number}</p>
                               <p className="text-sm text-muted-foreground">
@@ -504,7 +529,7 @@ export function AdminUsers() {
                       <p className="text-center text-muted-foreground">No orders found</p>
                     )}
                   </TabsContent>
-                  
+
                   <TabsContent value="activity" className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex justify-between p-3 bg-gray-50 rounded">
@@ -514,14 +539,19 @@ export function AdminUsers() {
                       <div className="flex justify-between p-3 bg-gray-50 rounded">
                         <span className="text-sm">Total Spent</span>
                         <span className="font-medium">
-                          {formatCurrency(orderHistory.reduce((sum, order) => sum + order.total_amount, 0))}
+                          {formatCurrency(
+                            orderHistory.reduce((sum, order) => sum + order.total_amount, 0)
+                          )}
                         </span>
                       </div>
                       <div className="flex justify-between p-3 bg-gray-50 rounded">
                         <span className="text-sm">Average Order Value</span>
                         <span className="font-medium">
-                          {orderHistory.length > 0 
-                            ? formatCurrency(orderHistory.reduce((sum, order) => sum + order.total_amount, 0) / orderHistory.length)
+                          {orderHistory.length > 0
+                            ? formatCurrency(
+                                orderHistory.reduce((sum, order) => sum + order.total_amount, 0) /
+                                  orderHistory.length
+                              )
                             : '$0.00'}
                         </span>
                       </div>
@@ -537,4 +567,4 @@ export function AdminUsers() {
   );
 }
 
-export default AdminUsers
+export default AdminUsers;

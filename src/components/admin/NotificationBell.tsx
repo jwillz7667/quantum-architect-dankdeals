@@ -17,13 +17,8 @@ import { useAdminNotifications, type AdminNotification } from '@/hooks/useAdminN
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-  } = useAdminNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
+    useAdminNotifications();
 
   const getNotificationIcon = (type: AdminNotification['type']) => {
     switch (type) {
@@ -95,7 +90,7 @@ export function NotificationBell() {
             notifications.map((notification) => {
               const Icon = getNotificationIcon(notification.type);
               const iconColor = getNotificationColor(notification.type);
-              
+
               return (
                 <DropdownMenuItem
                   key={notification.id}
@@ -112,12 +107,8 @@ export function NotificationBell() {
                 >
                   <Icon className={cn('h-5 w-5 mt-0.5', iconColor)} />
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {notification.title}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {notification.message}
-                    </p>
+                    <p className="text-sm font-medium leading-none">{notification.title}</p>
+                    <p className="text-sm text-gray-600">{notification.message}</p>
                     <p className="text-xs text-gray-500">
                       {formatDistanceToNow(notification.createdAt, { addSuffix: true })}
                     </p>
@@ -156,4 +147,4 @@ export function NotificationBell() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}

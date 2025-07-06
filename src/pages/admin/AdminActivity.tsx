@@ -42,14 +42,16 @@ export function AdminActivity() {
     try {
       const { data, error } = await supabase
         .from('admin_activity_logs')
-        .select(`
+        .select(
+          `
           *,
           admin:profiles!admin_activity_logs_admin_id_fkey (
             user_id,
             first_name,
             last_name
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -57,8 +59,8 @@ export function AdminActivity() {
 
       // Fetch admin emails
       if (data) {
-        const adminIds = [...new Set(data.map(log => log.admin_id))];
-        
+        const adminIds = [...new Set(data.map((log) => log.admin_id))];
+
         // Try to fetch auth data, but continue if it fails
         let authData: { users: AuthUser[] } | null = null;
         try {
@@ -67,7 +69,7 @@ export function AdminActivity() {
         } catch (authError) {
           console.error('Could not fetch auth data:', authError);
         }
-        
+
         const enrichedData = data.map((log) => {
           const authUser = authData?.users?.find((u) => u.id === log.admin_id);
           return {
@@ -75,7 +77,7 @@ export function AdminActivity() {
             admin: {
               ...log.admin,
               email: authUser?.email || 'Unknown',
-            }
+            },
           } as AdminActivityLog;
         });
 
@@ -84,9 +86,9 @@ export function AdminActivity() {
     } catch (error) {
       console.error('Error fetching activity logs:', error);
       toast({
-        title: "Error",
-        description: "Failed to load activity logs",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load activity logs',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -99,11 +101,13 @@ export function AdminActivity() {
       return;
     }
 
-    const filtered = activities.filter(activity => {
+    const filtered = activities.filter((activity) => {
       const searchLower = searchTerm.toLowerCase();
-      const adminName = `${activity.admin.first_name || ''} ${activity.admin.last_name || ''}`.toLowerCase();
+      const adminName =
+        `${activity.admin.first_name || ''} ${activity.admin.last_name || ''}`.toLowerCase();
       return (
-        (activity.entity_type?.toLowerCase().includes(searchLower) || false) ||
+        activity.entity_type?.toLowerCase().includes(searchLower) ||
+        false ||
         activity.action.toLowerCase().includes(searchLower) ||
         activity.admin.email.toLowerCase().includes(searchLower) ||
         adminName.includes(searchLower)
@@ -124,13 +128,15 @@ export function AdminActivity() {
   const exportLogs = () => {
     const csv = [
       ['Date', 'Admin', 'Action', 'Entity Type', 'Entity ID'].join(','),
-      ...filteredActivities.map(log => [
-        format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
-        `${log.admin.first_name || ''} ${log.admin.last_name || ''} (${log.admin.email})`,
-        log.action,
-        log.entity_type || 'N/A',
-        log.entity_id || 'N/A'
-      ].join(','))
+      ...filteredActivities.map((log) =>
+        [
+          format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
+          `${log.admin.first_name || ''} ${log.admin.last_name || ''} (${log.admin.email})`,
+          log.action,
+          log.entity_type || 'N/A',
+          log.entity_id || 'N/A',
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -142,11 +148,7 @@ export function AdminActivity() {
   };
 
   const getActionBadge = (action: string) => {
-    return (
-      <Badge className={actionColors[action] || 'bg-gray-100 text-gray-800'}>
-        {action}
-      </Badge>
-    );
+    return <Badge className={actionColors[action] || 'bg-gray-100 text-gray-800'}>{action}</Badge>;
   };
 
   if (isLoading) {
@@ -228,7 +230,9 @@ export function AdminActivity() {
                           <p className="font-medium capitalize">
                             {activity.entity_type.replace('_', ' ')}
                           </p>
-                          <p className="text-xs text-muted-foreground">{activity.entity_id || 'N/A'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {activity.entity_id || 'N/A'}
+                          </p>
                         </div>
                       )}
                     </TableCell>
@@ -259,4 +263,4 @@ export function AdminActivity() {
   );
 }
 
-export default AdminActivity
+export default AdminActivity;

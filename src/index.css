@@ -46,8 +46,17 @@
     /* Custom gradients for cannabis theme */
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
     --gradient-card: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --gradient-overlay: linear-gradient(to top, hsl(0 0% 0% / 0.6), hsl(0 0% 0% / 0.3), transparent);
-    --gradient-mobile-header: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--primary-hover)));
+    --gradient-overlay: linear-gradient(
+      to top,
+      hsl(0 0% 0% / 0.6),
+      hsl(0 0% 0% / 0.3),
+      transparent
+    );
+    --gradient-mobile-header: linear-gradient(
+      180deg,
+      hsl(var(--primary)),
+      hsl(var(--primary-hover))
+    );
 
     /* Shadows */
     --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.08);
@@ -133,18 +142,32 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @layer base {

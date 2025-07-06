@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ProductsFilterContextType {
   searchQuery: string;
@@ -11,22 +11,24 @@ interface ProductsFilterContextType {
 const ProductsFilterContext = createContext<ProductsFilterContextType | undefined>(undefined);
 
 export function ProductsFilterProvider({ children }: { children: ReactNode }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const clearFilters = () => {
-    setSearchQuery("");
+    setSearchQuery('');
     setSelectedCategory(null);
   };
 
   return (
-    <ProductsFilterContext.Provider value={{
-      searchQuery,
-      selectedCategory,
-      setSearchQuery,
-      setSelectedCategory,
-      clearFilters
-    }}>
+    <ProductsFilterContext.Provider
+      value={{
+        searchQuery,
+        selectedCategory,
+        setSearchQuery,
+        setSelectedCategory,
+        clearFilters,
+      }}
+    >
       {children}
     </ProductsFilterContext.Provider>
   );

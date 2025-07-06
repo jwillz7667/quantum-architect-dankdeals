@@ -1,20 +1,19 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { useCart } from "@/hooks/useCart";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { BottomNav } from '@/components/BottomNav';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface DeliveryAddress {
   street: string;
@@ -29,20 +28,20 @@ export default function CheckoutAddress() {
   const { items, totalItems, totalPrice } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [address, setAddress] = useState<DeliveryAddress>({
     street: '',
     apartment: '',
     city: '',
     state: 'MN',
     zipCode: '',
-    deliveryInstructions: ''
+    deliveryInstructions: '',
   });
-  
+
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isValidAddress, setIsValidAddress] = useState<boolean | null>(null);
-  const [deliveryFee, setDeliveryFee] = useState<number>(5.00);
+  const [deliveryFee, setDeliveryFee] = useState<number>(5.0);
   const [estimatedTime, setEstimatedTime] = useState<string>('30-60 minutes');
 
   // Redirect if cart is empty
@@ -56,7 +55,7 @@ export default function CheckoutAddress() {
   useEffect(() => {
     const loadSavedAddress = async () => {
       if (!user) return;
-      
+
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -66,25 +65,25 @@ export default function CheckoutAddress() {
 
         if (error || !data?.delivery_address) return;
 
-        const savedAddress = data.delivery_address as any;
+        const savedAddress = data.delivery_address as DeliveryAddress;
         setAddress({
           street: savedAddress.street || '',
           apartment: savedAddress.apartment || '',
           city: savedAddress.city || '',
           state: savedAddress.state || 'MN',
           zipCode: savedAddress.zipCode || '',
-          deliveryInstructions: savedAddress.deliveryInstructions || ''
+          deliveryInstructions: savedAddress.deliveryInstructions || '',
         });
       } catch (error) {
         console.error('Error loading saved address:', error);
       }
     };
 
-    loadSavedAddress();
+    void loadSavedAddress();
   }, [user]);
 
   const handleInputChange = (field: keyof DeliveryAddress, value: string) => {
-    setAddress(prev => ({ ...prev, [field]: value }));
+    setAddress((prev) => ({ ...prev, [field]: value }));
     setIsValidAddress(null);
     setValidationError(null);
   };
@@ -102,22 +101,24 @@ export default function CheckoutAddress() {
       // Check if address is in delivery zone
       // In a real app, this would validate against delivery zones
       const minnesotaZipPrefixes = ['550', '551', '552', '553', '554', '555'];
-      const isInDeliveryZone = minnesotaZipPrefixes.some(prefix => 
+      const isInDeliveryZone = minnesotaZipPrefixes.some((prefix) =>
         address.zipCode.startsWith(prefix)
       );
 
       if (!isInDeliveryZone) {
-        throw new Error('Sorry, we don\'t deliver to this area yet. We currently serve the Minneapolis-St. Paul metro area.');
+        throw new Error(
+          "Sorry, we don't deliver to this area yet. We currently serve the Minneapolis-St. Paul metro area."
+        );
       }
 
       // Calculate delivery fee and time based on location
       // This is simplified - in reality you'd use a delivery zone lookup
       const baseZipCode = address.zipCode.substring(0, 3);
       if (['550', '551'].includes(baseZipCode)) {
-        setDeliveryFee(5.00);
+        setDeliveryFee(5.0);
         setEstimatedTime('30-45 minutes');
       } else {
-        setDeliveryFee(7.50);
+        setDeliveryFee(7.5);
         setEstimatedTime('45-60 minutes');
       }
 
@@ -145,8 +146,8 @@ export default function CheckoutAddress() {
             delivery_address: {
               ...address,
               deliveryFee,
-              estimatedTime
-            }
+              estimatedTime,
+            },
           })
           .eq('user_id', user.id);
       } catch (error) {
@@ -213,7 +214,7 @@ export default function CheckoutAddress() {
                 placeholder="123 Main Street"
                 value={address.street}
                 onChange={(e) => handleInputChange('street', e.target.value)}
-                className={validationError && !address.street ? "border-destructive" : ""}
+                className={validationError && !address.street ? 'border-destructive' : ''}
               />
             </div>
 
@@ -235,17 +236,12 @@ export default function CheckoutAddress() {
                   placeholder="Minneapolis"
                   value={address.city}
                   onChange={(e) => handleInputChange('city', e.target.value)}
-                  className={validationError && !address.city ? "border-destructive" : ""}
+                  className={validationError && !address.city ? 'border-destructive' : ''}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value="MN"
-                  disabled
-                  className="bg-muted"
-                />
+                <Input id="state" value="MN" disabled className="bg-muted" />
               </div>
             </div>
 
@@ -255,8 +251,10 @@ export default function CheckoutAddress() {
                 id="zipCode"
                 placeholder="55401"
                 value={address.zipCode}
-                onChange={(e) => handleInputChange('zipCode', e.target.value.replace(/\D/g, '').substring(0, 5))}
-                className={validationError && !address.zipCode ? "border-destructive" : ""}
+                onChange={(e) =>
+                  handleInputChange('zipCode', e.target.value.replace(/\D/g, '').substring(0, 5))
+                }
+                className={validationError && !address.zipCode ? 'border-destructive' : ''}
               />
             </div>
 
@@ -273,8 +271,8 @@ export default function CheckoutAddress() {
 
             {/* Validate Button */}
             {!isValidAddress && (
-              <Button 
-                onClick={validateAddress} 
+              <Button
+                onClick={validateAddress}
                 disabled={isValidating}
                 variant="outline"
                 className="w-full"
@@ -321,19 +319,11 @@ export default function CheckoutAddress() {
 
         {/* Navigation */}
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/cart')}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={() => navigate('/cart')} className="flex-1">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Button>
-          <Button 
-            onClick={handleContinue}
-            disabled={!isValidAddress}
-            className="flex-1"
-          >
+          <Button onClick={handleContinue} disabled={!isValidAddress} className="flex-1">
             Continue
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -343,4 +333,4 @@ export default function CheckoutAddress() {
       <BottomNav />
     </div>
   );
-} 
+}

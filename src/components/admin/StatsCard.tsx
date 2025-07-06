@@ -26,11 +26,11 @@ export function StatsCard({
 }: StatsCardProps) {
   const getTrendIcon = () => {
     if (!trend) return null;
-    
+
     if (trend.value === 0) {
       return <MinusIcon className="h-4 w-4 text-gray-500" />;
     }
-    
+
     return trend.isPositive ? (
       <ArrowUpIcon className="h-4 w-4 text-green-600" />
     ) : (
@@ -53,9 +53,7 @@ export function StatsCard({
         <CardContent>
           <div className="space-y-1">
             <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
-            {description && (
-              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mt-1" />
-            )}
+            {description && <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mt-1" />}
           </div>
         </CardContent>
       </Card>
@@ -75,17 +73,13 @@ export function StatsCard({
             {trend && (
               <div className={cn('flex items-center gap-1', getTrendColor())}>
                 {getTrendIcon()}
-                <span className="text-xs font-medium">
-                  {Math.abs(trend.value)}%
-                </span>
+                <span className="text-xs font-medium">{Math.abs(trend.value)}%</span>
               </div>
             )}
-            {description && (
-              <p className="text-xs text-muted-foreground">{description}</p>
-            )}
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
           </div>
         )}
       </CardContent>
     </Card>
   );
-} 
+}

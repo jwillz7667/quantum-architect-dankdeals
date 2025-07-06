@@ -1,25 +1,27 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MobileHeader } from "@/components/MobileHeader";
-import { DesktopHeader } from "@/components/DesktopHeader";
-import { BottomNav } from "@/components/BottomNav";
-import { CheckCircle, Clock, MapPin, ArrowRight, Home } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { MobileHeader } from '@/components/MobileHeader';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { BottomNav } from '@/components/BottomNav';
+import { CheckCircle, Clock, MapPin, ArrowRight, Home } from 'lucide-react';
 
 export default function CheckoutComplete() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const orderNumber = searchParams.get('order');
-  
+
   const [estimatedDelivery, setEstimatedDelivery] = useState<string>('');
 
   useEffect(() => {
     // Calculate estimated delivery time (45 minutes from now)
     const now = new Date();
     const deliveryTime = new Date(now.getTime() + 45 * 60000);
-    setEstimatedDelivery(deliveryTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    setEstimatedDelivery(
+      deliveryTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    );
   }, []);
 
   if (!orderNumber) {
@@ -71,9 +73,7 @@ export default function CheckoutComplete() {
                 <Clock className="w-5 h-5 text-primary" />
                 <div>
                   <p className="font-medium">Estimated Delivery</p>
-                  <p className="text-sm text-muted-foreground">
-                    Today around {estimatedDelivery}
-                  </p>
+                  <p className="text-sm text-muted-foreground">Today around {estimatedDelivery}</p>
                 </div>
               </div>
 
@@ -81,9 +81,7 @@ export default function CheckoutComplete() {
                 <MapPin className="w-5 h-5 text-primary" />
                 <div>
                   <p className="font-medium">Delivery Method</p>
-                  <p className="text-sm text-muted-foreground">
-                    Cash on delivery to your address
-                  </p>
+                  <p className="text-sm text-muted-foreground">Cash on delivery to your address</p>
                 </div>
               </div>
             </div>
@@ -165,19 +163,12 @@ export default function CheckoutComplete() {
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <Button 
-            onClick={() => navigate('/profile/orders')}
-            className="w-full"
-            variant="outline"
-          >
+          <Button onClick={() => navigate('/profile/orders')} className="w-full" variant="outline">
             <ArrowRight className="w-4 h-4 mr-2" />
             Track Your Order
           </Button>
-          
-          <Button 
-            onClick={() => navigate('/')}
-            className="w-full"
-          >
+
+          <Button onClick={() => navigate('/')} className="w-full">
             <Home className="w-4 h-4 mr-2" />
             Continue Shopping
           </Button>
@@ -186,12 +177,22 @@ export default function CheckoutComplete() {
         {/* Support Info */}
         <div className="text-center text-sm text-muted-foreground">
           <p>Need help with your order?</p>
-          <p>Contact us at <a href="mailto:support@dankdealsmn.com" className="text-primary underline">support@dankdealsmn.com</a></p>
-          <p>or call <a href="tel:+16125551234" className="text-primary underline">(612) 555-1234</a></p>
+          <p>
+            Contact us at{' '}
+            <a href="mailto:support@dankdealsmn.com" className="text-primary underline">
+              support@dankdealsmn.com
+            </a>
+          </p>
+          <p>
+            or call{' '}
+            <a href="tel:+16125551234" className="text-primary underline">
+              (612) 555-1234
+            </a>
+          </p>
         </div>
       </div>
 
       <BottomNav />
     </div>
   );
-} 
+}

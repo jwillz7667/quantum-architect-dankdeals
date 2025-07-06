@@ -20,7 +20,7 @@ class Analytics {
         inject();
         this.isInitialized = true;
         logger.info('Vercel Analytics initialized');
-        
+
         // Flush any queued events
         this.flushQueue();
       } catch (error) {
@@ -42,9 +42,11 @@ class Analytics {
     document.head.appendChild(script);
 
     // Make plausible function available globally
-    (window as any).plausible = (window as any).plausible || function() {
-      ((window as any).plausible.q = (window as any).plausible.q || []).push(arguments);
-    };
+    (window as any).plausible =
+      (window as any).plausible ||
+      function () {
+        ((window as any).plausible.q = (window as any).plausible.q || []).push(arguments);
+      };
   }
 
   track(eventName: string, properties?: Record<string, any>) {
@@ -74,9 +76,9 @@ class Analytics {
 
   pageView(path?: string) {
     const currentPath = path || window.location.pathname;
-    
+
     // Vercel Analytics tracks page views automatically
-    
+
     // Track in Plausible
     if ((window as any).plausible) {
       (window as any).plausible('pageview');
@@ -111,18 +113,18 @@ export const AnalyticsEvents = {
   USER_SIGNED_OUT: 'user_signed_out',
   AGE_VERIFIED: 'age_verified',
   AGE_VERIFICATION_FAILED: 'age_verification_failed',
-  
+
   // Product events
   PRODUCT_VIEWED: 'product_viewed',
   PRODUCT_ADDED_TO_CART: 'product_added_to_cart',
   PRODUCT_REMOVED_FROM_CART: 'product_removed_from_cart',
-  
+
   // Checkout events
   CHECKOUT_STARTED: 'checkout_started',
   CHECKOUT_COMPLETED: 'checkout_completed',
   CHECKOUT_FAILED: 'checkout_failed',
-  
+
   // Search events
   SEARCH_PERFORMED: 'search_performed',
   CATEGORY_VIEWED: 'category_viewed',
-} as const; 
+} as const;

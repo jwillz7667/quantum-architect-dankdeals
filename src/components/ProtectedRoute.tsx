@@ -18,7 +18,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       if (!loading && user) {
         const isValid = await validateSession();
         setSessionValid(isValid);
-        
+
         if (!isValid) {
           navigate('/auth?reason=session_invalid');
         }

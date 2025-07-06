@@ -56,15 +56,17 @@ export function useAdminNotifications() {
 
       if (error) throw error;
 
-      setNotifications(data?.map(n => ({
-        id: n.id,
-        type: n.type,
-        title: n.title,
-        message: n.message,
-        isRead: n.is_read,
-        createdAt: new Date(n.created_at),
-        metadata: n.metadata,
-      })) || []);
+      setNotifications(
+        data?.map((n) => ({
+          id: n.id,
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          isRead: n.is_read,
+          createdAt: new Date(n.created_at),
+          metadata: n.metadata,
+        })) || []
+      );
     } catch (error) {
       console.error('Error loading notifications:', error);
     } finally {
@@ -110,10 +112,8 @@ export function useAdminNotifications() {
 
       if (error) throw error;
 
-      setNotifications(prev =>
-        prev.map(n =>
-          n.id === notificationId ? { ...n, isRead: true } : n
-        )
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
       );
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -133,9 +133,7 @@ export function useAdminNotifications() {
 
       if (error) throw error;
 
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, isRead: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
@@ -151,9 +149,7 @@ export function useAdminNotifications() {
 
       if (error) throw error;
 
-      setNotifications(prev =>
-        prev.filter(n => n.id !== notificationId)
-      );
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     } catch (error) {
       console.error('Error deleting notification:', error);
     }
@@ -167,25 +163,23 @@ export function useAdminNotifications() {
     setPreferences(updatedPreferences);
 
     try {
-      const { error } = await supabase
-        .from('notification_settings')
-        .upsert({
-          admin_id: adminUser.id,
-          email_new_order: updatedPreferences.emailNewOrder,
-          email_order_canceled: updatedPreferences.emailOrderCanceled,
-          email_low_inventory: updatedPreferences.emailLowInventory,
-          email_new_user: updatedPreferences.emailNewUser,
-          sound_enabled: updatedPreferences.soundEnabled,
-          desktop_notifications: updatedPreferences.desktopNotifications,
-        });
+      const { error } = await supabase.from('notification_settings').upsert({
+        admin_id: adminUser.id,
+        email_new_order: updatedPreferences.emailNewOrder,
+        email_order_canceled: updatedPreferences.emailOrderCanceled,
+        email_low_inventory: updatedPreferences.emailLowInventory,
+        email_new_user: updatedPreferences.emailNewUser,
+        sound_enabled: updatedPreferences.soundEnabled,
+        desktop_notifications: updatedPreferences.desktopNotifications,
+      });
 
       if (error) throw error;
     } catch (error) {
       console.error('Error updating preferences:', error);
       toast({
-        title: "Error",
-        description: "Failed to update notification preferences",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update notification preferences',
+        variant: 'destructive',
       });
     }
   };
@@ -199,17 +193,20 @@ export function useAdminNotifications() {
   }, [preferences.soundEnabled]);
 
   // Show desktop notification
-  const showDesktopNotification = useCallback((notification: AdminNotification) => {
-    if (!preferences.desktopNotifications) return;
+  const showDesktopNotification = useCallback(
+    (notification: AdminNotification) => {
+      if (!preferences.desktopNotifications) return;
 
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(notification.title, {
-        body: notification.message,
-        icon: '/favicon-96x96.png',
-        tag: notification.id,
-      });
-    }
-  }, [preferences.desktopNotifications]);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(notification.title, {
+          body: notification.message,
+          icon: '/favicon-96x96.png',
+          tag: notification.id,
+        });
+      }
+    },
+    [preferences.desktopNotifications]
+  );
 
   // Request desktop notification permission
   const requestNotificationPermission = async () => {
@@ -245,17 +242,20 @@ export function useAdminNotifications() {
             metadata: payload.new.metadata,
           };
 
-          setNotifications(prev => [newNotification, ...prev]);
+          setNotifications((prev) => [newNotification, ...prev]);
           playNotificationSound();
           showDesktopNotification(newNotification);
 
           // Show toast for high priority notifications
-          if (newNotification.metadata?.severity === 'high' || 
-              newNotification.metadata?.severity === 'critical') {
+          if (
+            newNotification.metadata?.severity === 'high' ||
+            newNotification.metadata?.severity === 'critical'
+          ) {
             toast({
               title: newNotification.title,
               description: newNotification.message,
-              variant: newNotification.metadata?.severity === 'critical' ? 'destructive' : 'default',
+              variant:
+                newNotification.metadata?.severity === 'critical' ? 'destructive' : 'default',
             });
           }
         }
@@ -273,7 +273,7 @@ export function useAdminNotifications() {
     loadPreferences();
   }, [loadNotifications, loadPreferences]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return {
     notifications,
@@ -287,4 +287,4 @@ export function useAdminNotifications() {
     requestNotificationPermission,
     refreshNotifications: loadNotifications,
   };
-} 
+}

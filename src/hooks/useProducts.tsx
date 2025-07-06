@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Product {
   id: string;
@@ -41,11 +41,13 @@ export function useProducts() {
 
       const { data, error: fetchError } = await supabase
         .from('products')
-        .select(`
+        .select(
+          `
           *,
           variants:product_variants(*),
           vendor:vendors(name, status)
-        `)
+        `
+        )
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -69,13 +71,15 @@ export function useProducts() {
   const filterProducts = (searchQuery: string, category: string | null) => {
     if (!searchQuery && !category) return products;
 
-    return products.filter(product => {
-      const matchesSearch = !searchQuery || 
+    return products.filter((product) => {
+      const matchesSearch =
+        !searchQuery ||
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      
+        (product.description &&
+          product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
       const matchesCategory = !category || product.category === category;
-      
+
       return matchesSearch && matchesCategory;
     });
   };
@@ -85,6 +89,6 @@ export function useProducts() {
     loading,
     error,
     refetch: fetchProducts,
-    filterProducts
+    filterProducts,
   };
 }

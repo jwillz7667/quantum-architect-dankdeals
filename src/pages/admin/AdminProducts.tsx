@@ -44,16 +44,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
-  Package,
-  Eye,
-  TrendingUp,
-  DollarSign
-} from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Package, Eye, TrendingUp, DollarSign } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 
 type ProductRow = Database['public']['Tables']['products']['Row'];
@@ -129,10 +120,12 @@ export function AdminProducts() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select(`
+        .select(
+          `
           *,
           product_variants (*)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -140,9 +133,9 @@ export function AdminProducts() {
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({
-        title: "Error",
-        description: "Failed to load products",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load products',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -163,29 +156,24 @@ export function AdminProducts() {
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Product updated successfully",
+          title: 'Success',
+          description: 'Product updated successfully',
         });
       } else {
         // Create new product with default vendor
-        const { data: vendors } = await supabase
-          .from('vendors')
-          .select('id')
-          .limit(1);
+        const { data: vendors } = await supabase.from('vendors').select('id').limit(1);
 
         const vendorId = vendors?.[0]?.id || '00000000-0000-0000-0000-000000000000';
 
-        const { error } = await supabase
-          .from('products')
-          .insert({
-            ...data,
-            vendor_id: vendorId,
-          });
+        const { error } = await supabase.from('products').insert({
+          ...data,
+          vendor_id: vendorId,
+        });
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Product created successfully",
+          title: 'Success',
+          description: 'Product created successfully',
         });
       }
 
@@ -196,9 +184,9 @@ export function AdminProducts() {
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
-        title: "Error",
-        description: "Failed to save product",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save product',
+        variant: 'destructive',
       });
     }
   };
@@ -226,19 +214,17 @@ export function AdminProducts() {
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Variant updated successfully",
+          title: 'Success',
+          description: 'Variant updated successfully',
         });
       } else {
         // Create new variant
-        const { error } = await supabase
-          .from('product_variants')
-          .insert(variantData);
+        const { error } = await supabase.from('product_variants').insert(variantData);
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Variant created successfully",
+          title: 'Success',
+          description: 'Variant created successfully',
         });
       }
 
@@ -249,9 +235,9 @@ export function AdminProducts() {
     } catch (error) {
       console.error('Error saving variant:', error);
       toast({
-        title: "Error",
-        description: "Failed to save variant",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save variant',
+        variant: 'destructive',
       });
     }
   };
@@ -260,24 +246,21 @@ export function AdminProducts() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId);
+      const { error } = await supabase.from('products').delete().eq('id', productId);
 
       if (error) throw error;
-      
+
       toast({
-        title: "Success",
-        description: "Product deleted successfully",
+        title: 'Success',
+        description: 'Product deleted successfully',
       });
       fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete product",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete product',
+        variant: 'destructive',
       });
     }
   };
@@ -286,24 +269,21 @@ export function AdminProducts() {
     if (!confirm('Are you sure you want to delete this variant?')) return;
 
     try {
-      const { error } = await supabase
-        .from('product_variants')
-        .delete()
-        .eq('id', variantId);
+      const { error } = await supabase.from('product_variants').delete().eq('id', variantId);
 
       if (error) throw error;
-      
+
       toast({
-        title: "Success",
-        description: "Variant deleted successfully",
+        title: 'Success',
+        description: 'Variant deleted successfully',
       });
       fetchProducts();
     } catch (error) {
       console.error('Error deleting variant:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete variant",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete variant',
+        variant: 'destructive',
       });
     }
   };
@@ -332,7 +312,7 @@ export function AdminProducts() {
     setVariantDialogOpen(true);
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     return matchesSearch && matchesCategory;
@@ -368,10 +348,12 @@ export function AdminProducts() {
         <h1 className="text-3xl font-bold">Product Management</h1>
         <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => {
-              setSelectedProduct(null);
-              productForm.reset();
-            }}>
+            <Button
+              onClick={() => {
+                setSelectedProduct(null);
+                productForm.reset();
+              }}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Add Product
             </Button>
@@ -405,11 +387,7 @@ export function AdminProducts() {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Product description..." 
-                          {...field} 
-                          rows={3}
-                        />
+                        <Textarea placeholder="Product description..." {...field} rows={3} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -448,10 +426,7 @@ export function AdminProducts() {
                       <FormItem>
                         <FormLabel>THC Content (%)</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="e.g., 18.5"
-                            {...field} 
-                          />
+                          <Input placeholder="e.g., 18.5" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -464,10 +439,7 @@ export function AdminProducts() {
                       <FormItem>
                         <FormLabel>CBD Content (%)</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="e.g., 0.5"
-                            {...field} 
-                          />
+                          <Input placeholder="e.g., 0.5" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -481,15 +453,10 @@ export function AdminProducts() {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                       <div className="space-y-0.5">
                         <FormLabel>Active</FormLabel>
-                        <FormDescription>
-                          Product is available for purchase
-                        </FormDescription>
+                        <FormDescription>Product is available for purchase</FormDescription>
                       </div>
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -502,9 +469,7 @@ export function AdminProducts() {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">
-                    {selectedProduct ? 'Update' : 'Create'} Product
-                  </Button>
+                  <Button type="submit">{selectedProduct ? 'Update' : 'Create'} Product</Button>
                 </div>
               </form>
             </Form>
@@ -550,9 +515,7 @@ export function AdminProducts() {
       <Card>
         <CardHeader>
           <CardTitle>Products ({filteredProducts.length})</CardTitle>
-          <CardDescription>
-            Manage your product catalog and inventory
-          </CardDescription>
+          <CardDescription>Manage your product catalog and inventory</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -603,8 +566,8 @@ export function AdminProducts() {
                               <div className="flex-1">
                                 <span className="font-medium">{variant.size}</span>
                                 <span className="text-sm text-muted-foreground ml-2">
-                                  {formatCurrency(variant.price)} • 
-                                  Stock: {variant.inventory_count || 0}
+                                  {formatCurrency(variant.price)} • Stock:{' '}
+                                  {variant.inventory_count || 0}
                                 </span>
                               </div>
                               <div className="flex gap-1">
@@ -632,18 +595,10 @@ export function AdminProducts() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => editProduct(product)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => editProduct(product)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteProduct(product.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => deleteProduct(product.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -659,12 +614,8 @@ export function AdminProducts() {
       <Dialog open={variantDialogOpen} onOpenChange={setVariantDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedVariant ? 'Edit Variant' : 'Add New Variant'}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedProduct?.name}
-            </DialogDescription>
+            <DialogTitle>{selectedVariant ? 'Edit Variant' : 'Add New Variant'}</DialogTitle>
+            <DialogDescription>{selectedProduct?.name}</DialogDescription>
           </DialogHeader>
           <Form {...variantForm}>
             <form onSubmit={variantForm.handleSubmit(onSubmitVariant)} className="space-y-4">
@@ -688,11 +639,11 @@ export function AdminProducts() {
                   <FormItem>
                     <FormLabel>Price ($)</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         step="0.01"
-                        {...field} 
-                        onChange={e => field.onChange(parseFloat(e.target.value))}
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -706,10 +657,10 @@ export function AdminProducts() {
                   <FormItem>
                     <FormLabel>Inventory Count</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={e => field.onChange(parseInt(e.target.value))}
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -730,16 +681,10 @@ export function AdminProducts() {
                 )}
               />
               <div className="flex justify-end gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setVariantDialogOpen(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setVariantDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {selectedVariant ? 'Update' : 'Create'} Variant
-                </Button>
+                <Button type="submit">{selectedVariant ? 'Update' : 'Create'} Variant</Button>
               </div>
             </form>
           </Form>
@@ -749,4 +694,4 @@ export function AdminProducts() {
   );
 }
 
-export default AdminProducts
+export default AdminProducts;
