@@ -221,6 +221,11 @@ export default function ProductDetail() {
     );
   }
 
+  // Safety check - if product is still null somehow, return early
+  if (!product) {
+    return null;
+  }
+
   const images = getImagesForProduct(product);
   const canonicalUrl = `https://dankdealsmn.com/product/${product.slug || product.id}`;
 
@@ -228,10 +233,10 @@ export default function ProductDetail() {
     { name: 'Home', url: 'https://dankdealsmn.com/' },
     { name: 'Categories', url: 'https://dankdealsmn.com/categories' },
     {
-      name: product.category.charAt(0).toUpperCase() + product.category.slice(1),
+      name: product.category?.charAt(0).toUpperCase() + product.category?.slice(1) || 'Products',
       url: `https://dankdealsmn.com/categories?category=${product.category}`,
     },
-    { name: product.name, url: canonicalUrl },
+    { name: product.name || 'Product', url: canonicalUrl },
   ]);
 
   const productSchema = generateProductSchema({
@@ -243,7 +248,7 @@ export default function ProductDetail() {
   const reviewSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
+    name: product.name || 'Cannabis Product',
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
@@ -319,7 +324,9 @@ export default function ProductDetail() {
       {/* Product Info */}
       <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            {product?.name || 'Cannabis Product'}
+          </h1>
           {selectedVariant && (
             <p className="text-2xl font-semibold text-primary">
               ${formatPrice(selectedVariant.price)}
@@ -333,10 +340,10 @@ export default function ProductDetail() {
         {/* Product Badges */}
         <div className="flex flex-wrap gap-2">
           <Badge variant="secondary" className="bg-primary text-primary-foreground">
-            {product.category}
+            {product?.category || 'flower'}
           </Badge>
-          {product.strain_type && <Badge variant="outline">{product.strain_type}</Badge>}
-          {product.lab_tested && (
+          {product?.strain_type && <Badge variant="outline">{product.strain_type}</Badge>}
+          {product?.lab_tested && (
             <Badge variant="outline" className="border-green-600 text-green-600">
               Lab Tested
             </Badge>
@@ -344,7 +351,7 @@ export default function ProductDetail() {
         </div>
 
         {/* Description */}
-        {product.description && (
+        {product?.description && (
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-foreground">Description</h2>
             <p className="text-muted-foreground leading-relaxed">{product.description}</p>
@@ -360,11 +367,11 @@ export default function ProductDetail() {
             <div>
               <p className="text-sm text-muted-foreground">Type</p>
               <p className="font-semibold text-accent-mint capitalize">
-                {product.strain_type || product.category}
+                {product?.strain_type || product?.category || 'flower'}
               </p>
             </div>
           </div>
-          {product.thc_content && (
+          {product?.thc_content && (
             <div className="flex items-center gap-2">
               <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">THC</span>
@@ -375,7 +382,7 @@ export default function ProductDetail() {
               </div>
             </div>
           )}
-          {product.cbd_content && product.cbd_content > 0 && (
+          {product?.cbd_content && product.cbd_content > 0 && (
             <div className="flex items-center gap-2">
               <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">CBD</span>
@@ -389,7 +396,7 @@ export default function ProductDetail() {
         </div>
 
         {/* Effects and Flavors */}
-        {product.effects && product.effects.length > 0 && (
+        {product?.effects && product.effects.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-foreground">Effects</h3>
             <div className="flex flex-wrap gap-2">
@@ -402,7 +409,7 @@ export default function ProductDetail() {
           </div>
         )}
 
-        {product.flavors && product.flavors.length > 0 && (
+        {product?.flavors && product.flavors.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-foreground">Flavors</h3>
             <div className="flex flex-wrap gap-2">
@@ -416,7 +423,7 @@ export default function ProductDetail() {
         )}
 
         {/* Variant Selector */}
-        {product.variants && product.variants.length > 1 && (
+        {product?.variants && product.variants.length > 1 && (
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-foreground">Choose Size</h3>
             <div className="grid grid-cols-2 gap-2">

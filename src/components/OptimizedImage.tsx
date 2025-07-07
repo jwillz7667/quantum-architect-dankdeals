@@ -26,6 +26,7 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -54,9 +55,22 @@ export function OptimizedImage({
   }, [priority, loading]);
 
   return (
-    <div className={cn('overflow-hidden', className)} style={{ width, height }}>
-      {!isLoaded && (
-        <div className="animate-pulse bg-muted" style={{ width: '100%', height: '100%' }} />
+    <div className={cn('overflow-hidden bg-muted', className)} style={{ width, height }}>
+      {!isLoaded && !hasError && (
+        <div
+          className="animate-pulse bg-muted flex items-center justify-center"
+          style={{ width: '100%', height: '100%' }}
+        >
+          <span className="text-muted-foreground text-sm">Loading...</span>
+        </div>
+      )}
+      {hasError && (
+        <div
+          className="bg-muted flex items-center justify-center"
+          style={{ width: '100%', height: '100%' }}
+        >
+          <span className="text-muted-foreground text-sm">Image not available</span>
+        </div>
       )}
       <img
         ref={imgRef}
@@ -67,14 +81,21 @@ export function OptimizedImage({
         loading={loading}
         sizes={sizes}
         srcSet={srcSet}
-        onLoad={() => setIsLoaded(true)}
+        onLoad={() => {
+          setIsLoaded(true);
+          setHasError(false);
+        }}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(false);
+        }}
         className={cn(
           'transition-opacity duration-300',
-          isLoaded ? 'opacity-100' : 'opacity-0',
+          isLoaded && !hasError ? 'opacity-100' : 'opacity-0',
           className
         )}
         style={{
-          display: isLoaded ? 'block' : 'none',
+          display: isLoaded && !hasError ? 'block' : 'none',
         }}
       />
     </div>

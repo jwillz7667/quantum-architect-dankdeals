@@ -7,13 +7,13 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 155 85% 6%;
+    --foreground: 140 64% 22%;
 
     --card: 0 0% 100%;
-    --card-foreground: 155 85% 6%;
+    --card-foreground: 140 64% 22%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 155 85% 6%;
+    --popover-foreground: 140 64% 22%;
 
     /* Primary Cannabis Green */
     --primary: 140 64% 22%;
@@ -26,13 +26,13 @@
     --accent-mint-foreground: 0 0% 100%;
 
     --secondary: 155 15% 94%;
-    --secondary-foreground: 155 85% 6%;
+    --secondary-foreground: 140 64% 22%;
 
     --muted: 155 15% 96%;
-    --muted-foreground: 155 25% 45%;
+    --muted-foreground: 0 0% 0%;
 
     --accent: 155 15% 94%;
-    --accent-foreground: 155 85% 6%;
+    --accent-foreground: 140 64% 22%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -69,26 +69,26 @@
 
   .dark {
     --background: 155 85% 6%;
-    --foreground: 0 0% 98%;
+    --foreground: 140 64% 35%;
 
     --card: 155 50% 8%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 140 64% 35%;
 
     --popover: 155 50% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover-foreground: 140 64% 35%;
 
     --primary: 140 64% 27%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 140 64% 22%;
 
     --secondary: 155 25% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary-foreground: 140 64% 35%;
 
     --muted: 155 25% 12%;
-    --muted-foreground: 155 15% 65%;
+    --muted-foreground: 0 0% 90%;
 
     --accent: 155 25% 15%;
-    --accent-foreground: 0 0% 98%;
+    --accent-foreground: 140 64% 35%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
