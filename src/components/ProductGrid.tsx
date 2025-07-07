@@ -16,12 +16,22 @@ const categoryImages: Record<string, string> = {
   edibles: ediblesImg,
 };
 
-const getImageForProduct = (product: any): string => {
+interface ProductWithImage {
+  image_url?: string;
+  category: string;
+}
+
+interface ProductVariant {
+  price: number;
+}
+
+const getImageForProduct = (product: ProductWithImage): string => {
   if (product.image_url) return product.image_url;
-  return categoryImages[product.category] || blueDreamImg;
+  const categoryImage = categoryImages[product.category];
+  return categoryImage || blueDreamImg;
 };
 
-const getMinPrice = (variants: any[]): number => {
+const getMinPrice = (variants: ProductVariant[]): number => {
   if (!variants || variants.length === 0) return 0;
   return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents
 };
@@ -82,8 +92,11 @@ export function ProductGrid() {
               id={product.id}
               name={product.name}
               price={getMinPrice(product.variants)}
-              type={product.category}
-              image={getImageForProduct(product)}
+              category={product.category}
+              imageUrl={getImageForProduct(product)}
+              thcContent={product.thc_content}
+              cbdContent={product.cbd_content}
+              description={product.description}
             />
           ))}
         </div>

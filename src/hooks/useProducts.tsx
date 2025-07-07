@@ -9,15 +9,10 @@ export interface Product {
   category: string;
   thc_content: number | null;
   cbd_content: number | null;
-  vendor_id: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   variants: ProductVariant[];
-  vendor: {
-    name: string;
-    status: string;
-  };
 }
 
 export interface ProductVariant {
@@ -44,8 +39,7 @@ export function useProducts() {
         .select(
           `
           *,
-          variants:product_variants(*),
-          vendor:vendors(name, status)
+          variants:product_variants(*)
         `
         )
         .eq('is_active', true)
@@ -65,7 +59,7 @@ export function useProducts() {
   };
 
   useEffect(() => {
-    fetchProducts();
+    void fetchProducts();
   }, []);
 
   const filterProducts = (searchQuery: string, category: string | null) => {

@@ -1,16 +1,18 @@
 // scripts/generate-sitemap.js
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
+import { writeFileSync } from 'fs';
+import { resolve } from 'path';
 import { config } from 'dotenv';
 
 // Load environment variables
 config();
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://ralbzuvkyexortqngvxs.supabase.co';
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
+const supabaseKey =
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
-const supabase = supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const BASE_URL = 'https://dankdealsmn.com';
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
@@ -38,17 +40,17 @@ const productCategories = [
   'vapes',
   'topicals',
   'accessories',
-  'wellness'
+  'wellness',
 ];
 
 function escapeXml(unsafe) {
   if (!unsafe) return '';
   return String(unsafe)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function formatDateForXml(date) {
@@ -76,7 +78,7 @@ function generateSitemapHeader() {
 function generateUrlEntry(url, lastmod, changefreq, priority, images = []) {
   const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
   if (!validateUrl(fullUrl)) return '';
-  
+
   let entry = `
   <url>
     <loc>${escapeXml(fullUrl)}</loc>
@@ -84,9 +86,9 @@ function generateUrlEntry(url, lastmod, changefreq, priority, images = []) {
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
     <mobile:mobile/>`;
-  
+
   // Add images if provided
-  images.forEach(image => {
+  images.forEach((image) => {
     if (image.url && validateUrl(image.url)) {
       entry += `
     <image:image>
@@ -96,7 +98,7 @@ function generateUrlEntry(url, lastmod, changefreq, priority, images = []) {
     </image:image>`;
     }
   });
-  
+
   entry += `
   </url>`;
   return entry;
@@ -104,34 +106,34 @@ function generateUrlEntry(url, lastmod, changefreq, priority, images = []) {
 
 async function generateMainSitemap() {
   console.log('🚀 Generating main sitemap...');
-  
+
   let sitemap = generateSitemapHeader();
   let totalUrls = 0;
-  
+
   // Add static pages
-  staticPages.forEach(page => {
+  staticPages.forEach((page) => {
     const entry = generateUrlEntry(page.url, CURRENT_DATE, page.changefreq, page.priority);
     if (entry) {
       sitemap += entry;
       totalUrls++;
     }
   });
-  
+
   // Add category pages
-  productCategories.forEach(category => {
+  productCategories.forEach((category) => {
     const entry = generateUrlEntry(`/categories/${category}`, CURRENT_DATE, 'weekly', 0.7);
     if (entry) {
       sitemap += entry;
       totalUrls++;
     }
   });
-  
+
   sitemap += `
 </urlset>`;
-  
-  fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap.xml'), sitemap, 'utf8');
+
+  writeFileSync(resolve(process.cwd(), 'public', 'sitemap.xml'), sitemap, 'utf8');
   console.log(`✅ Main sitemap generated with ${totalUrls} URLs`);
-  
+
   return totalUrls;
 }
 
@@ -140,50 +142,70 @@ async function generateProductSitemap() {
     console.log('⚠️ No database connection for product sitemap');
     return 0;
   }
-  
+
   console.log('🛍️ Generating product sitemap...');
-  
+
   try {
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, name, category, updated_at, image_url, description')
+      .select('id, slug, updated_at, category')
       .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-      .limit(5000);
-    
+      .order('created_at', { ascending: false });
+
     if (error) throw error;
     if (!products?.length) return 0;
-    
+
     let sitemap = generateSitemapHeader();
     let totalUrls = 0;
-    
-    products.forEach(product => {
-      const images = product.image_url ? [{
-        url: product.image_url.startsWith('http') ? product.image_url : `${BASE_URL}${product.image_url}`,
-        caption: product.name,
-        title: product.name
-      }] : [];
-      
+
+    products.forEach((product) => {
+      const images = product.image_url
+        ? [
+            {
+              url: product.image_url.startsWith('http')
+                ? product.image_url
+                : `${BASE_URL}${product.image_url}`,
+              caption: product.name,
+              title: product.name,
+            },
+          ]
+        : [];
+
       const entry = generateUrlEntry(
-        `/product/${product.id}`,
+        `/product/${product.slug || product.id}`,
         product.updated_at,
         'weekly',
         0.8,
         images
       );
-      
+
       if (entry) {
         sitemap += entry;
         totalUrls++;
       }
     });
-    
+
+    // Add category pages
+    const categories = [...new Set(products.map((p) => p.category))];
+    categories.forEach((category) => {
+      const entry = generateUrlEntry(
+        `/categories?category=${encodeURIComponent(category)}`,
+        CURRENT_DATE,
+        'weekly',
+        0.7
+      );
+      if (entry) {
+        sitemap += entry;
+        totalUrls++;
+      }
+    });
+
     sitemap += `
 </urlset>`;
-    
-    fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap-products.xml'), sitemap, 'utf8');
+
+    writeFileSync(resolve(process.cwd(), 'public', 'sitemap-products.xml'), sitemap, 'utf8');
     console.log(`✅ Product sitemap generated with ${totalUrls} URLs`);
-    
+
     return totalUrls;
   } catch (error) {
     console.warn('⚠️ Product sitemap generation failed:', error.message);
@@ -193,9 +215,9 @@ async function generateProductSitemap() {
 
 async function generateBlogSitemap() {
   if (!supabase) return 0;
-  
+
   console.log('📝 Generating blog sitemap...');
-  
+
   try {
     const { data: posts, error } = await supabase
       .from('blog_posts')
@@ -203,20 +225,26 @@ async function generateBlogSitemap() {
       .eq('is_published', true)
       .order('published_at', { ascending: false })
       .limit(1000);
-    
+
     if (error) throw error;
     if (!posts?.length) return 0;
-    
+
     let sitemap = generateSitemapHeader();
     let totalUrls = 0;
-    
-    posts.forEach(post => {
-      const images = post.featured_image ? [{
-        url: post.featured_image.startsWith('http') ? post.featured_image : `${BASE_URL}${post.featured_image}`,
-        caption: post.title,
-        title: post.title
-      }] : [];
-      
+
+    posts.forEach((post) => {
+      const images = post.featured_image
+        ? [
+            {
+              url: post.featured_image.startsWith('http')
+                ? post.featured_image
+                : `${BASE_URL}${post.featured_image}`,
+              caption: post.title,
+              title: post.title,
+            },
+          ]
+        : [];
+
       const entry = generateUrlEntry(
         `/blog/${post.slug}`,
         post.updated_at || post.published_at,
@@ -224,19 +252,19 @@ async function generateBlogSitemap() {
         0.6,
         images
       );
-      
+
       if (entry) {
         sitemap += entry;
         totalUrls++;
       }
     });
-    
+
     sitemap += `
 </urlset>`;
-    
-    fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
+
+    writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
     console.log(`✅ Blog sitemap generated with ${totalUrls} URLs`);
-    
+
     return totalUrls;
   } catch (error) {
     console.warn('⚠️ Blog sitemap generation failed:', error.message);
@@ -246,7 +274,7 @@ async function generateBlogSitemap() {
 
 async function generateSitemapIndex(totalUrls) {
   console.log('📑 Generating sitemap index...');
-  
+
   const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
@@ -266,8 +294,8 @@ async function generateSitemapIndex(totalUrls) {
     <lastmod>${CURRENT_DATE}</lastmod>
   </sitemap>
 </sitemapindex>`;
-  
-  fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap-index.xml'), sitemapIndex, 'utf8');
+
+  writeFileSync(resolve(process.cwd(), 'public', 'sitemap-index.xml'), sitemapIndex, 'utf8');
   console.log('✅ Sitemap index created');
 }
 
@@ -276,17 +304,17 @@ async function generateAllSitemaps() {
     console.log('🚀 Starting comprehensive sitemap generation...');
     console.log(`📅 Date: ${CURRENT_DATE}`);
     console.log(`🌐 Base URL: ${BASE_URL}`);
-    
+
     const mainUrls = await generateMainSitemap();
     const productUrls = await generateProductSitemap();
     const blogUrls = await generateBlogSitemap();
     const totalUrls = mainUrls + productUrls + blogUrls;
-    
+
     // Generate sitemap index for better organization
     if (totalUrls > 50) {
       await generateSitemapIndex(totalUrls);
     }
-    
+
     console.log('');
     console.log('✅ All sitemaps generated successfully!');
     console.log(`📊 Total URLs: ${totalUrls}`);
@@ -306,10 +334,9 @@ async function generateAllSitemaps() {
     console.log('   3. Monitor Core Web Vitals');
     console.log('   4. Check mobile usability');
     console.log('   5. Verify structured data markup');
-    
   } catch (error) {
     console.error('❌ Error generating sitemaps:', error);
-    
+
     // Create minimal fallback
     const fallback = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -320,11 +347,11 @@ async function generateAllSitemaps() {
     <priority>1.0</priority>
   </url>
 </urlset>`;
-    
-    fs.writeFileSync(path.join(process.cwd(), 'public', 'sitemap.xml'), fallback, 'utf8');
+
+    writeFileSync(resolve(process.cwd(), 'public', 'sitemap.xml'), fallback, 'utf8');
     console.log('⚠️ Fallback sitemap created');
     process.exit(1);
   }
 }
 
-generateAllSitemaps(); 
+generateAllSitemaps();
