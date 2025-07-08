@@ -24,6 +24,11 @@ dist-ssr
 *.sw?
 .env
 
+# Package manager locks (only use npm)
+bun.lockb
+yarn.lock
+pnpm-lock.yaml
+
 # Test coverage
 coverage
 .nyc_output
