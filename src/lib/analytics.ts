@@ -3,69 +3,50 @@ import { logger } from './logger';
 
 interface AnalyticsEvent {
   name: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, string | number | boolean>;
+}
+
+// Extend window to include Plausible
+declare global {
+  interface Window {
+    plausible?: (
+      event: string,
+      options?: { props?: Record<string, string | number | boolean> }
+    ) => void;
+  }
 }
 
 class Analytics {
   private queue: AnalyticsEvent[] = [];
   private isInitialized = false;
 
-  async initialize() {
+  initialize() {
     if (this.isInitialized) return;
 
-    // Initialize Vercel Analytics in production
-    if (env.VITE_ENV === 'production') {
-      try {
-        const { inject } = await import('@vercel/analytics');
-        inject();
-        this.isInitialized = true;
-        logger.info('Vercel Analytics initialized');
+    // Disable Vercel Analytics for now (causing MIME type errors)
+    // TODO: Re-enable when properly configured with Vercel deployment
 
-        // Flush any queued events
-        this.flushQueue();
-      } catch (error) {
-        logger.error('Failed to initialize Vercel Analytics', error as Error);
-      }
-    }
+    this.isInitialized = true;
+    logger.info('Analytics initialized (Plausible via HTML head)');
 
-    // Initialize Plausible if configured
-    if (env.VITE_PLAUSIBLE_DOMAIN) {
-      this.initializePlausible();
-    }
+    // Flush any queued events
+    this.flushQueue();
   }
 
-  private initializePlausible() {
-    const script = document.createElement('script');
-    script.defer = true;
-    script.dataset.domain = env.VITE_PLAUSIBLE_DOMAIN;
-    script.src = env.VITE_PLAUSIBLE_API_HOST + '/js/script.js';
-    document.head.appendChild(script);
+  // Plausible is now initialized via HTML head script tag
 
-    // Make plausible function available globally
-    (window as any).plausible =
-      (window as any).plausible ||
-      function () {
-        ((window as any).plausible.q = (window as any).plausible.q || []).push(arguments);
-      };
-  }
-
-  track(eventName: string, properties?: Record<string, any>) {
+  track(eventName: string, properties?: Record<string, string | number | boolean>) {
     const event: AnalyticsEvent = { name: eventName, properties };
 
     // Queue events if not initialized
-    if (!this.isInitialized && env.VITE_ENV === 'production') {
+    if (!this.isInitialized) {
       this.queue.push(event);
       return;
     }
 
-    // Send to Vercel Analytics
-    if ((window as any).va) {
-      (window as any).va('event', { name: eventName, data: properties });
-    }
-
-    // Send to Plausible
-    if ((window as any).plausible) {
-      (window as any).plausible(eventName, { props: properties });
+    // Send to Plausible (initialized via HTML head script)
+    if (window.plausible) {
+      window.plausible(eventName, { props: properties });
     }
 
     // Log in development
@@ -77,17 +58,15 @@ class Analytics {
   pageView(path?: string) {
     const currentPath = path || window.location.pathname;
 
-    // Vercel Analytics tracks page views automatically
-
-    // Track in Plausible
-    if ((window as any).plausible) {
-      (window as any).plausible('pageview');
+    // Track in Plausible (page views are tracked automatically by script)
+    if (window.plausible) {
+      window.plausible('pageview');
     }
 
     logger.debug('Page view', { path: currentPath });
   }
 
-  identify(userId: string, traits?: Record<string, any>) {
+  identify(userId: string, traits?: Record<string, string | number | boolean>) {
     // For future use with customer analytics
     logger.debug('User identified', { userId, traits });
   }
