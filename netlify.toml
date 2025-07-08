@@ -1,15 +1,73 @@
-# Netlify configuration
+# Comprehensive Netlify Configuration for DankDeals
+# 
+# This configuration includes:
+# - Build settings for different environments
+# - Security headers (CSP, HSTS, etc.)
+# - Performance optimization (caching, compression)
+# - SEO enhancements (redirects, sitemaps)
+# - Optional plugins for monitoring and optimization
+#
+# To use: Deploy this file to your repository root
+# Note: Remove netlify-plugin-js-obfuscator from Netlify UI if present
 
 [build]
   command = "npm run build"
   publish = "dist"
+  # Uncomment if using Netlify Functions
+  # functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
-  # Ensure modern JavaScript features are supported
   NPM_FLAGS = "--legacy-peer-deps"
+  # Optimize build performance
+  NETLIFY_USE_YARN = "false"
+  NETLIFY_SKIP_INSTALL_DEPENDENCIES = "false"
+  # Show more detailed logs during build
+  CI = "true"
 
-# Headers for security and performance
+# Production context
+[context.production]
+  command = "npm run build"
+  [context.production.environment]
+    VITE_ENV = "production"
+    NODE_ENV = "production"
+
+# Deploy preview context
+[context.deploy-preview]
+  command = "npm run build"
+  [context.deploy-preview.environment]
+    VITE_ENV = "preview"
+    NODE_ENV = "production"
+
+# Branch deploy context
+[context.branch-deploy]
+  command = "npm run build"
+  [context.branch-deploy.environment]
+    VITE_ENV = "staging"
+    NODE_ENV = "production"
+
+# Development context
+[context.development]
+  command = "npm run build:dev"
+  [context.development.environment]
+    VITE_ENV = "development"
+    NODE_ENV = "development"
+
+# Functions configuration (uncomment if using Netlify Functions)
+# [functions]
+#   directory = "netlify/functions"
+#   node_bundler = "esbuild"
+#   included_files = ["src/**"]
+
+# Dev server configuration
+[dev]
+  command = "npm run dev"
+  port = 8080
+  targetPort = 8080
+  publish = "dist"
+  autoLaunch = false
+
+# Headers for security, performance, and SEO
 [[headers]]
   for = "/*"
   [headers.values]
@@ -18,30 +76,232 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()"
     
-    # Cache control for static assets
-    Cache-Control = '''
-    public,
-    max-age=31536000,
-    immutable'''
+    # HSTS (HTTP Strict Transport Security)
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    
+    # Content Security Policy
+    # Note: 'unsafe-inline' and 'unsafe-eval' are included for React development
+    # Consider removing them in production if possible
+    Content-Security-Policy = '''
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io https://*.vercel-insights.com;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:;
+      font-src 'self' data:;
+      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://plausible.io https://*.vercel-insights.com;
+      media-src 'self';
+      object-src 'none';
+      frame-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    '''
 
+# Cache control for static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Images cache control
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+# HTML files - no cache
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  for = "/assets/*"
+  for = "/index.html"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# Redirects for SPA
+# Service worker
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "max-age=0, no-cache, no-store, must-revalidate"
+
+# Manifest
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/manifest+json"
+
+# Sitemaps
+[[headers]]
+  for = "/sitemap*.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+    Content-Type = "application/xml"
+
+# Robots.txt
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+    Content-Type = "text/plain"
+
+# Redirects for SPA and common patterns
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Note: If netlify-plugin-js-obfuscator is enabled in Netlify UI,
-# it must be disabled there as it can't handle ES2022 static blocks.
-# We use esbuild for minification which is sufficient for production. 
+# API proxy redirects (example - uncomment and update if needed)
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://your-api-endpoint.com/:splat"
+#   status = 200
+#   force = true
+#   headers = {X-From = "Netlify"}
+
+# Redirect www to non-www
+[[redirects]]
+  from = "https://www.dankdealsmn.com/*"
+  to = "https://dankdealsmn.com/:splat"
+  status = 301
+  force = true
+
+# Redirect Netlify default subdomain to primary domain
+[[redirects]]
+  from = "https://dankdealsmn.netlify.app/*"
+  to = "https://dankdealsmn.com/:splat"
+  status = 301
+  force = true
+
+# Old URL redirects (examples)
+[[redirects]]
+  from = "/shop"
+  to = "/categories"
+  status = 301
+
+[[redirects]]
+  from = "/products"
+  to = "/categories"
+  status = 301
+
+# 404 handling
+[[redirects]]
+  from = "/404"
+  to = "/index.html"
+  status = 404
+
+# Edge functions (example - uncomment if using)
+# [[edge_functions]]
+#   path = "/api/*"
+#   function = "api-handler"
+
+# Form handling
+[forms]
+  mode = "detect"
+
+# Analytics
+[analytics]
+  enable = true
+
+# Build plugins (optional - install via Netlify UI or npm)
+# Uncomment the plugins you want to use
+
+# Performance monitoring
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
+#   [plugins.inputs]
+#     # Performance thresholds
+#     thresholds.performance = 90
+#     thresholds.accessibility = 95
+#     thresholds.best-practices = 90
+#     thresholds.seo = 90
+#     thresholds.pwa = 80
+#     
+#     # Audit specific paths
+#     audits = [
+#       { path = "/" },
+#       { path = "/categories" },
+#       { path = "/cart" }
+#     ]
+
+# Automatic sitemap submission
+# [[plugins]]
+#   package = "netlify-plugin-submit-sitemap"
+#   [plugins.inputs]
+#     baseUrl = "https://dankdealsmn.com"
+#     sitemapPath = "/sitemap-index.xml"
+#     providers = ["google", "bing"]
+
+# Image optimization
+# [[plugins]]
+#   package = "netlify-plugin-image-optim"
+
+# Check for broken links
+# [[plugins]]
+#   package = "netlify-plugin-checklinks"
+#   [plugins.inputs]
+#     skipPatterns = ["https://supabase.co", "https://plausible.io"]
+#     todoPatterns = []
+#     checkExternal = false
+#     pretty = true
+
+# Note about obfuscator plugin:
+# netlify-plugin-js-obfuscator has been removed due to incompatibility
+# with ES2022+ features. We use esbuild minification instead.
+
+# Environment variable validation
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = false
+  compress = true
+
+[build.processing.images]
+  compress = true
+
+# IMPORTANT: To fix build errors, remove netlify-plugin-js-obfuscator
+# from Netlify UI: Site Settings > Plugins > Installed Plugins 
