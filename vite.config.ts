@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.warn'],
 
-        // Multiple passes for better compression
-        passes: 3,
+        // Safer compression settings
+        passes: 1,
 
         // Dead code elimination
         dead_code: true,
@@ -46,19 +46,18 @@ export default defineConfig(({ mode }) => ({
         loops: true,
         sequences: true,
 
-        // Size optimizations
+        // Size optimizations (removed toplevel and inline)
         properties: true,
         comparisons: true,
         computed_props: true,
-        toplevel: true,
 
-        // Safe aggressive options
+        // Safe options
         negate_iife: true,
-        inline: true,
       },
       mangle: {
         safari10: true,
-        toplevel: true,
+        // Removed toplevel to prevent breaking vendor code
+        reserved: ['$', '_'],
       },
       format: {
         comments: false,
@@ -146,15 +145,17 @@ export default defineConfig(({ mode }) => ({
     ],
     esbuildOptions: {
       target: 'esnext',
-      minify: true,
-      treeShaking: true,
+      // Less aggressive optimization for vendor dependencies
+      minify: false,
+      treeShaking: false,
       format: 'esm',
     },
   },
 
   esbuild: {
     target: 'esnext',
-    minifyIdentifiers: true,
+    // Less aggressive minification for development
+    minifyIdentifiers: mode === 'production',
     minifySyntax: true,
     minifyWhitespace: true,
     treeShaking: true,
