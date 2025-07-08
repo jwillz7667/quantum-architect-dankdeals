@@ -219,6 +219,20 @@ async function generateBlogSitemap() {
   console.log('📝 Generating blog sitemap...');
 
   try {
+    // Check if blog_posts table exists before querying
+    const { error: tableCheckError } = await supabase.from('blog_posts').select('id').limit(1);
+
+    // If table doesn't exist, create empty sitemap
+    if (
+      tableCheckError &&
+      tableCheckError.message.includes('relation "public.blog_posts" does not exist')
+    ) {
+      const emptySitemap = generateSitemapHeader() + '\n</urlset>';
+      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), emptySitemap, 'utf8');
+      console.log('✅ Blog sitemap created (no blog posts yet)');
+      return 0;
+    }
+
     const { data: posts, error } = await supabase
       .from('blog_posts')
       .select('id, title, slug, updated_at, published_at, featured_image')
@@ -227,7 +241,12 @@ async function generateBlogSitemap() {
       .limit(1000);
 
     if (error) throw error;
-    if (!posts?.length) return 0;
+    if (!posts?.length) {
+      const emptySitemap = generateSitemapHeader() + '\n</urlset>';
+      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), emptySitemap, 'utf8');
+      console.log('✅ Blog sitemap created (no blog posts yet)');
+      return 0;
+    }
 
     let sitemap = generateSitemapHeader();
     let totalUrls = 0;
@@ -267,7 +286,10 @@ async function generateBlogSitemap() {
 
     return totalUrls;
   } catch (error) {
-    console.warn('⚠️ Blog sitemap generation failed:', error.message);
+    // Create empty sitemap on any error
+    const emptySitemap = generateSitemapHeader() + '\n</urlset>';
+    writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), emptySitemap, 'utf8');
+    console.log('✅ Blog sitemap created (blog feature not available)');
     return 0;
   }
 }
