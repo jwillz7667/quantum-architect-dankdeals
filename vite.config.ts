@@ -20,13 +20,48 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
+        // Console and debug removal
         drop_console: true,
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info'],
-        passes: 2,
+        pure_funcs: ['console.log', 'console.info', 'console.warn'],
+
+        // Multiple passes for better compression
+        passes: 3,
+
+        // Dead code elimination
+        dead_code: true,
+        unused: true,
+
+        // Basic optimizations
+        collapse_vars: true,
+        reduce_vars: true,
+        hoist_funs: true,
+        if_return: true,
+        join_vars: true,
+
+        // Conditional optimizations
+        conditionals: true,
+        evaluate: true,
+        booleans: true,
+        loops: true,
+        sequences: true,
+
+        // Size optimizations
+        properties: true,
+        comparisons: true,
+        computed_props: true,
+        toplevel: true,
+
+        // Safe aggressive options
+        negate_iife: true,
+        inline: true,
       },
       mangle: {
         safari10: true,
+        toplevel: true,
+      },
+      format: {
+        comments: false,
       },
     },
     rollupOptions: {
@@ -84,11 +119,39 @@ export default defineConfig(({ mode }) => ({
       },
     },
     cssCodeSplit: true,
+    cssMinify: 'lightningcss',
     sourcemap: false,
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,
+
+    // Additional optimization
+    assetsInlineLimit: 4096,
+    emptyOutDir: true,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-toast',
+    ],
+    esbuildOptions: {
+      target: 'esnext',
+      minify: true,
+      treeShaking: true,
+      format: 'esm',
+    },
+  },
+
+  esbuild: {
+    target: 'esnext',
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
+    treeShaking: true,
+    legalComments: 'none',
+    drop: ['console', 'debugger'],
   },
 }));
