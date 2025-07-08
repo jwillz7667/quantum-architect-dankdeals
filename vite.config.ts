@@ -67,8 +67,13 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // React core
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+          // React core (include scheduler to prevent runtime errors)
+          if (
+            id.includes('react') ||
+            id.includes('react-dom') ||
+            id.includes('react-router') ||
+            id.includes('scheduler')
+          ) {
             return 'react-vendor';
           }
 
@@ -132,7 +137,9 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
       'react-router-dom',
+      'scheduler',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-toast',
