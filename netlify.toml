@@ -1,0 +1,47 @@
+# Netlify configuration
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  # Ensure modern JavaScript features are supported
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+    
+    # Cache control for static assets
+    Cache-Control = '''
+    public,
+    max-age=31536000,
+    immutable'''
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Redirects for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Note: If netlify-plugin-js-obfuscator is enabled in Netlify UI,
+# it must be disabled there as it can't handle ES2022 static blocks.
+# We use esbuild for minification which is sufficient for production. 

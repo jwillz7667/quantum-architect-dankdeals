@@ -16,7 +16,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    target: 'esnext',
+    // Use ES2015 target to avoid ES2022 static blocks that break netlify-plugin-js-obfuscator
+    target: 'es2015',
     // Switch to esbuild for safer vendor minification
     minify: 'esbuild',
     rollupOptions: {
@@ -100,7 +101,7 @@ export default defineConfig(({ mode }) => ({
       '@radix-ui/react-toast',
     ],
     esbuildOptions: {
-      target: 'esnext',
+      target: 'es2015',
       // Less aggressive optimization for vendor dependencies
       minify: false,
       treeShaking: false,
@@ -109,7 +110,7 @@ export default defineConfig(({ mode }) => ({
   },
 
   esbuild: {
-    target: 'es2020',
+    target: 'es2015',
     // Safer minification settings
     minifyIdentifiers: false,
     minifySyntax: true,
