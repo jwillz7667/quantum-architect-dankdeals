@@ -17,52 +17,8 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        // Console and debug removal
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.warn'],
-
-        // Safer compression settings
-        passes: 1,
-
-        // Dead code elimination
-        dead_code: true,
-        unused: true,
-
-        // Basic optimizations
-        collapse_vars: true,
-        reduce_vars: true,
-        hoist_funs: true,
-        if_return: true,
-        join_vars: true,
-
-        // Conditional optimizations
-        conditionals: true,
-        evaluate: true,
-        booleans: true,
-        loops: true,
-        sequences: true,
-
-        // Size optimizations (removed toplevel and inline)
-        properties: true,
-        comparisons: true,
-        computed_props: true,
-
-        // Safe options
-        negate_iife: true,
-      },
-      mangle: {
-        safari10: true,
-        // Removed toplevel to prevent breaking vendor code
-        reserved: ['$', '_'],
-      },
-      format: {
-        comments: false,
-      },
-    },
+    // Switch to esbuild for safer vendor minification
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -153,13 +109,14 @@ export default defineConfig(({ mode }) => ({
   },
 
   esbuild: {
-    target: 'esnext',
-    // Less aggressive minification for development
-    minifyIdentifiers: mode === 'production',
+    target: 'es2020',
+    // Safer minification settings
+    minifyIdentifiers: false,
     minifySyntax: true,
     minifyWhitespace: true,
-    treeShaking: true,
+    treeShaking: false,
     legalComments: 'none',
-    drop: ['console', 'debugger'],
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+    keepNames: true,
   },
 }));
