@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { OptimizedImage } from './OptimizedImage';
+// import { generateProductSchema } from '@/lib/seo'; // Available if needed for structured data
 
 // Import new product images
 import pineappleFruz1 from '@/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg';
@@ -50,6 +51,29 @@ export function ProductCard({
 
   // Use local image if available, otherwise fallback to provided imageUrl
   const displayImage = productImageMap[id] || imageUrl || '/api/placeholder/400/400';
+
+  // Note: Product schema generation is available but not used in ProductCard
+  // Structured data is typically only added to product detail pages, not listing cards
+  // to avoid duplicate structured data on the same page.
+  // If needed for a specific use case, uncomment and implement:
+  /*
+  const productSchema = generateProductSchema({
+    id,
+    name,
+    description: description || '',
+    price,
+    category,
+    thc_content: thcContent,
+    cbd_content: cbdContent,
+    image_url: imageUrl,
+    variants: [{
+      id: `${id}-default`,
+      name: 'Default',
+      price: price,
+      inventory_count: 1
+    }],
+  } as any);
+  */
 
   return (
     <Card className="h-full cursor-pointer hover:shadow-lg transition-all duration-200 animate-fade-in flex flex-col">
