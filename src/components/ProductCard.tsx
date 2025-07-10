@@ -47,10 +47,13 @@ export function ProductCard({
     navigate(`/product/${id}`);
   };
 
-  const displayPrice = typeof price === 'number' ? (price / 100).toFixed(2) : '0.00';
+  const displayPrice = typeof price === 'number' ? price.toFixed(2) : '0.00';
 
-  // Use local image if available, otherwise fallback to provided imageUrl
+  // Use local image if available in development, otherwise use the URL from database
   const displayImage = productImageMap[id] || imageUrl || '/api/placeholder/400/400';
+
+  // In production, the imageUrl from database will point to /assets/products/...
+  // which will be served from the public directory
 
   // Note: Product schema generation is available but not used in ProductCard
   // Structured data is typically only added to product detail pages, not listing cards

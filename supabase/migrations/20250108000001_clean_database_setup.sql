@@ -589,48 +589,48 @@ INSERT INTO public.products (id, name, description, category, image_url, thc_con
    'Pineapple Fruz', 
    'Experience tropical paradise with Pineapple Fruz, a premium hybrid strain that delivers an explosion of sweet pineapple flavors with subtle fruity undertones. This carefully cultivated flower offers a perfect balance of uplifting cerebral effects and gentle body relaxation. Known for its dense, trichome-covered buds and vibrant orange hairs, Pineapple Fruz is ideal for creative activities, social gatherings, or simply unwinding after a long day. Lab-tested for purity and potency.', 
    'flower', 
-   '/src/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg', 
+   '/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg', 
    23.5, 
    0.8, 
    true,
    'pineapple-fruz',
-   55.00),
+   40.00),
   
   -- Rainbow Sherbert #11
   ('22222222-2222-2222-2222-222222222222', 
    'Rainbow Sherbert #11', 
    'Rainbow Sherbert #11, also known as RS11, is an exclusive phenotype that combines the best traits of its legendary lineage. This indica-dominant hybrid boasts a complex terpene profile featuring sweet, creamy sherbert notes with hints of fruit and gas. The effects are equally impressive, offering deep relaxation without heavy sedation, making it perfect for evening use. With its stunning purple and green coloration covered in a thick layer of crystalline trichomes, RS11 is a true connoisseur''s choice. Premium indoor-grown and hand-trimmed.', 
    'flower', 
-   '/src/assets/products/rs11/rainbow-sherbert11-1.jpeg', 
+   '/assets/products/rs11/rainbow-sherbert11-1.jpeg', 
    26.2, 
    0.5, 
    true,
    'rainbow-sherbert-11',
-   65.00),
+   45.00),
   
   -- Runtz
   ('33333333-3333-3333-3333-333333333333', 
    'Runtz', 
    'Indulge in the award-winning Runtz strain, a perfectly balanced hybrid that has taken the cannabis world by storm. This Zkittlez x Gelato cross delivers an incredibly smooth smoke with a sweet, fruity candy flavor that lives up to its name. Runtz produces euphoric and uplifting effects that gradually transition into full-body relaxation, making it versatile for any time of day. The beautiful purple and green buds are generously coated with resinous trichomes, indicating its premium quality and potency. Grown with meticulous care and attention to detail.', 
    'flower', 
-   '/src/assets/products/runtz/runtz-1.jpeg', 
+   '/assets/products/runtz/runtz-1.jpeg', 
    24.8, 
    0.6, 
    true,
    'runtz',
-   60.00),
+   42.00),
   
   -- Wedding Cake
   ('44444444-4444-4444-4444-444444444444', 
    'Wedding Cake', 
    'Wedding Cake, also known as Pink Cookies, is a potent indica-hybrid that delivers exceptional flavor and effects. This Triangle Kush x Animal Mints cross features a rich, tangy flavor profile with undertones of vanilla and earth. Known for its relaxing and euphoric effects, Wedding Cake is perfect for unwinding in the evening or managing stress and discomfort. The dense, colorful buds showcase a thick coating of trichomes that give it a cake-like appearance. This premium strain is cultivated indoors under optimal conditions to ensure maximum potency and flavor.', 
    'flower', 
-   '/src/assets/products/wedding-cake/wedding-cake-1.jpeg', 
+   '/assets/products/wedding-cake/wedding-cake-1.jpeg', 
    25.5, 
    0.4, 
    true,
    'wedding-cake',
-   60.00)
+   42.00)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,
@@ -644,9 +644,9 @@ ON CONFLICT (id) DO UPDATE SET
 -- Update product metadata
 UPDATE products SET 
   gallery_urls = ARRAY[
-    '/src/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg',
-    '/src/assets/products/pineapple-fruz/pineapple-fruz-2.jpeg',
-    '/src/assets/products/pineapple-fruz/pineapple-fruz-3.jpeg'
+    '/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg',
+    '/assets/products/pineapple-fruz/pineapple-fruz-2.jpeg',
+    '/assets/products/pineapple-fruz/pineapple-fruz-3.jpeg'
   ],
   effects = ARRAY['euphoric', 'creative', 'relaxed', 'happy', 'uplifted'],
   flavors = ARRAY['pineapple', 'tropical', 'sweet', 'citrus', 'fruity'],
@@ -657,8 +657,8 @@ WHERE id = '11111111-1111-1111-1111-111111111111';
 
 UPDATE products SET 
   gallery_urls = ARRAY[
-    '/src/assets/products/rs11/rainbow-sherbert11-1.jpeg',
-    '/src/assets/products/rs11/rainbow-sherbert11-2.jpeg'
+    '/assets/products/rs11/rainbow-sherbert11-1.jpeg',
+    '/assets/products/rs11/rainbow-sherbert11-2.jpeg'
   ],
   effects = ARRAY['relaxed', 'euphoric', 'sleepy', 'happy', 'hungry'],
   flavors = ARRAY['sweet', 'berry', 'creamy', 'fruity', 'gas'],
@@ -669,9 +669,9 @@ WHERE id = '22222222-2222-2222-2222-222222222222';
 
 UPDATE products SET 
   gallery_urls = ARRAY[
-    '/src/assets/products/runtz/runtz-1.jpeg',
-    '/src/assets/products/runtz/runtz-2.jpeg',
-    '/src/assets/products/runtz/runtz-3.jpeg'
+    '/assets/products/runtz/runtz-1.jpeg',
+    '/assets/products/runtz/runtz-2.jpeg',
+    '/assets/products/runtz/runtz-3.jpeg'
   ],
   effects = ARRAY['euphoric', 'uplifted', 'happy', 'relaxed', 'tingly'],
   flavors = ARRAY['sweet', 'fruity', 'candy', 'tropical', 'berry'],
@@ -682,9 +682,9 @@ WHERE id = '33333333-3333-3333-3333-333333333333';
 
 UPDATE products SET 
   gallery_urls = ARRAY[
-    '/src/assets/products/wedding-cake/wedding-cake-1.jpeg',
-    '/src/assets/products/wedding-cake/wedding-cake-2.jpeg',
-    '/src/assets/products/wedding-cake/wedding-cake-3.jpeg'
+    '/assets/products/wedding-cake/wedding-cake-1.jpeg',
+    '/assets/products/wedding-cake/wedding-cake-2.jpeg',
+    '/assets/products/wedding-cake/wedding-cake-3.jpeg'
   ],
   effects = ARRAY['relaxed', 'euphoric', 'happy', 'uplifted', 'hungry'],
   flavors = ARRAY['vanilla', 'sweet', 'earthy', 'pepper', 'flowery'],
@@ -693,31 +693,31 @@ UPDATE products SET
   is_featured = true
 WHERE id = '44444444-4444-4444-4444-444444444444';
 
--- Insert product variants
+-- Insert product variants with more realistic pricing
 INSERT INTO public.product_variants (id, product_id, name, weight_grams, price, inventory_count, is_active) VALUES
   -- Pineapple Fruz variants
-  ('pv_pf_eighth', '11111111-1111-1111-1111-111111111111', '1/8 oz (3.5g)', 3.5, 5500, 50, true),
-  ('pv_pf_quarter', '11111111-1111-1111-1111-111111111111', '1/4 oz (7g)', 7.0, 10500, 30, true),
-  ('pv_pf_half', '11111111-1111-1111-1111-111111111111', '1/2 oz (14g)', 14.0, 20000, 20, true),
-  ('pv_pf_ounce', '11111111-1111-1111-1111-111111111111', '1 oz (28g)', 28.0, 38000, 10, true),
+  ('pv_pf_eighth', '11111111-1111-1111-1111-111111111111', '1/8 oz (3.5g)', 3.5, 4000, 50, true),
+  ('pv_pf_quarter', '11111111-1111-1111-1111-111111111111', '1/4 oz (7g)', 7.0, 7500, 30, true),
+  ('pv_pf_half', '11111111-1111-1111-1111-111111111111', '1/2 oz (14g)', 14.0, 14000, 20, true),
+  ('pv_pf_ounce', '11111111-1111-1111-1111-111111111111', '1 oz (28g)', 28.0, 25000, 10, true),
   
   -- Rainbow Sherbert #11 variants
-  ('pv_rs_eighth', '22222222-2222-2222-2222-222222222222', '1/8 oz (3.5g)', 3.5, 6500, 40, true),
-  ('pv_rs_quarter', '22222222-2222-2222-2222-222222222222', '1/4 oz (7g)', 7.0, 12500, 25, true),
-  ('pv_rs_half', '22222222-2222-2222-2222-222222222222', '1/2 oz (14g)', 14.0, 24000, 15, true),
-  ('pv_rs_ounce', '22222222-2222-2222-2222-222222222222', '1 oz (28g)', 28.0, 45000, 8, true),
+  ('pv_rs_eighth', '22222222-2222-2222-2222-222222222222', '1/8 oz (3.5g)', 3.5, 4500, 40, true),
+  ('pv_rs_quarter', '22222222-2222-2222-2222-222222222222', '1/4 oz (7g)', 7.0, 8500, 25, true),
+  ('pv_rs_half', '22222222-2222-2222-2222-222222222222', '1/2 oz (14g)', 14.0, 16000, 15, true),
+  ('pv_rs_ounce', '22222222-2222-2222-2222-222222222222', '1 oz (28g)', 28.0, 25000, 8, true),
   
   -- Runtz variants
-  ('pv_rz_eighth', '33333333-3333-3333-3333-333333333333', '1/8 oz (3.5g)', 3.5, 6000, 45, true),
-  ('pv_rz_quarter', '33333333-3333-3333-3333-333333333333', '1/4 oz (7g)', 7.0, 11500, 28, true),
-  ('pv_rz_half', '33333333-3333-3333-3333-333333333333', '1/2 oz (14g)', 14.0, 22000, 18, true),
-  ('pv_rz_ounce', '33333333-3333-3333-3333-333333333333', '1 oz (28g)', 28.0, 42000, 10, true),
+  ('pv_rz_eighth', '33333333-3333-3333-3333-333333333333', '1/8 oz (3.5g)', 3.5, 4200, 45, true),
+  ('pv_rz_quarter', '33333333-3333-3333-3333-333333333333', '1/4 oz (7g)', 7.0, 8000, 28, true),
+  ('pv_rz_half', '33333333-3333-3333-3333-333333333333', '1/2 oz (14g)', 14.0, 15000, 18, true),
+  ('pv_rz_ounce', '33333333-3333-3333-3333-333333333333', '1 oz (28g)', 28.0, 25000, 10, true),
   
   -- Wedding Cake variants
-  ('pv_wc_eighth', '44444444-4444-4444-4444-444444444444', '1/8 oz (3.5g)', 3.5, 6000, 55, true),
-  ('pv_wc_quarter', '44444444-4444-4444-4444-444444444444', '1/4 oz (7g)', 7.0, 11500, 35, true),
-  ('pv_wc_half', '44444444-4444-4444-4444-444444444444', '1/2 oz (14g)', 14.0, 22000, 22, true),
-  ('pv_wc_ounce', '44444444-4444-4444-4444-444444444444', '1 oz (28g)', 28.0, 42000, 12, true)
+  ('pv_wc_eighth', '44444444-4444-4444-4444-444444444444', '1/8 oz (3.5g)', 3.5, 4200, 55, true),
+  ('pv_wc_quarter', '44444444-4444-4444-4444-444444444444', '1/4 oz (7g)', 7.0, 8000, 35, true),
+  ('pv_wc_half', '44444444-4444-4444-4444-444444444444', '1/2 oz (14g)', 14.0, 15000, 22, true),
+  ('pv_wc_ounce', '44444444-4444-4444-4444-444444444444', '1 oz (28g)', 28.0, 25000, 12, true)
 ON CONFLICT (id) DO UPDATE SET
   product_id = EXCLUDED.product_id,
   name = EXCLUDED.name,
