@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Use ES2018 for broader compatibility while supporting modern features
-    target: ['es2018', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    // Use ES2015 for maximum compatibility with older libraries
+    target: 'es2015',
     // DISABLE MINIFICATION COMPLETELY
     minify: false,
     rollupOptions: {
@@ -111,10 +111,12 @@ export default defineConfig(({ mode }) => ({
       // Include problematic dependencies
       'use-sidecar',
       'react-remove-scroll',
+      // Include tslib for helper functions
+      'tslib',
     ],
     exclude: [],
     esbuildOptions: {
-      target: 'es2018',
+      target: 'es2015',
       // Preserve all names
       keepNames: true,
       minify: false,
@@ -124,7 +126,7 @@ export default defineConfig(({ mode }) => ({
   },
 
   esbuild: {
-    target: 'es2018',
+    target: 'es2015',
     // Keep all names to prevent minification issues
     keepNames: true,
     legalComments: 'none',
