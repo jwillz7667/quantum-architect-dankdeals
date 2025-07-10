@@ -286,10 +286,16 @@ export default function DeliveryArea() {
                 special delivery requests.
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-muted-foreground mb-4">
-                Call us at <strong className="text-foreground">(612) 555-DANK</strong> or email
-                <strong className="text-foreground"> delivery@dankdeals.com</strong>
+            <CardContent className="text-center space-y-4">
+              <a
+                href="tel:763-247-5378"
+                className="flex items-center justify-center gap-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
+              >
+                <Phone className="h-6 w-6" />
+                763-247-5378
+              </a>
+              <p className="text-muted-foreground">
+                Call or text to place orders and check delivery status
               </p>
               <Badge variant="secondary" className="bg-primary text-primary-foreground">
                 Available 7 Days a Week

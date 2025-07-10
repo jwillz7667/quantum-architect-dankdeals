@@ -177,16 +177,16 @@ export default function CheckoutComplete() {
         {/* Support Info */}
         <div className="text-center text-sm text-muted-foreground">
           <p>Need help with your order?</p>
-          <p>
-            Contact us at{' '}
-            <a href="mailto:support@dankdealsmn.com" className="text-primary underline">
-              support@dankdealsmn.com
+          <p className="mt-2">
+            Call or text us at{' '}
+            <a href="tel:763-247-5378" className="text-primary font-semibold text-base">
+              763-247-5378
             </a>
           </p>
-          <p>
-            or call{' '}
-            <a href="tel:+16125551234" className="text-primary underline">
-              (612) 555-1234
+          <p className="mt-1">
+            or email{' '}
+            <a href="mailto:support@dankdealsmn.com" className="text-primary underline">
+              support@dankdealsmn.com
             </a>
           </p>
         </div>

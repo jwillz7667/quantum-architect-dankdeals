@@ -8,7 +8,7 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, MapPin, Truck } from 'lucide-react';
+import { ShoppingCart, User, MapPin, Truck, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
 import { generateBreadcrumbSchema } from '@/lib/seo';
@@ -131,6 +131,32 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Footer Section */}
+        <div className="mt-12 mb-8 pb-8 border-t pt-8">
+          <div className="text-center space-y-4">
+            <img
+              src="/assets/logos/dankdeals-cart-logo.svg"
+              alt="DankDeals"
+              className="h-16 w-16 mx-auto opacity-70"
+            />
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Premium Cannabis Delivery in Minnesota
+              </p>
+              <a
+                href="tel:763-247-5378"
+                className="inline-flex items-center gap-2 text-lg font-semibold text-primary hover:text-primary/80 transition-colors"
+              >
+                <Phone className="h-5 w-5" />
+                Call/Text: 763-247-5378
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Licensed Minnesota Cannabis Retailer • 21+ Only • Cash on Delivery
+            </p>
+          </div>
         </div>
       </div>
 

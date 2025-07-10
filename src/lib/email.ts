@@ -56,7 +56,7 @@ export const sendOrderConfirmationEmail = async (emailData: EmailData): Promise<
         <li>Have your ID and cash ready</li>
       </ol>
       
-      <p>Questions? Contact us at support@dankdealsmn.com or (612) 555-DANK</p>
+      <p>Questions? Contact us at support@dankdealsmn.com or 763-247-5378</p>
     `;
 
     // Store notification in database

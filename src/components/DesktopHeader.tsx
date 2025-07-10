@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 // import { useAdminAuth } from "@/hooks/useAdminAuth";
 
@@ -21,8 +21,8 @@ export function DesktopHeader() {
     <header className="hidden md:flex bg-background border-b border-border">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
         {/* Logo */}
-        <Link to="/" className="text-2xl font-bold text-primary">
-          DankDeals
+        <Link to="/" className="flex items-center">
+          <img src="/assets/logos/dankdeals-logo.svg" alt="DankDeals" className="h-10 w-auto" />
         </Link>
 
         {/* Navigation */}
@@ -57,6 +57,15 @@ export function DesktopHeader() {
 
         {/* Actions */}
         <div className="flex items-center space-x-4">
+          {/* Phone Number - Prominent Display */}
+          <a
+            href="tel:763-247-5378"
+            className="flex items-center gap-2 text-primary font-semibold hover:text-primary/80 transition-colors"
+          >
+            <Phone className="h-5 w-5" />
+            <span>763-247-5378</span>
+          </a>
+
           <Link to="/cart">
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />

@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BottomNav } from '@/components/BottomNav';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -169,6 +169,22 @@ export default function Cart() {
                     <span>Total</span>
                     <span className="text-primary">${formatPrice(totalPrice)}</span>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Phone Order Option */}
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Prefer to order by phone?</p>
+                  <a
+                    href="tel:763-247-5378"
+                    className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+                  >
+                    <Phone className="h-4 w-4" />
+                    763-247-5378
+                  </a>
                 </div>
               </CardContent>
             </Card>
