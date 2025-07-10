@@ -194,6 +194,40 @@
   </head>
 
   <body>
+    <script>
+      // Polyfills for production compatibility
+      (function () {
+        // Polyfill for __name function
+        if (typeof globalThis.__name !== 'function') {
+          globalThis.__name = function (fn, name) {
+            if (typeof fn === 'function' && name) {
+              try {
+                Object.defineProperty(fn, 'name', {
+                  value: name,
+                  configurable: true,
+                  writable: false,
+                });
+              } catch (e) {
+                // Ignore errors on older browsers
+              }
+            }
+            return fn;
+          };
+        }
+
+        // Ensure globalThis exists
+        if (typeof globalThis === 'undefined') {
+          window.globalThis = window;
+        }
+
+        // Polyfill for Object.hasOwn (used by some libraries)
+        if (!Object.hasOwn) {
+          Object.hasOwn = function (obj, prop) {
+            return Object.prototype.hasOwnProperty.call(obj, prop);
+          };
+        }
+      })();
+    </script>
     <noscript>
       <div style="padding: 20px; text-align: center; font-family: system-ui">
         <h1>JavaScript Required</h1>

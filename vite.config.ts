@@ -16,13 +16,39 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Use ES2015 target to avoid ES2022 static blocks that break netlify-plugin-js-obfuscator
-    target: 'es2015',
-    // Switch to esbuild for safer vendor minification
-    minify: 'esbuild',
+    // Use ES2018 for broader compatibility while supporting modern features
+    target: ['es2018', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    // Use terser for production, no minification for development
+    minify: mode === 'production' ? 'terser' : false,
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.debug'],
+        // Preserve function names for libraries that depend on them
+        keep_fnames: true,
+      },
+      mangle: {
+        // Don't mangle function names
+        keep_fnames: true,
+        // Don't mangle class names
+        keep_classnames: true,
+        // Reserve names that might be used by libraries
+        reserved: ['__name', '__esModule', '_interopRequireDefault'],
+      },
+      format: {
+        comments: false,
+      },
+    },
     rollupOptions: {
       output: {
+        // Use function form for manualChunks to better control chunking
         manualChunks: (id) => {
+          // Problematic libraries that need special handling
+          if (id.includes('use-sidecar') || id.includes('react-remove-scroll')) {
+            return 'sidecar-vendor';
+          }
+
           // React core (include scheduler to prevent runtime errors)
           if (
             id.includes('react') ||
@@ -77,6 +103,10 @@ export default defineConfig(({ mode }) => ({
             return 'vendor';
           }
         },
+        // Preserve module structure for better debugging
+        preserveModules: false,
+        // Use named exports
+        exports: 'named',
       },
     },
     cssCodeSplit: true,
@@ -88,6 +118,10 @@ export default defineConfig(({ mode }) => ({
     // Additional optimization
     assetsInlineLimit: 4096,
     emptyOutDir: true,
+    // Polyfill for Node.js globals
+    define: {
+      global: 'globalThis',
+    },
   },
   optimizeDeps: {
     include: [
@@ -99,27 +133,27 @@ export default defineConfig(({ mode }) => ({
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-toast',
+      // Include problematic dependencies
+      'use-sidecar',
+      'react-remove-scroll',
     ],
+    exclude: [],
     esbuildOptions: {
-      target: 'es2015',
-      // Less aggressive optimization for vendor dependencies
+      target: 'es2018',
+      // Preserve all names
+      keepNames: true,
       minify: false,
-      treeShaking: false,
+      treeShaking: true,
       format: 'esm',
     },
   },
 
   esbuild: {
-    target: 'es2015',
-    // Safer minification settings
-    minifyIdentifiers: false,
-    minifySyntax: true,
-    minifyWhitespace: true,
-    treeShaking: false,
-    legalComments: 'none',
-    // Only drop console.log and console.debug in production, keep error/warn
-    drop: mode === 'production' ? ['debugger'] : [],
-    pure: mode === 'production' ? ['console.log', 'console.debug'] : [],
+    target: 'es2018',
+    // Keep all names to prevent minification issues
     keepNames: true,
+    legalComments: 'none',
+    // Only drop debugger in production
+    drop: mode === 'production' ? ['debugger'] : [],
   },
 }));
