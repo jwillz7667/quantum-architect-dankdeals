@@ -1,4 +1,4 @@
-import { Product } from '@/hooks/useProducts';
+import type { Product } from '@/hooks/useProducts';
 
 export interface SEOProps {
   title?: string;
@@ -66,7 +66,7 @@ export function generateProductSchema(product: Product) {
     image: product.image_url || '',
     brand: {
       '@type': 'Brand',
-      name: product.vendor.name,
+      name: 'DankDeals',
     },
     offers: {
       '@type': 'AggregateOffer',

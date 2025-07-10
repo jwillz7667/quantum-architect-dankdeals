@@ -1,61 +1,15 @@
-# DankDeals MN Robots.txt
-# https://dankdealsmn.com
+# Robots.txt for DankDeals MN
 
 User-agent: *
 Allow: /
 
-# Disallow admin and API routes
-Disallow: /admin/
-Disallow: /api/
-Disallow: /auth/
-Disallow: /_next/
-Disallow: /checkout/complete
-
-# Allow important assets
-Allow: /src/assets/products/
-Allow: /*.js$
-Allow: /*.css$
-Allow: /*.png$
-Allow: /*.jpg$
-Allow: /*.jpeg$
-Allow: /*.gif$
-Allow: /*.svg$
-Allow: /*.webp$
-
-# Crawl delay to be respectful
-Crawl-delay: 1
+# Disallow private/user areas
+Disallow: /auth
+Disallow: /profile/
+Disallow: /checkout/
+Disallow: /cart
 
 # Sitemaps
 Sitemap: https://dankdealsmn.com/sitemap.xml
 Sitemap: https://dankdealsmn.com/sitemap-products.xml
 Sitemap: https://dankdealsmn.com/sitemap-blog.xml
-
-# Specific bot rules
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Slurp
-Allow: /
-Crawl-delay: 1
-
-# Block bad bots
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: MJ12bot
-Disallow: /
-
-# Cannabis compliance notice
-# This website contains age-restricted content (21+)
-# Cannabis products for legal adult use only in Minnesota

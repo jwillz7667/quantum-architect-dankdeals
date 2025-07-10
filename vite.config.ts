@@ -18,28 +18,8 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Use ES2018 for broader compatibility while supporting modern features
     target: ['es2018', 'edge88', 'firefox78', 'chrome87', 'safari14'],
-    // Use terser for production, no minification for development
-    minify: mode === 'production' ? 'terser' : false,
-    terserOptions: {
-      compress: {
-        drop_console: false,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.debug'],
-        // Preserve function names for libraries that depend on them
-        keep_fnames: true,
-      },
-      mangle: {
-        // Don't mangle function names
-        keep_fnames: true,
-        // Don't mangle class names
-        keep_classnames: true,
-        // Reserve names that might be used by libraries
-        reserved: ['__name', '__esModule', '_interopRequireDefault'],
-      },
-      format: {
-        comments: false,
-      },
-    },
+    // DISABLE MINIFICATION COMPLETELY
+    minify: false,
     rollupOptions: {
       output: {
         // Use function form for manualChunks to better control chunking
@@ -78,11 +58,6 @@ export default defineConfig(({ mode }) => ({
             return 'form-vendor';
           }
 
-          // Admin pages (separate chunk since they're large)
-          if (id.includes('/pages/admin/')) {
-            return 'admin-vendor';
-          }
-
           // Checkout pages (separate chunk - only loaded during checkout)
           if (id.includes('/pages/checkout/')) {
             return 'checkout-vendor';
@@ -113,7 +88,7 @@ export default defineConfig(({ mode }) => ({
     cssMinify: 'lightningcss',
     sourcemap: false,
     reportCompressedSize: false,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
 
     // Additional optimization
     assetsInlineLimit: 4096,
@@ -153,7 +128,7 @@ export default defineConfig(({ mode }) => ({
     // Keep all names to prevent minification issues
     keepNames: true,
     legalComments: 'none',
-    // Only drop debugger in production
-    drop: mode === 'production' ? ['debugger'] : [],
+    // Don't drop anything
+    drop: [],
   },
 }));
