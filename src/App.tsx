@@ -21,6 +21,7 @@ const Cart = lazy(() => import('./pages/Cart'));
 const Profile = lazy(() => import('./pages/Profile'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Legal = lazy(() => import('./pages/Legal'));
@@ -89,6 +90,7 @@ const App = () => (
                     />
                     <Route path="/faq" element={<FAQ />} />
                     <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/terms" element={<Terms />} />
                     <Route path="/legal" element={<Legal />} />

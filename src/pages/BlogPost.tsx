@@ -1,12 +1,14 @@
+// src/pages/BlogPost.tsx
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { SEOHead } from '@/components/SEOHead';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
-import { Clock, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, Clock, Calendar, User } from 'lucide-react';
 
+// Blog posts data - in production, this would come from a database
 const blogPosts = [
   {
     id: 'understanding-terpenes-cannabis-flavor-effects',
@@ -437,46 +439,134 @@ const blogPosts = [
   },
 ];
 
-export default function Blog() {
+export default function BlogPost() {
+  const { slug } = useParams();
+  const post = blogPosts.find((p) => p.slug === slug);
+
+  if (!post) {
+    return <Navigate to="/blog" replace />;
+  }
+
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://dankdealsmn.com/' },
+    { name: 'Blog', url: 'https://dankdealsmn.com/blog' },
+    { name: post.title, url: `https://dankdealsmn.com/blog/${post.slug}` },
+  ];
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt,
+    image: `https://dankdealsmn.com${post.image}`,
+    datePublished: new Date(post.date).toISOString(),
+    dateModified: new Date(post.date).toISOString(),
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'DankDeals MN',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://dankdealsmn.com/apple-touch-icon.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://dankdealsmn.com/blog/${post.slug}`,
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead
-        title="Blog"
-        description="Stay informed about cannabis culture, laws, and strains."
+        title={post.title}
+        description={post.excerpt}
+        canonical={`https://dankdealsmn.com/blog/${post.slug}`}
+        breadcrumbs={breadcrumbs}
+        structuredData={structuredData}
+        openGraph={{
+          type: 'article',
+          article: {
+            publishedTime: new Date(post.date).toISOString(),
+            modifiedTime: new Date(post.date).toISOString(),
+            author: post.author,
+            tags: post.tags,
+          },
+          images: [
+            {
+              url: `https://dankdealsmn.com${post.image}`,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+            },
+          ],
+        }}
       />
       <DesktopHeader />
       <MobileHeader title="Blog" />
 
-      <div className="max-w-md mx-auto px-4 py-6">
-        <h2 className="text-xl font-bold text-foreground mb-6">Latest Articles</h2>
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <Link to="/blog">
+          <Button variant="ghost" className="mb-6">
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Blog
+          </Button>
+        </Link>
 
-        <div className="space-y-4">
-          {blogPosts.map((post, index) => (
-            <Link key={index} to={`/blog/${post.slug}`} className="block">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary">{post.category}</Badge>
-                    <span className="text-sm text-muted-foreground">
-                      <Clock className="inline-block mr-1 h-3 w-3" />
-                      {post.readTime}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      <Calendar className="inline-block mr-1 h-3 w-3" />
-                      {post.date}
-                    </span>
+        <article className="prose prose-gray dark:prose-invert max-w-none">
+          <header className="mb-8">
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Badge variant="secondary">{post.category}</Badge>
+              {post.tags.map((tag) => (
+                <Badge key={tag} variant="outline">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
+            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <User className="h-4 w-4" />
+                {post.author}
+              </span>
+              <span className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {post.date}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {post.readTime}
+              </span>
+            </div>
+          </header>
+
+          <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+        </article>
+
+        <div className="mt-12 pt-8 border-t">
+          <h2 className="text-2xl font-bold mb-4">More Articles</h2>
+          <div className="grid gap-4">
+            {blogPosts
+              .filter((p) => p.slug !== post.slug)
+              .slice(0, 3)
+              .map((relatedPost) => (
+                <Link
+                  key={relatedPost.slug}
+                  to={`/blog/${relatedPost.slug}`}
+                  className="block p-4 border rounded-lg hover:shadow-md transition-shadow"
+                >
+                  <h3 className="font-semibold mb-2">{relatedPost.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{relatedPost.excerpt}</p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>{relatedPost.date}</span>
+                    <span>{relatedPost.readTime}</span>
                   </div>
-                  <CardTitle className="text-lg">{post.title}</CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground">
-                    {post.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{post.excerpt}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                </Link>
+              ))}
+          </div>
         </div>
       </div>
 
