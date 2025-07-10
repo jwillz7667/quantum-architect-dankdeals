@@ -13,7 +13,11 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Force a single version of React and React DOM
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
+    dedupe: ['react', 'react-dom', 'react-router-dom'],
   },
   build: {
     // Use ES2015 for maximum compatibility with older libraries
@@ -31,10 +35,11 @@ export default defineConfig(({ mode }) => ({
 
           // React core (include scheduler to prevent runtime errors)
           if (
-            id.includes('react') ||
-            id.includes('react-dom') ||
-            id.includes('react-router') ||
-            id.includes('scheduler')
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/react-router') ||
+            id.includes('node_modules/react-router-dom/') ||
+            id.includes('node_modules/scheduler/')
           ) {
             return 'react-vendor';
           }
@@ -104,6 +109,8 @@ export default defineConfig(({ mode }) => ({
       'react-dom',
       'react-dom/client',
       'react-router-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
       'scheduler',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
@@ -115,6 +122,7 @@ export default defineConfig(({ mode }) => ({
       'tslib',
     ],
     exclude: [],
+    force: true, // Force re-optimization to ensure consistent builds
     esbuildOptions: {
       target: 'es2015',
       // Preserve all names
