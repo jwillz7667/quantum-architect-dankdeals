@@ -117,7 +117,9 @@ export default defineConfig(({ mode }) => ({
     minifyWhitespace: true,
     treeShaking: false,
     legalComments: 'none',
-    drop: mode === 'production' ? ['console', 'debugger'] : [],
+    // Only drop console.log and console.debug in production, keep error/warn
+    drop: mode === 'production' ? ['debugger'] : [],
+    pure: mode === 'production' ? ['console.log', 'console.debug'] : [],
     keepNames: true,
   },
 }));
