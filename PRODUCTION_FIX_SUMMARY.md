@@ -7,7 +7,8 @@ The production build was showing a white screen with JavaScript errors:
 1. `__name is not a function` error from minification issues
 2. `r is not a function` error from the sidecar-vendor bundle
 3. `__assign is not a function` error from missing TypeScript helpers
-4. 131 TypeScript errors primarily from admin-related files
+4. `dispatcher.useContext` null error from React Router context issues
+5. 131 TypeScript errors primarily from admin-related files
 
 ## Solution Applied
 
@@ -31,6 +32,11 @@ The production build was showing a white screen with JavaScript errors:
   - `__spreadArray` - for array spread operations
 - Installed `tslib` package for TypeScript helper functions
 - Fixed vendor.name error in seo.ts
+- **Fixed React Router context error** by:
+  - Adding React deduplication in vite.config.ts
+  - Forcing single React instance with aliases
+  - Importing Index component directly instead of lazy loading
+  - Adding `force: true` to optimizeDeps for consistent builds
 
 ### 3. Results
 
