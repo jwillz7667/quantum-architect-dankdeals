@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, MapPin, Truck, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
-import { generateBreadcrumbSchema } from '@/lib/seo';
 
 const Index = () => {
   const { user } = useAuth();
@@ -26,9 +25,9 @@ const Index = () => {
     }
   };
 
-  const breadcrumbSchema = generateBreadcrumbSchema([
+  const breadcrumbs = [
     { name: 'Home', url: 'https://dankdealsmn.com/' },
-  ]);
+  ];
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -37,7 +36,7 @@ const Index = () => {
         description="Minnesota's premier cannabis delivery service. Shop premium flower, edibles, concentrates & more. Same-day delivery across Minneapolis, St. Paul & surrounding areas. Age 21+ only."
         keywords="cannabis delivery Minnesota, marijuana delivery Minneapolis, weed delivery St Paul, same day cannabis delivery, dispensary near me, legal cannabis Minnesota"
         url="https://dankdealsmn.com/"
-        structuredData={breadcrumbSchema}
+        breadcrumbs={breadcrumbs}
       />
       <DesktopHeader />
       <MobileHeader title="DankDeals" />

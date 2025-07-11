@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Edit2, MapPin, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,13 +58,7 @@ export default function ProfileAddress() {
     is_default: false,
   });
 
-  useEffect(() => {
-    if (user) {
-      void fetchAddresses();
-    }
-  }, [user]);
-
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('addresses')
@@ -85,7 +79,13 @@ export default function ProfileAddress() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, toast]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchAddresses();
+    }
+  }, [user, fetchAddresses]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +132,7 @@ export default function ProfileAddress() {
       }
 
       resetForm();
-      fetchAddresses();
+      void fetchAddresses();
     } catch (error) {
       console.error('Error saving address:', error);
       toast({
@@ -171,7 +171,7 @@ export default function ProfileAddress() {
         description: 'Address deleted successfully',
       });
 
-      fetchAddresses();
+      void fetchAddresses();
     } catch (error) {
       console.error('Error deleting address:', error);
       toast({
@@ -202,7 +202,7 @@ export default function ProfileAddress() {
         description: 'Default address updated',
       });
 
-      fetchAddresses();
+      void fetchAddresses();
     } catch (error) {
       console.error('Error setting default address:', error);
       toast({
@@ -297,7 +297,7 @@ export default function ProfileAddress() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleSetDefault(address.id)}
+                              onClick={() => void handleSetDefault(address.id)}
                             >
                               <Check className="h-4 w-4" />
                             </Button>
@@ -325,7 +325,7 @@ export default function ProfileAddress() {
               <CardDescription>Enter your delivery address details</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
                 <div>
                   <Label htmlFor="label">Address Label</Label>
                   <Input
@@ -430,7 +430,7 @@ export default function ProfileAddress() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={() => void handleDelete()}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

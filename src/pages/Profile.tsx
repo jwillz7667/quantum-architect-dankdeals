@@ -6,7 +6,7 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 // import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const menuItems = [
@@ -29,18 +29,14 @@ export default function Profile() {
   // const { isAdmin, adminUser } = useAdminAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      void fetchProfile();
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    if (!user) return;
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('first_name, last_name, phone, avatar_url')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -51,7 +47,13 @@ export default function Profile() {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchProfile();
+    }
+  }, [user, fetchProfile]);
 
   const handleSignOut = async () => {
     await signOut();

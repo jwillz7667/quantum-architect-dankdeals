@@ -3,8 +3,8 @@ import { env } from './env';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export interface LogContext {
-  context?: Record<string, any>;
-  [key: string]: any;
+  context?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface LogEntry {
@@ -12,6 +12,12 @@ export interface LogEntry {
   message: string;
   timestamp: number;
   context?: LogContext;
+}
+
+type SanitizableValue = string | number | boolean | null | undefined | SanitizableObject | SanitizableValue[];
+
+interface SanitizableObject {
+  [key: string]: SanitizableValue;
 }
 
 class Logger {
@@ -33,23 +39,24 @@ class Logger {
     return true;
   }
 
-  private sanitizeData(data: any): any {
+  private sanitizeData<T>(data: T): T {
     if (!data) return data;
 
     // Clone to avoid modifying original
-    const sanitized = JSON.parse(JSON.stringify(data));
+    const sanitized = JSON.parse(JSON.stringify(data)) as T;
 
     // Remove sensitive fields
     const sensitiveFields = ['password', 'token', 'apiKey', 'secret', 'creditCard', 'ssn'];
 
-    const removeSensitive = (obj: any) => {
+    const removeSensitive = (obj: unknown): void => {
       if (typeof obj !== 'object' || obj === null) return;
 
-      Object.keys(obj).forEach((key) => {
+      const record = obj as Record<string, unknown>;
+      Object.keys(record).forEach((key) => {
         if (sensitiveFields.some((field) => key.toLowerCase().includes(field))) {
-          obj[key] = '[REDACTED]';
-        } else if (typeof obj[key] === 'object') {
-          removeSensitive(obj[key]);
+          record[key] = '[REDACTED]';
+        } else if (typeof record[key] === 'object') {
+          removeSensitive(record[key]);
         }
       });
     };
@@ -116,7 +123,7 @@ class Logger {
   }
 
   // Audit logging for compliance
-  audit(action: string, userId: string, details?: Record<string, any>) {
+  audit(action: string, userId: string, details?: Record<string, unknown>) {
     const message = `Audit: ${action}`;
     this.info(message, {
       userId,
@@ -134,7 +141,7 @@ export const logger = new Logger();
 declare global {
   interface Window {
     Sentry?: {
-      captureException: (error: Error, context?: any) => void;
+      captureException: (error: Error, context?: { extra?: unknown }) => void;
       captureMessage: (message: string, level?: string) => void;
     };
   }

@@ -164,3 +164,74 @@ export function generateArticleSchema(article: {
     },
   };
 }
+
+interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+export function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
+  const baseUrl = 'https://dankdealsmn.com';
+  const segments = pathname.split('/').filter(Boolean);
+  const breadcrumbs: BreadcrumbItem[] = [
+    { name: 'Home', url: baseUrl },
+  ];
+
+  let currentPath = '';
+  
+  segments.forEach((segment, index) => {
+    currentPath += `/${segment}`;
+    
+    // Handle special cases for better names
+    let name = segment
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    // Special naming for known routes
+    switch (segment) {
+      case 'blog':
+        name = 'Blog';
+        break;
+      case 'cart':
+        name = 'Shopping Cart';
+        break;
+      case 'profile':
+        name = 'My Profile';
+        break;
+      case 'categories':
+        name = 'Categories';
+        break;
+      case 'delivery-area':
+        name = 'Delivery Area';
+        break;
+      case 'faq':
+        name = 'FAQ';
+        break;
+      case 'auth':
+        name = 'Sign In';
+        break;
+      case 'checkout':
+        name = 'Checkout';
+        break;
+      case 'product':
+        // Skip 'product' segment as the next segment will be the product name
+        if (index === segments.length - 2) {
+          return;
+        }
+        break;
+    }
+    
+    // For product pages, use the last segment as the product name
+    if (segments[index - 1] === 'product' && index === segments.length - 1) {
+      name = name.replace(/^\d+-/, ''); // Remove leading numbers if any
+    }
+    
+    breadcrumbs.push({
+      name,
+      url: `${baseUrl}${currentPath}`,
+    });
+  });
+
+  return breadcrumbs;
+}

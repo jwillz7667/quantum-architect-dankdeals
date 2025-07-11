@@ -484,26 +484,11 @@ export default function BlogPost() {
       <SEOHead
         title={post.title}
         description={post.excerpt}
-        canonical={`https://dankdealsmn.com/blog/${post.slug}`}
-        breadcrumbs={breadcrumbs}
+        canonicalUrl={`https://dankdealsmn.com/blog/${post.slug}`}
+        article={true}
+        image={post.image}
         structuredData={structuredData}
-        openGraph={{
-          type: 'article',
-          article: {
-            publishedTime: new Date(post.date).toISOString(),
-            modifiedTime: new Date(post.date).toISOString(),
-            author: post.author,
-            tags: post.tags,
-          },
-          images: [
-            {
-              url: `https://dankdealsmn.com${post.image}`,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ],
-        }}
+        breadcrumbs={breadcrumbs}
       />
       <DesktopHeader />
       <MobileHeader title="Blog" />

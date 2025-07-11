@@ -7,7 +7,6 @@ import { CategoryRail } from '@/components/CategoryRail';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { SEOHead } from '@/components/SEOHead';
-import { generateBreadcrumbSchema } from '@/lib/seo';
 import { useProductsFilter } from '@/hooks/useProductsFilter';
 
 export default function Categories() {
@@ -38,7 +37,7 @@ export default function Categories() {
     ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)
     : 'All Categories';
 
-  const breadcrumbSchema = generateBreadcrumbSchema([
+  const breadcrumbs = [
     { name: 'Home', url: 'https://dankdealsmn.com/' },
     { name: 'Categories', url: 'https://dankdealsmn.com/categories' },
     ...(selectedCategory
@@ -49,7 +48,7 @@ export default function Categories() {
           },
         ]
       : []),
-  ]);
+  ];
 
   const pageTitle = selectedCategory
     ? `${categoryDisplayName} Cannabis Products | DankDeals Minnesota`
@@ -66,7 +65,7 @@ export default function Categories() {
         description={pageDescription}
         keywords={`cannabis categories, marijuana products Minnesota, weed types, flower, edibles, pre-rolls, concentrates, CBD products${selectedCategory ? `, ${selectedCategory}` : ''}`}
         url={`https://dankdealsmn.com/categories${selectedCategory ? `?category=${selectedCategory}` : ''}`}
-        structuredData={breadcrumbSchema}
+        breadcrumbs={breadcrumbs}
       />
       <DesktopHeader />
       <MobileHeader title={selectedCategory ? categoryDisplayName : 'Categories'} />

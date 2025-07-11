@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/useCart';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { SEOHead } from '@/components/SEOHead';
 
 export default function Cart() {
   const {
@@ -43,8 +44,18 @@ export default function Cart() {
     );
   }
 
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://dankdealsmn.com' },
+    { name: 'Shopping Cart', url: 'https://dankdealsmn.com/cart' },
+  ];
+
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-0 animate-fade-in">
+      <SEOHead
+        title="Shopping Cart"
+        description="Review your cannabis products and proceed to checkout. Same-day delivery in Minneapolis & St. Paul."
+        breadcrumbs={breadcrumbs}
+      />
       <DesktopHeader />
       <MobileHeader title="Shopping Cart" />
 

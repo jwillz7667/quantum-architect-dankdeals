@@ -13,7 +13,7 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/SEOHead';
-import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
+import { generateProductSchema } from '@/lib/seo';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import blueDreamImg from '@/assets/blue-dream.jpg';
 import prerollsImg from '@/assets/prerolls.jpg';
@@ -229,7 +229,7 @@ export default function ProductDetail() {
   const images = getImagesForProduct(product);
   const canonicalUrl = `https://dankdealsmn.com/product/${product.slug || product.id}`;
 
-  const breadcrumbSchema = generateBreadcrumbSchema([
+  const breadcrumbs = [
     { name: 'Home', url: 'https://dankdealsmn.com/' },
     { name: 'Categories', url: 'https://dankdealsmn.com/categories' },
     {
@@ -237,7 +237,7 @@ export default function ProductDetail() {
       url: `https://dankdealsmn.com/categories?category=${product.category}`,
     },
     { name: product.name || 'Product', url: canonicalUrl },
-  ]);
+  ];
 
   const productSchema = generateProductSchema({
     ...product,
@@ -270,7 +270,8 @@ export default function ProductDetail() {
         url={canonicalUrl}
         image={images[0]}
         type="product"
-        structuredData={[breadcrumbSchema, productSchema, reviewSchema]}
+        structuredData={[productSchema, reviewSchema]}
+        breadcrumbs={breadcrumbs}
       />
       <DesktopHeader />
       <MobileHeader title="Product Details" />

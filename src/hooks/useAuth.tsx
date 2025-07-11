@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { User, Session } from '@supabase/supabase-js';
+import type { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -16,6 +16,12 @@ import {
   logSecurityEvent,
 } from '@/lib/security';
 
+interface AuthResult {
+  error: AuthError | null;
+  rateLimited?: boolean;
+  lockedUntil?: number;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -24,25 +30,17 @@ interface AuthContextType {
     password: string,
     firstName?: string,
     lastName?: string
-  ) => Promise<{ error: any; rateLimited?: boolean; lockedUntil?: number }>;
+  ) => Promise<AuthResult>;
   signIn: (
     email: string,
     password: string
-  ) => Promise<{ error: any; rateLimited?: boolean; lockedUntil?: number }>;
-  signOut: () => Promise<{ error: any }>;
+  ) => Promise<AuthResult>;
+  signOut: () => Promise<{ error: AuthError | null }>;
   loading: boolean;
   csrfToken: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -80,7 +78,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -97,7 +95,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
+  const signUp = async (email: string, password: string, firstName?: string, lastName?: string): Promise<AuthResult> => {
     try {
       setLoading(true);
 
@@ -122,7 +120,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         logSecurityEvent('Sign up rate limited', { email: sanitizedEmail });
 
         return {
-          error: new Error(message),
+          error: { message, status: 429 } as AuthError,
           rateLimited: true,
           lockedUntil: rateCheck.lockedUntil,
         };
@@ -165,24 +163,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       return { error };
-    } catch (error: any) {
+    } catch (error) {
       recordFailedAttempt(email);
+
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       toast({
         title: 'Sign up failed',
-        description: 'An unexpected error occurred',
+        description: errorMessage,
         variant: 'destructive',
       });
 
-      logSecurityEvent('Sign up error', { error: error.message });
+      logSecurityEvent('Sign up error', { error: errorMessage });
 
-      return { error };
+      return { error: { message: errorMessage } as AuthError };
     } finally {
       setLoading(false);
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     try {
       setLoading(true);
 
@@ -205,7 +205,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         logSecurityEvent('Sign in rate limited', { email: sanitizedEmail });
 
         return {
-          error: new Error(message),
+          error: { message, status: 429 } as AuthError,
           rateLimited: true,
           lockedUntil: rateCheck.lockedUntil,
         };
@@ -234,24 +234,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       return { error };
-    } catch (error: any) {
+    } catch (error) {
       recordFailedAttempt(email);
+
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       toast({
         title: 'Sign in failed',
-        description: 'An unexpected error occurred',
+        description: errorMessage,
         variant: 'destructive',
       });
 
-      logSecurityEvent('Sign in error', { error: error.message });
+      logSecurityEvent('Sign in error', { error: errorMessage });
 
-      return { error };
+      return { error: { message: errorMessage } as AuthError };
     } finally {
       setLoading(false);
     }
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<{ error: AuthError | null }> => {
     try {
       const { error } = await supabase.auth.signOut();
 
@@ -266,16 +268,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       return { error };
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+
       toast({
         title: 'Sign out failed',
-        description: 'An unexpected error occurred',
+        description: errorMessage,
         variant: 'destructive',
       });
 
-      logSecurityEvent('Sign out error', { error: error.message });
+      logSecurityEvent('Sign out error', { error: errorMessage });
 
-      return { error };
+      return { error: { message: errorMessage } as AuthError };
     }
   };
 
@@ -290,4 +294,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Export useAuth at the end to fix fast refresh warning
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

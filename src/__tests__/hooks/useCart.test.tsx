@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useCart, CartProvider } from '@/hooks/useCart';
+import { useCart } from '@/hooks/useCart';
+import { CartProvider } from '@/hooks/CartProvider';
 import { ReactNode } from 'react';
 
 const wrapper = ({ children }: { children: ReactNode }) => <CartProvider>{children}</CartProvider>;

@@ -17,7 +17,7 @@ export const resetInactivityTimer = (): void => {
   }
 
   inactivityTimer = setTimeout(() => {
-    handleInactiveSession();
+    void handleInactiveSession();
   }, INACTIVITY_TIMEOUT);
 };
 
@@ -111,7 +111,7 @@ export const isLegalAge = (dateOfBirth: string): boolean => {
 };
 
 // Error logging (secure - no sensitive data)
-export const logSecurityEvent = (event: string, details?: Record<string, any>): void => {
+export const logSecurityEvent = (event: string, details?: Record<string, unknown>): void => {
   const timestamp = new Date().toISOString();
   const sanitizedDetails = details
     ? {

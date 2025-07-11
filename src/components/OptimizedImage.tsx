@@ -9,7 +9,6 @@ interface OptimizedImageProps {
   height?: number | string;
   loading?: 'lazy' | 'eager';
   sizes?: string;
-  srcSet?: string;
   priority?: boolean;
 }
 
@@ -21,7 +20,6 @@ export function OptimizedImage({
   height,
   loading = 'lazy',
   sizes,
-  srcSet,
   priority = false,
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -72,32 +70,39 @@ export function OptimizedImage({
           <span className="text-muted-foreground text-sm">Image not available</span>
         </div>
       )}
-      <img
-        ref={imgRef}
-        src={isInView ? src : undefined}
-        alt={alt}
-        width={width}
-        height={height}
-        loading={loading}
-        sizes={sizes}
-        srcSet={srcSet}
-        onLoad={() => {
-          setIsLoaded(true);
-          setHasError(false);
-        }}
-        onError={() => {
-          setHasError(true);
-          setIsLoaded(false);
-        }}
-        className={cn(
-          'transition-opacity duration-300',
-          isLoaded && !hasError ? 'opacity-100' : 'opacity-0',
-          className
+      <picture>
+        {src.match(/\.(jpg|png|jpeg)$/) && (
+          <source
+            type="image/webp"
+            srcSet={isInView ? src.replace(/\.(jpg|png|jpeg)$/, '.webp') : undefined}
+          />
         )}
-        style={{
-          display: isLoaded && !hasError ? 'block' : 'none',
-        }}
-      />
+        <img
+          ref={imgRef}
+          src={isInView ? src : undefined}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={loading}
+          sizes={sizes}
+          onLoad={() => {
+            setIsLoaded(true);
+            setHasError(false);
+          }}
+          onError={() => {
+            setHasError(true);
+            setIsLoaded(false);
+          }}
+          className={cn(
+            'transition-opacity duration-300',
+            isLoaded && !hasError ? 'opacity-100' : 'opacity-0',
+            className
+          )}
+          style={{
+            display: isLoaded && !hasError ? 'block' : 'none',
+          }}
+        />
+      </picture>
     </div>
   );
 }

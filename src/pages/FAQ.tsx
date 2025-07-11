@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { SEOHead } from '@/components/SEOHead';
-import { generateFAQSchema, generateBreadcrumbSchema } from '@/lib/seo';
+import { generateFAQSchema } from '@/lib/seo';
 
 const faqs = [
   {
@@ -64,21 +64,17 @@ const faqs = [
 ];
 
 export default function FAQ() {
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: 'Home', url: 'https://dankdealsmn.com/' },
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://dankdealsmn.com' },
     { name: 'FAQ', url: 'https://dankdealsmn.com/faq' },
-  ]);
-
-  const faqSchema = generateFAQSchema(faqs);
+  ];
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead
-        title="Frequently Asked Questions | DankDeals Cannabis Delivery"
-        description="Get answers to common questions about DankDeals cannabis delivery service. Learn about delivery hours, minimum orders, payment options, and more."
-        keywords="cannabis delivery FAQ, marijuana delivery questions, weed delivery Minneapolis FAQ, dispensary delivery info"
-        url="https://dankdealsmn.com/faq"
-        structuredData={[breadcrumbSchema, faqSchema]}
+        title="Frequently Asked Questions"
+        description="Find answers to common questions about DankDeals cannabis delivery service in Minneapolis. Learn about ordering, delivery, payment, and more."
+        breadcrumbs={breadcrumbs}
       />
       <DesktopHeader />
       <MobileHeader title="FAQ" />

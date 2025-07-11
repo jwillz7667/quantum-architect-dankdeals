@@ -24,6 +24,22 @@ import {
   Clock,
 } from 'lucide-react';
 
+interface DeliveryInfo {
+  street: string;
+  apartment?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  deliveryInstructions?: string;
+  deliveryFee: number;
+  estimatedTime: string;
+}
+
+interface OrderData {
+  id: string;
+  // Add other fields as needed
+}
+
 export default function CheckoutReview() {
   const { items, subtotal, taxAmount, deliveryFee, clearCart } = useCart();
   const { user } = useAuth();
@@ -31,17 +47,6 @@ export default function CheckoutReview() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  interface DeliveryInfo {
-    street: string;
-    apartment?: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    deliveryInstructions?: string;
-    deliveryFee: number;
-    estimatedTime: string;
-  }
-
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
 
   // For this demo, we'll assume tip is 18% (would be stored from payment step)
@@ -92,7 +97,7 @@ export default function CheckoutReview() {
   };
 
   const handlePlaceOrder = async () => {
-    if (!agreedToTerms) return;
+    if (!agreedToTerms || !user || !deliveryInfo) return;
 
     setIsPlacingOrder(true);
 
@@ -103,7 +108,7 @@ export default function CheckoutReview() {
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          customer_id: user?.id || '',
+          customer_id: user.id,
           order_number: orderNumber,
           delivery_address: deliveryInfo,
           subtotal: subtotal,
@@ -120,9 +125,9 @@ export default function CheckoutReview() {
           vendor_id: 'default-vendor', // In real app, this would be dynamic
         })
         .select()
-        .single();
+        .single<OrderData>();
 
-      if (orderError) throw orderError;
+      if (orderError || !order) throw orderError || new Error('Failed to create order');
 
       // Create order items
       const orderItems = items.map((item) => ({
@@ -140,7 +145,7 @@ export default function CheckoutReview() {
 
       // Send confirmation email
       await sendOrderConfirmationEmail({
-        to: user!.email!,
+        to: user.email ?? '',
         orderNumber: orderNumber,
         totalAmount: totalAmount,
         items: items.map((item) => ({
@@ -359,7 +364,7 @@ export default function CheckoutReview() {
             Back
           </Button>
           <Button
-            onClick={handlePlaceOrder}
+            onClick={() => void handlePlaceOrder()}
             disabled={!agreedToTerms || isPlacingOrder}
             className="flex-1"
           >

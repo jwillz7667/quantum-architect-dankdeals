@@ -10,6 +10,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Package, Clock, CheckCircle } from 'lucide-react';
 
+interface DeliveryAddress {
+  street: string;
+  apartment?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
 interface Order {
   id: string;
   order_number: string;
@@ -17,7 +25,7 @@ interface Order {
   status: string;
   payment_status: string;
   total_amount: number;
-  delivery_address: any;
+  delivery_address: DeliveryAddress | null;
 }
 
 export default function ProfileOrders() {

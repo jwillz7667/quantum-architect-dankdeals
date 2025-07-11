@@ -7,13 +7,12 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Suspense, lazy } from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
 import { ProductsFilterProvider } from '@/hooks/useProductsFilter';
-import { CartProvider } from '@/hooks/useCart';
+import { CartProvider } from '@/hooks/CartProvider';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/PageLoader';
-import Index from './pages/Index'; // Import directly for now
 
 // Lazy load all page components for better code splitting
-// const Index = lazy(() => import('./pages/Index'));
+const Index = lazy(() => import('./pages/Index'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
 const Categories = lazy(() => import('./pages/Categories'));

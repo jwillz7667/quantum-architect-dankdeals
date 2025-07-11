@@ -18,6 +18,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Lock, Mail, User, Phone, CheckCircle2, XCircle } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
 
+interface LocationState {
+  from?: {
+    pathname: string;
+  };
+}
+
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,7 +38,8 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
 
-  const from = location.state?.from?.pathname || '/';
+  const locationState = location.state as LocationState | null;
+  const from = locationState?.from?.pathname || '/';
 
   useEffect(() => {
     if (session) {
@@ -150,7 +157,7 @@ export default function Auth() {
               </TabsList>
 
               <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
+                <form onSubmit={(e) => void handleSignIn(e)} className="space-y-4">
                   <div>
                     <Label htmlFor="signin-email">Email</Label>
                     <div className="relative">
@@ -188,7 +195,7 @@ export default function Auth() {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
+                <form onSubmit={(e) => void handleSignUp(e)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>

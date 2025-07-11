@@ -7,6 +7,8 @@ import blueDreamImg from '@/assets/blue-dream.jpg';
 import prerollsImg from '@/assets/prerolls.jpg';
 import wellnessImg from '@/assets/wellness.jpg';
 import ediblesImg from '@/assets/edibles-hero.jpg';
+import AutoSizer from "react-virtualized-auto-sizer";
+import { FixedSizeGrid as Grid } from "react-window";
 
 // Fallback images for different categories
 const categoryImages: Record<string, string> = {
@@ -77,30 +79,55 @@ export function ProductGrid() {
     );
   }
 
+  if (filteredProducts.length === 0) {
+    return <p className="text-muted-foreground">No products found matching your criteria.</p>;
+  }
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-foreground">
         {searchQuery || selectedCategory ? 'Search Results' : 'Hot right now'}
       </h3>
-      {filteredProducts.length === 0 ? (
-        <p className="text-muted-foreground">No products found matching your criteria.</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              price={getMinPrice(product.variants)}
-              category={product.category}
-              imageUrl={getImageForProduct(product)}
-              thcContent={product.thc_content}
-              cbdContent={product.cbd_content}
-              description={product.description}
-            />
-          ))}
-        </div>
-      )}
+      <div style={{ height: '600px' }}>
+        <AutoSizer>
+          {({ height, width }) => {
+            const columnWidth = 200; // Adjust based on your ProductCard width
+            const columnCount = Math.max(1, Math.floor(width / columnWidth));
+            const rowCount = Math.ceil(filteredProducts.length / columnCount);
+            const rowHeight = 300; // Adjust based on your ProductCard height
+            return (
+              <Grid
+                columnCount={columnCount}
+                columnWidth={width / columnCount}
+                height={height}
+                rowCount={rowCount}
+                rowHeight={rowHeight}
+                width={width}
+              >
+                {({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
+                  const index = rowIndex * columnCount + columnIndex;
+                  if (index >= filteredProducts.length) return null;
+                  const product = filteredProducts[index];
+                  return (
+                    <div style={style}>
+                      <ProductCard
+                        key={product.id}
+                        id={product.id}
+                        name={product.name}
+                        price={getMinPrice(product.variants)}
+                        category={product.category}
+                        imageUrl={getImageForProduct(product)}
+                        thcContent={product.thc_content}
+                        cbdContent={product.cbd_content}
+                        description={product.description}
+                      />
+                    </div>
+                  );
+                }}
+              </Grid>
+            );
+          }}
+        </AutoSizer>
+      </div>
     </div>
   );
 }

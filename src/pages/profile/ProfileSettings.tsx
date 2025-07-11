@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, Moon, Shield, Smartphone, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -52,29 +52,29 @@ export default function ProfileSettings() {
     two_factor_enabled: false,
   });
 
-  useEffect(() => {
-    if (user) {
-      void fetchPreferences();
-    }
-  }, [user]);
-
-  const fetchPreferences = async () => {
+  const fetchPreferences = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      const result = await supabase
         .from('user_preferences')
         .select('*')
         .eq('user_id', user?.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching preferences:', error);
-      } else if (data) {
-        setPreferences(data);
+      if (result.error && result.error.code !== 'PGRST116') {
+        console.error('Error fetching preferences:', result.error);
+      } else if (result.data) {
+        setPreferences(result.data as UserPreferences);
       }
     } catch (error) {
       console.error('Error fetching preferences:', error);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchPreferences();
+    }
+  }, [user, fetchPreferences]);
 
   const handlePreferenceChange = async (key: keyof UserPreferences, value: boolean) => {
     setSaving(true);
@@ -201,7 +201,7 @@ export default function ProfileSettings() {
                   id="email-notifications"
                   checked={preferences.email_notifications}
                   onCheckedChange={(checked) =>
-                    handlePreferenceChange('email_notifications', checked)
+                    void handlePreferenceChange('email_notifications', checked)
                   }
                   disabled={saving}
                 />
@@ -220,7 +220,7 @@ export default function ProfileSettings() {
                   id="sms-notifications"
                   checked={preferences.sms_notifications}
                   onCheckedChange={(checked) =>
-                    handlePreferenceChange('sms_notifications', checked)
+                    void handlePreferenceChange('sms_notifications', checked)
                   }
                   disabled={saving}
                 />
@@ -238,7 +238,7 @@ export default function ProfileSettings() {
                 <Switch
                   id="marketing-emails"
                   checked={preferences.marketing_emails}
-                  onCheckedChange={(checked) => handlePreferenceChange('marketing_emails', checked)}
+                  onCheckedChange={(checked) => void handlePreferenceChange('marketing_emails', checked)}
                   disabled={saving}
                 />
               </div>
@@ -265,7 +265,7 @@ export default function ProfileSettings() {
                 <Switch
                   id="dark-mode"
                   checked={preferences.dark_mode}
-                  onCheckedChange={(checked) => handlePreferenceChange('dark_mode', checked)}
+                  onCheckedChange={(checked) => void handlePreferenceChange('dark_mode', checked)}
                   disabled={saving}
                 />
               </div>
@@ -355,7 +355,7 @@ export default function ProfileSettings() {
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>Enter your current password and choose a new one</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handlePasswordChange}>
+          <form onSubmit={(e) => void handlePasswordChange(e)}>
             <div className="space-y-4 py-4">
               <div>
                 <Label htmlFor="current-password">Current Password</Label>

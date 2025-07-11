@@ -13,7 +13,7 @@ interface HealthStatus {
     auth: boolean;
     modules: boolean;
   };
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   error?: string;
 }
 
@@ -31,7 +31,7 @@ export default function HealthCheck() {
   });
 
   useEffect(() => {
-    checkHealth();
+    void checkHealth();
   }, []);
 
   const checkHealth = async () => {
@@ -52,35 +52,47 @@ export default function HealthCheck() {
     try {
       // Check environment variables
       results.checks.environment = !!(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY);
-      results.details!.environment = {
-        mode: env.VITE_ENV,
-        hasSupabaseUrl: !!env.VITE_SUPABASE_URL,
-        hasSupabaseKey: !!env.VITE_SUPABASE_ANON_KEY,
-      };
+      if (results.details) {
+        results.details.environment = {
+          mode: env.VITE_ENV,
+          hasSupabaseUrl: !!env.VITE_SUPABASE_URL,
+          hasSupabaseKey: !!env.VITE_SUPABASE_ANON_KEY,
+        };
+      }
 
       // Check module imports
       const moduleCheck = performHealthCheck();
       results.checks.modules = moduleCheck.status === 'healthy';
-      results.details!.modules = moduleCheck;
+      if (results.details) {
+        results.details.modules = moduleCheck;
+      }
 
       // Check Supabase connection
       try {
         const { error: pingError } = await supabase.from('profiles').select('count').limit(1);
         results.checks.supabase = !pingError;
-        results.details!.supabase = { error: pingError?.message };
-      } catch (error) {
+        if (results.details) {
+          results.details.supabase = { error: pingError?.message };
+        }
+      } catch (_error) {
         results.checks.supabase = false;
-        results.details!.supabase = { error: 'Connection failed' };
+        if (results.details) {
+          results.details.supabase = { error: 'Connection failed' };
+        }
       }
 
       // Check database access
       try {
         const { error: dbError } = await supabase.from('categories').select('id').limit(1);
         results.checks.database = !dbError;
-        results.details!.database = { error: dbError?.message };
-      } catch (error) {
+        if (results.details) {
+          results.details.database = { error: dbError?.message };
+        }
+      } catch (_error) {
         results.checks.database = false;
-        results.details!.database = { error: 'Database query failed' };
+        if (results.details) {
+          results.details.database = { error: 'Database query failed' };
+        }
       }
 
       // Check auth service
@@ -90,13 +102,17 @@ export default function HealthCheck() {
           error: authError,
         } = await supabase.auth.getSession();
         results.checks.auth = !authError;
-        results.details!.auth = {
-          hasSession: !!session,
-          error: authError?.message,
-        };
-      } catch (error) {
+        if (results.details) {
+          results.details.auth = {
+            hasSession: !!session,
+            error: authError?.message,
+          };
+        }
+      } catch (_error) {
         results.checks.auth = false;
-        results.details!.auth = { error: 'Auth service unreachable' };
+        if (results.details) {
+          results.details.auth = { error: 'Auth service unreachable' };
+        }
       }
 
       // Calculate overall status
@@ -112,9 +128,11 @@ export default function HealthCheck() {
         results.status = 'unhealthy';
       }
 
-      results.details!.performance = {
-        checkDuration: Date.now() - startTime,
-      };
+      if (results.details) {
+        results.details.performance = {
+          checkDuration: Date.now() - startTime,
+        };
+      }
     } catch (error) {
       results.status = 'unhealthy';
       results.error = error instanceof Error ? error.message : 'Unknown error';
