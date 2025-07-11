@@ -53,7 +53,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@supabase/auth-helpers-react": "^0.4.2",
     "@supabase/supabase-js": "^2.45.0",
-    "@tanstack/react-query": "^5.51.1",
+    "@tanstack/react-query": "^5.83.0",
     "caniuse-lite": "^1.0.30001727",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
