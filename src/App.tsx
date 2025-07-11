@@ -10,6 +10,7 @@ import { ProductsFilterProvider } from '@/hooks/useProductsFilter';
 import { CartProvider } from '@/hooks/CartProvider';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/PageLoader';
+import { RealTimeProvider } from '@/context/RealTimeContext';
 
 // Lazy load all page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));
@@ -61,112 +62,113 @@ const App = () => (
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <CartProvider>
-            <ProductsFilterProvider>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/" element={<Index />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/delivery-area" element={<DeliveryArea />} />
-                  <Route
-                    path="/cart"
-                    element={
-                      <ProtectedRoute>
-                        <Cart />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <Profile />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPost />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/legal" element={<Legal />} />
-                  <Route
-                    path="/checkout/address"
-                    element={
-                      <ProtectedRoute>
-                        <CheckoutAddress />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/checkout/payment"
-                    element={
-                      <ProtectedRoute>
-                        <CheckoutPayment />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/checkout/review"
-                    element={
-                      <ProtectedRoute>
-                        <CheckoutReview />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/checkout/complete"
-                    element={
-                      <ProtectedRoute>
-                        <CheckoutComplete />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile/orders"
-                    element={
-                      <ProtectedRoute>
-                        <ProfileOrders />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile/personal"
-                    element={
-                      <ProtectedRoute>
-                        <ProfilePersonal />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile/address"
-                    element={
-                      <ProtectedRoute>
-                        <ProfileAddress />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile/payment"
-                    element={
-                      <ProtectedRoute>
-                        <ProfilePayment />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile/settings"
-                    element={
-                      <ProtectedRoute>
-                        <ProfileSettings />
-                      </ProtectedRoute>
-                    }
-                  />
+          <RealTimeProvider>
+            <CartProvider>
+              <ProductsFilterProvider>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/" element={<Index />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/delivery-area" element={<DeliveryArea />} />
+                    <Route
+                      path="/cart"
+                      element={
+                        <ProtectedRoute>
+                          <Cart />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute>
+                          <Profile />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/legal" element={<Legal />} />
+                    <Route
+                      path="/checkout/address"
+                      element={
+                        <ProtectedRoute>
+                          <CheckoutAddress />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/checkout/payment"
+                      element={
+                        <ProtectedRoute>
+                          <CheckoutPayment />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/checkout/review"
+                      element={
+                        <ProtectedRoute>
+                          <CheckoutReview />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/checkout/complete"
+                      element={
+                        <ProtectedRoute>
+                          <CheckoutComplete />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile/orders"
+                      element={
+                        <ProtectedRoute>
+                          <ProfileOrders />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile/personal"
+                      element={
+                        <ProtectedRoute>
+                          <ProfilePersonal />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile/address"
+                      element={
+                        <ProtectedRoute>
+                          <ProfileAddress />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile/payment"
+                      element={
+                        <ProtectedRoute>
+                          <ProfilePayment />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile/settings"
+                      element={
+                        <ProtectedRoute>
+                          <ProfileSettings />
+                        </ProtectedRoute>
+                      }
+                    />
 
-                  {/* Admin Routes - COMMENTED OUT */}
-                  {/* <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
+                    {/* Admin Routes - COMMENTED OUT */}
+                    {/* <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
                 <Route index element={<Overview />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="products" element={<AdminProducts />} />
@@ -177,13 +179,14 @@ const App = () => (
                 <Route path="settings" element={<AdminSettings />} />
               </Route> */}
 
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="/health" element={<HealthCheck />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </ProductsFilterProvider>
-          </CartProvider>
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="/health" element={<HealthCheck />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </ProductsFilterProvider>
+            </CartProvider>
+          </RealTimeProvider>
         </AuthProvider>
       </TooltipProvider>
     </HelmetProvider>

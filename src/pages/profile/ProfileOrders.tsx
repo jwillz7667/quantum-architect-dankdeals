@@ -7,16 +7,9 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealTime } from '@/context/RealTimeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Package, Clock, CheckCircle } from 'lucide-react';
-
-interface DeliveryAddress {
-  street: string;
-  apartment?: string;
-  city: string;
-  state: string;
-  zipCode: string;
-}
 
 interface Order {
   id: string;
@@ -25,12 +18,23 @@ interface Order {
   status: string;
   payment_status: string;
   total_amount: number;
-  delivery_address: DeliveryAddress | null;
+  user_id: string;
+  // Delivery address fields (denormalized in database)
+  delivery_first_name: string;
+  delivery_last_name: string;
+  delivery_street_address: string;
+  delivery_apartment?: string;
+  delivery_city: string;
+  delivery_state: string;
+  delivery_zip_code: string;
+  delivery_phone?: string;
+  delivery_instructions?: string;
 }
 
 export default function ProfileOrders() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { subscribeToOrders } = useRealTime();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +46,7 @@ export default function ProfileOrders() {
         const { data, error } = await supabase
           .from('orders')
           .select('*')
-          .eq('customer_id', user.id)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -56,6 +60,34 @@ export default function ProfileOrders() {
 
     void fetchOrders();
   }, [user]);
+
+  // Subscribe to real-time order updates
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = subscribeToOrders((payload) => {
+      console.log('Order update received in ProfileOrders:', payload);
+
+      if (payload.eventType === 'INSERT' && payload.new) {
+        // Add new order to the beginning of the list
+        setOrders((prev) => [payload.new as Order, ...prev]);
+      } else if (payload.eventType === 'UPDATE' && payload.new) {
+        // Update existing order
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.id === payload.new.id ? (payload.new as Order) : order
+          )
+        );
+      } else if (payload.eventType === 'DELETE' && payload.old) {
+        // Remove deleted order
+        setOrders((prev) => prev.filter((order) => order.id !== payload.old.id));
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user, subscribeToOrders]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -155,15 +187,14 @@ export default function ProfileOrders() {
                       <span className="font-semibold">${order.total_amount.toFixed(2)}</span>
                     </div>
 
-                    {order.delivery_address && (
+                    {order.delivery_street_address && (
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Delivery Address:</p>
                         <p className="text-sm">
-                          {order.delivery_address.street} {order.delivery_address.apartment}
+                          {order.delivery_street_address} {order.delivery_apartment}
                         </p>
                         <p className="text-sm">
-                          {order.delivery_address.city}, {order.delivery_address.state}{' '}
-                          {order.delivery_address.zipCode}
+                          {order.delivery_city}, {order.delivery_state} {order.delivery_zip_code}
                         </p>
                       </div>
                     )}
