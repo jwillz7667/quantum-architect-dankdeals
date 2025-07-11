@@ -75,7 +75,7 @@
     "react-window": "^1.8.10",
     "recharts": "^2.12.7",
     "sonner": "^1.5.0",
-    "tailwind-merge": "^2.5.2",
+    "tailwind-merge": "^3.3.1",
     "tailwindcss": "^3.4.4",
     "tailwindcss-animate": "^1.0.7",
     "tslib": "^2.8.1",
