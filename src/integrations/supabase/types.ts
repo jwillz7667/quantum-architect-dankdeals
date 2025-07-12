@@ -11,36 +11,52 @@ export interface Database {
     Tables: {
       profiles: {
         Row: {
-          id: string
-          email: string | null
-          first_name: string | null
-          last_name: string | null
-          phone: string | null
-          date_of_birth: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          age_verified?: boolean;
+          age_verified_at?: string | null;
+          marketing_consent?: boolean;
+          terms_accepted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          delivery_address?: any;
+        };
         Insert: {
-          id: string
-          email?: string | null
-          first_name?: string | null
-          last_name?: string | null
-          phone?: string | null
-          date_of_birth?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id: string;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          age_verified?: boolean;
+          age_verified_at?: string | null;
+          marketing_consent?: boolean;
+          terms_accepted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          delivery_address?: any;
+        };
         Update: {
-          id?: string
-          email?: string | null
-          first_name?: string | null
-          last_name?: string | null
-          phone?: string | null
-          date_of_birth?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
+          id?: string;
+          email?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          date_of_birth?: string | null;
+          age_verified?: boolean;
+          age_verified_at?: string | null;
+          marketing_consent?: boolean;
+          terms_accepted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          delivery_address?: any;
+        };
+        Relationships: [];
+      };
       categories: {
         Row: {
           id: string
@@ -202,140 +218,142 @@ export interface Database {
       }
       orders: {
         Row: {
-          id: string
-          user_id: string
-          order_number: string
-          status: string
-          subtotal: number
-          tax_amount: number
-          delivery_fee: number
-          total_amount: number
-          delivery_first_name: string
-          delivery_last_name: string
-          delivery_street_address: string
-          delivery_apartment: string | null
-          delivery_city: string
-          delivery_state: string
-          delivery_zip_code: string
-          delivery_phone: string | null
-          delivery_instructions: string | null
-          payment_method: string
-          payment_status: string
-          delivery_date: string | null
-          delivery_time_start: string | null
-          delivery_time_end: string | null
-          estimated_delivery_at: string | null
-          delivered_at: string | null
-          notes: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          user_id: string;
+          order_number: string;
+          status?: string;
+          subtotal: number;
+          tax_amount: number;
+          delivery_fee: number;
+          total_amount: number;
+          delivery_first_name: string;
+          delivery_last_name: string;
+          delivery_street_address: string;
+          delivery_apartment?: string | null;
+          delivery_city: string;
+          delivery_state: string;
+          delivery_zip_code: string;
+          delivery_phone?: string | null;
+          delivery_instructions?: string | null;
+          payment_method?: string;
+          payment_status?: string;
+          delivery_date?: string | null;
+          delivery_time_start?: string | null;
+          delivery_time_end?: string | null;
+          estimated_delivery_at?: string | null;
+          delivered_at?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Insert: {
-          id?: string
-          user_id: string
-          order_number?: string
-          status?: string
-          subtotal: number
-          tax_amount?: number
-          delivery_fee?: number
-          total_amount: number
-          delivery_first_name: string
-          delivery_last_name: string
-          delivery_street_address: string
-          delivery_apartment?: string | null
-          delivery_city: string
-          delivery_state?: string
-          delivery_zip_code: string
-          delivery_phone?: string | null
-          delivery_instructions?: string | null
-          payment_method?: string
-          payment_status?: string
-          delivery_date?: string | null
-          delivery_time_start?: string | null
-          delivery_time_end?: string | null
-          estimated_delivery_at?: string | null
-          delivered_at?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          user_id: string;
+          order_number: string;
+          status?: string;
+          subtotal: number;
+          tax_amount: number;
+          delivery_fee: number;
+          total_amount: number;
+          delivery_first_name: string;
+          delivery_last_name: string;
+          delivery_street_address: string;
+          delivery_apartment?: string | null;
+          delivery_city: string;
+          delivery_state: string;
+          delivery_zip_code: string;
+          delivery_phone?: string | null;
+          delivery_instructions?: string | null;
+          payment_method?: string;
+          payment_status?: string;
+          delivery_date?: string | null;
+          delivery_time_start?: string | null;
+          delivery_time_end?: string | null;
+          estimated_delivery_at?: string | null;
+          delivered_at?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          user_id?: string
-          order_number?: string
-          status?: string
-          subtotal?: number
-          tax_amount?: number
-          delivery_fee?: number
-          total_amount?: number
-          delivery_first_name?: string
-          delivery_last_name?: string
-          delivery_street_address?: string
-          delivery_apartment?: string | null
-          delivery_city?: string
-          delivery_state?: string
-          delivery_zip_code?: string
-          delivery_phone?: string | null
-          delivery_instructions?: string | null
-          payment_method?: string
-          payment_status?: string
-          delivery_date?: string | null
-          delivery_time_start?: string | null
-          delivery_time_end?: string | null
-          estimated_delivery_at?: string | null
-          delivered_at?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
+          id?: string;
+          user_id?: string;
+          order_number?: string;
+          status?: string;
+          subtotal?: number;
+          tax_amount?: number;
+          delivery_fee?: number;
+          total_amount?: number;
+          delivery_first_name?: string;
+          delivery_last_name?: string;
+          delivery_street_address?: string;
+          delivery_apartment?: string | null;
+          delivery_city?: string;
+          delivery_state?: string;
+          delivery_zip_code?: string;
+          delivery_phone?: string | null;
+          delivery_instructions?: string | null;
+          payment_method?: string;
+          payment_status?: string;
+          delivery_date?: string | null;
+          delivery_time_start?: string | null;
+          delivery_time_end?: string | null;
+          estimated_delivery_at?: string | null;
+          delivered_at?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       order_items: {
         Row: {
-          id: string
-          order_id: string
-          product_id: string
-          product_name: string
-          product_price: number
-          product_weight_grams: number | null
-          product_thc_percentage: number | null
-          product_cbd_percentage: number | null
-          product_strain_type: string | null
-          quantity: number
-          unit_price: number
-          total_price: number
-          created_at: string
-        }
+          id: string;
+          order_id: string;
+          product_id: string;
+          product_name: string;
+          product_price: number;
+          product_weight_grams?: number | null;
+          product_thc_percentage?: number | null;
+          product_cbd_percentage?: number | null;
+          product_strain_type?: string | null;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+          created_at?: string;
+        };
         Insert: {
-          id?: string
-          order_id: string
-          product_id: string
-          product_name: string
-          product_price: number
-          product_weight_grams?: number | null
-          product_thc_percentage?: number | null
-          product_cbd_percentage?: number | null
-          product_strain_type?: string | null
-          quantity: number
-          unit_price: number
-          total_price: number
-          created_at?: string
-        }
+          id?: string;
+          order_id: string;
+          product_id: string;
+          product_name: string;
+          product_price: number;
+          product_weight_grams?: number | null;
+          product_thc_percentage?: number | null;
+          product_cbd_percentage?: number | null;
+          product_strain_type?: string | null;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          order_id?: string
-          product_id?: string
-          product_name?: string
-          product_price?: number
-          product_weight_grams?: number | null
-          product_thc_percentage?: number | null
-          product_cbd_percentage?: number | null
-          product_strain_type?: string | null
-          quantity?: number
-          unit_price?: number
-          total_price?: number
-          created_at?: string
-        }
-      }
+          id?: string;
+          order_id?: string;
+          product_id?: string;
+          product_name?: string;
+          product_price?: number;
+          product_weight_grams?: number | null;
+          product_thc_percentage?: number | null;
+          product_cbd_percentage?: number | null;
+          product_strain_type?: string | null;
+          quantity?: number;
+          unit_price?: number;
+          total_price?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       cart_items: {
         Row: {
           id: string

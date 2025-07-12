@@ -13,7 +13,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { sendOrderConfirmationEmail } from '@/lib/email';
+import type { Database } from '@/integrations/supabase/types';
 import {
   ShoppingCart,
   MapPin,
@@ -35,10 +35,18 @@ interface DeliveryInfo {
   estimatedTime: string;
 }
 
-interface OrderData {
+interface UserProfile {
   id: string;
-  // Add other fields as needed
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  delivery_address?: DeliveryInfo;
 }
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type OrderInsert = Database['public']['Tables']['orders']['Insert'];
+type OrderItemInsert = Database['public']['Tables']['order_items']['Insert'];
 
 export default function CheckoutReview() {
   const { items, subtotal, taxAmount, deliveryFee, clearCart } = useCart();
@@ -48,36 +56,55 @@ export default function CheckoutReview() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // For this demo, we'll assume tip is 18% (would be stored from payment step)
   const tipAmount = subtotal * 0.18;
   const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
 
-  // Load delivery info
+  // Load delivery info and user profile
   useEffect(() => {
-    const loadDeliveryInfo = async () => {
+    const loadUserData = async () => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase
+        // Load user profile
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('delivery_address')
-          .eq('user_id', user.id)
+          .select('*')
+          .eq('id', user.id)
           .single();
 
-        if (error || !data?.delivery_address) {
+        if (profileError) {
+          console.error('Error loading profile:', profileError);
+        } else if (profile) {
+          const typedProfile = profile as ProfileRow;
+          setUserProfile({
+            id: typedProfile.id,
+            first_name: typedProfile.first_name,
+            last_name: typedProfile.last_name,
+            phone: typedProfile.phone,
+            email: typedProfile.email,
+            delivery_address: typedProfile.delivery_address as DeliveryInfo | undefined
+          });
+        }
+
+        // Load delivery info
+        const savedAddressData = (profile as ProfileRow | null)?.delivery_address || localStorage.getItem('delivery_address');
+        if (!savedAddressData) {
           navigate('/checkout/address');
           return;
         }
 
-        setDeliveryInfo(data.delivery_address as DeliveryInfo);
+        const parsedAddress = typeof savedAddressData === 'string' ? JSON.parse(savedAddressData) : savedAddressData;
+        setDeliveryInfo(parsedAddress as DeliveryInfo);
       } catch (error) {
-        console.error('Error loading delivery info:', error);
+        console.error('Error loading user data:', error);
         navigate('/checkout/address');
       }
     };
 
-    void loadDeliveryInfo();
+    void loadUserData();
   }, [user, navigate]);
 
   // Redirect if cart is empty
@@ -97,7 +124,7 @@ export default function CheckoutReview() {
   };
 
   const handlePlaceOrder = async () => {
-    if (!agreedToTerms || !user || !deliveryInfo) return;
+    if (!agreedToTerms || !user || !deliveryInfo || !userProfile) return;
 
     setIsPlacingOrder(true);
 
@@ -105,35 +132,42 @@ export default function CheckoutReview() {
       const orderNumber = generateOrderNumber();
 
       // Create order in database
+      const orderData: OrderInsert = {
+        user_id: user.id,
+        order_number: orderNumber,
+        delivery_first_name: userProfile.first_name || 'Customer',
+        delivery_last_name: userProfile.last_name || '',
+        delivery_street_address: deliveryInfo.street,
+        delivery_apartment: deliveryInfo.apartment,
+        delivery_city: deliveryInfo.city,
+        delivery_state: deliveryInfo.state,
+        delivery_zip_code: deliveryInfo.zipCode,
+        delivery_phone: userProfile.phone || '',
+        delivery_instructions: deliveryInfo.deliveryInstructions,
+        subtotal: subtotal,
+        tax_amount: taxAmount,
+        delivery_fee: deliveryFee,
+        total_amount: totalAmount,
+        status: 'confirmed',
+        payment_method: 'cash',
+        payment_status: 'pending',
+      };
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          customer_id: user.id,
-          order_number: orderNumber,
-          delivery_address: deliveryInfo,
-          subtotal: subtotal,
-          tax_amount: taxAmount,
-          delivery_fee: deliveryFee,
-          tip_amount: tipAmount,
-          total_amount: totalAmount,
-          total_weight_grams: items.reduce(
-            (total, item) => total + item.variant.weight_grams * item.quantity,
-            0
-          ),
-          status: 'pending',
-          payment_status: 'pending',
-          vendor_id: 'default-vendor', // In real app, this would be dynamic
-        })
+        .insert(orderData)
         .select()
-        .single<OrderData>();
+        .single();
 
       if (orderError || !order) throw orderError || new Error('Failed to create order');
 
       // Create order items
-      const orderItems = items.map((item) => ({
+      const orderItems: OrderItemInsert[] = items.map((item) => ({
         order_id: order.id,
         product_id: item.productId,
-        variant_id: item.variantId,
+        product_name: item.name,
+        product_price: item.price,
+        product_weight_grams: item.variant.weight_grams,
         quantity: item.quantity,
         unit_price: item.price,
         total_price: item.price * item.quantity,
@@ -143,18 +177,15 @@ export default function CheckoutReview() {
 
       if (itemsError) throw itemsError;
 
-      // Send confirmation email
-      await sendOrderConfirmationEmail({
-        to: user.email ?? '',
-        orderNumber: orderNumber,
-        totalAmount: totalAmount,
-        items: items.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        deliveryAddress: deliveryInfo,
+      // Trigger email sending via edge function
+      const { error: emailError } = await supabase.functions.invoke('send-order-emails', {
+        body: { orderId: order.id }
       });
+
+      if (emailError) {
+        console.error('Error sending order emails:', emailError);
+        // Don't fail the order if email fails - it will be queued for retry
+      }
 
       // Clear cart
       clearCart();

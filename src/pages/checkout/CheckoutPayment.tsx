@@ -55,12 +55,18 @@ export default function CheckoutPayment() {
         const { data, error } = await supabase
           .from('profiles')
           .select('delivery_address')
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .single();
 
         if (error || !data?.delivery_address) {
-          // Redirect back to address if no address found
-          navigate('/checkout/address');
+          // Try loading from localStorage
+          const savedAddress = localStorage.getItem('delivery_address');
+          if (savedAddress) {
+            setDeliveryInfo(JSON.parse(savedAddress) as DeliveryInfo);
+          } else {
+            // Redirect back to address if no address found
+            navigate('/checkout/address');
+          }
           return;
         }
 

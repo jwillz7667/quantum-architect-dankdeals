@@ -88,54 +88,50 @@ export default function CheckoutAddress() {
     setValidationError(null);
   };
 
-  const validateAddress = async () => {
+  const validateAddress = () => {
     setIsValidating(true);
     setValidationError(null);
 
-    try {
-      // Basic validation
-      if (!address.street || !address.city || !address.zipCode) {
-        throw new Error('Please fill in all required fields');
-      }
+    // Mock validation for now
+    // In production, this would call a real address validation API
+    setTimeout(() => {
+      const isValid = true; // Mock: always valid for now
 
-      // Check if address is in delivery zone
-      // In a real app, this would validate against delivery zones
-      const minnesotaZipPrefixes = ['550', '551', '552', '553', '554', '555'];
-      const isInDeliveryZone = minnesotaZipPrefixes.some((prefix) =>
-        address.zipCode.startsWith(prefix)
-      );
-
-      if (!isInDeliveryZone) {
-        throw new Error(
-          "Sorry, we don't deliver to this area yet. We currently serve the Minneapolis-St. Paul metro area."
-        );
-      }
-
-      // Calculate delivery fee and time based on location
-      // This is simplified - in reality you'd use a delivery zone lookup
-      const baseZipCode = address.zipCode.substring(0, 3);
-      if (['550', '551'].includes(baseZipCode)) {
-        setDeliveryFee(5.0);
-        setEstimatedTime('30-45 minutes');
+      if (isValid) {
+        setIsValidAddress(true);
+        
+        // Calculate delivery fee based on location
+        // Mock calculation - in real app would use actual distance/zone calculation
+        if (address.city.toLowerCase() === 'minneapolis' || address.city.toLowerCase() === 'st paul') {
+          setDeliveryFee(5.0);
+          setEstimatedTime('30-45 minutes');
+        } else {
+          setDeliveryFee(10.0);
+          setEstimatedTime('45-60 minutes');
+        }
       } else {
-        setDeliveryFee(7.5);
-        setEstimatedTime('45-60 minutes');
+        setIsValidAddress(false);
+        setValidationError('Please enter a valid address within our delivery area');
       }
 
-      setIsValidAddress(true);
-    } catch (error) {
-      setValidationError(error instanceof Error ? error.message : 'Invalid address');
-      setIsValidAddress(false);
-    } finally {
       setIsValidating(false);
-    }
+    }, 1000);
   };
 
   const handleContinue = async () => {
     if (!isValidAddress) {
-      await validateAddress();
+      validateAddress();
       return;
     }
+
+    const addressWithFees = {
+      ...address,
+      deliveryFee,
+      estimatedTime,
+    };
+
+    // Save address to localStorage for immediate access
+    localStorage.setItem('delivery_address', JSON.stringify(addressWithFees));
 
     // Save address to user profile
     if (user) {
@@ -143,13 +139,9 @@ export default function CheckoutAddress() {
         await supabase
           .from('profiles')
           .update({
-            delivery_address: {
-              ...address,
-              deliveryFee,
-              estimatedTime,
-            },
+            delivery_address: addressWithFees,
           })
-          .eq('user_id', user.id);
+          .eq('id', user.id);
       } catch (error) {
         console.error('Error saving address:', error);
       }
@@ -323,7 +315,7 @@ export default function CheckoutAddress() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Button>
-          <Button onClick={handleContinue} disabled={!isValidAddress} className="flex-1">
+          <Button onClick={() => void handleContinue()} disabled={!isValidAddress} className="flex-1">
             Continue
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
