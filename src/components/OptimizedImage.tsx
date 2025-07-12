@@ -70,39 +70,31 @@ export function OptimizedImage({
           <span className="text-muted-foreground text-sm">Image not available</span>
         </div>
       )}
-      <picture>
-        {src.match(/\.(jpg|png|jpeg)$/) && (
-          <source
-            type="image/webp"
-            srcSet={isInView ? src.replace(/\.(jpg|png|jpeg)$/, '.webp') : undefined}
-          />
+      <img
+        ref={imgRef}
+        src={isInView ? src : undefined}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={loading}
+        sizes={sizes}
+        onLoad={() => {
+          setIsLoaded(true);
+          setHasError(false);
+        }}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(false);
+        }}
+        className={cn(
+          'transition-opacity duration-300',
+          isLoaded && !hasError ? 'opacity-100' : 'opacity-0',
+          className
         )}
-        <img
-          ref={imgRef}
-          src={isInView ? src : undefined}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={loading}
-          sizes={sizes}
-          onLoad={() => {
-            setIsLoaded(true);
-            setHasError(false);
-          }}
-          onError={() => {
-            setHasError(true);
-            setIsLoaded(false);
-          }}
-          className={cn(
-            'transition-opacity duration-300',
-            isLoaded && !hasError ? 'opacity-100' : 'opacity-0',
-            className
-          )}
-          style={{
-            display: isLoaded && !hasError ? 'block' : 'none',
-          }}
-        />
-      </picture>
+        style={{
+          display: isLoaded && !hasError ? 'block' : 'none',
+        }}
+      />
     </div>
   );
 }

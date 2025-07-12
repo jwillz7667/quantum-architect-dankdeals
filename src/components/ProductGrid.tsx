@@ -14,7 +14,7 @@ import { FixedSizeGrid as Grid } from "react-window";
 const categoryImages: Record<string, string> = {
   flower: blueDreamImg,
   prerolls: prerollsImg,
-  wellness: wellnessImg,
+  topicals: wellnessImg,
   edibles: ediblesImg,
 };
 
@@ -23,19 +23,15 @@ interface ProductWithImage {
   category: string;
 }
 
-interface ProductVariant {
-  price: number;
+function getMinPrice(variants: Array<{ price: number }> | undefined): number {
+  if (!variants || variants.length === 0) return 0;
+  return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents to dollars
 }
 
 const getImageForProduct = (product: ProductWithImage): string => {
   if (product.image_url) return product.image_url;
-  const categoryImage = categoryImages[product.category];
+  const categoryImage = categoryImages[product.category] || categoryImages.flower;
   return categoryImage || blueDreamImg;
-};
-
-const getMinPrice = (variants: ProductVariant[]): number => {
-  if (!variants || variants.length === 0) return 0;
-  return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents
 };
 
 export function ProductGrid() {

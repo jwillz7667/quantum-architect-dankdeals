@@ -20,19 +20,6 @@ import prerollsImg from '@/assets/prerolls.jpg';
 import wellnessImg from '@/assets/wellness.jpg';
 import ediblesImg from '@/assets/edibles-hero.jpg';
 
-// Import new product images
-import pineappleFruz1 from '@/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg';
-import pineappleFruz2 from '@/assets/products/pineapple-fruz/pineapple-fruz-2.jpeg';
-import pineappleFruz3 from '@/assets/products/pineapple-fruz/pineapple-fruz-3.jpeg';
-import rs11_1 from '@/assets/products/rs11/rainbow-sherbert11-1.jpeg';
-import rs11_2 from '@/assets/products/rs11/rainbow-sherbert11-2.jpeg';
-import runtz1 from '@/assets/products/runtz/runtz-1.jpeg';
-import runtz2 from '@/assets/products/runtz/runtz-2.jpeg';
-import runtz3 from '@/assets/products/runtz/runtz-3.jpeg';
-import weddingCake1 from '@/assets/products/wedding-cake/wedding-cake-1.jpeg';
-import weddingCake2 from '@/assets/products/wedding-cake/wedding-cake-2.jpeg';
-import weddingCake3 from '@/assets/products/wedding-cake/wedding-cake-3.jpeg';
-
 interface ExtendedProduct extends Product {
   gallery_urls?: string[];
   effects?: string[];
@@ -41,14 +28,6 @@ interface ExtendedProduct extends Product {
   lab_tested?: boolean;
   slug?: string;
 }
-
-// Map product IDs to their local images
-const productImageMap: Record<string, string[]> = {
-  '11111111-1111-1111-1111-111111111111': [pineappleFruz1, pineappleFruz2, pineappleFruz3],
-  '22222222-2222-2222-2222-222222222222': [rs11_1, rs11_2],
-  '33333333-3333-3333-3333-333333333333': [runtz1, runtz2, runtz3],
-  '44444444-4444-4444-4444-444444444444': [weddingCake1, weddingCake2, weddingCake3],
-};
 
 // Fallback images for different categories
 const categoryImages: Record<string, string> = {
@@ -149,11 +128,6 @@ export default function ProductDetail() {
     if (!product) return [blueDreamImg];
 
     // Check if we have local images for this product
-    if (product.id && productImageMap[product.id]) {
-      return productImageMap[product.id];
-    }
-
-    // Otherwise use gallery_urls or default image
     if (product.gallery_urls && product.gallery_urls.length > 0) {
       return product.gallery_urls;
     }

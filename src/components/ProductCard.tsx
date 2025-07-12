@@ -6,20 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { OptimizedImage } from './OptimizedImage';
 // import { generateProductSchema } from '@/lib/seo'; // Available if needed for structured data
 
-// Import new product images
-import pineappleFruz1 from '@/assets/products/pineapple-fruz/pineapple-fruz-1.jpeg';
-import rs11_1 from '@/assets/products/rs11/rainbow-sherbert11-1.jpeg';
-import runtz1 from '@/assets/products/runtz/runtz-1.jpeg';
-import weddingCake1 from '@/assets/products/wedding-cake/wedding-cake-1.jpeg';
-
-// Map product IDs to their local images
-const productImageMap: Record<string, string> = {
-  '11111111-1111-1111-1111-111111111111': pineappleFruz1,
-  '22222222-2222-2222-2222-222222222222': rs11_1,
-  '33333333-3333-3333-3333-333333333333': runtz1,
-  '44444444-4444-4444-4444-444444444444': weddingCake1,
-};
-
 interface ProductCardProps {
   id: string;
   name: string;
@@ -49,8 +35,8 @@ export function ProductCard({
 
   const displayPrice = typeof price === 'number' ? price.toFixed(2) : '0.00';
 
-  // Use local image if available in development, otherwise use the URL from database
-  const displayImage = productImageMap[id] || imageUrl || '/api/placeholder/400/400';
+  // Use the imageUrl from database or a placeholder
+  const displayImage = imageUrl || '/api/placeholder/400/400';
 
   // In production, the imageUrl from database will point to /assets/products/...
   // which will be served from the public directory
@@ -124,15 +110,15 @@ export function ProductCard({
           )}
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0 mt-auto">
+      <CardFooter className="p-4 pt-0">
         <Button
-          className="w-full"
+          className="w-full hover-lift"
           onClick={(e) => {
             e.stopPropagation();
             handleProductClick();
           }}
         >
-          <ShoppingCart className="w-4 h-4 mr-2" />
+          <ShoppingCart className="mr-2 h-4 w-4" />
           View Details
         </Button>
       </CardFooter>
