@@ -1,5 +1,12 @@
+// @ts-ignore - Deno types
+/// <reference types="https://deno.land/x/types/index.d.ts" />
+
+// @ts-ignore - Deno module
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+// @ts-ignore - Deno module
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0"
+
+declare const Deno: any;
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -9,7 +16,26 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+interface EmailQueueItem {
+  id: string;
+  order_id: string;
+  email_type: string;
+  status: string;
+  attempts: number;
+  last_attempt_at?: string | null;
+  sent_at?: string | null;
+  error_message?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ProcessResult {
+  id: string;
+  status: string;
+  error?: string;
+}
+
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -37,9 +63,9 @@ serve(async (req) => {
       )
     }
 
-    const results = []
+    const results: ProcessResult[] = []
 
-    for (const emailJob of pendingEmails) {
+    for (const emailJob of pendingEmails as EmailQueueItem[]) {
       try {
         // Update status to processing
         await supabase
@@ -90,15 +116,17 @@ serve(async (req) => {
         }
       } catch (error) {
         // Handle individual email errors
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        
         await supabase
           .from('email_queue')
           .update({ 
             status: emailJob.attempts >= 2 ? 'failed' : 'pending',
-            error_message: error.message
+            error_message: errorMessage
           })
           .eq('id', emailJob.id)
 
-        results.push({ id: emailJob.id, status: 'error', error: error.message })
+        results.push({ id: emailJob.id, status: 'error', error: errorMessage })
       }
     }
 
@@ -118,7 +146,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
