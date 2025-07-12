@@ -9,7 +9,8 @@ import { BottomNav } from '@/components/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealTime } from '@/context/RealTimeContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Package, Clock, CheckCircle } from 'lucide-react';
+import { logger } from '@/lib/logger';
+import { ArrowLeft, Package, Clock, CheckCircle, WifiOff, Wifi } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -34,7 +35,7 @@ interface Order {
 export default function ProfileOrders() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { subscribeToOrders } = useRealTime();
+  const { subscribeToOrders, connectionStatus } = useRealTime();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +53,7 @@ export default function ProfileOrders() {
         if (error) throw error;
         setOrders(data || []);
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        logger.error('Error fetching orders', error instanceof Error ? error : new Error(String(error)));
       } finally {
         setLoading(false);
       }
@@ -66,7 +67,10 @@ export default function ProfileOrders() {
     if (!user) return;
 
     const unsubscribe = subscribeToOrders((payload) => {
-      console.log('Order update received in ProfileOrders:', payload);
+      logger.info('Order update received in ProfileOrders', { 
+        eventType: payload.eventType,
+        orderId: (payload.new as Order | undefined)?.id || (payload.old as Order | undefined)?.id
+      });
 
       if (payload.eventType === 'INSERT' && payload.new) {
         // Add new order to the beginning of the list
@@ -135,11 +139,25 @@ export default function ProfileOrders() {
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-semibold">Order History</h1>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-semibold">Order History</h1>
+          </div>
+          {connectionStatus === 'connected' && (
+            <div className="flex items-center gap-1 text-green-600">
+              <Wifi className="w-4 h-4" />
+              <span className="text-xs">Live</span>
+            </div>
+          )}
+          {connectionStatus === 'error' && (
+            <div className="flex items-center gap-1 text-red-600">
+              <WifiOff className="w-4 h-4" />
+              <span className="text-xs">Offline</span>
+            </div>
+          )}
         </div>
 
         {/* Orders List */}
