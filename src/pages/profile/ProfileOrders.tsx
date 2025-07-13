@@ -7,7 +7,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
-import { useRealTime } from '@/context/RealTimeContext';
+import { useRealTime } from '@/hooks/useRealTime';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { ArrowLeft, Package, Clock, CheckCircle, WifiOff, Wifi } from 'lucide-react';

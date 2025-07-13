@@ -14,11 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/SEOHead';
 import { generateProductSchema } from '@/lib/seo';
-import { OptimizedImage } from '@/components/OptimizedImage';
-import blueDreamImg from '@/assets/blue-dream.jpg';
-import prerollsImg from '@/assets/prerolls.jpg';
-import wellnessImg from '@/assets/wellness.jpg';
-import ediblesImg from '@/assets/edibles-hero.jpg';
+import { ResponsiveImage } from '@/components/ResponsiveImage';
+import { getProductImages, getImageSizes } from '@/lib/productImages';
 
 interface ExtendedProduct extends Product {
   gallery_urls?: string[];
@@ -28,14 +25,6 @@ interface ExtendedProduct extends Product {
   lab_tested?: boolean;
   slug?: string;
 }
-
-// Fallback images for different categories
-const categoryImages: Record<string, string> = {
-  flower: blueDreamImg,
-  prerolls: prerollsImg,
-  topicals: wellnessImg,
-  edibles: ediblesImg,
-};
 
 export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
@@ -125,16 +114,10 @@ export default function ProductDetail() {
   };
 
   const getImagesForProduct = (product: ExtendedProduct | null): string[] => {
-    if (!product) return [blueDreamImg];
+    if (!product) return ['/assets/blue-dream.jpg'];
 
-    // Check if we have local images for this product
-    if (product.gallery_urls && product.gallery_urls.length > 0) {
-      return product.gallery_urls;
-    }
-
-    if (product.image_url) return [product.image_url];
-
-    return [categoryImages[product.category] || blueDreamImg];
+    const productImages = getProductImages(product.id, product.name, product.category);
+    return productImages.gallery;
   };
 
   const formatPrice = (priceInCents: number): string => {
@@ -252,14 +235,14 @@ export default function ProductDetail() {
 
       {/* Product Image Gallery */}
       <div className="aspect-[4/3] overflow-hidden relative group">
-        <OptimizedImage
+        <ResponsiveImage
           src={images[currentImageIndex]}
           alt={`${product.name} - ${product.category} cannabis product image ${currentImageIndex + 1}`}
-          className="w-full h-full object-cover"
-          width="100%"
-          height="100%"
+          className="w-full h-full"
+          aspectRatio="4/3"
+          objectFit="cover"
           priority
-          sizes="100vw"
+          sizes={getImageSizes('detail')}
         />
 
         {images.length > 1 && (

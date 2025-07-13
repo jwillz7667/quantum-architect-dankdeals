@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Clock,
 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface DeliveryInfo {
   street: string;
@@ -52,6 +53,7 @@ export default function CheckoutReview() {
   const { items, subtotal, taxAmount, deliveryFee, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -79,6 +81,18 @@ export default function CheckoutReview() {
           console.error('Error loading profile:', profileError);
         } else if (profile) {
           const typedProfile = profile as ProfileRow;
+          
+          // Check if DOB is provided for age verification
+          if (!typedProfile.date_of_birth) {
+            toast({
+              title: 'Age Verification Required',
+              description: 'Please update your profile with your date of birth to complete your order.',
+              variant: 'destructive',
+            });
+            navigate('/profile/personal');
+            return;
+          }
+          
           setUserProfile({
             id: typedProfile.id,
             first_name: typedProfile.first_name,
@@ -105,7 +119,7 @@ export default function CheckoutReview() {
     };
 
     void loadUserData();
-  }, [user, navigate]);
+  }, [user, navigate, toast]);
 
   // Redirect if cart is empty
   useEffect(() => {

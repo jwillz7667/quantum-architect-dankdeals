@@ -3,36 +3,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
 import { Loader2 } from 'lucide-react';
 import { useProductsFilter } from '@/hooks/useProductsFilter';
-import blueDreamImg from '@/assets/blue-dream.jpg';
-import prerollsImg from '@/assets/prerolls.jpg';
-import wellnessImg from '@/assets/wellness.jpg';
-import ediblesImg from '@/assets/edibles-hero.jpg';
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeGrid as Grid } from "react-window";
-
-// Fallback images for different categories
-const categoryImages: Record<string, string> = {
-  flower: blueDreamImg,
-  prerolls: prerollsImg,
-  topicals: wellnessImg,
-  edibles: ediblesImg,
-};
-
-interface ProductWithImage {
-  image_url?: string;
-  category: string;
-}
 
 function getMinPrice(variants: Array<{ price: number }> | undefined): number {
   if (!variants || variants.length === 0) return 0;
   return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents to dollars
 }
 
-const getImageForProduct = (product: ProductWithImage): string => {
-  if (product.image_url) return product.image_url;
-  const categoryImage = categoryImages[product.category] || categoryImages.flower;
-  return categoryImage || blueDreamImg;
-};
+
 
 export function ProductGrid() {
   const { products, loading, error } = useProducts();
@@ -111,7 +90,7 @@ export function ProductGrid() {
                         name={product.name}
                         price={getMinPrice(product.variants)}
                         category={product.category}
-                        imageUrl={getImageForProduct(product)}
+                        imageUrl={product.image_url}
                         thcContent={product.thc_content}
                         cbdContent={product.cbd_content}
                         description={product.description}

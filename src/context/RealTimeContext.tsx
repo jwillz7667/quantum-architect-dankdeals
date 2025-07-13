@@ -1,8 +1,9 @@
 // src/context/RealTimeContext.tsx
-import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
+import { createContext, useEffect, useState, useRef, type ReactNode } from 'react';
 import { REALTIME_SUBSCRIBE_STATES, type RealtimeChannel, type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import type { AuthContextType } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
@@ -42,14 +43,15 @@ interface RealTimeContextType {
   connectionStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
 }
 
-const RealTimeContext = createContext<RealTimeContextType | undefined>(undefined);
+export const RealTimeContext = createContext<RealTimeContextType | undefined>(undefined);
 
 // Notification sound configuration
 const ENABLE_NOTIFICATION_SOUND = true;
 const NOTIFICATION_SOUND_URL = '/notification.mp3';
 
 export function RealTimeProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const authContext = useAuth() as AuthContextType;
+  const user = authContext.user;
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [latestOrderUpdate, setLatestOrderUpdate] = useState<RealtimePostgresChangesPayload<Order> | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<RealTimeContextType['connectionStatus']>('disconnected');
@@ -246,12 +248,4 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
       {children}
     </RealTimeContext.Provider>
   );
-}
-
-export function useRealTime() {
-  const context = useContext(RealTimeContext);
-  if (context === undefined) {
-    throw new Error('useRealTime must be used within a RealTimeProvider');
-  }
-  return context;
 } 

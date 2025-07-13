@@ -3,8 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { OptimizedImage } from './OptimizedImage';
-// import { generateProductSchema } from '@/lib/seo'; // Available if needed for structured data
+import { ResponsiveImage } from './ResponsiveImage';
+import { getProductImages, getImageSizes } from '@/lib/productImages';
 
 interface ProductCardProps {
   id: string;
@@ -35,48 +35,24 @@ export function ProductCard({
 
   const displayPrice = typeof price === 'number' ? price.toFixed(2) : '0.00';
 
-  // Use the imageUrl from database or a placeholder
-  const displayImage = imageUrl || '/api/placeholder/400/400';
-
-  // In production, the imageUrl from database will point to /assets/products/...
-  // which will be served from the public directory
-
-  // Note: Product schema generation is available but not used in ProductCard
-  // Structured data is typically only added to product detail pages, not listing cards
-  // to avoid duplicate structured data on the same page.
-  // If needed for a specific use case, uncomment and implement:
-  /*
-  const productSchema = generateProductSchema({
-    id,
-    name,
-    description: description || '',
-    price,
-    category,
-    thc_content: thcContent,
-    cbd_content: cbdContent,
-    image_url: imageUrl,
-    variants: [{
-      id: `${id}-default`,
-      name: 'Default',
-      price: price,
-      inventory_count: 1
-    }],
-  } as any);
-  */
+  // Get optimized images for this product
+  const productImages = getProductImages(id, name, category);
+  const displayImage = productImages.main;
+  const imageAlt = `${name} - ${category} cannabis product`;
 
   return (
     <Card className="h-full cursor-pointer hover:shadow-lg transition-all duration-200 animate-fade-in flex flex-col">
       <CardHeader className="p-0" onClick={handleProductClick}>
         <div className="aspect-square overflow-hidden rounded-t-lg">
-          <OptimizedImage
+          <ResponsiveImage
             src={displayImage}
-            alt={`${name} - ${category} cannabis product`}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-            width={400}
-            height={400}
-            priority={true}
-            loading="eager"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            fallbackSrc={imageUrl}
+            alt={imageAlt}
+            className="w-full h-full hover:scale-105 transition-transform duration-200"
+            aspectRatio="1/1"
+            objectFit="cover"
+            loading="lazy"
+            sizes={getImageSizes('card')}
           />
         </div>
       </CardHeader>

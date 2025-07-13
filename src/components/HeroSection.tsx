@@ -1,10 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { Phone } from 'lucide-react';
-import { OptimizedImage } from '@/components/OptimizedImage';
-import blueDreamImg from '@/assets/blue-dream.jpg';
+import { ResponsiveImage } from '@/components/ResponsiveImage';
+import { getProductImages } from '@/lib/productImages';
 
 export function HeroSection() {
+  // Get a featured product image - using Wedding Cake as the featured product
+  const featuredProductImages = getProductImages('44444444-4444-4444-4444-444444444444', 'Wedding Cake', 'flower');
+  
   return (
     <div className="space-y-4">
       {/* Call to Action Bar */}
@@ -19,17 +22,17 @@ export function HeroSection() {
       </div>
 
       {/* Featured Product */}
-      <Link to="/product/blue-dream">
+      <Link to="/product/44444444-4444-4444-4444-444444444444">
         <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-primary to-primary-light shadow-elevated cursor-pointer hover:shadow-glow transition-all duration-300">
           <div className="absolute inset-0 gradient-overlay" />
           <div className="relative aspect-[16/9] flex items-end p-6">
             <div className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32">
-              <OptimizedImage
-                src={blueDreamImg}
-                alt="Blue Dream - Premium Sativa Cannabis Flower"
-                className="w-full h-full object-cover rounded-lg shadow-lg"
-                width="128"
-                height="128"
+              <ResponsiveImage
+                src={featuredProductImages.main}
+                alt="Wedding Cake - Premium Indica Cannabis Flower"
+                className="w-full h-full rounded-lg shadow-lg"
+                aspectRatio="1/1"
+                objectFit="cover"
                 priority
                 sizes="(max-width: 640px) 96px, 128px"
               />
@@ -41,8 +44,8 @@ export function HeroSection() {
               >
                 Featured
               </Badge>
-              <h2 className="text-2xl font-bold mb-1">Blue Dream</h2>
-              <p className="text-white/90">From $25.50</p>
+              <h2 className="text-2xl font-bold mb-1">Wedding Cake</h2>
+              <p className="text-white/90">Premium Indica - From $35.00</p>
             </div>
           </div>
         </div>

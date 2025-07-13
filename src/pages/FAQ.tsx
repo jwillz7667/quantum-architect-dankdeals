@@ -8,7 +8,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { SEOHead } from '@/components/SEOHead';
-import { generateFAQSchema } from '@/lib/seo';
 
 const faqs = [
   {

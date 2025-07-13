@@ -1,7 +1,8 @@
 // src/__tests__/context/RealTimeContext.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { RealTimeProvider, useRealTime } from '@/context/RealTimeContext';
+import { RealTimeProvider } from '@/context/RealTimeContext';
+import { useRealTime } from '@/hooks/useRealTime';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';

@@ -54,7 +54,7 @@ class IntersectionObserverMock {
   unobserve() {}
   disconnect() {}
 }
-window.IntersectionObserver = IntersectionObserverMock as any;
+(window as Window & typeof globalThis).IntersectionObserver = IntersectionObserverMock as unknown as typeof IntersectionObserver;
 
 // Mock ResizeObserver
 class ResizeObserverMock {
@@ -62,4 +62,4 @@ class ResizeObserverMock {
   unobserve() {}
   disconnect() {}
 }
-window.ResizeObserver = ResizeObserverMock as any;
+(window as Window & typeof globalThis).ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;

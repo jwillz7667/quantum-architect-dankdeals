@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
 import type { PostgrestSingleResponse } from '@supabase/supabase-js';
@@ -16,30 +16,8 @@ import {
   cleanupActivityTracking,
   logSecurityEvent,
 } from '@/lib/security';
-
-interface AuthResult {
-  error: AuthError | null;
-  rateLimited?: boolean;
-  lockedUntil?: number;
-}
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  profile: { is_admin?: boolean } | null;
-  signUp: (
-    email: string,
-    password: string,
-    firstName?: string,
-    lastName?: string
-  ) => Promise<AuthResult>;
-  signIn: (email: string, password: string) => Promise<AuthResult>;
-  signOut: () => Promise<{ error: AuthError | null }>;
-  loading: boolean;
-  csrfToken: string;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext } from '@/context/AuthContext';
+import type { AuthResult } from '@/context/AuthContext';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -368,6 +346,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
+    if (import.meta.env.DEV) {
+      console.warn(
+        'AuthContext was undefined during a hot reload. This is a known issue with Vite HMR and React Context. Returning a mock context.'
+      );
+      return {
+        user: null,
+        session: null,
+        profile: null,
+        signUp: () => Promise.resolve({ error: { name: 'AuthNotReady', message: 'Authentication service is not available during HMR.' } as AuthError }),
+        signIn: () => Promise.resolve({ error: { name: 'AuthNotReady', message: 'Authentication service is not available during HMR.' } as AuthError }),
+        signOut: () => Promise.resolve({ error: { name: 'AuthNotReady', message: 'Authentication service is not available during HMR.' } as AuthError }),
+        loading: true,
+        csrfToken: ''
+      };
+    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
