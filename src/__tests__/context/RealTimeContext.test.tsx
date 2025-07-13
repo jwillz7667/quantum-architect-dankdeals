@@ -36,9 +36,11 @@ function TestComponent() {
 
 describe('RealTimeContext', () => {
   const mockUser = { id: 'test-user-123', email: 'test@example.com' };
+  const mockOn = vi.fn();
+  const mockSubscribe = vi.fn();
   const mockChannel = {
-    on: vi.fn().mockReturnThis(),
-    subscribe: vi.fn().mockImplementation((callback: (status: string) => void) => {
+    on: mockOn.mockReturnThis(),
+    subscribe: mockSubscribe.mockImplementation((callback: (status: string) => void) => {
       callback('subscribed');
       return mockChannel;
     }),
@@ -73,10 +75,10 @@ describe('RealTimeContext', () => {
     );
 
     await waitFor(() => {
-      expect(supabase.channel).toHaveBeenCalledWith(`orders-channel-${mockUser.id}`);
+      expect(vi.mocked(supabase.channel)).toHaveBeenCalledWith(`orders-channel-${mockUser.id}`);
     });
 
-    expect(mockChannel.on).toHaveBeenCalledWith(
+    expect(mockOn).toHaveBeenCalledWith(
       'postgres_changes',
       expect.objectContaining({
         event: '*',
@@ -89,7 +91,7 @@ describe('RealTimeContext', () => {
   });
 
   it('should handle connection status changes', async () => {
-    const mockSubscribe = vi.fn().mockImplementation((callback) => {
+    const mockSubscribe = vi.fn().mockImplementation((callback: (status: string) => void) => {
       setTimeout(() => callback('subscribed'), 0);
       return mockChannel;
     });
@@ -120,11 +122,11 @@ describe('RealTimeContext', () => {
 
     unmount();
 
-    expect(supabase.removeChannel).toHaveBeenCalledWith(mockChannel);
+    expect(vi.mocked(supabase.removeChannel)).toHaveBeenCalledWith(mockChannel);
   });
 
   it('should not create channel when user is not authenticated', () => {
-    (useAuth as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ user: null });
+    vi.mocked(useAuth).mockReturnValue({ user: null } as ReturnType<typeof useAuth>);
 
     render(
       <RealTimeProvider>
@@ -132,7 +134,7 @@ describe('RealTimeContext', () => {
       </RealTimeProvider>
     );
 
-    expect(supabase.channel).not.toHaveBeenCalled();
+    expect(vi.mocked(supabase.channel)).not.toHaveBeenCalled();
   });
 
   it('should handle order updates', async () => {
@@ -151,7 +153,7 @@ describe('RealTimeContext', () => {
     );
 
     await waitFor(() => {
-      expect(mockChannel.on).toHaveBeenCalled();
+      expect(mockOn).toHaveBeenCalled();
     });
 
     // Simulate an order status update

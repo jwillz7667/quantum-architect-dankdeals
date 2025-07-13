@@ -65,7 +65,7 @@ export function ProductGrid() {
       </h3>
       <div style={{ height: '600px' }}>
         <AutoSizer>
-          {({ height, width }) => {
+          {({ height, width }: { height: number; width: number }) => {
             const columnWidth = 200; // Adjust based on your ProductCard width
             const columnCount = Math.max(1, Math.floor(width / columnWidth));
             const rowCount = Math.ceil(filteredProducts.length / columnCount);
