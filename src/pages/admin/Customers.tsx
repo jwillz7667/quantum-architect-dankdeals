@@ -6,7 +6,6 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { useToast } from '../../hooks/use-toast';
 import { z } from 'zod';
 import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
 import { Search } from 'lucide-react';
 
 const customerSchema = z.object({

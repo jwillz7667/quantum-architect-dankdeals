@@ -38,7 +38,7 @@ describe('RealTimeContext', () => {
   const mockUser = { id: 'test-user-123', email: 'test@example.com' };
   const mockChannel = {
     on: vi.fn().mockReturnThis(),
-    subscribe: vi.fn().mockImplementation((callback) => {
+    subscribe: vi.fn().mockImplementation((callback: (status: string) => void) => {
       callback('subscribed');
       return mockChannel;
     }),
@@ -46,9 +46,9 @@ describe('RealTimeContext', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAuth as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ user: mockUser });
-    (supabase.channel as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockChannel);
-    (supabase.removeChannel as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as ReturnType<typeof useAuth>);
+    vi.mocked(supabase.channel).mockReturnValue(mockChannel);
+    vi.mocked(supabase.removeChannel).mockResolvedValue({} as never);
   });
 
   afterEach(() => {

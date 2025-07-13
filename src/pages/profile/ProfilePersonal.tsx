@@ -20,6 +20,17 @@ interface ProfileData {
   date_of_birth: string;
 }
 
+interface ProfileUpdateData {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  updated_at: string;
+  date_of_birth?: string;
+  age_verified?: boolean;
+  age_verified_at?: string;
+}
+
 export default function ProfilePersonal() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +50,9 @@ export default function ProfilePersonal() {
       if (!user) return;
 
       try {
+        if (!user?.id) {
+          throw new Error('User not authenticated');
+        }
         const { data, error } = await supabase
           .from('profiles')
           .select('first_name, last_name, phone, date_of_birth')
@@ -97,7 +111,17 @@ export default function ProfilePersonal() {
         }
       }
 
-      const updateData: any = {
+      if (!user?.id) {
+        toast({
+          title: 'Error',
+          description: 'You must be logged in to update your profile.',
+          variant: 'destructive',
+        });
+        setSaving(false);
+        return;
+      }
+
+      const updateData: ProfileUpdateData = {
         user_id: user.id,
         first_name: profile.first_name.trim(),
         last_name: profile.last_name.trim(),
@@ -171,7 +195,7 @@ export default function ProfilePersonal() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <Input value={user.email || ''} disabled className="bg-muted" />
+                  <Input value={user?.email || ''} disabled className="bg-muted" />
                   <p className="text-sm text-muted-foreground">
                     Contact support to change your email address
                   </p>

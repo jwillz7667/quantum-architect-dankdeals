@@ -17,7 +17,7 @@ import {
   logSecurityEvent,
 } from '@/lib/security';
 import { AuthContext } from '@/context/AuthContext';
-import type { AuthResult } from '@/context/AuthContext';
+import type { AuthResult, AuthContextType } from '@/context/AuthContext';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -343,7 +343,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 };
 
 // Custom hook to use auth context
-const useAuth = () => {
+const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     if (import.meta.env.DEV) {

@@ -1,6 +1,7 @@
 import { ProductCard } from '@/components/ProductCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
+import type { Product } from '@/hooks/useProducts';
 import { Loader2 } from 'lucide-react';
 import { useProductsFilter } from '@/hooks/useProductsFilter';
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -18,7 +19,7 @@ export function ProductGrid() {
   const { searchQuery, selectedCategory } = useProductsFilter();
 
   // Filter products based on search and category
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts: Product[] = products.filter((product) => {
     const matchesSearch =
       !searchQuery ||
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
