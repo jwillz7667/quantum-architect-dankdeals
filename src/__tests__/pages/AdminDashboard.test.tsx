@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Overview from '../../pages/admin/Overview';
 import { useAuth } from '../../hooks/useAuth';
+import type { User } from '@supabase/supabase-js';
 
 // Mock the hooks
 vi.mock('../../hooks/useAuth');
@@ -42,13 +43,16 @@ const renderWithProviders = (component: React.ReactElement) => {
 
 describe('Admin Dashboard', () => {
   beforeEach(() => {
-    (vi.mocked(useAuth) as any).mockReturnValue({
-      user: { id: '1', email: 'admin@test.com', is_admin: true },
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: '1', email: 'admin@test.com' } as User,
+      session: null,
+      profile: { is_admin: true },
       loading: false,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
-    });
+      csrfToken: 'test-token'
+    } as ReturnType<typeof useAuth>);
   });
 
   it('renders overview stats', async () => {

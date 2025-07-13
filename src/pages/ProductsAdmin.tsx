@@ -27,15 +27,15 @@ const fetchProducts = async (): Promise<Product[]> => {
 };
 
 const createProduct = async (newProduct: Omit<Product, 'id'>): Promise<Product> => {
-  const { data, error } = await supabase.from('products').insert(newProduct).select().single();
-  if (error) throw error;
-  return productSchema.parse(data);
+  const result = await supabase.from('products').insert(newProduct).select().single();
+  if (result.error) throw result.error;
+  return productSchema.parse(result.data);
 };
 
 const updateProduct = async (updatedProduct: Product): Promise<Product> => {
-  const { data, error } = await supabase.from('products').update(updatedProduct).eq('id', updatedProduct.id).select().single();
-  if (error) throw error;
-  return productSchema.parse(data);
+  const result = await supabase.from('products').update(updatedProduct).eq('id', updatedProduct.id).select().single();
+  if (result.error) throw result.error;
+  return productSchema.parse(result.data);
 };
 
 const deleteProduct = async (id: string): Promise<void> => {
