@@ -49,7 +49,7 @@ const ENABLE_NOTIFICATION_SOUND = true;
 const NOTIFICATION_SOUND_URL = '/notification.mp3';
 
 export function RealTimeProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [latestOrderUpdate, setLatestOrderUpdate] = useState<RealtimePostgresChangesPayload<Order> | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<RealTimeContextType['connectionStatus']>('disconnected');
@@ -177,6 +177,11 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (loading) {
+      // Exit early if authentication is still loading
+      return;
+    }
+
     if (!user) {
       // Clean up channel if user logs out
       if (channel) {
@@ -201,7 +206,7 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
         void supabase.removeChannel(ordersChannel);
       }
     };
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const subscribeToOrders = (callback: (payload: RealtimePostgresChangesPayload<Order>) => void) => {
     if (!channel) {
@@ -254,4 +259,4 @@ export function useRealTime() {
     throw new Error('useRealTime must be used within a RealTimeProvider');
   }
   return context;
-} 
+}  
