@@ -6,9 +6,10 @@ import { Shield } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requiresAdmin?: boolean;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, requiresAdmin = false }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [sessionValid, setSessionValid] = useState<boolean | null>(null);
@@ -21,14 +22,19 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
         if (!isValid) {
           navigate('/auth?reason=session_invalid');
+        } else if (requiresAdmin && !user.is_admin) {
+          navigate('/auth?reason=not_admin');
         }
       } else if (!loading && !user) {
         navigate('/auth');
       }
     };
 
-    checkSession();
-  }, [user, loading, navigate]);
+    checkSession().catch((error) => {
+      console.error('Session check failed:', error);
+      navigate('/auth?reason=error');
+    });
+  }, [user, loading, navigate, requiresAdmin]);
 
   if (loading || sessionValid === null) {
     return (

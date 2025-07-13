@@ -28,6 +28,13 @@ const Legal = lazy(() => import('./pages/Legal'));
 const DeliveryArea = lazy(() => import('./pages/DeliveryArea'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const HealthCheck = lazy(() => import('./pages/HealthCheck'));
+const AdminLayout = lazy(() => import('./pages/AdminLayout'));
+const Overview = lazy(() => import('./pages/admin/Overview'));
+const ProductsAdmin = lazy(() => import('./pages/ProductsAdmin'));
+const OrdersAdmin = lazy(() => import('./pages/OrdersAdmin'));
+const Customers = lazy(() => import('./pages/admin/Customers'));
+const Analytics = lazy(() => import('./pages/admin/Analytics'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
 
 // Lazy load checkout pages (only loaded when user checks out)
 const CheckoutAddress = lazy(() => import('./pages/checkout/CheckoutAddress'));
@@ -167,17 +174,18 @@ const App = () => (
                       }
                     />
 
-                    {/* Admin Routes - COMMENTED OUT */}
-                    {/* <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
-                <Route index element={<Overview />} />
-                <Route path="orders" element={<AdminOrders />} />
-                <Route path="products" element={<AdminProducts />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="activity" element={<AdminActivity />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route> */}
+                    <Route path="/admin" element={
+                      <ProtectedRoute requiresAdmin>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<Overview />} />
+                      <Route path="products" element={<ProductsAdmin />} />
+                      <Route path="orders" element={<OrdersAdmin />} />
+                      <Route path="customers" element={<Customers />} />
+                      <Route path="analytics" element={<Analytics />} />
+                      <Route path="settings" element={<Settings />} />
+                    </Route>
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="/health" element={<HealthCheck />} />

@@ -62,15 +62,12 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## Admin Dashboard
 
-The admin dashboard is available at `/admin` and includes:
+Access the admin dashboard at `/admin` after logging in as an admin user.
+- Overview: `/admin`
+- Manage Products: `/admin/products`
+- Manage Orders: `/admin/orders`
 
-- Real-time order management
-- Inventory control with low stock alerts
-- Customer management
-- Analytics and reporting
-- Store settings configuration
-
-**Only `admin@dankdealsmn.com` can access the admin panel.**
+Ensure your user has `is_admin: true` in Supabase.
 
 ## Database Setup
 

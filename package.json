@@ -53,7 +53,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@supabase/auth-helpers-react": "^0.4.2",
     "@supabase/supabase-js": "^2.45.0",
-    "@tanstack/react-query": "^5.51.1",
+    "@tanstack/react-query": "^5.83.0",
     "caniuse-lite": "^1.0.30001727",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -73,14 +73,14 @@
     "react-router-dom": "^6.24.1",
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^1.8.10",
-    "recharts": "^2.12.7",
+    "recharts": "^2.15.4",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss": "^3.4.4",
     "tailwindcss-animate": "^1.0.7",
     "tslib": "^2.8.1",
     "vaul": "^0.9.3",
-    "zod": "^3.25.68"
+    "zod": "^3.25.76"
   },
   "optionalDependencies": {
     "@axe-core/react": "^4.10.2",
