@@ -1,12 +1,16 @@
 // src/lib/productImages.ts
 
+// Product image configuration with fallbacks
 interface ProductImageSet {
   main: string;
   gallery: string[];
   alt: string;
 }
 
-// Product image mappings using WebP format for better performance
+// Default placeholder
+const PLACEHOLDER_IMAGE = '/assets/placeholder.svg';
+
+// Product image mappings
 export const productImageMap: Record<string, ProductImageSet> = {
   // Pineapple Fruz
   '11111111-1111-1111-1111-111111111111': {
@@ -18,7 +22,7 @@ export const productImageMap: Record<string, ProductImageSet> = {
     ],
     alt: 'Pineapple Fruz Cannabis Strain',
   },
-  
+
   // Rainbow Sherbert #11 (RS11)
   '22222222-2222-2222-2222-222222222222': {
     main: '/assets/products/rs11/rainbow-sherbert11-1.webp',
@@ -28,7 +32,7 @@ export const productImageMap: Record<string, ProductImageSet> = {
     ],
     alt: 'Rainbow Sherbert #11 Cannabis Strain',
   },
-  
+
   // Runtz
   '33333333-3333-3333-3333-333333333333': {
     main: '/assets/products/runtz/runtz-1.webp',
@@ -39,7 +43,7 @@ export const productImageMap: Record<string, ProductImageSet> = {
     ],
     alt: 'Runtz Cannabis Strain',
   },
-  
+
   // Wedding Cake
   '44444444-4444-4444-4444-444444444444': {
     main: '/assets/products/wedding-cake/wedding-cake-1.webp',
@@ -52,29 +56,29 @@ export const productImageMap: Record<string, ProductImageSet> = {
   },
 };
 
-// Fallback images for categories
-export const categoryFallbackImages: Record<string, string> = {
-  flower: '/assets/blue-dream.jpg',
-  prerolls: '/assets/prerolls.jpg',
-  topicals: '/assets/wellness.jpg',
-  edibles: '/assets/edibles-hero.jpg',
-};
-
 // Get product images with fallback support
-export function getProductImages(productId: string, productName?: string, category?: string): ProductImageSet {
+export function getProductImages(
+  productId: string,
+  productName?: string,
+  _category?: string
+): ProductImageSet {
   // First check if we have specific images for this product ID
   if (productImageMap[productId]) {
     return productImageMap[productId];
   }
-  
+
   // Try to match by product name
   if (productName) {
     const nameLower = productName.toLowerCase();
-    
+
     if (nameLower.includes('pineapple') && nameLower.includes('fruz')) {
       return productImageMap['11111111-1111-1111-1111-111111111111'];
     }
-    if (nameLower.includes('rainbow') || nameLower.includes('sherbert') || nameLower.includes('rs11')) {
+    if (
+      nameLower.includes('rainbow') ||
+      nameLower.includes('sherbert') ||
+      nameLower.includes('rs11')
+    ) {
       return productImageMap['22222222-2222-2222-2222-222222222222'];
     }
     if (nameLower.includes('runtz')) {
@@ -84,13 +88,11 @@ export function getProductImages(productId: string, productName?: string, catego
       return productImageMap['44444444-4444-4444-4444-444444444444'];
     }
   }
-  
-  // Fallback to category image
-  const fallbackImage = category ? categoryFallbackImages[category] || categoryFallbackImages.flower : categoryFallbackImages.flower;
-  
+
+  // Ultimate fallback
   return {
-    main: fallbackImage,
-    gallery: [fallbackImage],
+    main: PLACEHOLDER_IMAGE,
+    gallery: [PLACEHOLDER_IMAGE],
     alt: productName || 'Cannabis Product',
   };
 }
@@ -114,4 +116,4 @@ export function getImageSizes(context: 'card' | 'detail' | 'thumbnail'): string 
     default:
       return '100vw';
   }
-} 
+}

@@ -3,13 +3,32 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 import { supabase } from '../integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table';
 import { Skeleton } from '../components/ui/skeleton';
 import { useToast } from '../hooks/use-toast';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
 import { Eye } from 'lucide-react';
 
 const orderSchema = z.object({
@@ -19,13 +38,19 @@ const orderSchema = z.object({
   status: z.string(),
   created_at: z.string(),
   email: z.string().optional(),
-  order_items: z.array(z.object({
-    quantity: z.number(),
-    price: z.number(),
-    product: z.object({
-      name: z.string(),
-    }).optional(),
-  })).optional(),
+  order_items: z
+    .array(
+      z.object({
+        quantity: z.number(),
+        price: z.number(),
+        product: z
+          .object({
+            name: z.string(),
+          })
+          .optional(),
+      })
+    )
+    .optional(),
 });
 
 type Order = z.infer<typeof orderSchema>;
@@ -33,47 +58,46 @@ type Order = z.infer<typeof orderSchema>;
 const fetchOrders = async (): Promise<Order[]> => {
   const { data, error } = await supabase
     .from('orders')
-    .select(`
+    .select(
+      `
       *,
-      profiles!inner(email),
       order_items(
         quantity,
         price,
         product:products(name)
       )
-    `)
+    `
+    )
     .order('created_at', { ascending: false });
-    
+
   if (error) throw error;
-  
-  type OrderWithProfile = {
+
+  // Fetch user emails separately using auth admin API if needed
+  // For now, we'll just use the user_id as orders table has that
+  type OrderWithItems = {
     id: string;
     user_id: string;
     total_amount: number;
     status: string;
     created_at: string;
-    profiles?: { email: string };
     order_items?: Array<{
       quantity: number;
       price: number;
       product?: { name: string };
     }>;
   };
-  
-  const orders = ((data || []) as OrderWithProfile[]).map((order) => ({
+
+  const orders = ((data || []) as OrderWithItems[]).map((order) => ({
     ...order,
-    email: order.profiles?.email,
+    email: order.user_id, // For now, show user_id instead of email
   }));
-  
+
   return z.array(orderSchema).parse(orders);
 };
 
 const updateOrderStatus = async ({ id, status }: { id: string; status: string }) => {
-  const { error } = await supabase
-    .from('orders')
-    .update({ status })
-    .eq('id', id);
-    
+  const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+
   if (error) throw error;
 };
 
@@ -82,7 +106,11 @@ const OrdersAdmin: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const { data: orders, isLoading, error } = useQuery({
+  const {
+    data: orders,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['ordersAdmin'],
     queryFn: fetchOrders,
   });
@@ -101,14 +129,14 @@ const OrdersAdmin: React.FC = () => {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      processing: "default",
-      completed: "outline",
-      cancelled: "destructive",
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      pending: 'secondary',
+      processing: 'default',
+      completed: 'outline',
+      cancelled: 'destructive',
     };
-    
-    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
+
+    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
   };
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
@@ -159,11 +187,7 @@ const OrdersAdmin: React.FC = () => {
                   <TableCell>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedOrder(order)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => setSelectedOrder(order)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
@@ -174,10 +198,19 @@ const OrdersAdmin: React.FC = () => {
                         {selectedOrder && (
                           <div className="space-y-4">
                             <div>
-                              <p><strong>Order ID:</strong> {selectedOrder.id}</p>
-                              <p><strong>Customer:</strong> {selectedOrder.email}</p>
-                              <p><strong>Date:</strong> {new Date(selectedOrder.created_at).toLocaleString()}</p>
-                              <p><strong>Status:</strong> {getStatusBadge(selectedOrder.status)}</p>
+                              <p>
+                                <strong>Order ID:</strong> {selectedOrder.id}
+                              </p>
+                              <p>
+                                <strong>Customer:</strong> {selectedOrder.email}
+                              </p>
+                              <p>
+                                <strong>Date:</strong>{' '}
+                                {new Date(selectedOrder.created_at).toLocaleString()}
+                              </p>
+                              <p>
+                                <strong>Status:</strong> {getStatusBadge(selectedOrder.status)}
+                              </p>
                             </div>
                             <div>
                               <h4 className="font-semibold mb-2">Order Items</h4>
@@ -196,7 +229,9 @@ const OrdersAdmin: React.FC = () => {
                                       <TableCell>{item.product?.name || 'Unknown'}</TableCell>
                                       <TableCell>{item.quantity}</TableCell>
                                       <TableCell>${item.price.toFixed(2)}</TableCell>
-                                      <TableCell>${(item.quantity * item.price).toFixed(2)}</TableCell>
+                                      <TableCell>
+                                        ${(item.quantity * item.price).toFixed(2)}
+                                      </TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -222,4 +257,4 @@ const OrdersAdmin: React.FC = () => {
   );
 };
 
-export default OrdersAdmin; 
+export default OrdersAdmin;

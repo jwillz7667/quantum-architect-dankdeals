@@ -3,8 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { ResponsiveImage } from './ResponsiveImage';
-import { getProductImages, getImageSizes } from '@/lib/productImages';
+import { SimpleImage } from './SimpleImage';
+import { getProductImages } from '@/lib/productImages';
 
 interface ProductCardProps {
   id: string;
@@ -38,21 +38,16 @@ export function ProductCard({
   // Get optimized images for this product
   const productImages = getProductImages(id, name, category);
   const displayImage = productImages.main;
-  const imageAlt = `${name} - ${category} cannabis product`;
 
   return (
     <Card className="h-full cursor-pointer hover:shadow-lg transition-all duration-200 animate-fade-in flex flex-col">
       <CardHeader className="p-0" onClick={handleProductClick}>
         <div className="aspect-square overflow-hidden rounded-t-lg">
-          <ResponsiveImage
+          <SimpleImage
             src={displayImage}
-            fallbackSrc={imageUrl}
-            alt={imageAlt}
-            className="w-full h-full hover:scale-105 transition-transform duration-200"
-            aspectRatio="1/1"
-            objectFit="cover"
-            loading="lazy"
-            sizes={getImageSizes('card')}
+            fallback={imageUrl}
+            alt={`${name} - ${category}`}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
           />
         </div>
       </CardHeader>

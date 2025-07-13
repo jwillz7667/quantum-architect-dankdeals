@@ -14,8 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/SEOHead';
 import { generateProductSchema } from '@/lib/seo';
-import { ResponsiveImage } from '@/components/ResponsiveImage';
-import { getProductImages, getImageSizes } from '@/lib/productImages';
+import { SimpleImage } from '@/components/SimpleImage';
+import { getProductImages } from '@/lib/productImages';
 
 interface ExtendedProduct extends Product {
   gallery_urls?: string[];
@@ -114,7 +114,7 @@ export default function ProductDetail() {
   };
 
   const getImagesForProduct = (product: ExtendedProduct | null): string[] => {
-    if (!product) return ['/assets/blue-dream.jpg'];
+    if (!product) return [];
 
     const productImages = getProductImages(product.id, product.name, product.category);
     return productImages.gallery;
@@ -235,14 +235,10 @@ export default function ProductDetail() {
 
       {/* Product Image Gallery */}
       <div className="aspect-[4/3] overflow-hidden relative group">
-        <ResponsiveImage
+        <SimpleImage
           src={images[currentImageIndex]}
-          alt={`${product.name} - ${product.category} cannabis product image ${currentImageIndex + 1}`}
-          className="w-full h-full"
-          aspectRatio="4/3"
-          objectFit="cover"
-          priority
-          sizes={getImageSizes('detail')}
+          alt={`${product.name} - ${product.category} image ${currentImageIndex + 1}`}
+          className="w-full h-full object-cover"
         />
 
         {images.length > 1 && (
