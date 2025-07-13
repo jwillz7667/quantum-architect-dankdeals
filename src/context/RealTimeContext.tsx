@@ -1,9 +1,12 @@
 // src/context/RealTimeContext.tsx
 import { createContext, useEffect, useState, useRef, type ReactNode } from 'react';
-import { REALTIME_SUBSCRIBE_STATES, type RealtimeChannel, type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import {
+  REALTIME_SUBSCRIBE_STATES,
+  type RealtimeChannel,
+  type RealtimePostgresChangesPayload,
+} from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import type { AuthContextType } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
@@ -38,7 +41,9 @@ interface Order {
 }
 
 interface RealTimeContextType {
-  subscribeToOrders: (callback: (payload: RealtimePostgresChangesPayload<Order>) => void) => () => void;
+  subscribeToOrders: (
+    callback: (payload: RealtimePostgresChangesPayload<Order>) => void
+  ) => () => void;
   latestOrderUpdate: RealtimePostgresChangesPayload<Order> | null;
   connectionStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
 }
@@ -50,11 +55,12 @@ const ENABLE_NOTIFICATION_SOUND = true;
 const NOTIFICATION_SOUND_URL = '/notification.mp3';
 
 export function RealTimeProvider({ children }: { children: ReactNode }) {
-  const authContext = useAuth() as AuthContextType;
-  const user = authContext.user;
+  const { user, loading } = useAuth(); // Remove type assertion and destructure directly
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
-  const [latestOrderUpdate, setLatestOrderUpdate] = useState<RealtimePostgresChangesPayload<Order> | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<RealTimeContextType['connectionStatus']>('disconnected');
+  const [latestOrderUpdate, setLatestOrderUpdate] =
+    useState<RealtimePostgresChangesPayload<Order> | null>(null);
+  const [connectionStatus, setConnectionStatus] =
+    useState<RealTimeContextType['connectionStatus']>('disconnected');
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -69,8 +75,8 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
   const playNotificationSound = () => {
     if (ENABLE_NOTIFICATION_SOUND && audioRef.current) {
       audioRef.current.play().catch((error: unknown) => {
-        logger.warn('Failed to play notification sound', { 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+        logger.warn('Failed to play notification sound', {
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       });
     }
@@ -78,11 +84,14 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
 
   const handleOrderUpdate = (payload: RealtimePostgresChangesPayload<Order>) => {
     try {
-      logger.info('Real-time order update received', { 
+      logger.info('Real-time order update received', {
         eventType: payload.eventType,
-        orderId: (payload.new as Order | undefined)?.id || (payload.old as Order | undefined)?.id || 'unknown'
+        orderId:
+          (payload.new as Order | undefined)?.id ||
+          (payload.old as Order | undefined)?.id ||
+          'unknown',
       });
-      
+
       setLatestOrderUpdate(payload);
 
       // Show toast notifications for order status changes
@@ -110,7 +119,10 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        if (newOrder.payment_status !== oldOrder.payment_status && newOrder.payment_status === 'paid') {
+        if (
+          newOrder.payment_status !== oldOrder.payment_status &&
+          newOrder.payment_status === 'paid'
+        ) {
           toast({
             title: 'Payment Confirmed',
             description: `Payment for order #${newOrder.order_number} has been confirmed.`,
@@ -127,7 +139,10 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
         playNotificationSound();
       }
     } catch (error) {
-      logger.error('Error handling order update:', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error handling order update:',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   };
 
@@ -136,7 +151,7 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
 
     try {
       setConnectionStatus('connecting');
-      
+
       const ordersChannel = supabase
         .channel(`orders-channel-${user.id}`)
         .on(
@@ -151,7 +166,7 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
         )
         .subscribe((status) => {
           logger.info('Real-time subscription status changed', { status });
-          
+
           if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
             setConnectionStatus('connected');
           } else if (status === REALTIME_SUBSCRIBE_STATES.CLOSED) {
@@ -172,13 +187,21 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
 
       return ordersChannel;
     } catch (error) {
-      logger.error('Failed to setup real-time subscription:', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to setup real-time subscription:',
+        error instanceof Error ? error : new Error(String(error))
+      );
       setConnectionStatus('error');
       return null;
     }
   };
 
   useEffect(() => {
+    // Exit early if authentication is still loading
+    if (loading) {
+      return;
+    }
+
     if (!user) {
       // Clean up channel if user logs out
       if (channel) {
@@ -203,9 +226,11 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
         void supabase.removeChannel(ordersChannel);
       }
     };
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, loading]); // Add loading to dependency array
 
-  const subscribeToOrders = (callback: (payload: RealtimePostgresChangesPayload<Order>) => void) => {
+  const subscribeToOrders = (
+    callback: (payload: RealtimePostgresChangesPayload<Order>) => void
+  ) => {
     if (!channel) {
       logger.warn('No real-time channel available for subscription');
       return () => {};
@@ -217,7 +242,10 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
         try {
           callback(payload);
         } catch (error) {
-          logger.error('Error in order subscription callback:', error instanceof Error ? error : new Error(String(error)));
+          logger.error(
+            'Error in order subscription callback:',
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       };
 
@@ -238,7 +266,10 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
         // The channel is managed by the provider lifecycle
       };
     } catch (error) {
-      logger.error('Failed to subscribe to orders:', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to subscribe to orders:',
+        error instanceof Error ? error : new Error(String(error))
+      );
       return () => {};
     }
   };
@@ -248,4 +279,4 @@ export function RealTimeProvider({ children }: { children: ReactNode }) {
       {children}
     </RealTimeContext.Provider>
   );
-} 
+}
