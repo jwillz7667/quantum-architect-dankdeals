@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, requiresAdmin = false }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [sessionValid, setSessionValid] = useState<boolean | null>(null);
 
@@ -22,7 +22,12 @@ export const ProtectedRoute = ({ children, requiresAdmin = false }: ProtectedRou
 
         if (!isValid) {
           navigate('/auth?reason=session_invalid');
-        } else if (requiresAdmin && !user.is_admin) {
+        } else if (requiresAdmin && profile && !profile.is_admin) {
+          console.log('Admin check failed:', {
+            requiresAdmin,
+            profile,
+            is_admin: profile?.is_admin,
+          });
           navigate('/auth?reason=not_admin');
         }
       } else if (!loading && !user) {
@@ -34,9 +39,10 @@ export const ProtectedRoute = ({ children, requiresAdmin = false }: ProtectedRou
       console.error('Session check failed:', error);
       navigate('/auth?reason=error');
     });
-  }, [user, loading, navigate, requiresAdmin]);
+  }, [user, profile, loading, navigate, requiresAdmin]);
 
-  if (loading || sessionValid === null) {
+  // Show loading if auth is loading or session is being validated
+  if (loading || (user && sessionValid === null)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -50,6 +56,19 @@ export const ProtectedRoute = ({ children, requiresAdmin = false }: ProtectedRou
 
   if (!user || !sessionValid) {
     return null;
+  }
+
+  // For admin routes, wait for profile to load
+  if (requiresAdmin && !profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="w-8 h-8 text-primary mx-auto mb-4 animate-pulse" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

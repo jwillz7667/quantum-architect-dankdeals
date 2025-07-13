@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
+import type { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -25,16 +26,14 @@ interface AuthResult {
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  profile: { is_admin?: boolean } | null;
   signUp: (
     email: string,
     password: string,
     firstName?: string,
     lastName?: string
   ) => Promise<AuthResult>;
-  signIn: (
-    email: string,
-    password: string
-  ) => Promise<AuthResult>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<{ error: AuthError | null }>;
   loading: boolean;
   csrfToken: string;
@@ -49,17 +48,75 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<{ is_admin?: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState<string>(generateCSRFToken());
   const { toast } = useToast();
+
+  const fetchProfile = async (userId: string) => {
+    console.log('Fetching profile for user:', userId);
+
+    try {
+      // First check if user has admin role in auth metadata
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error('Error fetching auth user:', authError);
+        setProfile({ is_admin: false });
+        return;
+      }
+
+      // Check multiple possible locations for admin flag
+      const isAdminFromMetadata =
+        authUser?.app_metadata?.is_admin === true ||
+        authUser?.app_metadata?.role === 'admin' ||
+        authUser?.user_metadata?.is_admin === true;
+
+      if (isAdminFromMetadata) {
+        console.log('User is admin from metadata:', {
+          userId,
+          app_metadata: authUser?.app_metadata,
+        });
+        setProfile({ is_admin: true });
+        return;
+      }
+
+      // Fallback: directly query auth.users table using RPC function
+      const result: PostgrestSingleResponse<boolean> = await supabase.rpc('check_user_is_admin', {
+        user_id: userId,
+      });
+      const { data: adminData, error: adminError } = result;
+
+      if (!adminError && typeof adminData === 'boolean') {
+        console.log('User admin status from RPC:', { userId, is_admin: adminData });
+        setProfile({ is_admin: adminData });
+      } else {
+        console.log('Could not determine admin status, defaulting to false:', adminError);
+        setProfile({ is_admin: false });
+      }
+    } catch (error) {
+      console.error('Error in fetchProfile:', error);
+      setProfile({ is_admin: false });
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
+
       setLoading(false);
 
       // Initialize activity tracking when user signs in
@@ -78,9 +135,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     // THEN check for existing session
-    void supabase.auth.getSession().then(({ data: { session } }) => {
+    void supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      }
+
       setLoading(false);
 
       // Initialize activity tracking if user is already signed in
@@ -95,7 +157,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, firstName?: string, lastName?: string): Promise<AuthResult> => {
+  const signUp = async (
+    email: string,
+    password: string,
+    firstName?: string,
+    lastName?: string
+  ): Promise<AuthResult> => {
     try {
       setLoading(true);
 
@@ -286,6 +353,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value = {
     user,
     session,
+    profile,
     signUp,
     signIn,
     signOut,
@@ -296,11 +364,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Export useAuth at the end to fix fast refresh warning
-export const useAuth = () => {
+// Custom hook to use auth context
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
+
+// Export useAuth separately to fix fast refresh warning
+export { useAuth };
