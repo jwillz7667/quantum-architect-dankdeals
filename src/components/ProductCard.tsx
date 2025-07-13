@@ -74,7 +74,8 @@ export function ProductCard({
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
             width={400}
             height={400}
-            priority={false}
+            priority={true}
+            loading="eager"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         </div>

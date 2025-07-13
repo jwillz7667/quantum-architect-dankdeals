@@ -26,31 +26,71 @@ export function OptimizedImage({
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    // Always load images immediately if priority is set or loading is eager
     if (priority || loading === 'eager') {
       setIsInView(true);
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      {
-        rootMargin: '50px',
+    // Set up IntersectionObserver for lazy loading
+    const setupObserver = () => {
+      if (!imgRef.current) return;
+
+      // Check if IntersectionObserver is supported
+      if (!('IntersectionObserver' in window)) {
+        // Fallback for browsers that don't support IntersectionObserver
+        setIsInView(true);
+        return;
       }
-    );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
+      observerRef.current = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            if (observerRef.current) {
+              observerRef.current.disconnect();
+              observerRef.current = null;
+            }
+          }
+        },
+        {
+          rootMargin: '50px',
+          threshold: 0.01, // Trigger when even 1% is visible
+        }
+      );
 
-    return () => observer.disconnect();
-  }, [priority, loading]);
+      observerRef.current.observe(imgRef.current);
+    };
+
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(setupObserver, 100);
+
+    // Fallback: If image hasn't loaded after 2 seconds, force load it
+    const fallbackTimeoutId = setTimeout(() => {
+      if (!isInView) {
+        console.warn(`Image ${src} not loaded after 2s, forcing load`);
+        setIsInView(true);
+      }
+    }, 2000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(fallbackTimeoutId);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
+  }, [priority, loading, src, isInView]);
+
+  // Reset error state when src changes
+  useEffect(() => {
+    setHasError(false);
+    setIsLoaded(false);
+  }, [src]);
 
   return (
     <div className={cn('overflow-hidden bg-muted', className)} style={{ width, height }}>
@@ -82,7 +122,8 @@ export function OptimizedImage({
           setIsLoaded(true);
           setHasError(false);
         }}
-        onError={() => {
+        onError={(e) => {
+          console.error(`Failed to load image: ${src}`, e);
           setHasError(true);
           setIsLoaded(false);
         }}
