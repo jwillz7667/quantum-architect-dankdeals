@@ -7,8 +7,17 @@ interface ProductImageSet {
   alt: string;
 }
 
-// Default placeholder
+// Default placeholder - ensure this file exists
 const PLACEHOLDER_IMAGE = '/assets/placeholder.svg';
+
+// Validate image path and provide fallback
+function validateImagePath(path: string): string {
+  // Ensure path starts with /
+  if (!path.startsWith('/')) {
+    return '/' + path;
+  }
+  return path;
+}
 
 // Product image mappings
 export const productImageMap: Record<string, ProductImageSet> = {
@@ -64,7 +73,12 @@ export function getProductImages(
 ): ProductImageSet {
   // First check if we have specific images for this product ID
   if (productImageMap[productId]) {
-    return productImageMap[productId];
+    const imageSet = productImageMap[productId];
+    return {
+      main: validateImagePath(imageSet.main),
+      gallery: imageSet.gallery.map(validateImagePath),
+      alt: imageSet.alt,
+    };
   }
 
   // Try to match by product name
@@ -72,27 +86,47 @@ export function getProductImages(
     const nameLower = productName.toLowerCase();
 
     if (nameLower.includes('pineapple') && nameLower.includes('fruz')) {
-      return productImageMap['11111111-1111-1111-1111-111111111111'];
+      const imageSet = productImageMap['11111111-1111-1111-1111-111111111111'];
+      return {
+        main: validateImagePath(imageSet.main),
+        gallery: imageSet.gallery.map(validateImagePath),
+        alt: imageSet.alt,
+      };
     }
     if (
       nameLower.includes('rainbow') ||
       nameLower.includes('sherbert') ||
       nameLower.includes('rs11')
     ) {
-      return productImageMap['22222222-2222-2222-2222-222222222222'];
+      const imageSet = productImageMap['22222222-2222-2222-2222-222222222222'];
+      return {
+        main: validateImagePath(imageSet.main),
+        gallery: imageSet.gallery.map(validateImagePath),
+        alt: imageSet.alt,
+      };
     }
     if (nameLower.includes('runtz')) {
-      return productImageMap['33333333-3333-3333-3333-333333333333'];
+      const imageSet = productImageMap['33333333-3333-3333-3333-333333333333'];
+      return {
+        main: validateImagePath(imageSet.main),
+        gallery: imageSet.gallery.map(validateImagePath),
+        alt: imageSet.alt,
+      };
     }
     if (nameLower.includes('wedding') && nameLower.includes('cake')) {
-      return productImageMap['44444444-4444-4444-4444-444444444444'];
+      const imageSet = productImageMap['44444444-4444-4444-4444-444444444444'];
+      return {
+        main: validateImagePath(imageSet.main),
+        gallery: imageSet.gallery.map(validateImagePath),
+        alt: imageSet.alt,
+      };
     }
   }
 
   // Ultimate fallback
   return {
-    main: PLACEHOLDER_IMAGE,
-    gallery: [PLACEHOLDER_IMAGE],
+    main: validateImagePath(PLACEHOLDER_IMAGE),
+    gallery: [validateImagePath(PLACEHOLDER_IMAGE)],
     alt: productName || 'Cannabis Product',
   };
 }

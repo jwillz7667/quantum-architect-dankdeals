@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { SimpleImage } from './SimpleImage';
+import { OptimizedProductImage } from './OptimizedProductImage';
 import { getProductImages } from '@/lib/productImages';
 
 interface ProductCardProps {
@@ -43,11 +43,12 @@ export function ProductCard({
     <Card className="h-full cursor-pointer hover:shadow-lg transition-all duration-200 animate-fade-in flex flex-col">
       <CardHeader className="p-0" onClick={handleProductClick}>
         <div className="aspect-square overflow-hidden rounded-t-lg">
-          <SimpleImage
+          <OptimizedProductImage
             src={displayImage}
             fallback={imageUrl}
-            alt={`${name} - ${category}`}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+            alt={`${name} - Premium ${category} cannabis product`}
+            className="w-full h-full hover:scale-105 transition-transform duration-200"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
       </CardHeader>

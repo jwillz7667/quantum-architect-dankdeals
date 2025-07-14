@@ -11,9 +11,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
+import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, User } from 'lucide-react';
 
 interface DeliveryAddress {
   street: string;
@@ -24,10 +22,25 @@ interface DeliveryAddress {
   deliveryInstructions: string;
 }
 
+interface PersonalInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+}
+
 export default function CheckoutAddress() {
   const { items, totalItems, totalPrice } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+  });
 
   const [address, setAddress] = useState<DeliveryAddress>({
     street: '',
@@ -51,41 +64,70 @@ export default function CheckoutAddress() {
     }
   }, [items.length, navigate]);
 
-  // Load saved address if available
+  // Load saved data from localStorage if available
   useEffect(() => {
-    const loadSavedAddress = async () => {
-      if (!user) return;
+    const savedPersonalInfo = localStorage.getItem('checkout_personal_info');
+    const savedAddress = localStorage.getItem('checkout_address');
 
+    if (savedPersonalInfo) {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('delivery_address')
-          .eq('user_id', user.id)
-          .single();
+        setPersonalInfo(JSON.parse(savedPersonalInfo) as PersonalInfo);
+      } catch (error) {
+        console.error('Error loading saved personal info:', error);
+      }
+    }
 
-        if (error || !data?.delivery_address) return;
-
-        const savedAddress = data.delivery_address as DeliveryAddress;
-        setAddress({
-          street: savedAddress.street || '',
-          apartment: savedAddress.apartment || '',
-          city: savedAddress.city || '',
-          state: savedAddress.state || 'MN',
-          zipCode: savedAddress.zipCode || '',
-          deliveryInstructions: savedAddress.deliveryInstructions || '',
-        });
+    if (savedAddress) {
+      try {
+        setAddress(JSON.parse(savedAddress) as DeliveryAddress);
       } catch (error) {
         console.error('Error loading saved address:', error);
       }
-    };
+    }
+  }, []);
 
-    void loadSavedAddress();
-  }, [user]);
+  const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
+    setPersonalInfo((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleInputChange = (field: keyof DeliveryAddress, value: string) => {
+  const handleAddressChange = (field: keyof DeliveryAddress, value: string) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
     setIsValidAddress(null);
     setValidationError(null);
+  };
+
+  const calculateAge = (dateOfBirth: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const validateForm = (): string | null => {
+    if (!personalInfo.firstName.trim()) return 'First name is required';
+    if (!personalInfo.lastName.trim()) return 'Last name is required';
+    if (!personalInfo.email.trim()) return 'Email is required';
+    if (!personalInfo.phone.trim()) return 'Phone number is required';
+    if (!personalInfo.dateOfBirth) return 'Date of birth is required';
+    if (!address.street.trim()) return 'Street address is required';
+    if (!address.city.trim()) return 'City is required';
+    if (!address.zipCode.trim()) return 'ZIP code is required';
+
+    const age = calculateAge(personalInfo.dateOfBirth);
+    if (age < 21) return 'You must be 21 or older to place an order';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(personalInfo.email)) return 'Please enter a valid email address';
+
+    const phoneRegex = /^\d{10}$/;
+    const cleanPhone = personalInfo.phone.replace(/\D/g, '');
+    if (!phoneRegex.test(cleanPhone)) return 'Please enter a valid 10-digit phone number';
+
+    return null;
   };
 
   const validateAddress = () => {
@@ -99,10 +141,13 @@ export default function CheckoutAddress() {
 
       if (isValid) {
         setIsValidAddress(true);
-        
+
         // Calculate delivery fee based on location
         // Mock calculation - in real app would use actual distance/zone calculation
-        if (address.city.toLowerCase() === 'minneapolis' || address.city.toLowerCase() === 'st paul') {
+        if (
+          address.city.toLowerCase() === 'minneapolis' ||
+          address.city.toLowerCase() === 'st paul'
+        ) {
           setDeliveryFee(5.0);
           setEstimatedTime('30-45 minutes');
         } else {
@@ -118,7 +163,13 @@ export default function CheckoutAddress() {
     }, 1000);
   };
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
+    const formError = validateForm();
+    if (formError) {
+      setValidationError(formError);
+      return;
+    }
+
     if (!isValidAddress) {
       validateAddress();
       return;
@@ -130,31 +181,14 @@ export default function CheckoutAddress() {
       estimatedTime,
     };
 
-    // Save address to localStorage for immediate access
+    // Save data to localStorage for checkout process
+    localStorage.setItem('checkout_personal_info', JSON.stringify(personalInfo));
+    localStorage.setItem('checkout_address', JSON.stringify(addressWithFees));
     localStorage.setItem('delivery_address', JSON.stringify(addressWithFees));
-
-    // Save address to user profile
-    if (user) {
-      try {
-        await supabase
-          .from('profiles')
-          .update({
-            delivery_address: addressWithFees,
-          })
-          .eq('id', user.id);
-      } catch (error) {
-        console.error('Error saving address:', error);
-      }
-    }
 
     // Navigate to payment step
     navigate('/checkout/payment');
   };
-
-  if (!user) {
-    navigate('/auth');
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -193,6 +227,92 @@ export default function CheckoutAddress() {
           </CardContent>
         </Card>
 
+        {/* Personal Information Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Personal Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  value={personalInfo.firstName}
+                  onChange={(e) => handlePersonalInfoChange('firstName', e.target.value)}
+                  className={
+                    validationError && !personalInfo.firstName.trim() ? 'border-destructive' : ''
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  value={personalInfo.lastName}
+                  onChange={(e) => handlePersonalInfoChange('lastName', e.target.value)}
+                  className={
+                    validationError && !personalInfo.lastName.trim() ? 'border-destructive' : ''
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="john@example.com"
+                value={personalInfo.email}
+                onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
+                className={
+                  validationError && !personalInfo.email.trim() ? 'border-destructive' : ''
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="(555) 123-4567"
+                value={personalInfo.phone}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/\D/g, '');
+                  const formatted = cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+                  handlePersonalInfoChange('phone', formatted);
+                }}
+                className={
+                  validationError && !personalInfo.phone.trim() ? 'border-destructive' : ''
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dateOfBirth">Date of Birth * (Must be 21+)</Label>
+              <Input
+                id="dateOfBirth"
+                type="date"
+                value={personalInfo.dateOfBirth}
+                onChange={(e) => handlePersonalInfoChange('dateOfBirth', e.target.value)}
+                max={
+                  new Date(new Date().setFullYear(new Date().getFullYear() - 21))
+                    .toISOString()
+                    .split('T')[0]
+                }
+                className={validationError && !personalInfo.dateOfBirth ? 'border-destructive' : ''}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Address Form */}
         <Card>
           <CardHeader>
@@ -205,7 +325,7 @@ export default function CheckoutAddress() {
                 id="street"
                 placeholder="123 Main Street"
                 value={address.street}
-                onChange={(e) => handleInputChange('street', e.target.value)}
+                onChange={(e) => handleAddressChange('street', e.target.value)}
                 className={validationError && !address.street ? 'border-destructive' : ''}
               />
             </div>
@@ -216,7 +336,7 @@ export default function CheckoutAddress() {
                 id="apartment"
                 placeholder="Apt 4B (optional)"
                 value={address.apartment}
-                onChange={(e) => handleInputChange('apartment', e.target.value)}
+                onChange={(e) => handleAddressChange('apartment', e.target.value)}
               />
             </div>
 
@@ -227,7 +347,7 @@ export default function CheckoutAddress() {
                   id="city"
                   placeholder="Minneapolis"
                   value={address.city}
-                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  onChange={(e) => handleAddressChange('city', e.target.value)}
                   className={validationError && !address.city ? 'border-destructive' : ''}
                 />
               </div>
@@ -244,7 +364,7 @@ export default function CheckoutAddress() {
                 placeholder="55401"
                 value={address.zipCode}
                 onChange={(e) =>
-                  handleInputChange('zipCode', e.target.value.replace(/\D/g, '').substring(0, 5))
+                  handleAddressChange('zipCode', e.target.value.replace(/\D/g, '').substring(0, 5))
                 }
                 className={validationError && !address.zipCode ? 'border-destructive' : ''}
               />
@@ -256,7 +376,7 @@ export default function CheckoutAddress() {
                 id="instructions"
                 placeholder="Ring doorbell, leave at door, etc."
                 value={address.deliveryInstructions}
-                onChange={(e) => handleInputChange('deliveryInstructions', e.target.value)}
+                onChange={(e) => handleAddressChange('deliveryInstructions', e.target.value)}
                 className="min-h-20"
               />
             </div>
@@ -315,7 +435,7 @@ export default function CheckoutAddress() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Button>
-          <Button onClick={() => void handleContinue()} disabled={!isValidAddress} className="flex-1">
+          <Button onClick={handleContinue} disabled={!isValidAddress} className="flex-1">
             Continue
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>

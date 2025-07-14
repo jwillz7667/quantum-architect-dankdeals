@@ -11,9 +11,6 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 import {
   ShoppingCart,
   MapPin,
@@ -36,90 +33,88 @@ interface DeliveryInfo {
   estimatedTime: string;
 }
 
-interface UserProfile {
-  id: string;
-  first_name?: string | null;
-  last_name?: string | null;
-  phone?: string | null;
-  email?: string | null;
-  delivery_address?: DeliveryInfo;
+interface PersonalInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
 }
 
-type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-type OrderInsert = Database['public']['Tables']['orders']['Insert'];
-type OrderItemInsert = Database['public']['Tables']['order_items']['Insert'];
+interface PaymentInfo {
+  paymentMethod: string;
+  tipAmount: number;
+  tipPercentage: number;
+  customTip: string;
+}
+
+interface OrderDetails {
+  orderNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  address: DeliveryInfo;
+  items: Array<{
+    name: string;
+    variant: { name: string; weight_grams: number };
+    quantity: number;
+    price: number;
+  }>;
+  subtotal: number;
+  taxAmount: number;
+  deliveryFee: number;
+  tipAmount: number;
+  totalAmount: number;
+  paymentMethod: string;
+}
 
 export default function CheckoutReview() {
   const { items, subtotal, taxAmount, deliveryFee, clearCart } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
 
-  // For this demo, we'll assume tip is 18% (would be stored from payment step)
-  const tipAmount = subtotal * 0.18;
+  const tipAmount = paymentInfo?.tipAmount || 0;
   const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
 
-  // Load delivery info and user profile
+  // Load data from localStorage
   useEffect(() => {
-    const loadUserData = async () => {
-      if (!user) return;
-
-      try {
-        // Load user profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error loading profile:', profileError);
-        } else if (profile) {
-          const typedProfile = profile as ProfileRow;
-          
-          // Check if DOB is provided for age verification
-          if (!typedProfile.date_of_birth) {
-            toast({
-              title: 'Age Verification Required',
-              description: 'Please update your profile with your date of birth to complete your order.',
-              variant: 'destructive',
-            });
-            navigate('/profile/personal');
-            return;
-          }
-          
-          setUserProfile({
-            id: typedProfile.id,
-            first_name: typedProfile.first_name,
-            last_name: typedProfile.last_name,
-            phone: typedProfile.phone,
-            email: typedProfile.email,
-            delivery_address: typedProfile.delivery_address as DeliveryInfo | undefined
-          });
-        }
-
-        // Load delivery info
-        const savedAddressData = (profile as ProfileRow | null)?.delivery_address || localStorage.getItem('delivery_address');
-        if (!savedAddressData) {
-          navigate('/checkout/address');
-          return;
-        }
-
-        const parsedAddress = typeof savedAddressData === 'string' ? JSON.parse(savedAddressData) : savedAddressData;
-        setDeliveryInfo(parsedAddress as DeliveryInfo);
-      } catch (error) {
-        console.error('Error loading user data:', error);
+    try {
+      // Load personal info
+      const savedPersonalInfo = localStorage.getItem('checkout_personal_info');
+      if (!savedPersonalInfo) {
         navigate('/checkout/address');
+        return;
       }
-    };
+      setPersonalInfo(JSON.parse(savedPersonalInfo) as PersonalInfo);
 
-    void loadUserData();
-  }, [user, navigate, toast]);
+      // Load delivery info
+      const savedAddress = localStorage.getItem('delivery_address');
+      if (!savedAddress) {
+        navigate('/checkout/address');
+        return;
+      }
+      setDeliveryInfo(JSON.parse(savedAddress) as DeliveryInfo);
+
+      // Load payment info
+      const savedPayment = localStorage.getItem('checkout_payment');
+      if (!savedPayment) {
+        navigate('/checkout/payment');
+        return;
+      }
+      setPaymentInfo(JSON.parse(savedPayment) as PaymentInfo);
+    } catch (error) {
+      console.error('Error loading checkout data:', error);
+      navigate('/checkout/address');
+    }
+  }, [navigate]);
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -137,89 +132,116 @@ export default function CheckoutReview() {
     return `${prefix}${timestamp}${random}`;
   };
 
-  const handlePlaceOrder = async () => {
-    if (!agreedToTerms || !user || !deliveryInfo || !userProfile) return;
+  const sendOrderEmail = (orderDetails: OrderDetails) => {
+    const adminEmail = 'admin@dankdealsmn.com'; // Replace with actual admin email
+
+    const emailContent = {
+      to: adminEmail,
+      subject: `New Order: ${orderDetails.orderNumber}`,
+      html: `
+        <h2>New Cannabis Delivery Order</h2>
+        <h3>Order #${orderDetails.orderNumber}</h3>
+        
+        <h4>Customer Information:</h4>
+        <p><strong>Name:</strong> ${orderDetails.firstName} ${orderDetails.lastName}</p>
+        <p><strong>Email:</strong> ${orderDetails.email}</p>
+        <p><strong>Phone:</strong> ${orderDetails.phone}</p>
+        <p><strong>Date of Birth:</strong> ${orderDetails.dateOfBirth}</p>
+        
+        <h4>Delivery Address:</h4>
+        <p>${orderDetails.address.street}${orderDetails.address.apartment ? ', ' + orderDetails.address.apartment : ''}</p>
+        <p>${orderDetails.address.city}, ${orderDetails.address.state} ${orderDetails.address.zipCode}</p>
+        ${orderDetails.address.deliveryInstructions ? `<p><strong>Instructions:</strong> ${orderDetails.address.deliveryInstructions}</p>` : ''}
+        
+        <h4>Order Items:</h4>
+        <ul>
+          ${orderDetails.items
+            .map(
+              (item) => `
+            <li>${item.name} - ${item.variant.name} (${item.variant.weight_grams}g) - Qty: ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}</li>
+          `
+            )
+            .join('')}
+        </ul>
+        
+        <h4>Order Total:</h4>
+        <p>Subtotal: $${orderDetails.subtotal.toFixed(2)}</p>
+        <p>Tax: $${orderDetails.taxAmount.toFixed(2)}</p>
+        <p>Delivery Fee: $${orderDetails.deliveryFee.toFixed(2)}</p>
+        <p>Tip: $${orderDetails.tipAmount.toFixed(2)}</p>
+        <p><strong>Total: $${orderDetails.totalAmount.toFixed(2)}</strong></p>
+        
+        <p><strong>Payment Method:</strong> ${orderDetails.paymentMethod}</p>
+        <p><strong>Order Time:</strong> ${new Date().toLocaleString()}</p>
+      `,
+    };
+
+    // In a real app, you would send this via a proper email service
+    // For now, we'll log it to console
+    console.log('Order email would be sent:', emailContent);
+
+    // Store the order details in localStorage for the admin to review
+    const existingOrders = JSON.parse(localStorage.getItem('admin_orders') || '[]') as Array<
+      OrderDetails & { timestamp: string; status: string }
+    >;
+    existingOrders.push({
+      ...orderDetails,
+      timestamp: new Date().toISOString(),
+      status: 'pending',
+    });
+    localStorage.setItem('admin_orders', JSON.stringify(existingOrders));
+  };
+
+  const handlePlaceOrder = () => {
+    if (!agreedToTerms || !deliveryInfo || !personalInfo || !paymentInfo) return;
 
     setIsPlacingOrder(true);
 
     try {
       const orderNumber = generateOrderNumber();
 
-      // Create order in database
-      const orderData: OrderInsert = {
-        user_id: user.id,
-        order_number: orderNumber,
-        delivery_first_name: userProfile.first_name || 'Customer',
-        delivery_last_name: userProfile.last_name || '',
-        delivery_street_address: deliveryInfo.street,
-        delivery_apartment: deliveryInfo.apartment,
-        delivery_city: deliveryInfo.city,
-        delivery_state: deliveryInfo.state,
-        delivery_zip_code: deliveryInfo.zipCode,
-        delivery_phone: userProfile.phone || '',
-        delivery_instructions: deliveryInfo.deliveryInstructions,
-        subtotal: subtotal,
-        tax_amount: taxAmount,
-        delivery_fee: deliveryFee,
-        total_amount: totalAmount,
-        status: 'confirmed',
-        payment_method: 'cash',
-        payment_status: 'pending',
+      const orderDetails = {
+        orderNumber,
+        firstName: personalInfo.firstName,
+        lastName: personalInfo.lastName,
+        email: personalInfo.email,
+        phone: personalInfo.phone,
+        dateOfBirth: personalInfo.dateOfBirth,
+        address: deliveryInfo,
+        items,
+        subtotal,
+        taxAmount,
+        deliveryFee,
+        tipAmount,
+        totalAmount,
+        paymentMethod: paymentInfo.paymentMethod,
       };
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single();
+      // Send order details via email
+      sendOrderEmail(orderDetails);
 
-      if (orderError || !order) throw orderError || new Error('Failed to create order');
-
-      // Create order items
-      const orderItems: OrderItemInsert[] = items.map((item) => ({
-        order_id: order.id,
-        product_id: item.productId,
-        product_name: item.name,
-        product_price: item.price,
-        product_weight_grams: item.variant.weight_grams,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.price * item.quantity,
-      }));
-
-      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // Trigger email sending via edge function
-      const { error: emailError } = await supabase.functions.invoke('send-order-emails', {
-        body: { orderId: order.id }
-      });
-
-      if (emailError) {
-        console.error('Error sending order emails:', emailError);
-        // Don't fail the order if email fails - it will be queued for retry
-      }
-
-      // Clear cart
+      // Clear cart and localStorage
       clearCart();
+      localStorage.removeItem('checkout_personal_info');
+      localStorage.removeItem('checkout_address');
+      localStorage.removeItem('checkout_payment');
+      localStorage.removeItem('delivery_address');
 
       // Navigate to success page
       navigate(`/checkout/complete?order=${orderNumber}`);
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      toast({
+        title: 'Order Failed',
+        description: 'Failed to place order. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsPlacingOrder(false);
     }
   };
 
-  if (!user) {
-    navigate('/auth');
-    return null;
-  }
-
-  if (!deliveryInfo) {
+  if (!deliveryInfo || !personalInfo || !paymentInfo) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-0">
         <DesktopHeader />

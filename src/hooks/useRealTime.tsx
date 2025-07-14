@@ -1,11 +1,10 @@
-// src/hooks/useRealTime.tsx
-import { useContext } from 'react';
+import React from 'react';
 import { RealTimeContext } from '@/context/RealTimeContext';
 
-export function useRealTime() {
-  const context = useContext(RealTimeContext);
-  if (context === undefined) {
+export const useRealTime = () => {
+  const context = React.useContext(RealTimeContext);
+  if (!context) {
     throw new Error('useRealTime must be used within a RealTimeProvider');
   }
   return context;
-} 
+};

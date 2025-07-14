@@ -10,8 +10,6 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { CreditCard, DollarSign, ArrowRight, ArrowLeft, Info, MapPin, Clock } from 'lucide-react';
 
 interface DeliveryInfo {
@@ -35,7 +33,6 @@ const TIP_OPTIONS = [
 
 export default function CheckoutPayment() {
   const { items, subtotal, taxAmount, deliveryFee } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
@@ -46,39 +43,21 @@ export default function CheckoutPayment() {
   const tipAmount = tipPercentage > 0 ? subtotal * tipPercentage : parseFloat(customTip) || 0;
   const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
 
-  // Load delivery info
+  // Load delivery info from localStorage
   useEffect(() => {
-    const loadDeliveryInfo = async () => {
-      if (!user) return;
-
+    const savedAddress = localStorage.getItem('delivery_address');
+    if (savedAddress) {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('delivery_address')
-          .eq('id', user.id)
-          .single();
-
-        if (error || !data?.delivery_address) {
-          // Try loading from localStorage
-          const savedAddress = localStorage.getItem('delivery_address');
-          if (savedAddress) {
-            setDeliveryInfo(JSON.parse(savedAddress) as DeliveryInfo);
-          } else {
-            // Redirect back to address if no address found
-            navigate('/checkout/address');
-          }
-          return;
-        }
-
-        setDeliveryInfo(data.delivery_address as DeliveryInfo);
+        setDeliveryInfo(JSON.parse(savedAddress) as DeliveryInfo);
       } catch (error) {
         console.error('Error loading delivery info:', error);
         navigate('/checkout/address');
       }
-    };
-
-    void loadDeliveryInfo();
-  }, [user, navigate]);
+    } else {
+      // Redirect back to address if no address found
+      navigate('/checkout/address');
+    }
+  }, [navigate]);
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -108,16 +87,16 @@ export default function CheckoutPayment() {
   };
 
   const handleContinue = () => {
-    // Save payment method and tip info, then proceed to review
-    // In a real app, you'd save this to session or context
-    // For now, we'll just navigate to review
+    // Save payment method and tip info to localStorage
+    const paymentData = {
+      paymentMethod,
+      tipAmount,
+      tipPercentage,
+      customTip: tipPercentage === 0 ? customTip : '',
+    };
+    localStorage.setItem('checkout_payment', JSON.stringify(paymentData));
     navigate('/checkout/review');
   };
-
-  if (!user) {
-    navigate('/auth');
-    return null;
-  }
 
   if (!deliveryInfo) {
     return (

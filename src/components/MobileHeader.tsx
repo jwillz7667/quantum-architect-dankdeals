@@ -19,7 +19,6 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
     { label: 'Home', href: '/' },
     { label: 'Categories', href: '/categories' },
     { label: 'Cart', href: '/cart' },
-    { label: 'Profile', href: '/profile' },
     { label: 'FAQ', href: '/faq' },
     { label: 'Blog', href: '/blog' },
     { label: 'Privacy Policy', href: '/privacy' },

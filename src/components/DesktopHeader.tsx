@@ -1,8 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, Phone } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-// import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { ShoppingCart, Phone } from 'lucide-react';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -14,8 +12,6 @@ const navItems = [
 
 export function DesktopHeader() {
   const location = useLocation();
-  const { user } = useAuth();
-  // const { isAdmin } = useAdminAuth();
 
   return (
     <header className="hidden md:flex bg-background border-b border-border">
@@ -71,18 +67,6 @@ export function DesktopHeader() {
               <ShoppingCart className="h-5 w-5" />
             </Button>
           </Link>
-
-          <Link to={user ? '/profile' : '/auth'}>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
-
-          {!user && (
-            <Link to="/auth">
-              <Button size="sm">Sign In</Button>
-            </Link>
-          )}
         </div>
       </div>
     </header>
