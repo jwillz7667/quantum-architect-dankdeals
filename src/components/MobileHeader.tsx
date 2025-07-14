@@ -3,6 +3,7 @@ import { Menu, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { OptimizedLogo } from '@/components/OptimizedLogo';
 // import { useAuth } from "@/hooks/useAuth";
 // import { useAdminAuth } from "@/hooks/useAdminAuth";
 // import { useCart } from "@/hooks/useCart";
@@ -45,10 +46,10 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
           <h1 className="text-xl font-bold text-primary-foreground">{title}</h1>
         ) : (
           <Link to="/" className="flex items-center">
-            <img
-              src="/assets/logos/dankdeals-logo.svg"
-              alt="DankDeals"
+            <OptimizedLogo
               className="h-8 w-auto brightness-0 invert"
+              alt="DankDeals"
+              priority={true}
             />
           </Link>
         )}
@@ -68,10 +69,11 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
               <SheetHeader>
                 <div className="flex items-center justify-between">
                   <SheetTitle>Menu</SheetTitle>
-                  <img
-                    src="/assets/logos/dankdeals-cart-logo.svg"
+                  <OptimizedLogo
+                    variant="cart"
                     alt="DankDeals"
                     className="h-8 w-8"
+                    priority={false}
                   />
                 </div>
               </SheetHeader>

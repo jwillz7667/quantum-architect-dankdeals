@@ -1,5 +1,3 @@
-// src/lib/productImages.ts
-
 // Product image configuration with fallbacks
 interface ProductImageSet {
   main: string;
@@ -10,16 +8,7 @@ interface ProductImageSet {
 // Default placeholder - ensure this file exists
 const PLACEHOLDER_IMAGE = '/assets/placeholder.svg';
 
-// Validate image path and provide fallback
-function validateImagePath(path: string): string {
-  // Ensure path starts with /
-  if (!path.startsWith('/')) {
-    return '/' + path;
-  }
-  return path;
-}
-
-// Product image mappings
+// Product image mappings with public paths
 export const productImageMap: Record<string, ProductImageSet> = {
   // Pineapple Fruz
   '11111111-1111-1111-1111-111111111111': {
@@ -73,12 +62,7 @@ export function getProductImages(
 ): ProductImageSet {
   // First check if we have specific images for this product ID
   if (productImageMap[productId]) {
-    const imageSet = productImageMap[productId];
-    return {
-      main: validateImagePath(imageSet.main),
-      gallery: imageSet.gallery.map(validateImagePath),
-      alt: imageSet.alt,
-    };
+    return productImageMap[productId];
   }
 
   // Try to match by product name
@@ -86,47 +70,27 @@ export function getProductImages(
     const nameLower = productName.toLowerCase();
 
     if (nameLower.includes('pineapple') && nameLower.includes('fruz')) {
-      const imageSet = productImageMap['11111111-1111-1111-1111-111111111111'];
-      return {
-        main: validateImagePath(imageSet.main),
-        gallery: imageSet.gallery.map(validateImagePath),
-        alt: imageSet.alt,
-      };
+      return productImageMap['11111111-1111-1111-1111-111111111111'];
     }
     if (
       nameLower.includes('rainbow') ||
       nameLower.includes('sherbert') ||
       nameLower.includes('rs11')
     ) {
-      const imageSet = productImageMap['22222222-2222-2222-2222-222222222222'];
-      return {
-        main: validateImagePath(imageSet.main),
-        gallery: imageSet.gallery.map(validateImagePath),
-        alt: imageSet.alt,
-      };
+      return productImageMap['22222222-2222-2222-2222-222222222222'];
     }
     if (nameLower.includes('runtz')) {
-      const imageSet = productImageMap['33333333-3333-3333-3333-333333333333'];
-      return {
-        main: validateImagePath(imageSet.main),
-        gallery: imageSet.gallery.map(validateImagePath),
-        alt: imageSet.alt,
-      };
+      return productImageMap['33333333-3333-3333-3333-333333333333'];
     }
     if (nameLower.includes('wedding') && nameLower.includes('cake')) {
-      const imageSet = productImageMap['44444444-4444-4444-4444-444444444444'];
-      return {
-        main: validateImagePath(imageSet.main),
-        gallery: imageSet.gallery.map(validateImagePath),
-        alt: imageSet.alt,
-      };
+      return productImageMap['44444444-4444-4444-4444-444444444444'];
     }
   }
 
   // Ultimate fallback
   return {
-    main: validateImagePath(PLACEHOLDER_IMAGE),
-    gallery: [validateImagePath(PLACEHOLDER_IMAGE)],
+    main: PLACEHOLDER_IMAGE,
+    gallery: [PLACEHOLDER_IMAGE],
     alt: productName || 'Cannabis Product',
   };
 }

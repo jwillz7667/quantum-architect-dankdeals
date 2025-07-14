@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Phone } from 'lucide-react';
+import { OptimizedLogo } from '@/components/OptimizedLogo';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -18,7 +19,7 @@ export function DesktopHeader() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <img src="/assets/logos/dankdeals-logo.svg" alt="DankDeals" className="h-10 w-auto" />
+          <OptimizedLogo className="h-10 w-auto" alt="DankDeals" priority={true} />
         </Link>
 
         {/* Navigation */}

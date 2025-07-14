@@ -241,11 +241,11 @@ export default function ProductDetail() {
       <MobileHeader title="Product Details" />
 
       {/* Product Image Gallery */}
-      <div className="aspect-[4/3] overflow-hidden relative group">
+      <div className="aspect-[4/3] overflow-hidden relative group bg-gray-100">
         <OptimizedProductImage
           src={images[currentImageIndex]}
           alt={`${product.name} - Premium ${product.category} cannabis strain, image ${currentImageIndex + 1} of ${images.length}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           priority={currentImageIndex === 0}
           sizes="100vw"
         />

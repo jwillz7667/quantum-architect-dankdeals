@@ -1,214 +1,221 @@
-# Order Confirmation Email Setup
+# Email Notification Setup Guide
 
-This guide covers the setup of automated order confirmation emails for DankDeals.
+This guide explains how to set up the complete email notification system for order confirmations and admin alerts.
 
 ## Overview
 
-The system sends two emails when an order is confirmed:
-1. **Customer Email**: Order confirmation with details and next steps
-2. **Admin Email**: Alert for immediate action with all order information
+The email system consists of:
 
-## Components
+1. **Database triggers** that queue emails when orders are created
+2. **Supabase Edge Functions** that process and send emails
+3. **Resend API** for reliable email delivery
+4. **Customer confirmation emails** with order details
+5. **Admin alert emails** for immediate order notifications
 
-### 1. Edge Functions
+## 1. Database Setup
 
-#### `send-order-emails`
-- Location: `supabase/functions/send-order-emails/index.ts`
-- Purpose: Sends order confirmation emails to customers and admin
-- Trigger: Called when order status changes to 'confirmed'
+The database already includes:
 
-#### `process-email-queue`
-- Location: `supabase/functions/process-email-queue/index.ts`
-- Purpose: Processes queued emails with retry logic
-- Trigger: Can be called via cron job or webhook
+- `email_queue` table for queuing emails
+- `orders` table with proper triggers
+- Database triggers that automatically queue emails when orders are confirmed
 
-### 2. Database Components
+## 2. Supabase Edge Functions
 
-#### `email_queue` table
-Stores pending emails with retry logic:
-- `order_id`: Reference to the order
-- `email_type`: Type of email (order_confirmation, etc.)
-- `status`: pending, processing, sent, failed
-- `attempts`: Number of send attempts
-- `error_message`: Last error if failed
+Two Edge Functions are included:
 
-#### Trigger: `queue_order_email`
-Automatically queues emails when order status changes to 'confirmed'
+### A. `send-order-emails` Function
 
-## Setup Instructions
+- Formats and sends both customer confirmation and admin alert emails
+- Uses Resend API for delivery
+- Includes detailed order information and HTML templates
 
-### 1. Deploy Database Migration
+### B. `process-email-queue` Function
 
-```bash
-supabase db push
-```
+- Processes pending emails from the queue
+- Handles retries and error logging
+- Should be called periodically (recommended: every 5 minutes)
 
-### 2. Deploy Edge Functions
+## 3. Required Environment Variables
+
+Set these variables in your Supabase Edge Functions environment:
 
 ```bash
-# Deploy send-order-emails function
-supabase functions deploy send-order-emails
-
-# Deploy process-email-queue function
-supabase functions deploy process-email-queue
-```
-
-### 3. Set Environment Variables
-
-In your Supabase dashboard, set the following secrets:
-
-```bash
-# Email service credentials (Resend)
-RESEND_API_KEY=re_xxxxxxxxxxxx
-
-# Admin notification email
+# Email Service Configuration
+RESEND_API_KEY=re_your_resend_api_key_here
 ADMIN_EMAIL=admin@dankdealsmn.com
-
-# From email address
 FROM_EMAIL=orders@dankdealsmn.com
+
+# Supabase Configuration (automatically available)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### 4. Set Up Email Processing
+## 4. Resend API Setup
 
-#### Option A: Direct Trigger (Recommended for immediate sending)
-Modify your order confirmation logic to call the edge function directly:
+1. **Sign up for Resend**: Go to [resend.com](https://resend.com) and create an account
 
-```typescript
-// After confirming order
-const { error } = await supabase.functions.invoke('send-order-emails', {
-  body: { orderId: order.id }
-})
-```
+2. **Get API Key**:
+   - Navigate to API Keys section
+   - Create a new API key
+   - Copy the key (starts with `re_`)
 
-#### Option B: Queue Processing (Recommended for reliability)
-Set up a cron job to process the email queue:
+3. **Domain Setup**:
+   - Add your domain (e.g., `dankdealsmn.com`)
+   - Verify domain ownership via DNS
+   - Wait for domain verification to complete
 
-```bash
-# Supabase cron job (every 5 minutes)
-SELECT cron.schedule(
-  'process-email-queue',
-  '*/5 * * * *',
-  $$
-  SELECT net.http_post(
-    url := current_setting('app.settings.supabase_functions_url') || '/process-email-queue',
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || current_setting('app.settings.supabase_service_role_key')
-    )
-  );
-  $$
-);
-```
+4. **Set Environment Variables**:
+   ```bash
+   # In Supabase Dashboard > Edge Functions > Settings
+   RESEND_API_KEY=re_your_actual_api_key
+   ADMIN_EMAIL=admin@dankdealsmn.com
+   FROM_EMAIL=orders@dankdealsmn.com
+   ```
 
-## Email Templates
+## 5. Email Templates
 
-### Customer Email Includes:
-- Order number and confirmation
-- Detailed order items with strain info
-- Delivery address
-- Total amount due (cash)
-- Next steps (5-minute call, delivery process)
-- Contact information
+The system includes two email templates:
 
-### Admin Email Includes:
-- Urgent notification header
-- Order timestamp
-- Customer contact info (prominently displayed)
-- Delivery address with special instructions
-- Detailed order items
-- Total cash amount due
+### Customer Confirmation Email
+
+- Professional HTML template with DankDeals branding
+- Order details with item breakdown
+- Delivery address confirmation
+- Next steps and contact information
+- Legal disclaimers for cannabis delivery
+
+### Admin Alert Email
+
+- Urgent styling for immediate attention
+- Customer contact information prominently displayed
+- Complete order details for processing
 - Action items checklist
+- Cash payment reminder
 
-## Testing
+## 6. Deployment Steps
 
-### 1. Test Email Function Directly
+1. **Deploy Edge Functions**:
+
+   ```bash
+   # Deploy both functions
+   supabase functions deploy send-order-emails
+   supabase functions deploy process-email-queue
+   ```
+
+2. **Set Environment Variables**:
+
+   ```bash
+   # Set the required environment variables
+   supabase secrets set RESEND_API_KEY=re_your_key
+   supabase secrets set ADMIN_EMAIL=admin@dankdealsmn.com
+   supabase secrets set FROM_EMAIL=orders@dankdealsmn.com
+   ```
+
+3. **Test the System**:
+   - Place a test order through the application
+   - Check the `email_queue` table for pending emails
+   - Manually invoke the `process-email-queue` function
+   - Verify both customer and admin emails are received
+
+## 7. Production Monitoring
+
+### Automated Processing
+
+Set up a cron job or scheduled task to process the email queue:
 
 ```bash
-# Test with a sample order ID
-supabase functions invoke send-order-emails \
-  --body '{"orderId":"YOUR_ORDER_ID"}'
+# Example: Every 5 minutes
+*/5 * * * * curl -X POST https://your-project.supabase.co/functions/v1/process-email-queue -H "Authorization: Bearer YOUR_ANON_KEY"
 ```
 
-### 2. Monitor Email Queue
+### Email Queue Monitoring
 
-```sql
--- Check pending emails
-SELECT * FROM email_queue 
-WHERE status = 'pending' 
-ORDER BY created_at DESC;
+Monitor the `email_queue` table for:
 
--- Check failed emails
-SELECT * FROM email_queue 
-WHERE status = 'failed' 
-ORDER BY created_at DESC;
-```
+- Failed emails (`status = 'failed'`)
+- High retry counts (`attempts > 2`)
+- Old pending emails (`created_at < NOW() - INTERVAL '1 hour'`)
 
-### 3. Manually Process Queue
+### Logging
+
+The system logs all email activities:
+
+- Order creation events
+- Email sending attempts
+- Error messages and retry attempts
+- Performance metrics
+
+## 8. Email Content Customization
+
+### Customer Email Features:
+
+- Order confirmation with professional branding
+- Detailed order breakdown with prices
+- Delivery address confirmation
+- Payment method reminder (Cash on Delivery)
+- Next steps with timeline
+- Contact information and support details
+
+### Admin Email Features:
+
+- Urgent alert styling (red header)
+- Customer contact information highlighted
+- Complete order details for fulfillment
+- Action items checklist
+- Cash payment total prominently displayed
+- Delivery address with special instructions
+
+## 9. Security Best Practices
+
+1. **API Keys**: Store all API keys as environment variables, never in code
+2. **Email Validation**: Customer emails are validated before sending
+3. **Rate Limiting**: Resend API has built-in rate limiting
+4. **Error Handling**: Comprehensive error handling with retry logic
+5. **Data Sanitization**: Sensitive data is filtered from logs
+
+## 10. Testing
+
+### Test Customer Email:
 
 ```bash
-# Process pending emails
-supabase functions invoke process-email-queue
+# Test customer confirmation email
+curl -X POST https://your-project.supabase.co/functions/v1/send-order-emails \
+  -H "Authorization: Bearer YOUR_SERVICE_ROLE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"orderId": "your-test-order-id"}'
 ```
 
-## Troubleshooting
+### Test Email Queue Processing:
 
-### Common Issues
-
-1. **Emails not sending**
-   - Check RESEND_API_KEY is set correctly
-   - Verify email addresses are valid
-   - Check email_queue for error messages
-
-2. **Order not found errors**
-   - Ensure order has associated profile data
-   - Check that order_items are properly linked
-
-3. **Queue processing failures**
-   - Check Supabase logs for edge function errors
-   - Verify service role key permissions
-   - Monitor retry attempts in email_queue
-
-### Debug Queries
-
-```sql
--- Check recent order confirmations
-SELECT o.*, p.email, p.first_name, p.last_name
-FROM orders o
-JOIN profiles p ON o.user_id = p.id
-WHERE o.status = 'confirmed'
-ORDER BY o.created_at DESC
-LIMIT 10;
-
--- Check email queue status
-SELECT 
-  eq.*,
-  o.order_number,
-  p.email
-FROM email_queue eq
-JOIN orders o ON eq.order_id = o.id
-JOIN profiles p ON o.user_id = p.id
-ORDER BY eq.created_at DESC;
+```bash
+# Test queue processing
+curl -X POST https://your-project.supabase.co/functions/v1/process-email-queue \
+  -H "Authorization: Bearer YOUR_SERVICE_ROLE_KEY"
 ```
 
-## Security Considerations
+## 11. Troubleshooting
 
-1. **API Keys**: Store all API keys as Supabase secrets
-2. **RLS Policies**: Email queue is protected by RLS
-3. **Service Role**: Only service role can process email queue
-4. **Rate Limiting**: Resend API has built-in rate limiting
-5. **PII Protection**: Customer data is only sent to registered email
+### Common Issues:
 
-## Monitoring
+1. **Emails not sending**: Check Resend API key and domain verification
+2. **Queue not processing**: Verify `process-email-queue` function is deployed
+3. **Missing emails**: Check `email_queue` table for failed entries
+4. **Template issues**: Validate HTML in email templates
 
-Set up alerts for:
-- Failed email sends (status = 'failed' in email_queue)
-- High queue backlog (> 50 pending emails)
-- Edge function errors in Supabase logs
+### Debug Steps:
 
-## Future Enhancements
+1. Check Supabase Edge Function logs
+2. Verify environment variables are set
+3. Test Resend API key independently
+4. Review email queue table for error messages
 
-1. SMS notifications alongside emails
-2. Delivery tracking updates
-3. Customer preference management
-4. Email template customization
-5. Multi-language support 
+## 12. Compliance Notes
+
+- All emails include cannabis compliance disclaimers
+- Age verification reminders (21+)
+- Clear unsubscribe instructions (when applicable)
+- Privacy policy and terms of service links
+- Minnesota cannabis regulations compliance
+
+The email system is now fully integrated with the order placement flow and will automatically send notifications when customers place orders.

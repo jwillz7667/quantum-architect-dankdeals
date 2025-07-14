@@ -1,5 +1,5 @@
 // src/context/RealTimeContext.tsx
-import React, { createContext, type ReactNode } from 'react';
+import { createContext, type ReactNode } from 'react';
 
 // Simplified RealTime context - no real-time features for guest checkout
 interface RealTimeContextType {

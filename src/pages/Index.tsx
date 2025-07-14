@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, MapPin, Truck, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
+import { OptimizedLogo } from '@/components/OptimizedLogo';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -103,10 +104,11 @@ const Index = () => {
         {/* Footer Section */}
         <div className="mt-12 mb-8 pb-8 border-t pt-8">
           <div className="text-center space-y-4">
-            <img
-              src="/assets/logos/dankdeals-cart-logo.svg"
+            <OptimizedLogo
+              variant="cart"
               alt="DankDeals"
               className="h-16 w-16 mx-auto opacity-70"
+              priority={false}
             />
             <div>
               <p className="text-sm text-muted-foreground mb-2">

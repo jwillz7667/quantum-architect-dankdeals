@@ -5,35 +5,35 @@
         xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0">
   <url>
     <loc>https://dankdealsmn.com/product/pineapple-fruz</loc>
-    <lastmod>2025-07-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <mobile:mobile/>
-  </url>
-  <url>
-    <loc>https://dankdealsmn.com/product/rainbow-sherbert-11</loc>
-    <lastmod>2025-07-07</lastmod>
+    <lastmod>2025-07-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
   </url>
   <url>
     <loc>https://dankdealsmn.com/product/runtz</loc>
-    <lastmod>2025-07-07</lastmod>
+    <lastmod>2025-07-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/product/rainbow-sherbert-11</loc>
+    <lastmod>2025-07-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
   </url>
   <url>
     <loc>https://dankdealsmn.com/product/wedding-cake</loc>
-    <lastmod>2025-07-07</lastmod>
+    <lastmod>2025-07-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <mobile:mobile/>
   </url>
   <url>
     <loc>https://dankdealsmn.com/categories?category=flower</loc>
-    <lastmod>2025-07-12</lastmod>
+    <lastmod>2025-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>

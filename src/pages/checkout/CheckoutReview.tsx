@@ -11,6 +11,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
+import { OrderService } from '@/lib/orderService';
 import {
   ShoppingCart,
   MapPin,
@@ -46,28 +47,6 @@ interface PaymentInfo {
   tipAmount: number;
   tipPercentage: number;
   customTip: string;
-}
-
-interface OrderDetails {
-  orderNumber: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  address: DeliveryInfo;
-  items: Array<{
-    name: string;
-    variant: { name: string; weight_grams: number };
-    quantity: number;
-    price: number;
-  }>;
-  subtotal: number;
-  taxAmount: number;
-  deliveryFee: number;
-  tipAmount: number;
-  totalAmount: number;
-  paymentMethod: string;
 }
 
 export default function CheckoutReview() {
@@ -123,91 +102,26 @@ export default function CheckoutReview() {
     }
   }, [items.length, navigate]);
 
-  const generateOrderNumber = () => {
-    const prefix = 'DD';
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000)
-      .toString()
-      .padStart(3, '0');
-    return `${prefix}${timestamp}${random}`;
-  };
-
-  const sendOrderEmail = (orderDetails: OrderDetails) => {
-    const adminEmail = 'admin@dankdealsmn.com'; // Replace with actual admin email
-
-    const emailContent = {
-      to: adminEmail,
-      subject: `New Order: ${orderDetails.orderNumber}`,
-      html: `
-        <h2>New Cannabis Delivery Order</h2>
-        <h3>Order #${orderDetails.orderNumber}</h3>
-        
-        <h4>Customer Information:</h4>
-        <p><strong>Name:</strong> ${orderDetails.firstName} ${orderDetails.lastName}</p>
-        <p><strong>Email:</strong> ${orderDetails.email}</p>
-        <p><strong>Phone:</strong> ${orderDetails.phone}</p>
-        <p><strong>Date of Birth:</strong> ${orderDetails.dateOfBirth}</p>
-        
-        <h4>Delivery Address:</h4>
-        <p>${orderDetails.address.street}${orderDetails.address.apartment ? ', ' + orderDetails.address.apartment : ''}</p>
-        <p>${orderDetails.address.city}, ${orderDetails.address.state} ${orderDetails.address.zipCode}</p>
-        ${orderDetails.address.deliveryInstructions ? `<p><strong>Instructions:</strong> ${orderDetails.address.deliveryInstructions}</p>` : ''}
-        
-        <h4>Order Items:</h4>
-        <ul>
-          ${orderDetails.items
-            .map(
-              (item) => `
-            <li>${item.name} - ${item.variant.name} (${item.variant.weight_grams}g) - Qty: ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}</li>
-          `
-            )
-            .join('')}
-        </ul>
-        
-        <h4>Order Total:</h4>
-        <p>Subtotal: $${orderDetails.subtotal.toFixed(2)}</p>
-        <p>Tax: $${orderDetails.taxAmount.toFixed(2)}</p>
-        <p>Delivery Fee: $${orderDetails.deliveryFee.toFixed(2)}</p>
-        <p>Tip: $${orderDetails.tipAmount.toFixed(2)}</p>
-        <p><strong>Total: $${orderDetails.totalAmount.toFixed(2)}</strong></p>
-        
-        <p><strong>Payment Method:</strong> ${orderDetails.paymentMethod}</p>
-        <p><strong>Order Time:</strong> ${new Date().toLocaleString()}</p>
-      `,
-    };
-
-    // In a real app, you would send this via a proper email service
-    // For now, we'll log it to console
-    console.log('Order email would be sent:', emailContent);
-
-    // Store the order details in localStorage for the admin to review
-    const existingOrders = JSON.parse(localStorage.getItem('admin_orders') || '[]') as Array<
-      OrderDetails & { timestamp: string; status: string }
-    >;
-    existingOrders.push({
-      ...orderDetails,
-      timestamp: new Date().toISOString(),
-      status: 'pending',
-    });
-    localStorage.setItem('admin_orders', JSON.stringify(existingOrders));
-  };
-
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!agreedToTerms || !deliveryInfo || !personalInfo || !paymentInfo) return;
 
     setIsPlacingOrder(true);
 
     try {
-      const orderNumber = generateOrderNumber();
-
-      const orderDetails = {
-        orderNumber,
+      const orderData = {
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
         email: personalInfo.email,
         phone: personalInfo.phone,
         dateOfBirth: personalInfo.dateOfBirth,
-        address: deliveryInfo,
+        deliveryAddress: {
+          street: deliveryInfo.street,
+          apartment: deliveryInfo.apartment,
+          city: deliveryInfo.city,
+          state: deliveryInfo.state,
+          zipCode: deliveryInfo.zipCode,
+          deliveryInstructions: deliveryInfo.deliveryInstructions,
+        },
         items,
         subtotal,
         taxAmount,
@@ -217,23 +131,32 @@ export default function CheckoutReview() {
         paymentMethod: paymentInfo.paymentMethod,
       };
 
-      // Send order details via email
-      sendOrderEmail(orderDetails);
+      const result = await OrderService.createOrder(orderData);
 
-      // Clear cart and localStorage
-      clearCart();
-      localStorage.removeItem('checkout_personal_info');
-      localStorage.removeItem('checkout_address');
-      localStorage.removeItem('checkout_payment');
-      localStorage.removeItem('delivery_address');
+      if (result.success && result.orderNumber) {
+        // Clear cart and localStorage
+        clearCart();
+        localStorage.removeItem('checkout_personal_info');
+        localStorage.removeItem('checkout_address');
+        localStorage.removeItem('checkout_payment');
+        localStorage.removeItem('delivery_address');
 
-      // Navigate to success page
-      navigate(`/checkout/complete?order=${orderNumber}`);
+        toast({
+          title: 'Order Placed Successfully!',
+          description: `Order #${result.orderNumber} has been confirmed. Check your email for details.`,
+        });
+
+        // Navigate to success page
+        navigate(`/checkout/complete?order=${result.orderNumber}`);
+      } else {
+        throw new Error(result.error || 'Failed to place order');
+      }
     } catch (error) {
       console.error('Error placing order:', error);
       toast({
         title: 'Order Failed',
-        description: 'Failed to place order. Please try again.',
+        description:
+          error instanceof Error ? error.message : 'Failed to place order. Please try again.',
         variant: 'destructive',
       });
     } finally {

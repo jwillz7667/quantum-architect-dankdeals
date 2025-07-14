@@ -117,9 +117,10 @@ export function OptimizedProductImage({
           src={currentSrc || (isInView ? src : '')}
           alt={alt}
           className={cn(
-            'w-full h-full object-cover transition-opacity duration-300',
+            'w-full h-full transition-opacity duration-300',
             isLoading && 'opacity-0',
-            !isLoading && 'opacity-100'
+            !isLoading && 'opacity-100',
+            className
           )}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
