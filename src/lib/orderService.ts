@@ -114,14 +114,15 @@ export class OrderService {
         .single();
 
       if (orderError || !order) {
-        logger.error('Failed to create order', {
-          error: orderError,
-          userId: userId || 'guest',
-          email: orderData.email,
-          orderData: {
-            subtotal: orderData.subtotal,
-            totalAmount: orderData.totalAmount,
-            paymentMethod: orderData.paymentMethod,
+        logger.error('Failed to create order', orderError, {
+          context: {
+            userId: userId || 'guest',
+            email: orderData.email,
+            orderData: {
+              subtotal: orderData.subtotal,
+              totalAmount: orderData.totalAmount,
+              paymentMethod: orderData.paymentMethod,
+            },
           },
         });
         return {
@@ -141,6 +142,57 @@ export class OrderService {
         unit_price: item.price,
         total_price: item.price * item.quantity,
       }));
+
+      // Log order items for debugging
+      logger.info('Creating order items', {
+        context: {
+          orderId: order.id,
+          itemCount: orderItems.length,
+          productIds: orderItems.map((item) => item.product_id),
+          orderItems: orderItems.map((item) => ({
+            productId: item.product_id,
+            productName: item.product_name,
+            quantity: item.quantity,
+          })),
+        },
+      });
+
+      // Validate that all products exist before creating order items
+      const productIds = [...new Set(orderItems.map((item) => item.product_id))];
+      const { data: existingProducts, error: validateError } = await supabase
+        .from('products')
+        .select('id')
+        .in('id', productIds);
+
+      if (validateError) {
+        logger.error('Failed to validate products', validateError);
+        // Clean up the order
+        await supabase.from('orders').delete().eq('id', order.id);
+        return { success: false, error: 'Failed to validate product information' };
+      }
+
+      const existingProductIds = existingProducts?.map((p) => p.id) || [];
+      const missingProductIds = productIds.filter((id) => !existingProductIds.includes(id));
+
+      if (missingProductIds.length > 0) {
+        logger.error(
+          'Order contains invalid product IDs',
+          new Error('Invalid product IDs in cart'),
+          {
+            context: {
+              missingProductIds,
+              existingProductIds,
+              allProductIds: productIds,
+            },
+          }
+        );
+        // Clean up the order
+        await supabase.from('orders').delete().eq('id', order.id);
+        return {
+          success: false,
+          error: `Invalid products in cart. Please refresh the page and try again.`,
+        };
+      }
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
 
