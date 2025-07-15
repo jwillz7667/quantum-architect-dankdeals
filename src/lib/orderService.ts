@@ -78,66 +78,19 @@ export class OrderService {
           updated_at: new Date().toISOString(),
         });
       } else {
-        // For guest checkout, try to find existing user or create a temporary one
-        const { data: existingUser, error: searchError } = await supabase.auth.admin.listUsers();
-
-        if (!searchError && existingUser?.users) {
-          const userWithEmail = existingUser.users.find((u: any) => u.email === orderData.email);
-          if (userWithEmail) {
-            userId = userWithEmail.id;
-
-            // Update profile for guest user
-            await supabase.from('profiles').upsert({
-              id: userWithEmail.id,
-              email: orderData.email,
-              first_name: orderData.firstName,
-              last_name: orderData.lastName,
-              phone: orderData.phone,
-              date_of_birth: orderData.dateOfBirth,
-              updated_at: new Date().toISOString(),
-            });
-          } else {
-            // Create new guest user
-            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-              email: orderData.email,
-              password: crypto.randomUUID(), // Generate random password for guest
-              email_confirm: true,
-              user_metadata: {
-                first_name: orderData.firstName,
-                last_name: orderData.lastName,
-                phone: orderData.phone,
-                date_of_birth: orderData.dateOfBirth,
-              },
-            });
-
-            if (authError) {
-              logger.error('Failed to create guest user', authError);
-              return {
-                success: false,
-                error: `Failed to create user account: ${authError.message}`,
-              };
-            }
-
-            userId = authData.user?.id || null;
-          }
-        } else {
-          logger.error('Failed to search for existing users', searchError);
-          return { success: false, error: 'Failed to process user information' };
-        }
-      }
-
-      if (!userId) {
-        return { success: false, error: 'Failed to identify user' };
+        // For guest checkout, create anonymous order without user account
+        // We'll store guest info directly in the order record
+        userId = null;
       }
 
       // Generate order number
       const orderNumber = this.generateOrderNumber();
 
-      // Create the order
+      // Create the order - userId can be null for guest orders
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: userId,
+          user_id: userId, // Can be null for guest orders
           order_number: orderNumber,
           status: 'pending',
           subtotal: orderData.subtotal,
@@ -155,12 +108,22 @@ export class OrderService {
           delivery_instructions: orderData.deliveryAddress.deliveryInstructions,
           payment_method: orderData.paymentMethod,
           payment_status: 'pending',
+          notes: `Guest order - Email: ${orderData.email}, DOB: ${orderData.dateOfBirth}`,
         })
         .select()
         .single();
 
       if (orderError || !order) {
-        logger.error('Failed to create order', orderError);
+        logger.error('Failed to create order', {
+          error: orderError,
+          userId: userId || 'guest',
+          email: orderData.email,
+          orderData: {
+            subtotal: orderData.subtotal,
+            totalAmount: orderData.totalAmount,
+            paymentMethod: orderData.paymentMethod,
+          },
+        });
         return {
           success: false,
           error: `Failed to create order: ${orderError?.message || 'Unknown error'}`,
@@ -203,7 +166,8 @@ export class OrderService {
         context: {
           orderId: order.id,
           orderNumber: order.order_number,
-          userId,
+          userId: userId || 'guest',
+          email: orderData.email,
           totalAmount: orderData.totalAmount,
         },
       });
