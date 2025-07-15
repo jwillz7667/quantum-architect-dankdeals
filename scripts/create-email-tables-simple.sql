@@ -1,5 +1,5 @@
--- Run this in Supabase SQL Editor to create email tracking tables
--- Go to: https://supabase.com/dashboard/project/ralbzuvkyexortqngvxs/sql
+-- Simple email tables creation script
+-- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/ralbzuvkyexortqngvxs/sql
 
 -- Create email logs table
 CREATE TABLE IF NOT EXISTS public.email_logs (
@@ -37,23 +37,16 @@ CREATE INDEX IF NOT EXISTS idx_email_bounces_email ON public.email_bounces(email
 ALTER TABLE public.email_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.email_bounces ENABLE ROW LEVEL SECURITY;
 
--- Create policies for service role access
-DO $$
-BEGIN
-  -- Drop existing policies if they exist
-  DROP POLICY IF EXISTS "Service role can manage email logs" ON public.email_logs;
-  DROP POLICY IF EXISTS "Service role can manage email bounces" ON public.email_bounces;
-  
-  -- Create new policies
-  CREATE POLICY "Service role can manage email logs" ON public.email_logs
-    FOR ALL USING (true);
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Service role can manage email logs" ON public.email_logs;
+DROP POLICY IF EXISTS "Service role can manage email bounces" ON public.email_bounces;
 
-  CREATE POLICY "Service role can manage email bounces" ON public.email_bounces
-    FOR ALL USING (true);
-EXCEPTION
-  WHEN undefined_table THEN
-    NULL; -- Ignore if tables don't exist yet
-END $$;
+-- Create simple policies for service role access
+CREATE POLICY "Service role can manage email logs" ON public.email_logs
+  FOR ALL USING (true);
+
+CREATE POLICY "Service role can manage email bounces" ON public.email_bounces
+  FOR ALL USING (true);
 
 -- Comments
 COMMENT ON TABLE public.email_logs IS 'Stores all email events from Resend webhooks';
