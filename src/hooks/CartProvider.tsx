@@ -1,7 +1,8 @@
 // src/hooks/CartProvider.tsx
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductVariant } from '@/hooks/useProducts';
 import type { CartItem } from './useCart';
 
@@ -30,20 +31,63 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Validate cart items against database
+  const validateCartItems = useCallback(
+    async (cartItems: CartItem[]): Promise<CartItem[]> => {
+      if (cartItems.length === 0) return cartItems;
+
+      try {
+        const productIds = [...new Set(cartItems.map((item) => item.productId))];
+        const { data: validProducts } = await supabase
+          .from('products')
+          .select('id')
+          .in('id', productIds);
+
+        const validProductIds = new Set(validProducts?.map((p: { id: string }) => p.id) || []);
+        const validItems = cartItems.filter((item) => validProductIds.has(item.productId));
+
+        const removedCount = cartItems.length - validItems.length;
+        if (removedCount > 0) {
+          console.log(`Removed ${removedCount} invalid cart items`);
+          toast({
+            title: 'Cart Updated',
+            description: `Removed ${removedCount} outdated item${removedCount > 1 ? 's' : ''} from cart`,
+            variant: 'destructive',
+          });
+        }
+
+        return validItems;
+      } catch (error) {
+        console.error('Error validating cart items:', error);
+        // On error, return original items to avoid data loss
+        return cartItems;
+      }
+    },
+    [toast]
+  );
+
   // Load cart from localStorage on mount
   useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart) as unknown;
-        setItems(Array.isArray(parsedCart) ? parsedCart as CartItem[] : []);
+    const loadAndValidateCart = async () => {
+      try {
+        const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart) as unknown;
+          const cartItems = Array.isArray(parsedCart) ? (parsedCart as CartItem[]) : [];
+
+          // Validate cart items against database
+          const validItems = await validateCartItems(cartItems);
+          setItems(validItems);
+        }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    };
+
+    void loadAndValidateCart();
+  }, [validateCartItems]);
 
   // Save cart to localStorage whenever items change
   useEffect(() => {
@@ -160,4 +204,4 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-}; 
+};
