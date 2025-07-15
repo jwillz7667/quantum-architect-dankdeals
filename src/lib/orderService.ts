@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { EmailService } from '@/lib/emailService';
 import type { CartItem } from '@/hooks/useCart';
 
 interface CreateOrderData {
@@ -203,7 +204,7 @@ export class OrderService {
         return { success: false, error: 'Failed to create order items' };
       }
 
-      // Update order status to confirmed to trigger email notifications
+      // Update order status to confirmed
       const { error: updateError } = await supabase
         .from('orders')
         .update({ status: 'confirmed' })
@@ -212,6 +213,44 @@ export class OrderService {
       if (updateError) {
         logger.error('Failed to update order status', updateError);
         // Order is created but notification might not be sent
+      }
+
+      // Send order confirmation email
+      try {
+        const emailData = {
+          orderNumber: order.order_number,
+          customerEmail: orderData.email,
+          customerName: `${orderData.firstName} ${orderData.lastName}`,
+          items: orderData.items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            weight_grams: item.variant.weight_grams,
+          })),
+          deliveryAddress: {
+            street: orderData.deliveryAddress.street,
+            apartment: orderData.deliveryAddress.apartment,
+            city: orderData.deliveryAddress.city,
+            state: orderData.deliveryAddress.state,
+            zipCode: orderData.deliveryAddress.zipCode,
+            phone: orderData.phone,
+            instructions: orderData.deliveryAddress.deliveryInstructions,
+          },
+          totals: {
+            subtotal: orderData.subtotal,
+            tax: orderData.taxAmount,
+            delivery: orderData.deliveryFee,
+            total: orderData.totalAmount,
+          },
+        };
+
+        await EmailService.queueOrderConfirmationEmail(emailData);
+        logger.info('Order confirmation email queued', {
+          context: { orderNumber: order.order_number, email: orderData.email },
+        });
+      } catch (emailError) {
+        logger.error('Failed to queue order confirmation email', emailError as Error);
+        // Don't fail the order if email fails
       }
 
       logger.info('Order created successfully', {
