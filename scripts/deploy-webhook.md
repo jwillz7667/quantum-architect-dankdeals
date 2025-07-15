@@ -24,7 +24,7 @@
 
 ## Webhook URL
 
-After deployment, your webhook URL will be:
+✅ **Webhook function is deployed!** Your webhook URL is:
 
 ```
 https://ralbzuvkyexortqngvxs.supabase.co/functions/v1/resend-webhook
