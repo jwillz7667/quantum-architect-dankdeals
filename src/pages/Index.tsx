@@ -1,7 +1,7 @@
 import { SearchBar } from '@/components/SearchBar';
 import { CategoryRail } from '@/components/CategoryRail';
 import { HeroSection } from '@/components/HeroSection';
-import { ProductGrid } from '@/components/ProductGrid';
+import { FeaturedProductsGrid } from '@/components/FeaturedProductsGrid';
 import { BottomNav } from '@/components/BottomNav';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
@@ -14,10 +14,6 @@ import { OptimizedLogo } from '@/components/OptimizedLogo';
 
 const Index = () => {
   const navigate = useNavigate();
-
-  const handleOrderAction = () => {
-    navigate('/cart');
-  };
 
   const breadcrumbs = [{ name: 'Home', url: 'https://dankdealsmn.com/' }];
 
@@ -34,7 +30,7 @@ const Index = () => {
       <MobileHeader title="DankDeals" />
 
       {/* Main Content */}
-      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-6 pt-6 md:pt-8">
+      <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8">
         {/* Welcome message for new falses */}
         {/* Search Bar */}
         <SearchBar onFilter={() => console.log('Open filters')} />
@@ -51,15 +47,14 @@ const Index = () => {
         {/* Hot Products */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl md:text-2xl font-bold text-foreground">Featured Products</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">Hot Right Now</h2>
             {
-              <Button size="sm" onClick={handleOrderAction}>
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Order Now
+              <Button size="sm" onClick={() => navigate('/categories')}>
+                View All
               </Button>
             }
           </div>
-          <ProductGrid />
+          <FeaturedProductsGrid />
         </div>
 
         {/* Delivery Area Section */}
@@ -127,7 +122,7 @@ const Index = () => {
             </p>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Bottom Navigation */}
       <BottomNav activeTab="/" />

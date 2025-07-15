@@ -19,7 +19,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         cannabis:
           'bg-gradient-hero text-primary-foreground shadow-md hover:shadow-glow transform hover:scale-[1.02]',
-        mint: 'bg-accent-mint text-accent-mint-foreground shadow-sm hover:bg-accent-mint/90 transform hover:scale-[1.02]',
+        mint: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transform hover:scale-[1.02]',
         cart: 'bg-primary text-primary-foreground shadow-md hover:bg-primary-hover transform hover:scale-[1.02] font-semibold tracking-wide uppercase',
       },
       size: {

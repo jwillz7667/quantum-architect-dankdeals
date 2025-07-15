@@ -329,7 +329,7 @@ export default function ProductDetail() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Type</p>
-              <p className="font-semibold text-accent-mint capitalize">
+              <p className="font-semibold text-primary capitalize">
                 {product?.strain_type || product?.category || 'flower'}
               </p>
             </div>

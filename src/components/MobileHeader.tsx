@@ -41,27 +41,19 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
       </div>
 
       {/* Main header */}
-      <div className="bg-gradient-mobile-header px-4 py-4 flex items-center justify-between">
+      <div className="bg-white px-4 py-4 flex items-center justify-between">
         {title ? (
-          <h1 className="text-xl font-bold text-primary-foreground">{title}</h1>
+          <h1 className="text-xl font-bold text-primary">{title}</h1>
         ) : (
           <Link to="/" className="flex items-center">
-            <OptimizedLogo
-              className="h-8 w-auto brightness-0 invert"
-              alt="DankDeals"
-              priority={true}
-            />
+            <OptimizedLogo className="h-8 w-auto" alt="DankDeals" priority={true} />
           </Link>
         )}
 
         {showMenu && (
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-primary-foreground hover:bg-primary-light"
-              >
+              <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>

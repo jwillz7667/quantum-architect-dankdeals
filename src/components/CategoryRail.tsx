@@ -42,7 +42,7 @@ export function CategoryRail() {
   };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2 px-4 scrollbar-hide">
+    <div className="flex gap-3 overflow-x-auto pb-3 pt-1 px-4 scrollbar-hide">
       {categories.map((cat) => (
         <CategoryCard
           key={cat.category || 'all'}

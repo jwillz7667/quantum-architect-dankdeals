@@ -130,7 +130,7 @@ export default function DeliveryArea() {
           </p>
           <Badge
             variant="secondary"
-            className="bg-accent-mint text-accent-mint-foreground text-lg px-4 py-2"
+            className="bg-primary text-primary-foreground text-lg px-4 py-2"
           >
             Licensed Minnesota Cannabis Delivery
           </Badge>

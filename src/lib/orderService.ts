@@ -26,7 +26,6 @@ interface CreateOrderData {
   subtotal: number;
   taxAmount: number;
   deliveryFee: number;
-  tipAmount: number;
   totalAmount: number;
   paymentMethod: string;
 }
@@ -79,26 +78,52 @@ export class OrderService {
           updated_at: new Date().toISOString(),
         });
       } else {
-        // For guest checkout, create a temporary user record
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: orderData.email,
-          password: crypto.randomUUID(), // Generate random password for guest
-          options: {
-            data: {
+        // For guest checkout, try to find existing user or create a temporary one
+        const { data: existingUser, error: searchError } = await supabase.auth.admin.listUsers();
+
+        if (!searchError && existingUser?.users) {
+          const userWithEmail = existingUser.users.find((u: any) => u.email === orderData.email);
+          if (userWithEmail) {
+            userId = userWithEmail.id;
+
+            // Update profile for guest user
+            await supabase.from('profiles').upsert({
+              id: userWithEmail.id,
+              email: orderData.email,
               first_name: orderData.firstName,
               last_name: orderData.lastName,
               phone: orderData.phone,
               date_of_birth: orderData.dateOfBirth,
-            },
-          },
-        });
+              updated_at: new Date().toISOString(),
+            });
+          } else {
+            // Create new guest user
+            const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+              email: orderData.email,
+              password: crypto.randomUUID(), // Generate random password for guest
+              email_confirm: true,
+              user_metadata: {
+                first_name: orderData.firstName,
+                last_name: orderData.lastName,
+                phone: orderData.phone,
+                date_of_birth: orderData.dateOfBirth,
+              },
+            });
 
-        if (authError) {
-          logger.error('Failed to create guest user', authError);
-          return { success: false, error: 'Failed to create user account' };
+            if (authError) {
+              logger.error('Failed to create guest user', authError);
+              return {
+                success: false,
+                error: `Failed to create user account: ${authError.message}`,
+              };
+            }
+
+            userId = authData.user?.id || null;
+          }
+        } else {
+          logger.error('Failed to search for existing users', searchError);
+          return { success: false, error: 'Failed to process user information' };
         }
-
-        userId = authData.user?.id || null;
       }
 
       if (!userId) {
@@ -136,7 +161,10 @@ export class OrderService {
 
       if (orderError || !order) {
         logger.error('Failed to create order', orderError);
-        return { success: false, error: 'Failed to create order' };
+        return {
+          success: false,
+          error: `Failed to create order: ${orderError?.message || 'Unknown error'}`,
+        };
       }
 
       // Create order items

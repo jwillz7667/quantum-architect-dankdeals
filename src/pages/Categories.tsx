@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchBar } from '@/components/SearchBar';
 import { BottomNav } from '@/components/BottomNav';
-import { ProductGrid } from '@/components/ProductGrid';
+import { CategoriesProductGrid } from '@/components/CategoriesProductGrid';
 import { CategoryRail } from '@/components/CategoryRail';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
@@ -71,31 +71,21 @@ export default function Categories() {
       <MobileHeader title={selectedCategory ? categoryDisplayName : 'Categories'} />
 
       {/* Main Content */}
-      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-6 pt-6 md:pt-8">
+      <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8">
         {/* Search Bar */}
         <SearchBar onFilter={() => console.log('Open filters')} />
 
         {/* Categories Section */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">
             {selectedCategory ? `${categoryDisplayName} Products` : 'Browse by Category'}
           </h2>
           <CategoryRail />
         </div>
 
         {/* Products */}
-        <div className="space-y-4">
-          <ProductGrid />
-        </div>
-
-        {/* More Products */}
-        {!selectedCategory && (
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-foreground">Featured Products</h3>
-            <ProductGrid />
-          </div>
-        )}
-      </div>
+        <CategoriesProductGrid />
+      </main>
 
       {/* Bottom Navigation */}
       <BottomNav />

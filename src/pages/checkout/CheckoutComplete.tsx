@@ -108,6 +108,22 @@ export default function CheckoutComplete() {
           </AlertDescription>
         </Alert>
 
+        {/* Tip Reminder */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              💰 Remember to Tip Your Driver
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Our drivers work hard to bring you fresh cannabis products safely. Tips are paid in
+              cash upon delivery and are greatly appreciated!
+            </p>
+            <p className="text-sm font-medium">Suggested tip: 15-20% of your order total</p>
+          </CardContent>
+        </Card>
+
         {/* Action Buttons */}
         <div className="space-y-3">
           <Button onClick={() => navigate('/')} className="w-full" size="lg">

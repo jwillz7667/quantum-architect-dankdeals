@@ -60,8 +60,7 @@ export default function CheckoutReview() {
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
 
-  const tipAmount = paymentInfo?.tipAmount || 0;
-  const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
+  const totalAmount = subtotal + taxAmount + deliveryFee;
 
   // Load data from localStorage
   useEffect(() => {
@@ -126,7 +125,6 @@ export default function CheckoutReview() {
         subtotal,
         taxAmount,
         deliveryFee,
-        tipAmount,
         totalAmount,
         paymentMethod: paymentInfo.paymentMethod,
       };
@@ -300,14 +298,40 @@ export default function CheckoutReview() {
               <span>Delivery Fee</span>
               <span>${deliveryFee.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Driver Tip (18%)</span>
-              <span>${tipAmount.toFixed(2)}</span>
-            </div>
             <Separator />
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
               <span className="text-primary">${totalAmount.toFixed(2)}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tip Reminder */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">💰 Driver Tip Reminder</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Our drivers work hard to bring you fresh cannabis products safely and quickly. Tips
+              are paid in cash upon delivery and are greatly appreciated!
+            </p>
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <p className="text-sm font-medium mb-2">Suggested tip amounts:</p>
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                <div className="text-center p-2 bg-background rounded border">
+                  <div className="font-semibold">15%</div>
+                  <div className="text-muted-foreground">${(totalAmount * 0.15).toFixed(2)}</div>
+                </div>
+                <div className="text-center p-2 bg-background rounded border">
+                  <div className="font-semibold">18%</div>
+                  <div className="text-muted-foreground">${(totalAmount * 0.18).toFixed(2)}</div>
+                </div>
+                <div className="text-center p-2 bg-background rounded border">
+                  <div className="font-semibold">20%</div>
+                  <div className="text-muted-foreground">${(totalAmount * 0.2).toFixed(2)}</div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

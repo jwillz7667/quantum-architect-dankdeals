@@ -21,9 +21,9 @@ export function OptimizedLogo({
       ? '/assets/logos/dankdeals-cart-logo.svg'
       : '/assets/logos/dankdeals-logo.svg';
 
-  // Preload the logo if it's priority (above the fold)
+  // Only preload logo for critical above-the-fold usage
   useEffect(() => {
-    if (priority) {
+    if (priority && !hasError && variant === 'main') {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.href = logoPath;
@@ -32,10 +32,12 @@ export function OptimizedLogo({
       document.head.appendChild(link);
 
       return () => {
-        document.head.removeChild(link);
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
       };
     }
-  }, [priority, logoPath]);
+  }, [priority, logoPath, hasError, variant]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -45,8 +47,8 @@ export function OptimizedLogo({
     setHasError(true);
   };
 
-  if (hasError) {
-    // Fallback to text logo if SVG fails to load
+  if (hasError || !isLoaded) {
+    // Fallback to text logo if SVG fails to load or while loading
     return (
       <div className={`${className} flex items-center justify-center font-bold text-primary`}>
         DankDeals
@@ -55,27 +57,16 @@ export function OptimizedLogo({
   }
 
   return (
-    <div className="relative">
-      {/* Placeholder while loading */}
-      {!isLoaded && (
-        <div
-          className={`${className} bg-muted animate-pulse rounded`}
-          style={{ aspectRatio: variant === 'cart' ? '1 / 1' : '2.5 / 1' }}
-        />
-      )}
-
-      {/* Actual logo */}
-      <img
-        src={logoPath}
-        alt={alt}
-        className={`${className} ${!isLoaded ? 'opacity-0 absolute inset-0' : 'opacity-100'} transition-opacity duration-300`}
-        onLoad={handleLoad}
-        onError={handleError}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-        // Add fetchpriority for critical above-the-fold logos
-        {...(priority && { fetchPriority: 'high' as const })}
-      />
-    </div>
+    <img
+      src={logoPath}
+      alt={alt}
+      className={className}
+      onLoad={handleLoad}
+      onError={handleError}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      // Add fetchpriority for critical above-the-fold logos
+      {...(priority && { fetchPriority: 'high' as const })}
+    />
   );
 }
