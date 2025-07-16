@@ -40,8 +40,9 @@ export default function CheckoutPayment() {
   const [customTip, setCustomTip] = useState<string>('');
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo | null>(null);
 
-  const tipAmount = tipPercentage > 0 ? subtotal * tipPercentage : parseFloat(customTip) || 0;
-  const totalAmount = subtotal + taxAmount + deliveryFee + tipAmount;
+  const suggestedTipAmount =
+    tipPercentage > 0 ? subtotal * tipPercentage : parseFloat(customTip) || 0;
+  const totalAmount = subtotal + taxAmount + deliveryFee;
 
   // Load delivery info from localStorage
   useEffect(() => {
@@ -90,7 +91,7 @@ export default function CheckoutPayment() {
     // Save payment method and tip info to localStorage
     const paymentData = {
       paymentMethod,
-      tipAmount,
+      suggestedTipAmount,
       tipPercentage,
       customTip: tipPercentage === 0 ? customTip : '',
     };
@@ -210,12 +211,20 @@ export default function CheckoutPayment() {
           </CardContent>
         </Card>
 
-        {/* Tip Selection */}
+        {/* Tip Suggestion */}
         <Card>
           <CardHeader>
-            <CardTitle>Add a Tip for Your Driver</CardTitle>
+            <CardTitle>💰 Tip Suggestion for Your Driver</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Tips are paid in cash directly to your driver. This is just a suggestion to help you
+                calculate.
+              </AlertDescription>
+            </Alert>
+
             <RadioGroup
               value={
                 tipPercentage > 0
@@ -261,13 +270,27 @@ export default function CheckoutPayment() {
                   </div>
                 </div>
               )}
+
+            {suggestedTipAmount > 0 && (
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-blue-900">Suggested tip amount:</span>
+                  <span className="text-lg font-semibold text-blue-900">
+                    ${suggestedTipAmount.toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-xs text-blue-700 mt-1">
+                  Remember to have this amount ready in cash for your driver!
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Order Total */}
         <Card>
           <CardHeader>
-            <CardTitle>Order Total</CardTitle>
+            <CardTitle>Order Total (Cash Required)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
@@ -282,16 +305,13 @@ export default function CheckoutPayment() {
               <span>Delivery Fee</span>
               <span>${deliveryFee.toFixed(2)}</span>
             </div>
-            {tipAmount > 0 && (
-              <div className="flex justify-between text-sm">
-                <span>Driver Tip</span>
-                <span>${tipAmount.toFixed(2)}</span>
-              </div>
-            )}
             <Separator />
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
               <span className="text-primary">${totalAmount.toFixed(2)}</span>
+            </div>
+            <div className="text-xs text-muted-foreground mt-2">
+              * Tip is paid separately in cash to your driver
             </div>
           </CardContent>
         </Card>

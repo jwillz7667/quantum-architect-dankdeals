@@ -11,7 +11,7 @@ declare const Deno: any;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
-const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@dankdealsmn.com';
+const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'jwillz7667@gmail.com';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'orders@dankdealsmn.com';
 
 const corsHeaders = {

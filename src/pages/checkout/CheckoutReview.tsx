@@ -44,7 +44,7 @@ interface PersonalInfo {
 
 interface PaymentInfo {
   paymentMethod: string;
-  tipAmount: number;
+  suggestedTipAmount: number;
   tipPercentage: number;
   customTip: string;
 }
