@@ -219,6 +219,7 @@ export class OrderService {
       try {
         const emailData = {
           orderNumber: order.order_number,
+          orderId: order.id,
           customerEmail: orderData.email,
           customerName: `${orderData.firstName} ${orderData.lastName}`,
           items: orderData.items.map((item) => ({

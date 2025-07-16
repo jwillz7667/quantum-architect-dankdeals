@@ -1,16 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Resend } from 'resend';
-
-// Initialize Resend client with error handling
-let resend: Resend;
-try {
-  resend = new Resend((import.meta.env.VITE_RESEND_API_KEY as string) || '');
-} catch (error) {
-  console.warn('Failed to initialize Resend client:', error);
-}
 
 interface OrderEmailData {
   orderNumber: string;
+  orderId?: string; // Add orderId for edge function
   customerEmail: string;
   customerName: string;
   items: Array<{
@@ -230,52 +222,30 @@ export class EmailService {
   }
 
   /**
-   * Send order confirmation email immediately via Resend API
+   * Send order confirmation email via Supabase Edge Function
    */
   static async sendOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
     try {
-      // Check if Resend client is available
-      if (!resend) {
-        console.error('Resend client not initialized');
+      // Use orderId if available, otherwise fall back to orderNumber
+      const idToUse = orderData.orderId || orderData.orderNumber;
+
+      // Call the Supabase edge function to send emails
+      const response = await supabase.functions.invoke('send-order-emails', {
+        body: { orderId: idToUse },
+      });
+
+      if (response.error) {
+        console.error('Email service error:', response.error);
         return false;
       }
 
-      // Create email content
-      const htmlContent = this.createOrderConfirmationHTML(orderData);
-
-      // Send via Resend SDK
-      const { data, error } = await resend.emails.send({
-        from: 'DankDeals MN <info@dankdealsmn.com>',
-        to: [orderData.customerEmail],
-        subject: `Order Confirmation #${orderData.orderNumber} - DankDeals MN`,
-        html: htmlContent,
-        replyTo: ['support@dankdealsmn.com'],
-        tags: [
-          { name: 'category', value: 'order_confirmation' },
-          { name: 'order_number', value: orderData.orderNumber },
-        ],
-      });
-
-      if (error) {
-        console.error('Resend API error:', error);
+      const data = response.data as { success?: boolean; error?: string } | null;
+      if (!data?.success) {
+        console.error('Email service failed:', data?.error || 'Unknown error');
         return false;
       }
 
-      // Log the successful email send
-      await supabase.from('email_logs').insert({
-        email_id: data?.id,
-        event_type: 'sent',
-        to_email: orderData.customerEmail,
-        from_email: 'info@dankdealsmn.com',
-        subject: `Order Confirmation #${orderData.orderNumber} - DankDeals MN`,
-        event_data: {
-          order_number: orderData.orderNumber,
-          customer_name: orderData.customerName,
-          total_amount: orderData.totals.total,
-        },
-      });
-
-      console.log(`Order confirmation email sent to ${orderData.customerEmail}, ID: ${data?.id}`);
+      console.log(`Order confirmation emails sent for order ${orderData.orderNumber}`);
       return true;
     } catch (error) {
       console.error('Failed to send order confirmation email:', error);
