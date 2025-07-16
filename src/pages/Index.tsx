@@ -1,7 +1,5 @@
 import { SearchBar } from '@/components/SearchBar';
 import { CategoryRail } from '@/components/CategoryRail';
-import { HeroSection } from '@/components/HeroSection';
-import { FeaturedProductsGrid } from '@/components/FeaturedProductsGrid';
 import { BottomNav } from '@/components/BottomNav';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
@@ -10,6 +8,11 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, MapPin, Truck, Phone } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
+import { Suspense, lazy } from 'react';
+
+// Lazy load non-critical components to reduce initial bundle size
+const HeroSection = lazy(() => import('@/components/HeroSection'));
+const FeaturedProductsGrid = lazy(() => import('@/components/FeaturedProductsGrid'));
 
 const Index = () => {
   const navigate = useNavigate();
@@ -41,7 +44,9 @@ const Index = () => {
         </div>
 
         {/* Hero Section */}
-        <HeroSection />
+        <Suspense fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse" />}>
+          <HeroSection />
+        </Suspense>
 
         {/* Hot Products */}
         <div className="space-y-4">
@@ -53,7 +58,18 @@ const Index = () => {
               </Button>
             }
           </div>
-          <FeaturedProductsGrid />
+          <Suspense
+            fallback={
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+              </div>
+            }
+          >
+            <FeaturedProductsGrid />
+          </Suspense>
         </div>
 
         {/* Delivery Area Section */}

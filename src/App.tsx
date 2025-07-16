@@ -31,7 +31,15 @@ const CheckoutPayment = lazy(() => import('./pages/checkout/CheckoutPayment'));
 const CheckoutReview = lazy(() => import('./pages/checkout/CheckoutReview'));
 const CheckoutComplete = lazy(() => import('./pages/checkout/CheckoutComplete'));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

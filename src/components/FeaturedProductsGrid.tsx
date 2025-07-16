@@ -6,8 +6,8 @@ import { Loader2 } from 'lucide-react';
 export function FeaturedProductsGrid() {
   const { products, loading, error } = useProducts();
 
-  // Get featured products (first 8 products)
-  const featuredProducts = products.slice(0, 8);
+  // Get featured products (first 4 products for better performance)
+  const featuredProducts = products.slice(0, 4);
 
   if (loading) {
     return (

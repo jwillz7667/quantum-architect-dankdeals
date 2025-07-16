@@ -19,10 +19,23 @@ export default defineConfig(({ mode: _mode }) => ({
     dedupe: ['react', 'react-dom', 'react-router-dom'],
   },
   build: {
-    // Use ES2015 for maximum compatibility with older libraries
-    target: 'es2015',
-    // DISABLE MINIFICATION COMPLETELY
-    minify: false,
+    // Use ES2020 for better performance and smaller bundles
+    target: 'es2020',
+    // Enable minification for production performance
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      },
+      mangle: {
+        safari10: true,
+      },
+      format: {
+        comments: false,
+      },
+    },
     rollupOptions: {
       external: [
         // Exclude server-side React DOM modules from browser bundle
@@ -96,7 +109,29 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'icons-vendor';
           }
 
-          // Other vendor libraries
+          // Split large libraries into separate chunks for better loading
+          if (id.includes('node_modules/@supabase/supabase-js')) {
+            return 'supabase-vendor';
+          }
+
+          if (id.includes('node_modules/react-query') || id.includes('node_modules/@tanstack')) {
+            return 'query-vendor';
+          }
+
+          if (id.includes('node_modules/date-fns')) {
+            return 'date-vendor';
+          }
+
+          if (id.includes('node_modules/tailwind') || id.includes('node_modules/clsx')) {
+            return 'styles-vendor';
+          }
+
+          // Split helmet (SEO) into separate chunk
+          if (id.includes('node_modules/react-helmet')) {
+            return 'seo-vendor';
+          }
+
+          // Other vendor libraries (keep smaller)
           if (id.includes('node_modules')) {
             return 'vendor';
           }
@@ -111,7 +146,7 @@ export default defineConfig(({ mode: _mode }) => ({
     cssMinify: 'lightningcss',
     sourcemap: false,
     reportCompressedSize: false,
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 500,
 
     // Additional optimization
     assetsInlineLimit: 4096,
@@ -144,21 +179,18 @@ export default defineConfig(({ mode: _mode }) => ({
     exclude: ['react-dom/server', 'react-dom/server.node', '@react-email/render'],
     force: true, // Force re-optimization to ensure consistent builds
     esbuildOptions: {
-      target: 'es2015',
-      // Preserve all names
-      keepNames: true,
-      minify: false,
+      target: 'es2020',
+      keepNames: false,
+      minify: true,
       treeShaking: true,
       format: 'esm',
     },
   },
 
   esbuild: {
-    target: 'es2015',
-    // Keep all names to prevent minification issues
-    keepNames: true,
+    target: 'es2020',
+    keepNames: false,
     legalComments: 'none',
-    // Don't drop anything
-    drop: [],
+    drop: ['console', 'debugger'],
   },
 }));
