@@ -4,11 +4,19 @@
 # API routes should not be redirected
 /api/*  /api/:splat  200
 
-# Static files should be served as-is
+# Static assets should be served as-is
+/assets/*  /assets/:splat  200
 /sitemap.xml  /sitemap.xml  200
 /robots.txt   /robots.txt   200
 /favicon.ico  /favicon.ico  200
 /manifest.json /manifest.json 200
+/site.webmanifest /site.webmanifest 200
+/*.js  /:splat.js  200
+/*.css /:splat.css  200
+/*.woff2 /:splat.woff2 200
+/*.png /:splat.png 200
+/*.svg /:splat.svg 200
+/*.webp /:splat.webp 200
 
 # All other routes should go to React app
 /*    /index.html   200 

@@ -15,6 +15,7 @@
 /*.js
   Cache-Control: public, max-age=31536000, immutable
   X-Content-Type-Options: nosniff
+  Content-Type: application/javascript
 
 /*.css
   Cache-Control: public, max-age=31536000, immutable
@@ -40,6 +41,10 @@
 
 /manifest.json
   Cache-Control: public, max-age=604800
+
+/site.webmanifest
+  Cache-Control: public, max-age=604800
+  Content-Type: application/manifest+json
 
 /robots.txt
   Cache-Control: public, max-age=86400
