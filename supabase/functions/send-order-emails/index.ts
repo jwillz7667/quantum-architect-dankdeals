@@ -36,8 +36,8 @@ serve(async (req: Request) => {
     // Check if orderId is a UUID (32 chars + 4 hyphens) or order number (shorter string)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
 
-    // Fetch order details with user info and items
-    let query = supabase.from('orders').select(`
+    // First fetch order details with items
+    let orderQuery = supabase.from('orders').select(`
         *,
         order_items (
           *,
@@ -48,27 +48,35 @@ serve(async (req: Request) => {
             cbd_content,
             strain_type
           )
-        ),
-        profiles (
-          email,
-          first_name,
-          last_name,
-          phone
         )
       `);
 
     // Use appropriate field based on input format
     if (isUUID) {
-      query = query.eq('id', orderId);
+      orderQuery = orderQuery.eq('id', orderId);
     } else {
-      query = query.eq('order_number', orderId);
+      orderQuery = orderQuery.eq('order_number', orderId);
     }
 
-    const { data: order, error: orderError } = await query.single();
+    const { data: order, error: orderError } = await orderQuery.single();
 
     if (orderError || !order) {
       throw new Error(`Order not found: ${orderError?.message}`);
     }
+
+    // Fetch profile data if user_id exists
+    let profileData = null;
+    if (order.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, first_name, last_name, phone')
+        .eq('id', order.user_id)
+        .single();
+      profileData = profile;
+    }
+
+    // Add profiles data to order for compatibility with existing template code
+    order.profiles = profileData;
 
     // Generate customer email HTML
     const customerEmailHtml = `

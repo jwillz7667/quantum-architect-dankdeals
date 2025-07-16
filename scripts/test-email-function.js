@@ -3,7 +3,7 @@
 // Test script for order confirmation email edge function
 // Usage: node scripts/test-email-function.js <order-id>
 
-const fetch = require('node-fetch');
+// Use built-in fetch in Node.js 18+
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
@@ -22,9 +22,9 @@ async function testEmailFunction(orderId) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ orderId })
+      body: JSON.stringify({ orderId }),
     });
 
     const result = await response.json();
@@ -44,4 +44,4 @@ async function testEmailFunction(orderId) {
 
 // Run test
 const orderId = process.argv[2];
-testEmailFunction(orderId); 
+testEmailFunction(orderId);
