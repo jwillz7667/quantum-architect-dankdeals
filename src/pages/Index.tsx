@@ -1,6 +1,4 @@
 import { SearchBar } from '@/components/SearchBar';
-import { CategoryRail } from '@/components/CategoryRail';
-import { BottomNav } from '@/components/BottomNav';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { Button } from '@/components/ui/button';
@@ -11,8 +9,20 @@ import { SEOHead } from '@/components/SEOHead';
 import { Suspense, lazy } from 'react';
 
 // Lazy load non-critical components to reduce initial bundle size
-const HeroSection = lazy(() => import('@/components/HeroSection'));
-const FeaturedProductsGrid = lazy(() => import('@/components/FeaturedProductsGrid'));
+const CategoryRail = lazy(() =>
+  import('@/components/CategoryRail').then((module) => ({ default: module.CategoryRail }))
+);
+const HeroSection = lazy(() =>
+  import('@/components/HeroSection').then((module) => ({ default: module.HeroSection }))
+);
+const FeaturedProductsGrid = lazy(() =>
+  import('@/components/FeaturedProductsGrid').then((module) => ({
+    default: module.FeaturedProductsGrid,
+  }))
+);
+const BottomNav = lazy(() =>
+  import('@/components/BottomNav').then((module) => ({ default: module.BottomNav }))
+);
 
 const Index = () => {
   const navigate = useNavigate();
@@ -40,7 +50,9 @@ const Index = () => {
         {/* Categories Section */}
         <div className="space-y-4">
           <h2 className="text-xl md:text-2xl font-bold text-foreground">Categories</h2>
-          <CategoryRail />
+          <Suspense fallback={<div className="h-24 bg-gray-100 rounded-lg animate-pulse" />}>
+            <CategoryRail />
+          </Suspense>
         </div>
 
         {/* Hero Section */}
@@ -134,7 +146,9 @@ const Index = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab="/" />
+      <Suspense fallback={<div className="h-16 bg-gray-100" />}>
+        <BottomNav activeTab="/" />
+      </Suspense>
     </div>
   );
 };
