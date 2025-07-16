@@ -56,20 +56,35 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'sidecar-vendor';
           }
 
-          // React core (include scheduler to prevent runtime errors)
+          // React core (keep minimal)
           if (
             id.includes('node_modules/react/') ||
             (id.includes('node_modules/react-dom/') && !id.includes('server')) ||
-            id.includes('node_modules/react-router') ||
-            id.includes('node_modules/react-router-dom/') ||
             id.includes('node_modules/scheduler/')
           ) {
             return 'react-vendor';
           }
 
-          // Radix UI components (only loaded with specific pages)
+          // React Router (separate from React core)
+          if (
+            id.includes('node_modules/react-router') ||
+            id.includes('node_modules/react-router-dom/')
+          ) {
+            return 'router-vendor';
+          }
+
+          // Radix UI components (split more granularly)
+          if (id.includes('@radix-ui/react-dialog')) {
+            return 'radix-dialog-vendor';
+          }
+          if (id.includes('@radix-ui/react-dropdown-menu')) {
+            return 'radix-dropdown-vendor';
+          }
+          if (id.includes('@radix-ui/react-toast')) {
+            return 'radix-toast-vendor';
+          }
           if (id.includes('@radix-ui')) {
-            return 'ui-vendor';
+            return 'radix-other-vendor';
           }
 
           // Split data fetching libraries into separate chunks
@@ -77,17 +92,19 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'query-vendor';
           }
 
-          if (id.includes('@supabase/supabase-js')) {
+          if (id.includes('@supabase/supabase-js') || id.includes('node_modules/@supabase/')) {
             return 'supabase-vendor';
           }
 
           // Form libraries (only loaded with forms)
-          if (
-            id.includes('react-hook-form') ||
-            id.includes('@hookform/resolvers') ||
-            id.includes('zod')
-          ) {
-            return 'form-vendor';
+          if (id.includes('react-hook-form')) {
+            return 'react-hook-form-vendor';
+          }
+          if (id.includes('@hookform/resolvers')) {
+            return 'hookform-resolvers-vendor';
+          }
+          if (id.includes('zod')) {
+            return 'zod-vendor';
           }
 
           // Checkout pages (separate chunk - only loaded during checkout)
@@ -105,33 +122,23 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'icons-vendor';
           }
 
-          // Split large libraries into separate chunks for better loading
-          if (id.includes('node_modules/@supabase/supabase-js')) {
-            return 'supabase-vendor';
-          }
-
-          if (id.includes('node_modules/react-query') || id.includes('node_modules/@tanstack')) {
-            return 'query-vendor';
-          }
-
+          // Date handling libraries
           if (id.includes('node_modules/date-fns')) {
             return 'date-vendor';
           }
 
-          if (id.includes('node_modules/tailwind') || id.includes('node_modules/clsx')) {
-            return 'styles-vendor';
+          // CSS-in-JS and utility libraries
+          if (id.includes('node_modules/tailwind')) {
+            return 'tailwind-vendor';
+          }
+          if (id.includes('node_modules/clsx')) {
+            return 'clsx-vendor';
+          }
+          if (id.includes('node_modules/class-variance-authority')) {
+            return 'cva-vendor';
           }
 
           // Split helmet (SEO) into separate chunk
-          if (id.includes('node_modules/react-helmet')) {
-            return 'seo-vendor';
-          }
-
-          // Split commonly unused libraries into separate chunks
-          if (id.includes('node_modules/framer-motion')) {
-            return 'animation-vendor';
-          }
-
           if (
             id.includes('node_modules/react-helmet') ||
             id.includes('node_modules/react-helmet-async')
@@ -139,21 +146,70 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'seo-vendor';
           }
 
-          if (id.includes('node_modules/react-query') || id.includes('node_modules/@tanstack')) {
-            return 'query-vendor';
+          // Animation libraries
+          if (id.includes('node_modules/framer-motion')) {
+            return 'animation-vendor';
           }
 
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
-            return 'charts-vendor';
+          // Chart libraries (only loaded with admin/analytics)
+          if (id.includes('node_modules/recharts')) {
+            return 'recharts-vendor';
+          }
+          if (id.includes('node_modules/d3')) {
+            return 'd3-vendor';
           }
 
-          if (id.includes('node_modules/lodash') || id.includes('node_modules/ramda')) {
-            return 'utils-vendor';
+          // Utility libraries
+          if (id.includes('node_modules/lodash')) {
+            return 'lodash-vendor';
+          }
+          if (id.includes('node_modules/ramda')) {
+            return 'ramda-vendor';
           }
 
-          // Other vendor libraries (keep smaller)
-          if (id.includes('node_modules')) {
-            return 'vendor';
+          // Split large individual libraries
+          if (id.includes('node_modules/tslib')) {
+            return 'tslib-vendor';
+          }
+
+          // More aggressive vendor splitting by package name
+          if (id.includes('node_modules/')) {
+            const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
+            if (match) {
+              const packageName = match[1];
+
+              // Group type definitions together
+              if (packageName.startsWith('@types/')) {
+                return 'types-vendor';
+              }
+
+              // Group build tools together
+              if (
+                packageName.startsWith('@babel/') ||
+                packageName.startsWith('@rollup/') ||
+                packageName.startsWith('@vite/')
+              ) {
+                return 'build-tools-vendor';
+              }
+
+              // Group testing libraries together
+              if (
+                packageName.includes('test') ||
+                packageName.includes('spec') ||
+                packageName.includes('jest') ||
+                packageName.includes('vitest')
+              ) {
+                return 'test-vendor';
+              }
+
+              // Split by individual package for smaller chunks
+              const cleanName = packageName
+                .replace('@', '')
+                .replace('/', '-')
+                .replace(/[^a-zA-Z0-9-]/g, '');
+              return `${cleanName}-vendor`;
+            }
+            return 'misc-vendor';
           }
         },
         // Preserve module structure for better debugging
@@ -168,7 +224,7 @@ export default defineConfig(({ mode: _mode }) => ({
     cssTarget: 'es2020',
     sourcemap: false,
     reportCompressedSize: false,
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 800,
 
     // Additional optimization
     assetsInlineLimit: 4096,
