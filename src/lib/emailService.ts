@@ -1,8 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Resend } from 'resend';
 
-// Initialize Resend client
-const resend = new Resend((import.meta.env.VITE_RESEND_API_KEY as string) || '');
+// Initialize Resend client with error handling
+let resend: Resend;
+try {
+  resend = new Resend((import.meta.env.VITE_RESEND_API_KEY as string) || '');
+} catch (error) {
+  console.warn('Failed to initialize Resend client:', error);
+}
 
 interface OrderEmailData {
   orderNumber: string;
@@ -229,6 +234,12 @@ export class EmailService {
    */
   static async sendOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
     try {
+      // Check if Resend client is available
+      if (!resend) {
+        console.error('Resend client not initialized');
+        return false;
+      }
+
       // Create email content
       const htmlContent = this.createOrderConfirmationHTML(orderData);
 

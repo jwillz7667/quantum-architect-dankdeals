@@ -24,9 +24,28 @@ export default defineConfig(({ mode: _mode }) => ({
     // DISABLE MINIFICATION COMPLETELY
     minify: false,
     rollupOptions: {
+      external: [
+        // Exclude server-side React DOM modules from browser bundle
+        'react-dom/server',
+        'react-dom/server.node',
+        'react-dom/server.browser',
+        '@react-email/render',
+        'stream',
+        'util',
+      ],
       output: {
         // Use function form for manualChunks to better control chunking
         manualChunks: (id) => {
+          // Skip server-side modules entirely
+          if (
+            id.includes('react-dom/server') ||
+            id.includes('server.node') ||
+            id.includes('server.browser') ||
+            id.includes('server-legacy')
+          ) {
+            return undefined;
+          }
+
           // Problematic libraries that need special handling
           if (id.includes('use-sidecar') || id.includes('react-remove-scroll')) {
             return 'sidecar-vendor';
@@ -35,7 +54,7 @@ export default defineConfig(({ mode: _mode }) => ({
           // React core (include scheduler to prevent runtime errors)
           if (
             id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
+            (id.includes('node_modules/react-dom/') && !id.includes('server')) ||
             id.includes('node_modules/react-router') ||
             id.includes('node_modules/react-router-dom/') ||
             id.includes('node_modules/scheduler/')
@@ -119,8 +138,10 @@ export default defineConfig(({ mode: _mode }) => ({
       'react-remove-scroll',
       // Include tslib for helper functions
       'tslib',
+      // Include resend but exclude server components
+      'resend',
     ],
-    exclude: [],
+    exclude: ['react-dom/server', 'react-dom/server.node', '@react-email/render'],
     force: true, // Force re-optimization to ensure consistent builds
     esbuildOptions: {
       target: 'es2015',
