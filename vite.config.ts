@@ -21,21 +21,8 @@ export default defineConfig(({ mode: _mode }) => ({
   build: {
     // Use ES2020 for better performance and smaller bundles
     target: 'es2020',
-    // Enable minification for production performance
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-      },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        comments: false,
-      },
-    },
+    // Use esbuild for React-safe minification
+    minify: 'esbuild',
     rollupOptions: {
       external: [
         // Exclude server-side React DOM modules from browser bundle
@@ -180,7 +167,7 @@ export default defineConfig(({ mode: _mode }) => ({
     force: true, // Force re-optimization to ensure consistent builds
     esbuildOptions: {
       target: 'es2020',
-      keepNames: false,
+      keepNames: true,
       minify: true,
       treeShaking: true,
       format: 'esm',
@@ -189,7 +176,7 @@ export default defineConfig(({ mode: _mode }) => ({
 
   esbuild: {
     target: 'es2020',
-    keepNames: false,
+    keepNames: true,
     legalComments: 'none',
     drop: ['console', 'debugger'],
   },
