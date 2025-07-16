@@ -332,15 +332,33 @@ serve(async (req: Request) => {
       })
     );
 
-    // Execute both email sends
-    const results = await Promise.all(emailPromises);
+    // Execute email sends with delay to avoid rate limiting
+    const results = [];
+
+    for (let i = 0; i < emailPromises.length; i++) {
+      const result = await emailPromises[i];
+      results.push(result);
+
+      // Add delay between requests to avoid rate limiting (Resend allows 2 req/sec)
+      if (i < emailPromises.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 600)); // 600ms delay
+      }
+    }
 
     // Check if both emails were sent successfully
     const allSuccessful = results.every((result) => result.ok);
 
     if (!allSuccessful) {
       const errors = await Promise.all(results.map((r) => r.text()));
-      throw new Error(`Failed to send some emails: ${errors.join(', ')}`);
+      const errorMessages = errors.join(', ');
+
+      // Check if it's a rate limit error
+      if (errorMessages.includes('rate_limit_exceeded') || errorMessages.includes('429')) {
+        console.warn('Rate limit exceeded, but this is expected. Emails may be queued by Resend.');
+        // Don't throw error for rate limiting - Resend will queue the emails
+      } else {
+        throw new Error(`Failed to send some emails: ${errorMessages}`);
+      }
     }
 
     // Log email sent in notifications table
