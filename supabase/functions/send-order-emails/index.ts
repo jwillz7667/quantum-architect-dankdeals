@@ -2,41 +2,42 @@
 /// <reference types="https://deno.land/x/types/index.d.ts" />
 
 // @ts-ignore - Deno module
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 // @ts-ignore - Deno module
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 declare const Deno: any;
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
-const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@dankdealsmn.com'
-const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'orders@dankdealsmn.com'
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
+const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@dankdealsmn.com';
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'orders@dankdealsmn.com';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 interface OrderEmailPayload {
-  orderId: string
+  orderId: string;
 }
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    
-    const { orderId } = await req.json() as OrderEmailPayload
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    const { orderId } = (await req.json()) as OrderEmailPayload;
+
+    // Check if orderId is a UUID (32 chars + 4 hyphens) or order number (shorter string)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
 
     // Fetch order details with user info and items
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select(`
+    let query = supabase.from('orders').select(`
         *,
         order_items (
           *,
@@ -48,18 +49,25 @@ serve(async (req: Request) => {
             strain_type
           )
         ),
-        profiles!inner (
+        profiles (
           email,
           first_name,
           last_name,
           phone
         )
-      `)
-      .eq('id', orderId)
-      .single()
+      `);
+
+    // Use appropriate field based on input format
+    if (isUUID) {
+      query = query.eq('id', orderId);
+    } else {
+      query = query.eq('order_number', orderId);
+    }
+
+    const { data: order, error: orderError } = await query.single();
 
     if (orderError || !order) {
-      throw new Error(`Order not found: ${orderError?.message}`)
+      throw new Error(`Order not found: ${orderError?.message}`);
     }
 
     // Generate customer email HTML
@@ -94,12 +102,14 @@ serve(async (req: Request) => {
     </div>
     
     <div class="content">
-      <p>Hi ${order.profiles.first_name},</p>
+      <p>Hi ${order.profiles?.first_name || order.delivery_first_name},</p>
       <p>Thank you for your order! A team member will contact you within 5 minutes to confirm your delivery details.</p>
       
       <div class="order-info">
         <h2 style="margin-top: 0;">Order Details</h2>
-        ${order.order_items.map((item: any) => `
+        ${order.order_items
+          .map(
+            (item: any) => `
           <div class="item">
             <strong>${item.product_name}</strong><br>
             <span style="color: #6b7280;">
@@ -109,7 +119,9 @@ serve(async (req: Request) => {
             </span><br>
             Quantity: ${item.quantity} × $${item.unit_price.toFixed(2)} = <strong>$${item.total_price.toFixed(2)}</strong>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
         
         <div style="border-top: 2px solid #1e40af; padding-top: 15px; margin-top: 15px;">
           <div style="display: flex; justify-content: space-between;">
@@ -169,7 +181,7 @@ serve(async (req: Request) => {
   </div>
 </body>
 </html>
-    `
+    `;
 
     // Generate admin email HTML
     const adminEmailHtml = `
@@ -215,9 +227,9 @@ serve(async (req: Request) => {
       
       <div class="info-box">
         <h2 style="margin-top: 0;">Customer Information</h2>
-        <p><span class="label">Name:</span> <span class="value">${order.profiles.first_name} ${order.profiles.last_name}</span></p>
+        <p><span class="label">Name:</span> <span class="value">${order.profiles?.first_name || order.delivery_first_name} ${order.profiles?.last_name || order.delivery_last_name}</span></p>
         <p><span class="label">Phone:</span> <span class="value" style="font-size: 1.1em; color: #dc2626;">${order.delivery_phone}</span></p>
-        <p><span class="label">Email:</span> <span class="value">${order.profiles.email}</span></p>
+        <p><span class="label">Email:</span> <span class="value">${order.profiles?.email || order.notes?.match(/Email: ([^,]+)/)?.[1] || 'N/A'}</span></p>
       </div>
       
       <div class="info-box">
@@ -231,7 +243,9 @@ serve(async (req: Request) => {
       
       <div class="info-box">
         <h2 style="margin-top: 0;">Order Items</h2>
-        ${order.order_items.map((item: any) => `
+        ${order.order_items
+          .map(
+            (item: any) => `
           <div class="item">
             <strong>${item.product_name}</strong>
             ${item.products?.category ? ` (${item.products.category})` : ''}<br>
@@ -242,7 +256,9 @@ serve(async (req: Request) => {
             </span><br>
             Qty: ${item.quantity} × $${item.unit_price.toFixed(2)} = <strong>$${item.total_price.toFixed(2)}</strong>
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
         
         <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #dc2626;">
           <p><span class="label">Subtotal:</span> $${order.subtotal.toFixed(2)}</p>
@@ -266,10 +282,10 @@ serve(async (req: Request) => {
   </div>
 </body>
 </html>
-    `
+    `;
 
     // Send emails using Resend API
-    const emailPromises = []
+    const emailPromises = [];
 
     // Send customer confirmation email
     emailPromises.push(
@@ -277,16 +293,19 @@ serve(async (req: Request) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RESEND_API_KEY}`
+          Authorization: `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
           from: `DankDeals <${FROM_EMAIL}>`,
-          to: order.profiles.email,
+          to:
+            order.profiles?.email ||
+            order.notes?.match(/Email: ([^,]+)/)?.[1] ||
+            'guest@example.com',
           subject: `Order Confirmed - ${order.order_number}`,
-          html: customerEmailHtml
-        })
+          html: customerEmailHtml,
+        }),
       })
-    )
+    );
 
     // Send admin notification email
     emailPromises.push(
@@ -294,62 +313,60 @@ serve(async (req: Request) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RESEND_API_KEY}`
+          Authorization: `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
           from: `DankDeals Orders <${FROM_EMAIL}>`,
           to: ADMIN_EMAIL,
           subject: `🚨 NEW ORDER - ${order.order_number} - $${order.total_amount.toFixed(2)}`,
-          html: adminEmailHtml
-        })
+          html: adminEmailHtml,
+        }),
       })
-    )
+    );
 
     // Execute both email sends
-    const results = await Promise.all(emailPromises)
-    
+    const results = await Promise.all(emailPromises);
+
     // Check if both emails were sent successfully
-    const allSuccessful = results.every(result => result.ok)
-    
+    const allSuccessful = results.every((result) => result.ok);
+
     if (!allSuccessful) {
-      const errors = await Promise.all(results.map(r => r.text()))
-      throw new Error(`Failed to send some emails: ${errors.join(', ')}`)
+      const errors = await Promise.all(results.map((r) => r.text()));
+      throw new Error(`Failed to send some emails: ${errors.join(', ')}`);
     }
 
     // Log email sent in notifications table
-    await supabase
-      .from('notifications')
-      .insert([
-        {
-          user_id: order.user_id,
-          type: 'order_update',
-          title: 'Order Confirmation',
-          message: `Your order ${order.order_number} has been confirmed. Check your email for details.`,
-          data: { orderId: order.id, orderNumber: order.order_number }
-        }
-      ])
+    await supabase.from('notifications').insert([
+      {
+        user_id: order.user_id,
+        type: 'order_update',
+        title: 'Order Confirmation',
+        message: `Your order ${order.order_number} has been confirmed. Check your email for details.`,
+        data: { orderId: order.id, orderNumber: order.order_number },
+      },
+    ]);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Order confirmation emails sent successfully' 
+      JSON.stringify({
+        success: true,
+        message: 'Order confirmation emails sent successfully',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
-    )
+    );
   } catch (error) {
-    console.error('Error sending order emails:', error)
+    console.error('Error sending order emails:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error'
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
-    )
+    );
   }
-}) 
+});
