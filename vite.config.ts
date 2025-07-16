@@ -33,6 +33,11 @@ export default defineConfig(({ mode: _mode }) => ({
         'stream',
         'util',
       ],
+      // Improve tree shaking
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+      },
       output: {
         // Use function form for manualChunks to better control chunking
         manualChunks: (id) => {
@@ -67,9 +72,13 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'ui-vendor';
           }
 
-          // Data fetching (Supabase + React Query)
-          if (id.includes('@tanstack/react-query') || id.includes('@supabase/supabase-js')) {
+          // Split data fetching libraries into separate chunks
+          if (id.includes('@tanstack/react-query')) {
             return 'query-vendor';
+          }
+
+          if (id.includes('@supabase/supabase-js')) {
+            return 'supabase-vendor';
           }
 
           // Form libraries (only loaded with forms)
@@ -118,6 +127,30 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'seo-vendor';
           }
 
+          // Split commonly unused libraries into separate chunks
+          if (id.includes('node_modules/framer-motion')) {
+            return 'animation-vendor';
+          }
+
+          if (
+            id.includes('node_modules/react-helmet') ||
+            id.includes('node_modules/react-helmet-async')
+          ) {
+            return 'seo-vendor';
+          }
+
+          if (id.includes('node_modules/react-query') || id.includes('node_modules/@tanstack')) {
+            return 'query-vendor';
+          }
+
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
+            return 'charts-vendor';
+          }
+
+          if (id.includes('node_modules/lodash') || id.includes('node_modules/ramda')) {
+            return 'utils-vendor';
+          }
+
           // Other vendor libraries (keep smaller)
           if (id.includes('node_modules')) {
             return 'vendor';
@@ -131,6 +164,8 @@ export default defineConfig(({ mode: _mode }) => ({
     },
     cssCodeSplit: true,
     cssMinify: 'lightningcss',
+    // Improve CSS loading
+    cssTarget: 'es2020',
     sourcemap: false,
     reportCompressedSize: false,
     chunkSizeWarningLimit: 500,
@@ -141,6 +176,10 @@ export default defineConfig(({ mode: _mode }) => ({
     // Polyfill for Node.js globals
     define: {
       global: 'globalThis',
+    },
+    // Module preloading optimizations
+    modulePreload: {
+      polyfill: false,
     },
   },
   optimizeDeps: {
