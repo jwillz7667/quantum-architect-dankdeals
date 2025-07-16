@@ -244,8 +244,8 @@ export class OrderService {
           },
         };
 
-        await EmailService.queueOrderConfirmationEmail(emailData);
-        logger.info('Order confirmation email queued', {
+        await EmailService.sendOrderConfirmationEmail(emailData);
+        logger.info('Order confirmation email sent', {
           context: { orderNumber: order.order_number, email: orderData.email },
         });
       } catch (emailError) {

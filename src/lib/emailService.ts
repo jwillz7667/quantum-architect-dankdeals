@@ -1,4 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Resend } from 'resend';
+
+// Initialize Resend client
+const resend = new Resend((import.meta.env.VITE_RESEND_API_KEY as string) || '');
 
 interface OrderEmailData {
   orderNumber: string;
@@ -221,7 +225,55 @@ export class EmailService {
   }
 
   /**
-   * Queue an order confirmation email for sending
+   * Send order confirmation email immediately via Resend API
+   */
+  static async sendOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
+    try {
+      // Create email content
+      const htmlContent = this.createOrderConfirmationHTML(orderData);
+
+      // Send via Resend SDK
+      const { data, error } = await resend.emails.send({
+        from: 'DankDeals MN <info@dankdealsmn.com>',
+        to: [orderData.customerEmail],
+        subject: `Order Confirmation #${orderData.orderNumber} - DankDeals MN`,
+        html: htmlContent,
+        replyTo: ['support@dankdealsmn.com'],
+        tags: [
+          { name: 'category', value: 'order_confirmation' },
+          { name: 'order_number', value: orderData.orderNumber },
+        ],
+      });
+
+      if (error) {
+        console.error('Resend API error:', error);
+        return false;
+      }
+
+      // Log the successful email send
+      await supabase.from('email_logs').insert({
+        email_id: data?.id,
+        event_type: 'sent',
+        to_email: orderData.customerEmail,
+        from_email: 'info@dankdealsmn.com',
+        subject: `Order Confirmation #${orderData.orderNumber} - DankDeals MN`,
+        event_data: {
+          order_number: orderData.orderNumber,
+          customer_name: orderData.customerName,
+          total_amount: orderData.totals.total,
+        },
+      });
+
+      console.log(`Order confirmation email sent to ${orderData.customerEmail}, ID: ${data?.id}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send order confirmation email:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Queue an order confirmation email for sending (fallback method)
    * This adds the email to the email_queue table for processing by the edge function
    */
   static async queueOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
@@ -232,7 +284,7 @@ export class EmailService {
       // Add to email queue for processing
       const { error } = await supabase.from('email_queue').insert({
         recipient_email: orderData.customerEmail,
-        sender_email: 'orders@dankdealsmn.com',
+        sender_email: 'info@dankdealsmn.com',
         sender_name: 'DankDeals MN',
         subject: `Order Confirmation #${orderData.orderNumber} - DankDeals MN`,
         html_content: htmlContent,
@@ -270,7 +322,7 @@ export class EmailService {
     try {
       const { error } = await supabase.from('email_queue').insert({
         recipient_email: customerEmail,
-        sender_email: 'updates@dankdealsmn.com',
+        sender_email: 'info@dankdealsmn.com',
         sender_name: 'DankDeals MN',
         subject: `Order Update #${orderNumber} - ${status}`,
         html_content: `
