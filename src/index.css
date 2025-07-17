@@ -1,3 +1,6 @@
+/* Custom Icon Styles */
+@import './styles/icons.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -115,10 +118,17 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    /* Fix purple background on pull-to-refresh */
+    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
   }
 
   html {
     scroll-behavior: smooth;
+    /* Set custom overscroll background to match brand */
+    background-color: #185a1b; /* Cannabis green for overscroll area */
+    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
   }
 }
 
@@ -223,4 +233,54 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
+}
+
+/* Fix purple background during pull-to-refresh on mobile browsers */
+@supports (-webkit-overflow-scrolling: touch) {
+  html {
+    /* iOS Safari specific fix */
+    -webkit-overflow-scrolling: touch;
+    background: #185a1b !important;
+  }
+
+  body {
+    /* Prevent bounce scroll that shows purple background */
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    background: hsl(var(--background));
+  }
+}
+
+/* Additional mobile browser fixes */
+@media screen and (max-width: 768px) {
+  /* Webkit browsers (Chrome, Safari on mobile) */
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    overscroll-behavior-y: none; /* Prevent pull-to-refresh */
+  }
+
+  /* Chrome on Android */
+  html {
+    overscroll-behavior-y: none;
+    background: #185a1b !important;
+  }
+
+  /* PWA viewport fixes */
+  @supports (height: 100dvh) {
+    #root {
+      min-height: 100dvh;
+    }
+  }
 }

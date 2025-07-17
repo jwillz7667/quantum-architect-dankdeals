@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Phone } from 'lucide-react';
+import { CannabisLeafIcon } from '@/components/icons/CustomIcon';
 import { SimpleImage } from '@/components/SimpleImage';
 import { getProductImages } from '@/lib/productImages';
 
@@ -41,10 +42,11 @@ export function HeroSection() {
             </div>
             <div className="text-white z-10">
               <div
-                className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-primary text-primary-foreground mb-2"
+                className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-primary text-primary-foreground mb-2"
                 role="img"
                 aria-label="Featured product"
               >
+                <CannabisLeafIcon size={12} />
                 Featured
               </div>
               <h2 className="text-2xl font-bold mb-1">Wedding Cake</h2>

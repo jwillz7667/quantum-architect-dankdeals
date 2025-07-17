@@ -1,12 +1,13 @@
-import { Home, Grid3X3, ShoppingCart, MapPin } from 'lucide-react';
+import { Home, Grid3X3, MapPin } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { ShoppingCartIcon } from '@/components/icons/CustomIcon';
 
 const navItems = [
-  { icon: Home, label: 'Home', href: '/' },
-  { icon: Grid3X3, label: 'Categories', href: '/categories' },
-  { icon: MapPin, label: 'Delivery', href: '/delivery-area' },
-  { icon: ShoppingCart, label: 'Cart', href: '/cart' },
+  { icon: Home, label: 'Home', href: '/', type: 'lucide' },
+  { icon: Grid3X3, label: 'Categories', href: '/categories', type: 'lucide' },
+  { icon: MapPin, label: 'Delivery', href: '/delivery-area', type: 'lucide' },
+  { icon: null, label: 'Cart', href: '/cart', type: 'custom', customIcon: 'shopping-cart' },
 ];
 
 interface BottomNavProps {
@@ -32,9 +33,16 @@ export function BottomNav({ activeTab }: BottomNavProps) {
                     isActive ? 'text-primary' : 'text-muted-foreground'
                   }`}
                 >
-                  <item.icon
-                    className={`h-5 w-5 transition-transform ${isActive ? 'scale-110' : ''}`}
-                  />
+                  {item.type === 'custom' ? (
+                    <ShoppingCartIcon
+                      size={20}
+                      className={`transition-transform ${isActive ? 'scale-110' : ''}`}
+                    />
+                  ) : (
+                    <item.icon
+                      className={`h-5 w-5 transition-transform ${isActive ? 'scale-110' : ''}`}
+                    />
+                  )}
                   <span className="text-xs font-medium">{item.label}</span>
                 </Button>
               </Link>

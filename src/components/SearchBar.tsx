@@ -1,6 +1,7 @@
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { SearchIcon } from '@/components/icons/CustomIcon';
 import { useProductsFilter } from '@/hooks/useProductsFilter';
 
 interface SearchBarProps {
@@ -12,7 +13,7 @@ export function SearchBar({ onFilter }: SearchBarProps) {
 
   return (
     <div className="search-bar">
-      <Search className="h-5 w-5 text-muted-foreground" />
+      <SearchIcon size={20} className="text-muted-foreground" />
       <Input
         placeholder="Search products..."
         value={searchQuery}
