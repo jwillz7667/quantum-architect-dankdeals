@@ -131,35 +131,75 @@
       {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
+        "@id": "https://dankdealsmn.com/#organization",
         "name": "DankDeals Cannabis Delivery",
-        "image": "https://dankdealsmn.com/og-image.png",
-        "@id": "https://dankdealsmn.com",
+        "alternateName": "DankDeals MN",
+        "description": "Minnesota's premier cannabis delivery service offering premium flower, edibles, concentrates and more with same-day delivery.",
         "url": "https://dankdealsmn.com",
+        "logo": "https://dankdealsmn.com/apple-touch-icon.png",
+        "image": "https://dankdealsmn.com/og-image.png",
+        "telephone": "+1-763-247-5378",
+        "email": "info@dankdealsmn.com",
         "priceRange": "$$",
+        "currenciesAccepted": "USD",
+        "paymentAccepted": "Cash",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Minneapolis",
           "addressRegion": "MN",
-          "addressCountry": "US"
+          "addressCountry": "US",
+          "postalCode": "55401"
         },
         "geo": {
           "@type": "GeoCoordinates",
           "latitude": 44.9778,
           "longitude": -93.265
         },
-        "openingHoursSpecification": {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-          ],
-          "opens": "10:00",
-          "closes": "22:00"
+        "areaServed": [
+          {
+            "@type": "City",
+            "name": "Minneapolis",
+            "addressRegion": "MN",
+            "addressCountry": "US"
+          },
+          {
+            "@type": "City",
+            "name": "St. Paul",
+            "addressRegion": "MN",
+            "addressCountry": "US"
+          }
+        ],
+        "serviceArea": {
+          "@type": "GeoCircle",
+          "geoMidpoint": {
+            "@type": "GeoCoordinates",
+            "latitude": 44.9778,
+            "longitude": -93.265
+          },
+          "geoRadius": "30000"
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "10:00",
+            "closes": "22:00"
+          }
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "250",
+          "bestRating": "5",
+          "worstRating": "1"
         },
         "hasOfferCatalog": {
           "@type": "OfferCatalog",
@@ -167,34 +207,61 @@
           "itemListElement": [
             {
               "@type": "OfferCatalog",
-              "name": "Flower",
+              "name": "Cannabis Flower",
               "itemListElement": [
                 {
                   "@type": "Offer",
                   "itemOffered": {
                     "@type": "Product",
-                    "name": "Premium Cannabis Flower"
+                    "name": "Premium Cannabis Flower",
+                    "category": "flower"
                   }
                 }
               ]
             },
             {
               "@type": "OfferCatalog",
-              "name": "Edibles",
+              "name": "Cannabis Edibles",
               "itemListElement": [
                 {
                   "@type": "Offer",
                   "itemOffered": {
                     "@type": "Product",
-                    "name": "Cannabis Edibles"
+                    "name": "Cannabis Edibles",
+                    "category": "edibles"
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "OfferCatalog",
+              "name": "Cannabis Concentrates",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Product",
+                    "name": "Cannabis Concentrates",
+                    "category": "concentrates"
                   }
                 }
               ]
             }
           ]
-        }
+        },
+        "sameAs": [
+          "https://twitter.com/dankdeals_mn",
+          "https://instagram.com/dankdeals_mn",
+          "https://facebook.com/dankdeals_mn"
+        ]
       }
     </script>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json" src="/faq-schema.json"></script>
+
+    <!-- Reviews Schema -->
+    <script type="application/ld+json" src="/reviews-schema.json"></script>
 
     <!-- Plausible Analytics - Load after page load -->
     <script>

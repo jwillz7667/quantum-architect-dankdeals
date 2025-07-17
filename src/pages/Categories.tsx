@@ -8,10 +8,13 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { SEOHead } from '@/components/SEOHead';
 import { useProductsFilter } from '@/hooks/useProductsFilter';
+import { useProducts } from '@/hooks/useProducts';
+import { generateProductListingSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export default function Categories() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { selectedCategory, setSelectedCategory } = useProductsFilter();
+  const { products } = useProducts();
 
   // Sync URL params with filter state on mount
   useEffect(() => {
@@ -58,6 +61,15 @@ export default function Categories() {
     ? `Shop premium ${selectedCategory} cannabis products. Same-day delivery in Minneapolis & St. Paul. Age 21+ only.`
     : 'Browse our selection of premium cannabis products by category. Shop flower, edibles, pre-rolls, concentrates, and wellness products. Same-day delivery in Minneapolis & St. Paul.';
 
+  // Filter products by category for structured data
+  const filteredProducts = selectedCategory
+    ? products.filter((product) => product.category === selectedCategory)
+    : products;
+
+  // Generate structured data
+  const productListingSchema = generateProductListingSchema(filteredProducts, selectedCategory);
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
       <SEOHead
@@ -66,6 +78,7 @@ export default function Categories() {
         keywords={`cannabis categories, marijuana products Minnesota, weed types, flower, edibles, pre-rolls, concentrates, CBD products${selectedCategory ? `, ${selectedCategory}` : ''}`}
         url={`https://dankdealsmn.com/categories${selectedCategory ? `?category=${selectedCategory}` : ''}`}
         breadcrumbs={breadcrumbs}
+        structuredData={[productListingSchema, breadcrumbSchema]}
       />
       <DesktopHeader />
       <MobileHeader title={selectedCategory ? categoryDisplayName : 'Categories'} />

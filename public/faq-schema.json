@@ -1,0 +1,86 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What areas do you deliver to in Minnesota?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We provide same-day cannabis delivery throughout Minneapolis, St. Paul, and surrounding metro areas. Our delivery zone covers most zip codes within a 30-mile radius of downtown Minneapolis. You can check if we deliver to your area during checkout or by viewing our delivery area map."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much is delivery and what are the minimum order requirements?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Delivery is $5 for orders under $50. Orders over $50 qualify for free delivery. We accept cash on delivery only for legal compliance. There is no minimum order amount, but we recommend ordering at least $30 worth of products to make delivery worthwhile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What payment methods do you accept?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We accept cash payments only upon delivery. This is required for legal compliance with Minnesota cannabis regulations. Our delivery drivers carry change for bills up to $100. Tips for excellent service are always appreciated but never required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to show ID when receiving my order?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you must be 21 years or older and present a valid government-issued photo ID at the time of delivery. This includes driver's licenses, state IDs, passports, or military IDs. The name on your ID must match the name on your order. This is required by Minnesota law."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does delivery take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most deliveries arrive within 30-90 minutes during our operating hours (10 AM - 10 PM daily). During peak times (evenings and weekends), delivery may take up to 2 hours. You'll receive real-time tracking updates via SMS when your order is confirmed and when your driver is en route."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are your products lab-tested for safety and potency?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, all our cannabis products are tested by third-party laboratories for potency, pesticides, heavy metals, residual solvents, and microbials. Lab results are available upon request. We source only from licensed Minnesota cultivators and manufacturers who follow strict quality control standards."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I track my order status?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can track your order through your account dashboard or via SMS updates. You'll receive notifications when your order is confirmed, being prepared, out for delivery, and delivered. Our customer service team is also available to provide updates if needed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if I'm not satisfied with my order?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Customer satisfaction is our priority. If you're not completely satisfied with your order, please contact us within 24 hours of delivery. We'll work with you to resolve any issues, which may include product replacement or store credit. Due to safety regulations, we cannot accept returns of cannabis products."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer medical cannabis products?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We carry a wellness section with CBD-dominant products and therapeutic cannabis options that may benefit medical users. While we don't require medical cards, many of our products are suitable for medical cannabis patients. Our team can help recommend products based on your specific needs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How should I store my cannabis products?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Store flower in a cool, dark place in an airtight container. Keep edibles in their original packaging and refrigerate if indicated. Store concentrates in a cool, dark place. Always keep cannabis products away from children and pets. Most products maintain quality for 6-12 months when stored properly."
+      }
+    }
+  ]
+}

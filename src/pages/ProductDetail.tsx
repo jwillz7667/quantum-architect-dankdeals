@@ -248,6 +248,7 @@ export default function ProductDetail() {
           className="w-full h-full object-contain"
           priority={currentImageIndex === 0}
           sizes="100vw"
+          variant="detail"
         />
 
         {images.length > 1 && (

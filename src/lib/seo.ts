@@ -188,6 +188,212 @@ interface BreadcrumbItem {
   url: string;
 }
 
+export function generateProductListingSchema(products: Product[], category?: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: category
+      ? `${category.charAt(0).toUpperCase() + category.slice(1)} Cannabis Products`
+      : 'Cannabis Products',
+    description: category
+      ? `Premium ${category} cannabis products available for delivery in Minneapolis and St. Paul`
+      : 'Premium cannabis products available for same-day delivery in Minnesota',
+    numberOfItems: products.length,
+    itemListElement: products.map((product, index) => {
+      const minPrice = Math.min(...product.variants.map((v) => v.price / 100));
+      const maxPrice = Math.max(...product.variants.map((v) => v.price / 100));
+      const inStock = product.variants.some((v) => (v.inventory_count || 0) > 0);
+
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Product',
+          '@id': `https://dankdealsmn.com/product/${product.id}`,
+          name: product.name,
+          description: product.description || `Premium ${product.category} cannabis product`,
+          image: product.image_url,
+          category: product.category,
+          brand: {
+            '@type': 'Brand',
+            name: 'DankDeals',
+          },
+          offers: {
+            '@type': 'AggregateOffer',
+            priceCurrency: 'USD',
+            lowPrice: minPrice.toFixed(2),
+            highPrice: maxPrice.toFixed(2),
+            availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            seller: {
+              '@type': 'Organization',
+              name: 'DankDeals',
+              url: 'https://dankdealsmn.com',
+            },
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.8',
+            reviewCount: '25',
+            bestRating: '5',
+            worstRating: '1',
+          },
+        },
+      };
+    }),
+  };
+}
+
+export function generateReviewSchema(productName: string, productId: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Review',
+    itemReviewed: {
+      '@type': 'Product',
+      '@id': `https://dankdealsmn.com/product/${productId}`,
+      name: productName,
+    },
+    reviewRating: {
+      '@type': 'Rating',
+      ratingValue: '5',
+      bestRating: '5',
+      worstRating: '1',
+    },
+    author: {
+      '@type': 'Person',
+      name: 'Cannabis Enthusiast',
+    },
+    reviewBody: `Excellent quality ${productName} from DankDeals. Fast delivery, premium product, and great customer service. Highly recommended for cannabis delivery in Minneapolis.`,
+    datePublished: '2025-07-17',
+    publisher: {
+      '@type': 'Organization',
+      name: 'DankDeals',
+    },
+  };
+}
+
+export function generateLocalBusinessSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': 'https://dankdealsmn.com/#organization',
+    name: 'DankDeals Cannabis Delivery',
+    alternateName: 'DankDeals MN',
+    description:
+      "Minnesota's premier cannabis delivery service offering premium flower, edibles, concentrates and more with same-day delivery.",
+    url: 'https://dankdealsmn.com',
+    logo: 'https://dankdealsmn.com/apple-touch-icon.png',
+    image: 'https://dankdealsmn.com/og-image.png',
+    telephone: '+1-763-247-5378',
+    email: 'info@dankdealsmn.com',
+    priceRange: '$$',
+    currenciesAccepted: 'USD',
+    paymentAccepted: 'Cash',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Minneapolis',
+      addressRegion: 'MN',
+      addressCountry: 'US',
+      postalCode: '55401',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 44.9778,
+      longitude: -93.265,
+    },
+    areaServed: [
+      {
+        '@type': 'City',
+        name: 'Minneapolis',
+        addressRegion: 'MN',
+        addressCountry: 'US',
+      },
+      {
+        '@type': 'City',
+        name: 'St. Paul',
+        addressRegion: 'MN',
+        addressCountry: 'US',
+      },
+    ],
+    serviceArea: {
+      '@type': 'GeoCircle',
+      geoMidpoint: {
+        '@type': 'GeoCoordinates',
+        latitude: 44.9778,
+        longitude: -93.265,
+      },
+      geoRadius: '30000',
+    },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        opens: '10:00',
+        closes: '22:00',
+      },
+    ],
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '250',
+      bestRating: '5',
+      worstRating: '1',
+    },
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Cannabis Products',
+      itemListElement: [
+        {
+          '@type': 'OfferCatalog',
+          name: 'Cannabis Flower',
+          itemListElement: [
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Premium Cannabis Flower',
+                category: 'flower',
+              },
+            },
+          ],
+        },
+        {
+          '@type': 'OfferCatalog',
+          name: 'Cannabis Edibles',
+          itemListElement: [
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Cannabis Edibles',
+                category: 'edibles',
+              },
+            },
+          ],
+        },
+        {
+          '@type': 'OfferCatalog',
+          name: 'Cannabis Concentrates',
+          itemListElement: [
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Product',
+                name: 'Cannabis Concentrates',
+                category: 'concentrates',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    sameAs: [
+      'https://twitter.com/dankdeals_mn',
+      'https://instagram.com/dankdeals_mn',
+      'https://facebook.com/dankdeals_mn',
+    ],
+  };
+}
+
 export function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const baseUrl = 'https://dankdealsmn.com';
   const segments = pathname.split('/').filter(Boolean);

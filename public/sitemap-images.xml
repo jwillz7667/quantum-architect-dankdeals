@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Logo and Branding Images -->
+  <url>
+    <loc>https://dankdealsmn.com/</loc>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/logos/dankdeals-logo.svg</image:loc>
+      <image:title>DankDeals Logo - Premium Cannabis Delivery Minnesota</image:title>
+      <image:caption>Official DankDeals logo for Minnesota's premier cannabis delivery service</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/og-image.png</image:loc>
+      <image:title>DankDeals Social Media Image</image:title>
+      <image:caption>DankDeals social media sharing image showcasing cannabis delivery service</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/apple-touch-icon.png</image:loc>
+      <image:title>DankDeals App Icon</image:title>
+      <image:caption>DankDeals mobile app icon for cannabis delivery service</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Product Gallery Images -->
+  <url>
+    <loc>https://dankdealsmn.com/product/pineapple-fruz</loc>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/pineapple-fruz/pineapple-fruz-1.webp</image:loc>
+      <image:title>Pineapple Fruz Cannabis Strain - Main Product Image</image:title>
+      <image:caption>Premium Pineapple Fruz hybrid cannabis strain with tropical flavors and balanced effects</image:caption>
+      <image:geo_location>Minneapolis, Minnesota</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/pineapple-fruz/pineapple-fruz-2.webp</image:loc>
+      <image:title>Pineapple Fruz Cannabis Buds Close-up</image:title>
+      <image:caption>Detailed view of Pineapple Fruz cannabis buds showing trichome coverage and quality</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/pineapple-fruz/pineapple-fruz-3.webp</image:loc>
+      <image:title>Pineapple Fruz Strain Gallery View</image:title>
+      <image:caption>Additional angle of premium Pineapple Fruz cannabis highlighting freshness and quality</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://dankdealsmn.com/product/runtz</loc>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/runtz/runtz-1.webp</image:loc>
+      <image:title>Runtz Cannabis Strain - Premium Hybrid</image:title>
+      <image:caption>Popular Runtz strain with fruity candy flavors and balanced hybrid effects</image:caption>
+      <image:geo_location>Minneapolis, Minnesota</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/runtz/runtz-2.webp</image:loc>
+      <image:title>Runtz Cannabis Buds Detail</image:title>
+      <image:caption>Close-up of Runtz cannabis showing dense structure and colorful appearance</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/runtz/runtz-3.webp</image:loc>
+      <image:title>Runtz Strain Multiple Views</image:title>
+      <image:caption>Various angles of premium Runtz cannabis demonstrating quality and consistency</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://dankdealsmn.com/product/rainbow-sherbert-11</loc>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/rs11/rainbow-sherbert11-1.webp</image:loc>
+      <image:title>Rainbow Sherbert #11 Cannabis Strain</image:title>
+      <image:caption>Rainbow Sherbert #11 indica-dominant strain with sweet berry flavors and relaxing effects</image:caption>
+      <image:geo_location>Minneapolis, Minnesota</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/rs11/rainbow-sherbert11-2.webp</image:loc>
+      <image:title>Rainbow Sherbert #11 Detailed View</image:title>
+      <image:caption>Detailed view of Rainbow Sherbert #11 buds showing purple hues and trichome density</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://dankdealsmn.com/product/wedding-cake</loc>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/wedding-cake/wedding-cake-1.webp</image:loc>
+      <image:title>Wedding Cake Cannabis Strain - Premium Indica</image:title>
+      <image:caption>Wedding Cake strain with vanilla and cake flavors, potent indica effects for relaxation</image:caption>
+      <image:geo_location>Minneapolis, Minnesota</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/wedding-cake/wedding-cake-2.webp</image:loc>
+      <image:title>Wedding Cake Cannabis Detail</image:title>
+      <image:caption>Close-up of Wedding Cake cannabis buds showing frosty trichomes and dense structure</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/wedding-cake/wedding-cake-3.webp</image:loc>
+      <image:title>Wedding Cake Premium Quality</image:title>
+      <image:caption>Premium Wedding Cake cannabis strain highlighting exceptional quality and potency</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Thumbnail Images for Performance -->
+  <url>
+    <loc>https://dankdealsmn.com/categories</loc>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/pineapple-fruz/pineapple-fruz-1-thumb-160.webp</image:loc>
+      <image:title>Pineapple Fruz Thumbnail - Category View</image:title>
+      <image:caption>Optimized thumbnail of Pineapple Fruz cannabis for category browsing</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/runtz/runtz-1-thumb-160.webp</image:loc>
+      <image:title>Runtz Thumbnail - Category View</image:title>
+      <image:caption>Optimized thumbnail of Runtz cannabis strain for category browsing</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/rs11/rainbow-sherbert11-1-thumb-160.webp</image:loc>
+      <image:title>Rainbow Sherbert #11 Thumbnail</image:title>
+      <image:caption>Optimized thumbnail of Rainbow Sherbert #11 for category browsing</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/wedding-cake/wedding-cake-1-thumb-160.webp</image:loc>
+      <image:title>Wedding Cake Thumbnail</image:title>
+      <image:caption>Optimized thumbnail of Wedding Cake cannabis for category browsing</image:caption>
+    </image:image>
+  </url>
+
+</urlset>
