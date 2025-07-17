@@ -29,9 +29,17 @@ serve(async (req: Request) => {
   }
 
   try {
+    console.log('Starting email function with environment variables:');
+    console.log('- SUPABASE_URL:', SUPABASE_URL ? 'Set' : 'Missing');
+    console.log('- SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing');
+    console.log('- RESEND_API_KEY:', RESEND_API_KEY ? 'Set' : 'Missing');
+    console.log('- ADMIN_EMAIL:', ADMIN_EMAIL);
+    console.log('- FROM_EMAIL:', FROM_EMAIL);
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const { orderId } = (await req.json()) as OrderEmailPayload;
+    console.log('Processing order ID:', orderId);
 
     // Check if orderId is a UUID (32 chars + 4 hyphens) or order number (shorter string)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
@@ -237,7 +245,7 @@ serve(async (req: Request) => {
         <h2 style="margin-top: 0;">Customer Information</h2>
         <p><span class="label">Name:</span> <span class="value">${order.profiles?.first_name || order.delivery_first_name} ${order.profiles?.last_name || order.delivery_last_name}</span></p>
         <p><span class="label">Phone:</span> <span class="value" style="font-size: 1.1em; color: #dc2626;">${order.delivery_phone}</span></p>
-        <p><span class="label">Email:</span> <span class="value">${order.profiles?.email || order.notes?.match(/Email: ([^,]+)/)?.[1] || 'N/A'}</span></p>
+        <p><span class="label">Email:</span> <span class="value">${customerEmail || 'N/A'}</span></p>
       </div>
       
       <div class="info-box">
@@ -295,25 +303,36 @@ serve(async (req: Request) => {
     // Send emails using Resend API
     const emailPromises = [];
 
-    // Send customer confirmation email
-    emailPromises.push(
-      fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
-          from: `DankDeals <${FROM_EMAIL}>`,
-          to:
-            order.profiles?.email ||
-            order.notes?.match(/Email: ([^,]+)/)?.[1] ||
-            'guest@example.com',
-          subject: `Order Confirmed - ${order.order_number}`,
-          html: customerEmailHtml,
-        }),
-      })
-    );
+    // Extract customer email for guest orders
+    let customerEmail = order.profiles?.email;
+    if (!customerEmail && order.notes) {
+      // Try multiple patterns to extract email from notes
+      const emailMatch =
+        order.notes.match(/Email:\s*([^,\s]+)/i) ||
+        order.notes.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+      customerEmail = emailMatch?.[1];
+    }
+
+    // Only send customer email if we have a valid email address
+    if (customerEmail && customerEmail !== 'guest@example.com') {
+      emailPromises.push(
+        fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: `DankDeals <${FROM_EMAIL}>`,
+            to: customerEmail,
+            subject: `Order Confirmed - ${order.order_number}`,
+            html: customerEmailHtml,
+          }),
+        })
+      );
+    } else {
+      console.warn(`No valid customer email found for order ${order.order_number}`);
+    }
 
     // Send admin notification email
     emailPromises.push(
@@ -332,12 +351,33 @@ serve(async (req: Request) => {
       })
     );
 
+    // Log what emails are being sent
+    console.log(`Sending emails for order ${order.order_number}:`);
+    console.log(`- Customer email: ${customerEmail || 'None'}`);
+    console.log(`- Admin email: ${ADMIN_EMAIL}`);
+    console.log(`- FROM_EMAIL: ${FROM_EMAIL}`);
+    console.log(`- Total emails to send: ${emailPromises.length}`);
+
     // Execute email sends with delay to avoid rate limiting
     const results = [];
+    const emailTypes = [];
 
     for (let i = 0; i < emailPromises.length; i++) {
       const result = await emailPromises[i];
-      results.push(result);
+      const emailType = i === 0 && customerEmail ? 'customer' : 'admin';
+      emailTypes.push(emailType);
+
+      console.log(`${emailType} email result: ${result.status} ${result.statusText}`);
+
+      if (!result.ok) {
+        const errorText = await result.clone().text();
+        console.error(`${emailType} email failed:`, errorText);
+        results.push({ success: false, type: emailType, error: errorText });
+      } else {
+        const responseData = await result.clone().text();
+        console.log(`${emailType} email sent successfully:`, responseData);
+        results.push({ success: true, type: emailType, response: responseData });
+      }
 
       // Add delay between requests to avoid rate limiting (Resend allows 2 req/sec)
       if (i < emailPromises.length - 1) {
@@ -345,20 +385,20 @@ serve(async (req: Request) => {
       }
     }
 
-    // Check if both emails were sent successfully
-    const allSuccessful = results.every((result) => result.ok);
+    // Check if emails were sent successfully
+    const successCount = results.filter((result) => result.success).length;
+    console.log(`Email results: ${successCount}/${results.length} emails sent successfully`);
 
-    if (!allSuccessful) {
-      const errors = await Promise.all(results.map((r) => r.text()));
-      const errorMessages = errors.join(', ');
-
-      // Check if it's a rate limit error
-      if (errorMessages.includes('rate_limit_exceeded') || errorMessages.includes('429')) {
-        console.warn('Rate limit exceeded, but this is expected. Emails may be queued by Resend.');
-        // Don't throw error for rate limiting - Resend will queue the emails
-      } else {
-        throw new Error(`Failed to send some emails: ${errorMessages}`);
-      }
+    if (successCount === 0) {
+      const errorMessages = results
+        .map((r) => `${r.type}: ${r.error || 'Unknown error'}`)
+        .join(', ');
+      throw new Error(`Failed to send any emails: ${errorMessages}`);
+    } else if (successCount < results.length) {
+      const failedTypes = results.filter((r) => !r.success).map((r) => r.type);
+      console.warn(
+        `Some emails failed to send (${failedTypes.join(', ')}), but ${successCount} were successful`
+      );
     }
 
     // Log email sent in notifications table
@@ -376,6 +416,10 @@ serve(async (req: Request) => {
       JSON.stringify({
         success: true,
         message: 'Order confirmation emails sent successfully',
+        emailsSent: successCount,
+        totalEmails: results.length,
+        customerEmail,
+        adminEmail: ADMIN_EMAIL,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
