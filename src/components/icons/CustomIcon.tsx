@@ -15,6 +15,7 @@ const iconMap: Record<string, string> = {
   'cannabis-leaf': '/assets/icons/Asset 1.svg',
   'cannabis-plant': '/assets/icons/Asset 21.svg',
   'cannabis-leaf-alt': '/assets/icons/Asset 20.svg',
+  'edibles-package': '/assets/icons/Asset 16.svg',
   'security-lock': '/assets/icons/Asset 9.svg',
   'settings-gear': '/assets/icons/Asset 13.svg',
   checkmark: '/assets/icons/Asset 37.svg',

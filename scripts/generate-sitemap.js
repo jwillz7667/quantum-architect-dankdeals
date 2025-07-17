@@ -222,15 +222,18 @@ async function generateBlogSitemap() {
     // Check if blog_posts table exists before querying
     const { error: tableCheckError } = await supabase.from('blog_posts').select('id').limit(1);
 
-    // If table doesn't exist, create empty sitemap
+    // If table doesn't exist, create sitemap with blog index only
     if (
       tableCheckError &&
       tableCheckError.message.includes('relation "public.blog_posts" does not exist')
     ) {
-      const emptySitemap = generateSitemapHeader() + '\n</urlset>';
-      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), emptySitemap, 'utf8');
+      let sitemap = generateSitemapHeader();
+      const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
+      sitemap += blogIndexEntry;
+      sitemap += '\n</urlset>';
+      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
       console.log('✅ Blog sitemap created (no blog posts yet)');
-      return 0;
+      return 1;
     }
 
     const { data: posts, error } = await supabase
@@ -242,10 +245,13 @@ async function generateBlogSitemap() {
 
     if (error) throw error;
     if (!posts?.length) {
-      const emptySitemap = generateSitemapHeader() + '\n</urlset>';
-      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), emptySitemap, 'utf8');
+      let sitemap = generateSitemapHeader();
+      const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
+      sitemap += blogIndexEntry;
+      sitemap += '\n</urlset>';
+      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
       console.log('✅ Blog sitemap created (no blog posts yet)');
-      return 0;
+      return 1;
     }
 
     let sitemap = generateSitemapHeader();
@@ -286,11 +292,14 @@ async function generateBlogSitemap() {
 
     return totalUrls;
   } catch (error) {
-    // Create empty sitemap on any error
-    const emptySitemap = generateSitemapHeader() + '\n</urlset>';
-    writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), emptySitemap, 'utf8');
+    // Create sitemap with blog index on any error
+    let sitemap = generateSitemapHeader();
+    const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
+    sitemap += blogIndexEntry;
+    sitemap += '\n</urlset>';
+    writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
     console.log('✅ Blog sitemap created (blog feature not available)');
-    return 0;
+    return 1;
   }
 }
 
