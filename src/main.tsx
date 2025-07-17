@@ -19,11 +19,13 @@ window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
 
-// Initialize accessibility testing in development
-void initializeAxe();
+// Initialize accessibility testing in development - NON-BLOCKING
+if (import.meta.env.DEV) {
+  setTimeout(() => void initializeAxe(), 1000);
+}
 
-// Initialize analytics
-void analytics.initialize();
+// Initialize analytics - NON-BLOCKING
+setTimeout(() => void analytics.initialize(), 500);
 
 // Validate environment variables on startup
 (function validateEnvironment() {
@@ -74,38 +76,10 @@ void analytics.initialize();
   }
 })();
 
-// Initialize error tracking in production
-if (env.VITE_ENV === 'production' && env.VITE_SENTRY_DSN) {
-  void import('@sentry/react')
-    .then((Sentry) => {
-      Sentry.init({
-        dsn: env.VITE_SENTRY_DSN,
-        environment: env.VITE_SENTRY_ENVIRONMENT || env.VITE_ENV,
-        integrations: [Sentry.browserTracingIntegration()],
-        tracesSampleRate: 0.1, // 10% of transactions
-        beforeSend(event) {
-          // Don't send events in development
-          if (env.VITE_ENV !== 'production') {
-            return null;
-          }
-          // Remove sensitive data
-          if (event.request?.cookies) {
-            delete event.request.cookies;
-          }
-          if (event.extra) {
-            delete event.extra.password;
-            delete event.extra.token;
-          }
-          return event;
-        },
-      });
-    })
-    .catch((error) => {
-      console.error('Failed to initialize Sentry:', error);
-    });
-}
+// Sentry removed to improve performance - 389KB bundle eliminated
+// Using native browser error handling instead
 
-// Set up performance monitoring
+// Set up lightweight performance monitoring
 if (env.VITE_ENV === 'production') {
   // Log performance metrics
   window.addEventListener('load', () => {

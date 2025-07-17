@@ -101,7 +101,7 @@ export function OptimizedProductImage({
   };
 
   return (
-    <div className={cn('relative overflow-hidden', className)}>
+    <div className={cn('relative overflow-hidden performance-optimized', className)}>
       {/* Loading skeleton */}
       {isLoading && (
         <div
@@ -120,7 +120,7 @@ export function OptimizedProductImage({
         srcSet={generateSrcSet(src)}
         alt={alt}
         className={cn(
-          'w-full h-full transition-opacity duration-300',
+          'w-full h-full transition-opacity duration-300 optimized-image',
           isLoading && 'opacity-0',
           !isLoading && 'opacity-100',
           className

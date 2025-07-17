@@ -124,11 +124,11 @@
 
 @layer components {
   .category-card {
-    @apply w-20 h-20 flex flex-col items-center justify-center rounded-lg bg-primary text-primary-foreground gap-1 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md;
+    @apply w-20 h-20 flex flex-col items-center justify-center rounded-lg bg-primary text-primary-foreground gap-1 shadow-sm transition-transform duration-150 hover:scale-105;
   }
 
   .product-card {
-    @apply bg-card rounded-lg overflow-hidden shadow-sm border border-border transition-all duration-200 hover:shadow-md hover:scale-[1.02];
+    @apply bg-card rounded-lg overflow-hidden shadow-sm border border-border transition-transform duration-150 hover:scale-[1.01];
   }
 
   .bottom-nav {
@@ -145,8 +145,9 @@
   }
 
   .shimmer {
-    background: linear-gradient(90deg, transparent, hsl(var(--muted)), transparent);
-    animation: shimmer 1.25s linear infinite;
+    background: linear-gradient(90deg, transparent, hsl(var(--muted)) 50%, transparent);
+    animation: shimmer 1.25s ease-in-out infinite;
+    will-change: transform;
   }
 }
 
@@ -161,21 +162,21 @@
 
 @keyframes slideIn {
   from {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
   to {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translate3d(0, 16px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -189,18 +190,29 @@
   }
 }
 
-/* Image loading animations */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
+/* Performance optimizations for layout containment */
+@layer utilities {
+  .performance-optimized {
+    contain: layout style paint;
+    will-change: transform;
   }
-  100% {
-    background-position: 200% 0;
-  }
-}
 
-.animate-shimmer {
-  animation: shimmer 1.5s ease-in-out infinite;
+  .product-grid {
+    contain: layout;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+    contain: strict;
+    will-change: transform;
+  }
+
+  /* Optimize images for better rendering */
+  .optimized-image {
+    image-rendering: auto;
+    contain: layout size;
+    will-change: auto;
+  }
 }
 
 /* Hide scrollbar for category rail */

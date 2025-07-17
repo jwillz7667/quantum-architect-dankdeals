@@ -85,7 +85,6 @@
   },
   "optionalDependencies": {
     "@axe-core/react": "^4.10.2",
-    "@sentry/react": "^7.99.0",
     "@vercel/analytics": "^1.5.0"
   },
   "devDependencies": {

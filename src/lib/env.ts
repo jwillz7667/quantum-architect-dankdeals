@@ -12,9 +12,7 @@ const envSchema = z.object({
   VITE_PLAUSIBLE_DOMAIN: z.string().optional(),
   VITE_PLAUSIBLE_API_HOST: z.string().url().optional(),
 
-  // Optional error tracking
-  VITE_SENTRY_DSN: z.string().url().optional(),
-  VITE_SENTRY_ENVIRONMENT: z.string().optional(),
+  // Error tracking removed for performance
 });
 
 // Validate environment variables
@@ -43,9 +41,7 @@ export const validateEnv = () => {
         console.warn('⚠️ Analytics not configured (VITE_PLAUSIBLE_DOMAIN missing)');
       }
 
-      if (!env.VITE_SENTRY_DSN) {
-        console.warn('⚠️ Error tracking not configured (VITE_SENTRY_DSN missing)');
-      }
+      // Sentry removed for performance optimization
     }
 
     return env;
@@ -73,8 +69,6 @@ export const validateEnv = () => {
             VITE_ENV: 'production' as const,
             VITE_PLAUSIBLE_DOMAIN: import.meta.env.VITE_PLAUSIBLE_DOMAIN as string | undefined,
             VITE_PLAUSIBLE_API_HOST: import.meta.env.VITE_PLAUSIBLE_API_HOST as string | undefined,
-            VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN as string | undefined,
-            VITE_SENTRY_ENVIRONMENT: import.meta.env.VITE_SENTRY_ENVIRONMENT as string | undefined,
           };
         }
       }
