@@ -86,6 +86,16 @@ serve(async (req: Request) => {
     // Add profiles data to order for compatibility with existing template code
     order.profiles = profileData;
 
+    // Extract customer email for guest orders FIRST (before using it in templates)
+    let customerEmail = order.profiles?.email;
+    if (!customerEmail && order.notes) {
+      // Try multiple patterns to extract email from notes
+      const emailMatch =
+        order.notes.match(/Email:\s*([^,\s]+)/i) ||
+        order.notes.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+      customerEmail = emailMatch?.[1];
+    }
+
     // Generate customer email HTML
     const customerEmailHtml = `
 <!DOCTYPE html>
@@ -302,16 +312,6 @@ serve(async (req: Request) => {
 
     // Send emails using Resend API
     const emailPromises = [];
-
-    // Extract customer email for guest orders
-    let customerEmail = order.profiles?.email;
-    if (!customerEmail && order.notes) {
-      // Try multiple patterns to extract email from notes
-      const emailMatch =
-        order.notes.match(/Email:\s*([^,\s]+)/i) ||
-        order.notes.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-      customerEmail = emailMatch?.[1];
-    }
 
     // Only send customer email if we have a valid email address
     if (customerEmail && customerEmail !== 'guest@example.com') {
