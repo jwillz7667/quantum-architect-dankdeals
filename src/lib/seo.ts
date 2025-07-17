@@ -58,12 +58,22 @@ export function generateProductSchema(product: Product) {
   const maxPrice = Math.max(...product.variants.map((v) => v.price / 100));
   const inStock = product.variants.some((v) => (v.inventory_count || 0) > 0);
 
+  // Enhanced image data for better SEO
+  const imageData = product.image_url
+    ? {
+        '@type': 'ImageObject',
+        url: product.image_url,
+        width: 400,
+        height: 400,
+      }
+    : undefined;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description || '',
-    image: product.image_url || '',
+    image: imageData,
     brand: {
       '@type': 'Brand',
       name: 'DankDeals',
@@ -73,29 +83,37 @@ export function generateProductSchema(product: Product) {
       priceCurrency: 'USD',
       lowPrice: minPrice.toFixed(2),
       highPrice: maxPrice.toFixed(2),
+      offerCount: product.variants.length,
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
         name: 'DankDeals',
+        url: 'https://dankdealsmn.com',
       },
+      url: `https://dankdealsmn.com/product/${product.id}`,
     },
     category: product.category,
+    sku: product.id,
+    gtin: product.id, // Using product ID as GTIN for uniqueness
+    mpn: product.name.toLowerCase().replace(/\s+/g, '-'), // Manufacturer part number
     ...(product.thc_content && {
       additionalProperty: [
         {
           '@type': 'PropertyValue',
           name: 'THC Content',
           value: `${product.thc_content}%`,
+          unitCode: 'P1', // Percentage unit code
         },
-      ],
-    }),
-    ...(product.cbd_content && {
-      additionalProperty: [
-        {
-          '@type': 'PropertyValue',
-          name: 'CBD Content',
-          value: `${product.cbd_content}%`,
-        },
+        ...(product.cbd_content
+          ? [
+              {
+                '@type': 'PropertyValue',
+                name: 'CBD Content',
+                value: `${product.cbd_content}%`,
+                unitCode: 'P1',
+              },
+            ]
+          : []),
       ],
     }),
   };
@@ -173,21 +191,19 @@ interface BreadcrumbItem {
 export function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const baseUrl = 'https://dankdealsmn.com';
   const segments = pathname.split('/').filter(Boolean);
-  const breadcrumbs: BreadcrumbItem[] = [
-    { name: 'Home', url: baseUrl },
-  ];
+  const breadcrumbs: BreadcrumbItem[] = [{ name: 'Home', url: baseUrl }];
 
   let currentPath = '';
-  
+
   segments.forEach((segment, index) => {
     currentPath += `/${segment}`;
-    
+
     // Handle special cases for better names
     let name = segment
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-    
+
     // Special naming for known routes
     switch (segment) {
       case 'blog':
@@ -221,12 +237,12 @@ export function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
         }
         break;
     }
-    
+
     // For product pages, use the last segment as the product name
     if (segments[index - 1] === 'product' && index === segments.length - 1) {
       name = name.replace(/^\d+-/, ''); // Remove leading numbers if any
     }
-    
+
     breadcrumbs.push({
       name,
       url: `${baseUrl}${currentPath}`,

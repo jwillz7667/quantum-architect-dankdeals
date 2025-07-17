@@ -29,6 +29,7 @@ export function SimpleProductCard({ id, name, category, imageUrl }: SimpleProduc
           alt={`${name} - Premium ${category} cannabis product`}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
           sizes="(max-width: 640px) 128px, 160px"
+          variant="thumbnail"
         />
       </div>
       <h3 className="text-sm font-medium text-foreground line-clamp-2 px-1">{name}</h3>
