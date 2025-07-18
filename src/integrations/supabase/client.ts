@@ -6,22 +6,30 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-// Create a dummy client for error cases
+// Create a dummy client for error cases - return graceful fallbacks instead of rejecting
 const createDummyClient = (): SupabaseClient<Database> => {
-  console.error('Supabase client not initialized due to missing configuration');
+  console.warn('Supabase client using fallback mode');
   return {
     auth: {
-      signUp: () => Promise.reject(new Error('Supabase not configured')),
-      signIn: () => Promise.reject(new Error('Supabase not configured')),
-      signOut: () => Promise.reject(new Error('Supabase not configured')),
+      signUp: () =>
+        Promise.resolve({
+          data: { user: null, session: null },
+          error: { message: 'Supabase not configured' },
+        }),
+      signIn: () =>
+        Promise.resolve({
+          data: { user: null, session: null },
+          error: { message: 'Supabase not configured' },
+        }),
+      signOut: () => Promise.resolve({ error: null }),
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     },
     from: () => ({
-      select: () => Promise.reject(new Error('Supabase not configured')),
-      insert: () => Promise.reject(new Error('Supabase not configured')),
-      update: () => Promise.reject(new Error('Supabase not configured')),
-      delete: () => Promise.reject(new Error('Supabase not configured')),
+      select: () => Promise.resolve({ data: [], error: null }),
+      insert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
+      update: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
+      delete: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
     }),
   } as unknown as SupabaseClient<Database>;
 };
@@ -59,8 +67,8 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     console.error('Using placeholder Supabase credentials');
   }
 
-  // Create client based on validation
-  if (!isValidUrl || (isPlaceholder && import.meta.env.PROD)) {
+  // Create client based on validation - always create real client if we have values
+  if (!isValidUrl) {
     supabaseClient = createDummyClient();
   } else {
     // Create the actual client when configuration is valid
