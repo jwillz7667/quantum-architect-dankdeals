@@ -334,7 +334,22 @@ serve(async (req: Request) => {
       console.warn(`No valid customer email found for order ${order.order_number}`);
     }
 
-    // Send admin notification email
+    // Always send admin notification email
+    const adminEmailPayload = {
+      from: `DankDeals Orders <${FROM_EMAIL}>`,
+      to: ADMIN_EMAIL,
+      subject: `🚨 NEW ORDER - ${order.order_number} - $${order.total_amount.toFixed(2)}`,
+      html: adminEmailHtml,
+    };
+    console.log(
+      'Preparing to send admin email:',
+      JSON.stringify({
+        to: adminEmailPayload.to,
+        from: adminEmailPayload.from,
+        subject: adminEmailPayload.subject,
+      })
+    );
+
     emailPromises.push(
       fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -342,12 +357,7 @@ serve(async (req: Request) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${RESEND_API_KEY}`,
         },
-        body: JSON.stringify({
-          from: `DankDeals Orders <${FROM_EMAIL}>`,
-          to: ADMIN_EMAIL,
-          subject: `🚨 NEW ORDER - ${order.order_number} - $${order.total_amount.toFixed(2)}`,
-          html: adminEmailHtml,
-        }),
+        body: JSON.stringify(adminEmailPayload),
       })
     );
 
@@ -362,20 +372,25 @@ serve(async (req: Request) => {
     const results = [];
     const emailTypes = [];
 
+    // Track which email is which based on whether customer email exists
+    const hasCustomerEmail = customerEmail && customerEmail !== 'guest@example.com';
+
     for (let i = 0; i < emailPromises.length; i++) {
       const result = await emailPromises[i];
-      const emailType = i === 0 && customerEmail ? 'customer' : 'admin';
+      // If we have a customer email, first email is customer, second is admin
+      // If no customer email, only email is admin
+      const emailType = hasCustomerEmail && i === 0 ? 'customer' : 'admin';
       emailTypes.push(emailType);
 
       console.log(`${emailType} email result: ${result.status} ${result.statusText}`);
 
       if (!result.ok) {
-        const errorText = await result.clone().text();
-        console.error(`${emailType} email failed:`, errorText);
-        results.push({ success: false, type: emailType, error: errorText });
+        const errorText = await result.text();
+        console.error(`${emailType} email failed with status ${result.status}:`, errorText);
+        results.push({ success: false, type: emailType, error: errorText, status: result.status });
       } else {
-        const responseData = await result.clone().text();
-        console.log(`${emailType} email sent successfully:`, responseData);
+        const responseData = await result.json();
+        console.log(`${emailType} email sent successfully:`, JSON.stringify(responseData));
         results.push({ success: true, type: emailType, response: responseData });
       }
 
@@ -387,11 +402,13 @@ serve(async (req: Request) => {
 
     // Check if emails were sent successfully
     const successCount = results.filter((result) => result.success).length;
+    const adminEmailResult = results.find((r) => r.type === 'admin');
     console.log(`Email results: ${successCount}/${results.length} emails sent successfully`);
+    console.log('Admin email result:', JSON.stringify(adminEmailResult));
 
     if (successCount === 0) {
       const errorMessages = results
-        .map((r) => `${r.type}: ${r.error || 'Unknown error'}`)
+        .map((r) => `${r.type}: ${r.error || 'Unknown error'} (status: ${r.status || 'unknown'})`)
         .join(', ');
       throw new Error(`Failed to send any emails: ${errorMessages}`);
     } else if (successCount < results.length) {
@@ -399,6 +416,13 @@ serve(async (req: Request) => {
       console.warn(
         `Some emails failed to send (${failedTypes.join(', ')}), but ${successCount} were successful`
       );
+
+      // Log specific failure details
+      results
+        .filter((r) => !r.success)
+        .forEach((r) => {
+          console.error(`Failed to send ${r.type} email:`, r.error);
+        });
     }
 
     // Log email sent in notifications table

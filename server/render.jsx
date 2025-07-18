@@ -5,7 +5,7 @@ import App from '../src/App';
 
 export async function render(url, context = {}) {
   const helmetContext = {};
-  
+
   const html = renderToString(
     <HelmetProvider context={helmetContext}>
       <StaticRouter location={url}>
@@ -25,4 +25,4 @@ export async function render(url, context = {}) {
       ${helmet.script.toString()}
     `,
   };
-} 
+}
