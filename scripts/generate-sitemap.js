@@ -214,91 +214,115 @@ async function generateProductSitemap() {
 }
 
 async function generateBlogSitemap() {
-  if (!supabase) return 0;
-
   console.log('📝 Generating blog sitemap...');
 
   try {
-    // Check if blog_posts table exists before querying
-    const { error: tableCheckError } = await supabase.from('blog_posts').select('id').limit(1);
-
-    // If table doesn't exist, create sitemap with blog index only
-    if (
-      tableCheckError &&
-      tableCheckError.message.includes('relation "public.blog_posts" does not exist')
-    ) {
-      let sitemap = generateSitemapHeader();
-      const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
-      sitemap += blogIndexEntry;
-      sitemap += '\n</urlset>';
-      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
-      console.log('✅ Blog sitemap created (no blog posts yet)');
-      return 1;
-    }
-
-    const { data: posts, error } = await supabase
-      .from('blog_posts')
-      .select('id, title, slug, updated_at, published_at, featured_image')
-      .eq('is_published', true)
-      .order('published_at', { ascending: false })
-      .limit(1000);
-
-    if (error) throw error;
-    if (!posts?.length) {
-      let sitemap = generateSitemapHeader();
-      const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
-      sitemap += blogIndexEntry;
-      sitemap += '\n</urlset>';
-      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
-      console.log('✅ Blog sitemap created (no blog posts yet)');
-      return 1;
-    }
+    // Hardcoded blog posts from Blog.tsx component
+    const blogPosts = [
+      {
+        slug: 'understanding-terpenes-cannabis-flavor-effects',
+        title: 'Understanding Terpenes: The Secret Behind Cannabis Flavor and Effects',
+        date: '2025-01-08',
+        priority: 0.7,
+      },
+      {
+        slug: 'cannabis-edibles-dosing-guide-beginners',
+        title: 'The Complete Guide to Cannabis Edibles Dosing for Beginners',
+        date: '2025-01-06',
+        priority: 0.7,
+      },
+      {
+        slug: 'minnesota-cannabis-laws-2025',
+        title: 'Minnesota Cannabis Laws 2025: What You Need to Know',
+        date: '2025-01-05',
+        priority: 0.7,
+      },
+      {
+        slug: 'best-cannabis-strains-winter-2025',
+        title: 'Top 5 Cannabis Strains for Minnesota Winter 2025',
+        date: '2025-01-03',
+        priority: 0.7,
+      },
+      {
+        slug: 'dankdeals-vs-dank-district-minneapolis-cannabis-delivery',
+        title: 'Minneapolis Cannabis Delivery Showdown: Why DankDeals Outshines Dank District',
+        date: '2025-01-18',
+        priority: 0.9,
+        isNews: true,
+        keywords:
+          'dank district, minneapolis cannabis delivery, cannabis delivery comparison, dankdeals vs dank district',
+      },
+      {
+        slug: 'fastest-weed-delivery-minneapolis-st-paul',
+        title: 'The Fastest Weed Delivery in Minneapolis-St. Paul: Beyond Dank District',
+        date: '2025-01-17',
+        priority: 0.9,
+        isNews: true,
+        keywords:
+          'fast weed delivery minneapolis, dank district delivery times, cannabis delivery st paul, fastest cannabis delivery',
+      },
+      {
+        slug: 'minneapolis-cannabis-delivery-zones-coverage',
+        title: 'Complete Minneapolis Cannabis Delivery Guide: Every Neighborhood Covered',
+        date: '2025-01-16',
+        priority: 0.9,
+        isNews: true,
+        keywords:
+          'cannabis delivery zones minneapolis, dank district coverage, st paul weed delivery, cannabis delivery neighborhoods',
+      },
+    ];
 
     let sitemap = generateSitemapHeader();
     let totalUrls = 0;
 
-    posts.forEach((post) => {
-      const images = post.featured_image
-        ? [
-            {
-              url: post.featured_image.startsWith('http')
-                ? post.featured_image
-                : `${BASE_URL}${post.featured_image}`,
-              caption: post.title,
-              title: post.title,
-            },
-          ]
-        : [];
+    // Add blog index
+    const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
+    sitemap += blogIndexEntry;
+    totalUrls++;
 
-      const entry = generateUrlEntry(
-        `/blog/${post.slug}`,
-        post.updated_at || post.published_at,
-        'monthly',
-        0.6,
-        images
-      );
+    // Add individual blog posts
+    blogPosts.forEach((post) => {
+      let entry = `
+  <url>
+    <loc>${escapeXml(`${BASE_URL}/blog/${post.slug}`)}</loc>
+    <lastmod>${formatDateForXml(post.date)}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>${post.priority}</priority>`;
 
-      if (entry) {
-        sitemap += entry;
-        totalUrls++;
+      if (post.isNews) {
+        entry += `
+    <news:news>
+      <news:publication>
+        <news:name>DankDeals Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${formatDateForXml(post.date)}</news:publication_date>
+      <news:title>${escapeXml(post.title)}</news:title>
+      <news:keywords>${escapeXml(post.keywords || '')}</news:keywords>
+    </news:news>`;
       }
+
+      entry += `
+    <mobile:mobile/>
+  </url>`;
+
+      sitemap += entry;
+      totalUrls++;
     });
 
-    sitemap += `
-</urlset>`;
-
+    sitemap += '\n</urlset>';
     writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
     console.log(`✅ Blog sitemap generated with ${totalUrls} URLs`);
-
     return totalUrls;
   } catch (error) {
+    console.warn('⚠️ Blog sitemap generation failed:', error.message);
     // Create sitemap with blog index on any error
     let sitemap = generateSitemapHeader();
     const blogIndexEntry = generateUrlEntry('/blog', CURRENT_DATE, 'weekly', 0.8);
     sitemap += blogIndexEntry;
     sitemap += '\n</urlset>';
     writeFileSync(resolve(process.cwd(), 'public', 'sitemap-blog.xml'), sitemap, 'utf8');
-    console.log('✅ Blog sitemap created (blog feature not available)');
+    console.log('✅ Blog sitemap created (fallback mode)');
     return 1;
   }
 }
