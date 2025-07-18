@@ -37,10 +37,8 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.error(errorMessage);
   console.error('Required variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY');
 
-  // In development, throw to catch configuration issues early
-  if (import.meta.env.DEV) {
-    throw new Error(errorMessage);
-  }
+  // In development, use dummy client instead of throwing
+  // This prevents the app from crashing during development
 
   // In production, use dummy client to prevent app crash
   supabaseClient = createDummyClient();
