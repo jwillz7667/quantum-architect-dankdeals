@@ -10,4 +10,80 @@
     <priority>0.8</priority>
     <mobile:mobile/>
   </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/understanding-terpenes-cannabis-flavor-effects</loc>
+    <lastmod>2025-01-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/cannabis-edibles-dosing-guide-beginners</loc>
+    <lastmod>2025-01-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/minnesota-cannabis-laws-2025</loc>
+    <lastmod>2025-01-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/best-cannabis-strains-winter-2025</loc>
+    <lastmod>2025-01-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/dankdeals-vs-dank-district-minneapolis-cannabis-delivery</loc>
+    <lastmod>2025-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <news:news>
+      <news:publication>
+        <news:name>DankDeals Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-18</news:publication_date>
+      <news:title>Minneapolis Cannabis Delivery Showdown: Why DankDeals Outshines Dank District</news:title>
+      <news:keywords>dank district, minneapolis cannabis delivery, cannabis delivery comparison, dankdeals vs dank district</news:keywords>
+    </news:news>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/fastest-weed-delivery-minneapolis-st-paul</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <news:news>
+      <news:publication>
+        <news:name>DankDeals Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-17</news:publication_date>
+      <news:title>The Fastest Weed Delivery in Minneapolis-St. Paul: Beyond Dank District</news:title>
+      <news:keywords>fast weed delivery minneapolis, dank district delivery times, cannabis delivery st paul, fastest cannabis delivery</news:keywords>
+    </news:news>
+    <mobile:mobile/>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/blog/minneapolis-cannabis-delivery-zones-coverage</loc>
+    <lastmod>2025-01-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <news:news>
+      <news:publication>
+        <news:name>DankDeals Blog</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-16</news:publication_date>
+      <news:title>Complete Minneapolis Cannabis Delivery Guide: Every Neighborhood Covered</news:title>
+      <news:keywords>cannabis delivery zones minneapolis, dank district coverage, st paul weed delivery, cannabis delivery neighborhoods</news:keywords>
+    </news:news>
+    <mobile:mobile/>
+  </url>
 </urlset>
