@@ -38,11 +38,11 @@ export function BottomNav({ activeTab }: BottomNavProps) {
                       size={20}
                       className={`transition-transform ${isActive ? 'scale-110' : ''}`}
                     />
-                  ) : (
+                  ) : item.icon ? (
                     <item.icon
                       className={`h-5 w-5 transition-transform ${isActive ? 'scale-110' : ''}`}
                     />
-                  )}
+                  ) : null}
                   <span className="text-xs font-medium">{item.label}</span>
                 </Button>
               </Link>
