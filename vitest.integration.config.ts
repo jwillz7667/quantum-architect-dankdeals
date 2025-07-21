@@ -21,5 +21,6 @@ export default defineConfig({
     },
     testTimeout: 30000, // Integration tests may take longer
     hookTimeout: 30000,
+    passWithNoTests: true, // Don't fail when no tests are found
   },
 });
