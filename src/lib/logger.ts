@@ -14,7 +14,14 @@ export interface LogEntry {
   context?: LogContext;
 }
 
-type SanitizableValue = string | number | boolean | null | undefined | SanitizableObject | SanitizableValue[];
+type SanitizableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SanitizableObject
+  | SanitizableValue[];
 
 interface SanitizableObject {
   [key: string]: SanitizableValue;

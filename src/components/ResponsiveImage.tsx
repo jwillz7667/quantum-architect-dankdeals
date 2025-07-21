@@ -79,7 +79,7 @@ export function ResponsiveImage({
   // Handle image error with fallback
   const handleError = () => {
     console.warn(`Failed to load image: ${currentSrc}`);
-    
+
     if (fallbackSrc && currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc);
       setHasError(false); // Reset error state to try fallback
@@ -98,11 +98,8 @@ export function ResponsiveImage({
   }, [src]);
 
   return (
-    <div 
-      className={cn(
-        'relative overflow-hidden bg-muted',
-        className
-      )}
+    <div
+      className={cn('relative overflow-hidden bg-muted', className)}
       style={{
         width,
         height,
@@ -113,12 +110,7 @@ export function ResponsiveImage({
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 animate-pulse bg-muted flex items-center justify-center">
           <div className="text-muted-foreground">
-            <svg
-              className="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -129,7 +121,7 @@ export function ResponsiveImage({
           </div>
         </div>
       )}
-      
+
       {/* Error state */}
       {hasError && (
         <div className="absolute inset-0 bg-muted flex items-center justify-center">
@@ -151,27 +143,23 @@ export function ResponsiveImage({
           </div>
         </div>
       )}
-      
+
       {/* Main image */}
       <picture>
         {/* WebP source with fallback */}
         {currentSrc.endsWith('.webp') && (
-          <source 
-            type="image/webp" 
+          <source
+            type="image/webp"
             srcSet={isInView ? srcSet || currentSrc : undefined}
             sizes={sizes}
           />
         )}
-        
+
         {/* JPEG fallback */}
         {currentSrc.endsWith('.webp') && fallbackSrc && (
-          <source 
-            type="image/jpeg" 
-            srcSet={isInView ? fallbackSrc : undefined}
-            sizes={sizes}
-          />
+          <source type="image/jpeg" srcSet={isInView ? fallbackSrc : undefined} sizes={sizes} />
         )}
-        
+
         <img
           ref={imgRef}
           src={isInView ? currentSrc : undefined}
@@ -196,4 +184,4 @@ export function ResponsiveImage({
       </picture>
     </div>
   );
-} 
+}

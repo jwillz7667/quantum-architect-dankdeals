@@ -95,7 +95,7 @@ export function SEOHead({
   // Combine all structured data
   const allJsonLdData: StructuredData[] = (() => {
     const dataArray: StructuredData[] = [];
-    
+
     // Add the main structured data
     if (structuredData) {
       if (Array.isArray(structuredData)) {
@@ -106,12 +106,12 @@ export function SEOHead({
     } else {
       dataArray.push(defaultJsonLd);
     }
-    
+
     // Add breadcrumb data if available
     if (breadcrumbJsonLd) {
       dataArray.push(breadcrumbJsonLd);
     }
-    
+
     return dataArray;
   })();
 
