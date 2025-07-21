@@ -198,7 +198,7 @@ export class EmailService {
     <div class="important-note">
       <strong>⚠️ Important Reminders:</strong>
       <ul>
-        <li>Payment is <strong>cash on delivery</strong> - please have exact change ready</li>
+        <li>Payment is <strong>CASH DUE ON DELIVERY</strong> - please have exact cash ready</li>
         <li>Valid ID required - must be 21+ years old</li>
         <li>Tip suggestions: 15% (${this.formatCurrency(totals.total * 0.15)}), 18% (${this.formatCurrency(totals.total * 0.18)}), 20% (${this.formatCurrency(totals.total * 0.2)})</li>
         <li>Please be available at the delivery address during the estimated time</li>

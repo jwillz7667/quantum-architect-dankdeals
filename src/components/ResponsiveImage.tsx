@@ -51,7 +51,7 @@ export function ResponsiveImage({
 
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsInView(true);
           observerRef.current?.disconnect();
         }

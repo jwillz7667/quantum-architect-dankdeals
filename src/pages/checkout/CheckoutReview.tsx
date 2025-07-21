@@ -273,8 +273,10 @@ export default function CheckoutReview() {
                 💵
               </div>
               <div>
-                <p className="font-medium">Cash on Delivery</p>
-                <p className="text-sm text-muted-foreground">Pay when your order arrives</p>
+                <p className="font-medium">Cash Due on Delivery</p>
+                <p className="text-sm text-muted-foreground">
+                  Payment required when your order arrives
+                </p>
               </div>
             </div>
           </CardContent>

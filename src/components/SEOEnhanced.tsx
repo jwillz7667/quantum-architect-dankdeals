@@ -1,65 +1,77 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
-export interface SEOHeadProps {
+interface SEOEnhancedProps {
   title?: string;
   description?: string;
   keywords?: string;
   image?: string;
   url?: string;
   type?: 'website' | 'article' | 'product';
-  twitterCard?: 'summary' | 'summary_large_image';
   author?: string;
   publishedTime?: string;
   modifiedTime?: string;
   structuredData?: object;
 }
 
-// Site configuration with proper environment variable access
-const SITE_URL = (import.meta.env['VITE_SITE_URL'] as string) || 'https://dankdealsmn.com';
-const SITE_NAME = 'DankDeals MN';
-const SITE_DESCRIPTION =
-  "Minnesota's premier cannabis delivery service. Premium flower, edibles, and concentrates delivered to your door. 21+ only.";
+// Default meta configuration
+const defaultMeta = {
+  title: 'DankDeals MN - Premium Cannabis Delivery in Minnesota',
+  description:
+    "Minnesota's premier cannabis delivery service. Premium flower, edibles, and concentrates delivered to your door. 21+ only.",
+  keywords:
+    'cannabis delivery, marijuana delivery, Minnesota cannabis, THC delivery, CBD products, premium flower, edibles, concentrates',
+  image: '/og-image.jpg',
+  type: 'website' as const,
+  author: 'DankDeals MN',
+};
 
-export const SEOHead: React.FC<SEOHeadProps> = ({
-  title = 'DankDeals MN - Premium Cannabis Delivery in Minnesota',
-  description = SITE_DESCRIPTION,
-  keywords = 'cannabis delivery, marijuana delivery, Minnesota cannabis, THC delivery, CBD products, premium flower, edibles, concentrates',
-  image = `${SITE_URL}/og-image.jpg`,
-  url = SITE_URL,
-  type = 'website',
-  twitterCard = 'summary_large_image',
-  author = 'DankDeals MN',
+export const SEOEnhanced: React.FC<SEOEnhancedProps> = ({
+  title = defaultMeta.title,
+  description = defaultMeta.description,
+  keywords = defaultMeta.keywords,
+  image = defaultMeta.image,
+  url = '/',
+  type = defaultMeta.type,
+  author = defaultMeta.author,
   publishedTime,
   modifiedTime,
   structuredData,
 }) => {
-  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
-  const fullUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`;
-  const fullImage = image.startsWith('http') ? image : `${SITE_URL}${image}`;
+  // Generate meta tags object
+  const metaTags = {
+    title: title,
+    description: description,
+    keywords: keywords || '',
+  };
+
+  const siteUrl = (import.meta.env['VITE_SITE_URL'] as string) || 'https://dankdealsmn.com';
+  const fullTitle = title.includes('DankDeals') ? title : `${title} | DankDeals MN`;
+  const fullImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+  const fullUrl = url.startsWith('http') ? url : `${siteUrl}${url}`;
 
   return (
     <Helmet>
       {/* Basic Meta Tags */}
       <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
+      <meta name="description" content={metaTags.description} />
+      {metaTags.keywords && <meta name="keywords" content={metaTags.keywords} />}
       <meta name="author" content={author} />
       <link rel="canonical" href={fullUrl} />
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
+      <meta property="og:description" content={metaTags.description} />
       <meta property="og:image" content={fullImage} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:type" content={type} />
-      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:site_name" content="DankDeals MN" />
       <meta property="og:locale" content="en_US" />
 
       {/* Twitter Card */}
-      <meta name="twitter:card" content={twitterCard} />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:description" content={metaTags.description} />
       <meta name="twitter:image" content={fullImage} />
       <meta name="twitter:site" content="@DankDealsMN" />
       <meta name="twitter:creator" content="@DankDealsMN" />
@@ -87,3 +99,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     </Helmet>
   );
 };
+
+// Export a provider wrapper for the app
+export function SEOProvider({ children }: { children: React.ReactNode }) {
+  return <HelmetProvider>{children}</HelmetProvider>;
+}

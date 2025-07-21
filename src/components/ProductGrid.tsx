@@ -1,40 +1,76 @@
+import { memo, useMemo } from 'react';
 import { ProductCard } from '@/components/ProductCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/hooks/useProducts';
-import { Loader2 } from 'lucide-react';
 import { useProductsFilter } from '@/hooks/useProductsFilterContext';
+import { ProductGridSkeleton } from '@/components/LoadingStates';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeGrid as Grid } from 'react-window';
+import { FixedSizeGrid as Grid, type GridChildComponentProps } from 'react-window';
 
-function getMinPrice(variants: Array<{ price: number }> | undefined): number {
+const getMinPrice = (variants: Array<{ price: number }> | undefined): number => {
   if (!variants || variants.length === 0) return 0;
   return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents to dollars
+};
+
+// Memoized grid cell component
+interface GridItemData {
+  filteredProducts: Product[];
+  columnCount: number;
 }
 
-export function ProductGrid() {
+const GridCell = memo(function GridCell({
+  columnIndex,
+  rowIndex,
+  style,
+  data,
+}: GridChildComponentProps<GridItemData>) {
+  const { filteredProducts, columnCount } = data;
+  const index = rowIndex * columnCount + columnIndex;
+
+  if (index >= filteredProducts.length) return null;
+
+  const product = filteredProducts[index];
+  if (!product) return null;
+
+  return (
+    <div style={style}>
+      <ProductCard
+        key={product.id}
+        id={product.id}
+        name={product.name}
+        price={getMinPrice(product.variants)}
+        category={product.category}
+        imageUrl={product.image_url ?? undefined}
+        thcContent={product.thc_content ?? undefined}
+        cbdContent={product.cbd_content ?? undefined}
+        description={product.description ?? undefined}
+      />
+    </div>
+  );
+});
+
+export const ProductGrid = memo(function ProductGrid() {
   const { products, loading, error } = useProducts();
   const { searchQuery, selectedCategory } = useProductsFilter();
 
   // Filter products based on search and category
-  const filteredProducts: Product[] = products.filter((product) => {
-    const matchesSearch =
-      !searchQuery ||
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (product.description &&
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesSearch =
+        !searchQuery ||
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (product.description &&
+          product.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+      const matchesCategory = !selectedCategory || product.category === selectedCategory;
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchQuery, selectedCategory]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <ProductGridSkeleton count={8} />;
   }
 
   if (error) {
@@ -68,6 +104,10 @@ export function ProductGrid() {
             const columnCount = Math.max(1, Math.floor(width / columnWidth));
             const rowCount = Math.ceil(filteredProducts.length / columnCount);
             const rowHeight = 300; // Adjust based on your ProductCard height
+
+            // Create grid item data directly without useMemo in callback
+            const itemData = { filteredProducts, columnCount };
+
             return (
               <Grid
                 columnCount={columnCount}
@@ -76,35 +116,9 @@ export function ProductGrid() {
                 rowCount={rowCount}
                 rowHeight={rowHeight}
                 width={width}
+                itemData={itemData}
               >
-                {({
-                  columnIndex,
-                  rowIndex,
-                  style,
-                }: {
-                  columnIndex: number;
-                  rowIndex: number;
-                  style: React.CSSProperties;
-                }) => {
-                  const index = rowIndex * columnCount + columnIndex;
-                  if (index >= filteredProducts.length) return null;
-                  const product = filteredProducts[index];
-                  return (
-                    <div style={style}>
-                      <ProductCard
-                        key={product.id}
-                        id={product.id}
-                        name={product.name}
-                        price={getMinPrice(product.variants)}
-                        category={product.category}
-                        imageUrl={product.image_url}
-                        thcContent={product.thc_content}
-                        cbdContent={product.cbd_content}
-                        description={product.description}
-                      />
-                    </div>
-                  );
-                }}
+                {GridCell}
               </Grid>
             );
           }}
@@ -112,4 +126,4 @@ export function ProductGrid() {
       </div>
     </div>
   );
-}
+});

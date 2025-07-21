@@ -177,9 +177,9 @@ export default function CheckoutPayment() {
                   <div className="flex items-center gap-3">
                     <DollarSign className="w-5 h-5 text-primary" />
                     <div>
-                      <p className="font-medium">Cash on Delivery</p>
+                      <p className="font-medium">Cash Due on Delivery</p>
                       <p className="text-sm text-muted-foreground">
-                        Pay with cash when your order arrives
+                        Payment in cash required when your order arrives
                       </p>
                     </div>
                   </div>

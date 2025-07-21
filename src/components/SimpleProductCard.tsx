@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OptimizedProductImage } from './OptimizedProductImage';
 import { getProductImages } from '@/lib/productImages';
@@ -9,16 +10,23 @@ interface SimpleProductCardProps {
   imageUrl?: string;
 }
 
-export function SimpleProductCard({ id, name, category, imageUrl }: SimpleProductCardProps) {
+export const SimpleProductCard = memo(function SimpleProductCard({
+  id,
+  name,
+  category,
+  imageUrl,
+}: SimpleProductCardProps) {
   const navigate = useNavigate();
 
-  const handleProductClick = () => {
+  const handleProductClick = useCallback(() => {
     navigate(`/product/${id}`);
-  };
+  }, [navigate, id]);
 
   // Get optimized images for this product
-  const productImages = getProductImages(id, name, category);
-  const displayImage = productImages.main;
+  const displayImage = useMemo(() => {
+    const productImages = getProductImages(id, name, category);
+    return productImages.main;
+  }, [id, name, category]);
 
   return (
     <div className="flex-shrink-0 cursor-pointer" onClick={handleProductClick}>
@@ -35,4 +43,4 @@ export function SimpleProductCard({ id, name, category, imageUrl }: SimpleProduc
       <h3 className="text-sm font-medium text-foreground line-clamp-2 px-1">{name}</h3>
     </div>
   );
-}
+});

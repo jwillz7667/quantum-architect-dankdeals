@@ -46,23 +46,21 @@ export function OptimizedImage({
         return;
       }
 
-      observerRef.current = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry?.isIntersecting) {
             setIsInView(true);
-            if (observerRef.current) {
-              observerRef.current.disconnect();
-              observerRef.current = null;
-            }
+            observer.disconnect();
           }
         },
         {
+          threshold: 0.1,
           rootMargin: '50px',
-          threshold: 0.01, // Trigger when even 1% is visible
         }
       );
 
-      observerRef.current.observe(imgRef.current);
+      observer.observe(imgRef.current);
     };
 
     // Small delay to ensure DOM is ready

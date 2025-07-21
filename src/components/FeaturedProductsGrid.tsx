@@ -41,7 +41,7 @@ export function FeaturedProductsGrid() {
           id={product.id}
           name={product.name}
           category={product.category}
-          imageUrl={product.image_url}
+          imageUrl={product.image_url || undefined}
         />
       ))}
     </div>

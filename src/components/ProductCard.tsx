@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,7 @@ interface ProductCardProps {
   description?: string;
 }
 
-export function ProductCard({
+export const ProductCard = memo(function ProductCard({
   id,
   name,
   price,
@@ -29,15 +30,28 @@ export function ProductCard({
 }: ProductCardProps) {
   const navigate = useNavigate();
 
-  const handleProductClick = () => {
+  const handleProductClick = useCallback(() => {
     navigate(`/product/${id}`);
-  };
+  }, [navigate, id]);
 
-  const displayPrice = typeof price === 'number' ? price.toFixed(2) : '0.00';
+  const handleButtonClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      handleProductClick();
+    },
+    [handleProductClick]
+  );
+
+  const displayPrice = useMemo(
+    () => (typeof price === 'number' ? price.toFixed(2) : '0.00'),
+    [price]
+  );
 
   // Get optimized images for this product
-  const productImages = getProductImages(id, name, category);
-  const displayImage = productImages.main;
+  const { displayImage } = useMemo(() => {
+    const productImages = getProductImages(id, name, category);
+    return { displayImage: productImages.main };
+  }, [id, name, category]);
 
   return (
     <Card className="h-full cursor-pointer hover:shadow-lg transition-all duration-200 animate-fade-in flex flex-col">
@@ -85,17 +99,11 @@ export function ProductCard({
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button
-          className="w-full hover-lift"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleProductClick();
-          }}
-        >
+        <Button className="w-full hover-lift" onClick={handleButtonClick}>
           <ShoppingCart className="mr-2 h-4 w-4" />
           View Details
         </Button>
       </CardFooter>
     </Card>
   );
-}
+});

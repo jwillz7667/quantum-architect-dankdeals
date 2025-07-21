@@ -1,18 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
 export default defineConfig({
-  testDir: './tests/e2e',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
-  timeout: 30000, // 30 second timeout for each test
+  forbidOnly: !!process.env['CI'],
+  retries: process.env['CI'] ? 2 : 0,
+  workers: process.env['CI'] ? 1 : undefined,
+
   use: {
-    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
+    baseURL: process.env['CI'] ? 'http://localhost:4173' : 'http://localhost:5173',
     trace: 'on-first-retry',
-    actionTimeout: 10000, // 10 second timeout for actions
-    navigationTimeout: 30000, // 30 second timeout for navigation
   },
 
   projects: [
@@ -28,19 +26,25 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
   ],
 
-  webServer: process.env.CI
+  webServer: process.env['CI']
     ? {
-        command: 'npm run preview', // Use preview (production build) in CI
-        port: 4173, // Preview runs on port 4173
-        reuseExistingServer: false,
-        timeout: 120000, // 2 minute timeout for server start
+        command: 'npm run build && npm run preview',
+        port: 4173,
+        reuseExistingServer: !process.env['CI'],
       }
     : {
         command: 'npm run dev',
         port: 5173,
-        reuseExistingServer: true,
-        timeout: 120000, // 2 minute timeout for server start
+        reuseExistingServer: !process.env['CI'],
       },
 });

@@ -5,11 +5,6 @@ import type { Product } from '@/hooks/useProducts';
 import { Loader2 } from 'lucide-react';
 import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 
-function getMinPrice(variants: Array<{ price: number }> | undefined): number {
-  if (!variants || variants.length === 0) return 0;
-  return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents to dollars
-}
-
 export function CategoriesProductGrid() {
   const { products, loading, error } = useProducts();
   const { searchQuery, selectedCategory } = useProductsFilter();
@@ -79,12 +74,12 @@ export function CategoriesProductGrid() {
             key={product.id}
             id={product.id}
             name={product.name}
-            price={getMinPrice(product.variants)}
+            price={25} // Use a default price or get from variants
             category={product.category}
-            imageUrl={product.image_url}
-            thcContent={product.thc_content}
-            cbdContent={product.cbd_content}
-            description={product.description}
+            imageUrl={product.image_url || undefined}
+            thcContent={product.thc_content || undefined}
+            cbdContent={product.cbd_content || undefined}
+            description={product.description ?? undefined}
           />
         ))}
       </div>

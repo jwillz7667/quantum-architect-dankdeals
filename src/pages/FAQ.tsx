@@ -23,7 +23,7 @@ const faqs = [
   {
     question: 'Do you accept cash payments?',
     answer:
-      'Yes, we accept cash on delivery. Payment is due upon delivery. We also accept credit/debit cards and digital payments for your convenience.',
+      'Yes, we require CASH DUE ON DELIVERY. Payment must be made in cash when your order arrives. Please have exact change ready as our drivers carry limited change.',
   },
   {
     question: 'How long does delivery take?',

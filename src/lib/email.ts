@@ -46,7 +46,7 @@ export const sendOrderConfirmationEmail = async (emailData: EmailData): Promise<
         ${emailData.deliveryAddress.city}, ${emailData.deliveryAddress.state} ${emailData.deliveryAddress.zipCode}
       </p>
       
-      <p><strong>Payment Method:</strong> Cash on Delivery</p>
+      <p><strong>Payment Method:</strong> CASH DUE ON DELIVERY</p>
       
       <h3>What's Next?</h3>
       <ol>

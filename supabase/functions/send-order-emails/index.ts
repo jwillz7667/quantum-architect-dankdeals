@@ -181,8 +181,8 @@ serve(async (req: Request) => {
       </div>
       
       <div class="warning">
-        <strong>Payment Method:</strong> Cash on Delivery<br>
-        Please have exact cash ready for your driver.
+        <strong>Payment Method:</strong> CASH DUE ON DELIVERY<br>
+        Please have exact cash ready for your driver. Payment is required upon delivery.
       </div>
       
       <div class="steps">
