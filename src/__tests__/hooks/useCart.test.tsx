@@ -54,8 +54,8 @@ describe('useCart Hook', () => {
     });
 
     expect(result.current.items).toHaveLength(1);
-    expect(result.current.items[0].name).toBe('Test Product');
-    expect(result.current.items[0].price).toBe(20); // Converted to dollars
+    expect(result.current.items[0]?.name).toBe('Test Product');
+    expect(result.current.items[0]?.price).toBe(20); // Converted to dollars
     expect(result.current.totalItems).toBe(1);
   });
 
@@ -92,13 +92,15 @@ describe('useCart Hook', () => {
       result.current.addItem(mockProduct, mockVariant, 1);
     });
 
-    const itemId = result.current.items[0].id;
+    const itemId = result.current.items[0]?.id;
 
     act(() => {
-      result.current.updateQuantity(itemId, 3);
+      if (itemId) {
+        result.current.updateQuantity(itemId, 3);
+      }
     });
 
-    expect(result.current.items[0].quantity).toBe(3);
+    expect(result.current.items[0]?.quantity).toBe(3);
     expect(result.current.totalItems).toBe(3);
   });
 
@@ -135,10 +137,12 @@ describe('useCart Hook', () => {
       result.current.addItem(mockProduct, mockVariant, 1);
     });
 
-    const itemId = result.current.items[0].id;
+    const itemId = result.current.items[0]?.id;
 
     act(() => {
-      result.current.removeItem(itemId);
+      if (itemId) {
+        result.current.removeItem(itemId);
+      }
     });
 
     expect(result.current.items).toHaveLength(0);

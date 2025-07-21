@@ -10,7 +10,6 @@ import { PageLoader } from '@/components/PageLoader';
 import { RealTimeProvider } from '@/context/RealTimeContext';
 import { queryClient } from '@/lib/react-query/config';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { AsyncErrorHandler } from '@/components/AsyncErrorHandler';
 import { AgeGate } from '@/components/AgeGate';
 import { SEOProvider } from '@/components/SEOEnhanced';
 
@@ -37,46 +36,44 @@ const CheckoutComplete = lazy(() => import('./pages/checkout/CheckoutComplete'))
 
 const App = () => (
   <ErrorBoundary>
-    <AsyncErrorHandler>
-      <QueryClientProvider client={queryClient}>
-        <SEOProvider>
-          <TooltipProvider>
-            <AgeGate />
-            <Toaster />
-            <Sonner />
-            <RealTimeProvider>
-              <CartProvider>
-                <ProductsFilterProvider>
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/product/:id" element={<ProductDetail />} />
-                      <Route path="/categories" element={<Categories />} />
-                      <Route path="/delivery-area" element={<DeliveryArea />} />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/faq" element={<FAQ />} />
-                      <Route path="/blog" element={<Blog />} />
-                      <Route path="/blog/:slug" element={<BlogPost />} />
-                      <Route path="/privacy" element={<Privacy />} />
-                      <Route path="/terms" element={<Terms />} />
-                      <Route path="/legal" element={<Legal />} />
-                      <Route path="/checkout/address" element={<CheckoutAddress />} />
-                      <Route path="/checkout/payment" element={<CheckoutPayment />} />
-                      <Route path="/checkout/review" element={<CheckoutReview />} />
-                      <Route path="/checkout/complete" element={<CheckoutComplete />} />
+    <QueryClientProvider client={queryClient}>
+      <SEOProvider>
+        <TooltipProvider>
+          <AgeGate />
+          <Toaster />
+          <Sonner />
+          <RealTimeProvider>
+            <CartProvider>
+              <ProductsFilterProvider>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/delivery-area" element={<DeliveryArea />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/legal" element={<Legal />} />
+                    <Route path="/checkout/address" element={<CheckoutAddress />} />
+                    <Route path="/checkout/payment" element={<CheckoutPayment />} />
+                    <Route path="/checkout/review" element={<CheckoutReview />} />
+                    <Route path="/checkout/complete" element={<CheckoutComplete />} />
 
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="/health" element={<HealthCheck />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </ProductsFilterProvider>
-              </CartProvider>
-            </RealTimeProvider>
-          </TooltipProvider>
-        </SEOProvider>
-      </QueryClientProvider>
-    </AsyncErrorHandler>
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="/health" element={<HealthCheck />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </ProductsFilterProvider>
+            </CartProvider>
+          </RealTimeProvider>
+        </TooltipProvider>
+      </SEOProvider>
+    </QueryClientProvider>
   </ErrorBoundary>
 );
 

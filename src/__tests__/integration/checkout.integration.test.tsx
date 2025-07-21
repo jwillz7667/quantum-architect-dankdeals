@@ -36,7 +36,6 @@ const mockProduct: Product = {
   category: 'flower',
   thc_content: 22.5,
   cbd_content: 0.5,
-  vendor_id: 'vendor-123',
   is_active: true,
   created_at: '2024-01-01',
   updated_at: '2024-01-01',

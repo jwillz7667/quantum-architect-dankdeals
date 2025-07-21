@@ -50,12 +50,8 @@ function extractErrorInfo(error: Error): ErrorInfo {
   }
 
   if (isValidationError(error)) {
-    const issues = (error).issues || [];
-    const message = issues
-      .map(
-        (issue: { path: string[]; message: string }) => `${issue.path.join('.')}: ${issue.message}`
-      )
-      .join(', ');
+    const issues = error.issues || [];
+    const message = issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ');
 
     return {
       message: message || 'Validation failed',
