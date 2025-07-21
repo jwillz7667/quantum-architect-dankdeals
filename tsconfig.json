@@ -11,6 +11,7 @@
     "vite.config.ts",
     "tailwind.config.ts",
     "vitest.config.ts",
+    "vitest.integration.config.ts",
     "playwright.config.ts",
     "tests/**/*.ts"
   ],
