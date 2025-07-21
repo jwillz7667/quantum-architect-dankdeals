@@ -6,6 +6,7 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/useCart';
+import type { CartItem } from '@/types/cart';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { SEOHead } from '@/components/SEOHead';
@@ -22,12 +23,20 @@ export default function Cart() {
     removeItem,
     isLoading,
   } = useCart();
+
+  // Type the destructured values explicitly to ensure proper inference
+  const cartItems: CartItem[] = items;
+  const cartTotalItems: number = totalItems;
+  const cartSubtotal: number = subtotal;
+  const cartTaxAmount: number = taxAmount;
+  const cartDeliveryFee: number = deliveryFee;
+  const cartTotalPrice: number = totalPrice;
   const navigate = useNavigate();
 
   const formatPrice = (price: number) => price.toFixed(2);
 
   const handleCheckout = () => {
-    if (items.length === 0) return;
+    if (cartItems.length === 0) return;
     navigate('/checkout/address');
   };
 
@@ -60,7 +69,7 @@ export default function Cart() {
       <MobileHeader title="Shopping Cart" />
 
       <div className="max-w-md mx-auto px-4 pt-6">
-        {items.length === 0 ? (
+        {cartItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">Your cart is empty</h3>
@@ -74,7 +83,7 @@ export default function Cart() {
             {/* Cart Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                Your Items ({totalItems} {totalItems === 1 ? 'item' : 'items'})
+                Your Items ({cartTotalItems} {cartTotalItems === 1 ? 'item' : 'items'})
               </h2>
               <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
                 Continue Shopping
@@ -83,7 +92,7 @@ export default function Cart() {
 
             {/* Cart Items */}
             <div className="space-y-3">
-              {items.map((item) => (
+              {cartItems.map((item) => (
                 <Card key={item.id} className="product-card">
                   <CardContent className="p-4">
                     <div className="flex gap-4">
@@ -165,20 +174,20 @@ export default function Cart() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${formatPrice(subtotal)}</span>
+                    <span>${formatPrice(cartSubtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
-                    <span>${formatPrice(taxAmount)}</span>
+                    <span>${formatPrice(cartTaxAmount)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Delivery Fee</span>
-                    <span>${formatPrice(deliveryFee)}</span>
+                    <span>${formatPrice(cartDeliveryFee)}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between text-base font-semibold">
                     <span>Total</span>
-                    <span className="text-primary">${formatPrice(totalPrice)}</span>
+                    <span className="text-primary">${formatPrice(cartTotalPrice)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -204,7 +213,7 @@ export default function Cart() {
       </div>
 
       {/* Checkout Button - Fixed at Bottom */}
-      {items.length > 0 && (
+      {cartItems.length > 0 && (
         <div className="fixed bottom-20 left-0 right-0 p-4 bg-background border-t border-border md:bottom-0">
           <div className="max-w-md mx-auto">
             <Button

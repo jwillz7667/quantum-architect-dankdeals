@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { EmailService } from '@/lib/emailService';
-import type { CartItem } from '@/hooks/useCart';
+import type { CartItem } from '@/types/cart';
 
 interface CreateOrderData {
   // Customer Information

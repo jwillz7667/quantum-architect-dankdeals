@@ -1,18 +1,11 @@
 // src/context/RealTimeContext.tsx
-import { createContext, type ReactNode } from 'react';
-
-// Simplified RealTime context - no real-time features for guest checkout
-interface RealTimeContextType {
-  connected: boolean;
-  orders: never[];
-}
-
-export const RealTimeContext = createContext<RealTimeContextType | null>(null);
+import type { ReactNode } from 'react';
+import { RealTimeContext } from './RealTimeContext-utils';
 
 export const RealTimeProvider = ({ children }: { children: ReactNode }) => {
-  const value: RealTimeContextType = {
+  const value = {
     connected: false,
-    orders: [],
+    orders: [] as never[],
   };
 
   return <RealTimeContext.Provider value={value}>{children}</RealTimeContext.Provider>;

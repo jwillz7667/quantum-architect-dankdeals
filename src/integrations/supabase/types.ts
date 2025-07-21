@@ -23,7 +23,14 @@ export interface Database {
           terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
-          delivery_address?: any;
+          delivery_address?: {
+            street: string;
+            apartment?: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            deliveryInstructions?: string;
+          } | null;
         };
         Insert: {
           id: string;
@@ -38,7 +45,14 @@ export interface Database {
           terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
-          delivery_address?: any;
+          delivery_address?: {
+            street: string;
+            apartment?: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            deliveryInstructions?: string;
+          } | null;
         };
         Update: {
           id?: string;
@@ -53,7 +67,14 @@ export interface Database {
           terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
-          delivery_address?: any;
+          delivery_address?: {
+            street: string;
+            apartment?: string;
+            city: string;
+            state: string;
+            zipCode: string;
+            deliveryInstructions?: string;
+          } | null;
         };
         Relationships: [];
       };

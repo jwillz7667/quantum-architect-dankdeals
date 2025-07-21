@@ -1,5 +1,5 @@
 import React from 'react';
-import { RealTimeContext } from '@/context/RealTimeContext';
+import { RealTimeContext } from '@/context/RealTimeContext-utils';
 
 export const useRealTime = () => {
   const context = React.useContext(RealTimeContext);

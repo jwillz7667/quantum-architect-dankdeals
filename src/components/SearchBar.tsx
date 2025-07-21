@@ -2,7 +2,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SearchIcon } from '@/components/icons/CustomIcon';
-import { useProductsFilter } from '@/hooks/useProductsFilter';
+import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 
 interface SearchBarProps {
   onFilter?: () => void;

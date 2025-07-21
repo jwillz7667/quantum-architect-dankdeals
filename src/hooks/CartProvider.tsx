@@ -1,26 +1,11 @@
 // src/hooks/CartProvider.tsx
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product, ProductVariant } from '@/hooks/useProducts';
-import type { CartItem } from './useCart';
-
-interface CartContextType {
-  items: CartItem[];
-  totalItems: number;
-  totalPrice: number;
-  subtotal: number;
-  taxAmount: number;
-  deliveryFee: number;
-  addItem: (product: Product, variant: ProductVariant, quantity?: number) => void;
-  updateQuantity: (itemId: string, quantity: number) => void;
-  removeItem: (itemId: string) => void;
-  clearCart: () => void;
-  isLoading: boolean;
-}
-
-export const CartContext = createContext<CartContextType | undefined>(undefined);
+import type { CartItem } from '@/types/cart';
+import { CartContext, type CartContextType } from './CartContext';
 
 const CART_STORAGE_KEY = 'dankdeals_cart';
 const TAX_RATE = 0.1025; // Minnesota cannabis tax rate (example)

@@ -1,15 +1,6 @@
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
-
-interface ProductsFilterContextType {
-  searchQuery: string;
-  selectedCategory: string | null;
-  setSearchQuery: (query: string) => void;
-  setSelectedCategory: (category: string | null) => void;
-  clearFilters: () => void;
-}
-
-const ProductsFilterContext = createContext<ProductsFilterContextType | undefined>(undefined);
+import { useState } from 'react';
+import { ProductsFilterContext } from './useProductsFilterContext';
 
 export function ProductsFilterProvider({ children }: { children: ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,12 +24,4 @@ export function ProductsFilterProvider({ children }: { children: ReactNode }) {
       {children}
     </ProductsFilterContext.Provider>
   );
-}
-
-export function useProductsFilter() {
-  const context = useContext(ProductsFilterContext);
-  if (context === undefined) {
-    throw new Error('useProductsFilter must be used within a ProductsFilterProvider');
-  }
-  return context;
 }

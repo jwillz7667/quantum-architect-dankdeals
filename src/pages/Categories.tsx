@@ -7,7 +7,7 @@ import { CategoryRail } from '@/components/CategoryRail';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { SEOHead } from '@/components/SEOHead';
-import { useProductsFilter } from '@/hooks/useProductsFilter';
+import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 import { useProducts } from '@/hooks/useProducts';
 import { generateProductListingSchema, generateBreadcrumbSchema } from '@/lib/seo';
 

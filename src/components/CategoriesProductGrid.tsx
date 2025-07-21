@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/hooks/useProducts';
 import { Loader2 } from 'lucide-react';
-import { useProductsFilter } from '@/hooks/useProductsFilter';
+import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 
 function getMinPrice(variants: Array<{ price: number }> | undefined): number {
   if (!variants || variants.length === 0) return 0;

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { expect } from 'vitest';
-import matchers from 'jest-axe';
+import { toHaveNoViolations } from 'jest-axe';
 
-expect.extend(matchers as any);
+expect.extend({ toHaveNoViolations });
 
 declare module 'vitest' {
   interface Assertion {

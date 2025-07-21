@@ -3,16 +3,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/hooks/useProducts';
 import { Loader2 } from 'lucide-react';
-import { useProductsFilter } from '@/hooks/useProductsFilter';
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeGrid as Grid } from "react-window";
+import { useProductsFilter } from '@/hooks/useProductsFilterContext';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeGrid as Grid } from 'react-window';
 
 function getMinPrice(variants: Array<{ price: number }> | undefined): number {
   if (!variants || variants.length === 0) return 0;
   return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents to dollars
 }
-
-
 
 export function ProductGrid() {
   const { products, loading, error } = useProducts();
@@ -79,7 +77,15 @@ export function ProductGrid() {
                 rowHeight={rowHeight}
                 width={width}
               >
-                {({ columnIndex, rowIndex, style }: { columnIndex: number; rowIndex: number; style: React.CSSProperties }) => {
+                {({
+                  columnIndex,
+                  rowIndex,
+                  style,
+                }: {
+                  columnIndex: number;
+                  rowIndex: number;
+                  style: React.CSSProperties;
+                }) => {
                   const index = rowIndex * columnCount + columnIndex;
                   if (index >= filteredProducts.length) return null;
                   const product = filteredProducts[index];

@@ -1,5 +1,5 @@
 import { CategoryCard } from './CategoryCard';
-import { useProductsFilter } from '@/hooks/useProductsFilter';
+import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const categories = [
