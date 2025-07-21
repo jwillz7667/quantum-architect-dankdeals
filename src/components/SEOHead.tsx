@@ -13,6 +13,9 @@ export interface SEOHeadProps {
   publishedTime?: string;
   modifiedTime?: string;
   structuredData?: object;
+  breadcrumbs?: Array<{ name: string; url: string }>;
+  canonicalUrl?: string;
+  article?: boolean;
 }
 
 // Site configuration with proper environment variable access
@@ -33,10 +36,14 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   publishedTime,
   modifiedTime,
   structuredData,
+  breadcrumbs,
+  canonicalUrl,
+  article,
 }) => {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
-  const fullUrl = url.startsWith('http') ? url : `${SITE_URL}${url}`;
+  const fullUrl = canonicalUrl || (url.startsWith('http') ? url : `${SITE_URL}${url}`);
   const fullImage = image.startsWith('http') ? image : `${SITE_URL}${image}`;
+  const actualType = article ? 'article' : type;
 
   return (
     <Helmet>
@@ -52,7 +59,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImage} />
       <meta property="og:url" content={fullUrl} />
-      <meta property="og:type" content={type} />
+      <meta property="og:type" content={actualType} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_US" />
 
@@ -65,17 +72,33 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="twitter:creator" content="@DankDealsMN" />
 
       {/* Article specific meta tags */}
-      {type === 'article' && publishedTime && (
+      {actualType === 'article' && publishedTime && (
         <meta property="article:published_time" content={publishedTime} />
       )}
-      {type === 'article' && modifiedTime && (
+      {actualType === 'article' && modifiedTime && (
         <meta property="article:modified_time" content={modifiedTime} />
       )}
-      {type === 'article' && <meta property="article:author" content={author} />}
+      {actualType === 'article' && <meta property="article:author" content={author} />}
 
       {/* Structured Data */}
       {structuredData && (
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      )}
+
+      {/* Breadcrumbs Structured Data */}
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: breadcrumbs.map((crumb, index) => ({
+              '@type': 'ListItem',
+              position: index + 1,
+              name: crumb.name,
+              item: crumb.url.startsWith('http') ? crumb.url : `${SITE_URL}${crumb.url}`,
+            })),
+          })}
+        </script>
       )}
 
       {/* Additional SEO Meta Tags */}

@@ -40,7 +40,6 @@ const mockProduct: Product = {
   created_at: '2024-01-01',
   updated_at: '2024-01-01',
   variants: [],
-  vendor: { name: 'Test Vendor', status: 'active' },
 };
 
 const mockVariant: ProductVariant = {

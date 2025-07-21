@@ -64,7 +64,7 @@ export const useOptimizedProducts = (filters?: {
       });
 
       // Prefetch individual product details for better UX
-      const products = response.data as Product[];
+      const products = response as Product[];
       if (Array.isArray(products)) {
         products.forEach((product) => {
           queryClient.setQueryData(queryKeys.products.detail(product.id), product);
@@ -102,7 +102,7 @@ export const useOptimizedProduct = (
       });
 
       // Prefetch related products if enabled
-      const product = response.data as Product;
+      const product = response as Product;
       if (options?.prefetchRelated && product.category) {
         void prefetchQuery.productList({ category: product.category });
       }
@@ -204,7 +204,7 @@ export const usePrefetchProducts = () => {
           const response = await apiClient.get(`/products/${id}`, {
             schema: productSchema,
           });
-          return response.data as Product;
+          return response as Product;
         },
         staleTime: 10 * 60 * 1000,
       });
@@ -218,7 +218,7 @@ export const usePrefetchProducts = () => {
             params: { category, is_active: true },
             schema: productsResponseSchema,
           });
-          return response.data as Product[];
+          return response as Product[];
         },
         staleTime: 5 * 60 * 1000,
       });
@@ -236,7 +236,7 @@ export const useInfiniteProducts = (
 ) => {
   return useQuery({
     queryKey: [...queryKeys.products.list(filters), 'infinite'],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0 }: { pageParam?: number }) => {
       const response = await apiClient.get('/products', {
         params: {
           offset: pageParam * pageSize,
@@ -252,10 +252,10 @@ export const useInfiniteProducts = (
         }),
       });
 
-      const result = response.data as { products: Product[]; hasMore: boolean };
+      const result = response as { products: Product[]; hasMore: boolean };
       return {
         products: result.products,
-        nextPage: result.hasMore ? (pageParam as number) + 1 : undefined,
+        nextPage: result.hasMore ? (pageParam || 0) + 1 : undefined,
       };
     },
     getNextPageParam: (lastPage: { nextPage?: number }) => lastPage.nextPage,

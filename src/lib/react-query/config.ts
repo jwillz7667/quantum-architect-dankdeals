@@ -12,9 +12,9 @@ import type { APIError } from '@/lib/api/client';
 // Retry logic based on error type
 const shouldRetryRequest = (failureCount: number, error: unknown): boolean => {
   // Don't retry on client errors (4xx)
-  if (error instanceof Error && 'statusCode' in error) {
+  if (error instanceof Error && 'status' in error) {
     const apiError = error as APIError;
-    if (apiError.statusCode >= 400 && apiError.statusCode < 500) {
+    if (apiError.status >= 400 && apiError.status < 500) {
       return false;
     }
   }
@@ -28,21 +28,21 @@ const handleGlobalError = (error: unknown): void => {
   logger.error('React Query Global Error', error as Error);
 
   // Handle specific error types
-  if (error instanceof Error && 'statusCode' in error) {
+  if (error instanceof Error && 'status' in error) {
     const apiError = error as APIError;
 
-    switch (apiError.statusCode) {
+    switch (apiError.status) {
       case 401:
         // Handle unauthorized - redirect to login
         window.location.href = '/login';
         break;
       case 403:
         // Handle forbidden
-        logger.warn('Access forbidden', { details: apiError.details });
+        logger.warn('Access forbidden', { data: apiError.data });
         break;
       case 429:
         // Handle rate limiting
-        logger.warn('Rate limit exceeded', { details: apiError.details });
+        logger.warn('Rate limit exceeded', { data: apiError.data });
         break;
     }
   }

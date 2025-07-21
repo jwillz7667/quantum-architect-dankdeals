@@ -16,6 +16,7 @@ interface APIRequestConfig<T = unknown> {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: unknown;
+  params?: Record<string, unknown>;
   timeout?: number;
   retries?: number;
   schema?: z.ZodType<T>;
@@ -93,6 +94,7 @@ export class APIClient {
         ...(config.headers || {}),
       },
       body: config.body,
+      params: config.params,
       timeout: config.timeout || this.defaultTimeout,
       retries: config.retries || this.maxRetries,
       schema: config.schema || z.any(),
@@ -216,7 +218,31 @@ export class APIClient {
     endpoint: string,
     config: Omit<APIRequestConfig<T>, 'method' | 'body'> = {}
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
+    let url = `${this.baseURL}${endpoint}`;
+
+    // Add query parameters if provided
+    if (config.params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(config.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          // Only convert primitive values to string
+          if (
+            typeof value === 'string' ||
+            typeof value === 'number' ||
+            typeof value === 'boolean'
+          ) {
+            searchParams.append(key, String(value));
+          } else {
+            // For objects/arrays, serialize as JSON
+            searchParams.append(key, JSON.stringify(value));
+          }
+        }
+      });
+      if (searchParams.size > 0) {
+        url += `?${searchParams.toString()}`;
+      }
+    }
+
     const processedConfig = this.processConfig({ ...config, method: 'GET' });
     const response = await this.executeRequest(url, processedConfig);
     return response.data;

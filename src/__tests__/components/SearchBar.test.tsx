@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SearchBar } from '@/components/SearchBar';
-import { ProductsFilterProvider } from '@/hooks/useProductsFilterContext';
+import { ProductsFilterProvider } from '@/hooks/useProductsFilter';
 
 // Mock the context provider
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (

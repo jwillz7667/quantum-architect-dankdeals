@@ -107,10 +107,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (existingItemIndex >= 0) {
           // Update quantity of existing item
           const updatedItems = [...currentItems];
-          updatedItems[existingItemIndex] = {
-            ...updatedItems[existingItemIndex],
-            quantity: updatedItems[existingItemIndex].quantity + quantity,
-          };
+          const existingItem = updatedItems[existingItemIndex];
+          if (existingItem) {
+            updatedItems[existingItemIndex] = {
+              ...existingItem,
+              quantity: existingItem.quantity + quantity,
+            };
+          }
 
           toast({
             title: 'Cart Updated',
