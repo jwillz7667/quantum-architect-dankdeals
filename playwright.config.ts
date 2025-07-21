@@ -7,9 +7,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  timeout: 30000, // 30 second timeout for each test
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
     trace: 'on-first-retry',
+    actionTimeout: 10000, // 10 second timeout for actions
+    navigationTimeout: 30000, // 30 second timeout for navigation
   },
 
   projects: [
@@ -27,9 +30,17 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    port: 5173,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: process.env.CI
+    ? {
+        command: 'npm run preview', // Use preview (production build) in CI
+        port: 4173, // Preview runs on port 4173
+        reuseExistingServer: false,
+        timeout: 120000, // 2 minute timeout for server start
+      }
+    : {
+        command: 'npm run dev',
+        port: 5173,
+        reuseExistingServer: true,
+        timeout: 120000, // 2 minute timeout for server start
+      },
 });
