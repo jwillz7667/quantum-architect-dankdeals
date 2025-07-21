@@ -1,12 +1,21 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./dist",
+      "startServerCommand": "node scripts/lighthouse-server.js",
+      "startServerReadyPattern": "Server running on",
       "url": [
-        "http://localhost/",
-        "http://localhost/categories",
-        "http://localhost/cart"
-      ]
+        "http://localhost:5000/",
+        "http://localhost:5000/categories",
+        "http://localhost:5000/cart"
+      ],
+      "settings": {
+        "throttlingMethod": "simulate",
+        "throttling": {
+          "cpuSlowdownMultiplier": 4
+        },
+        "skipAudits": ["uses-http2"],
+        "onlyCategories": ["performance", "accessibility", "best-practices", "seo", "pwa"]
+      }
     },
     "assert": {
       "assertions": {
