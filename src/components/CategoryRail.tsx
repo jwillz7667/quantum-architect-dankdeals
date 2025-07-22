@@ -16,9 +16,11 @@ export function CategoryRail() {
   const location = useLocation();
 
   const handleCategoryClick = (category: string | null) => {
+    // Always set the category first
+    setSelectedCategory(category);
+
     if (location.pathname === '/categories') {
-      // On categories page, just filter and update URL
-      setSelectedCategory(category);
+      // On categories page, just update URL without a full navigation
       const params = new URLSearchParams(location.search);
       if (category) {
         params.set('category', category);
@@ -26,22 +28,19 @@ export function CategoryRail() {
         params.delete('category');
       }
       navigate(`${location.pathname}?${params.toString()}`, { replace: true });
-    } else if (location.pathname === '/') {
-      // On home page, navigate to categories with filter
-      setSelectedCategory(category);
+    } else {
+      // On all other pages (including '/'), navigate to the categories page
+      // with the selected filter.
       if (category) {
         navigate(`/categories?category=${category}`);
       } else {
         navigate('/categories');
       }
-    } else {
-      // On other pages, just set filter without navigation
-      setSelectedCategory(category);
     }
   };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-6 pt-3 px-4 scrollbar-hide">
+    <div className="flex gap-3 overflow-x-auto pb-6 pt-3 px-4 scrollbar-hide -mx-4">
       {categories.map((cat) => (
         <CategoryCard
           key={cat.category || 'all'}

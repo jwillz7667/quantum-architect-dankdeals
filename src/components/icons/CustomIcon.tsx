@@ -45,6 +45,8 @@ export function CustomIcon({
   const iconPath = iconMap[name];
 
   React.useEffect(() => {
+    let isMounted = true;
+
     if (!iconPath) {
       console.warn(`Custom icon "${name}" not found in icon map`);
       return;
@@ -64,14 +66,20 @@ export function CustomIcon({
     fetch(iconPath)
       .then((response) => response.text())
       .then((svg) => {
-        // Store in session cache for performance
-        sessionStorage.setItem(cacheKey, svg);
-        setSvgContent(svg);
-        setIsLoaded(true);
+        if (isMounted) {
+          // Store in session cache for performance
+          sessionStorage.setItem(cacheKey, svg);
+          setSvgContent(svg);
+          setIsLoaded(true);
+        }
       })
       .catch((error) => {
         console.error(`Failed to load icon "${name}":`, error);
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [iconPath, name]);
 
   if (!iconPath) {
