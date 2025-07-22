@@ -196,8 +196,8 @@ jobs:
           VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL || '' }}
           VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY || '' }}
         run: |
-          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-'https://example.supabase.co'}"
-          export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-'example-anon-key'}"
+          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-https://example.supabase.co}"
+          export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-example-anon-key}"
           export VITE_ADMIN_EMAIL="admin@example.com"
           export VITE_ENV="production"
           npm run build
@@ -254,8 +254,8 @@ jobs:
           VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL || '' }}
           VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY || '' }}
         run: |
-          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-'https://example.supabase.co'}"
-          export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-'example-anon-key'}"
+          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-https://example.supabase.co}"
+          export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-example-anon-key}"
           npm run test:e2e -- --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
       
       - name: Upload test results
