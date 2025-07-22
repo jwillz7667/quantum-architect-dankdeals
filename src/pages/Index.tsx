@@ -3,8 +3,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, MapPin, Phone } from 'lucide-react';
-import { DeliveryTruckIcon } from '@/components/icons/DeliveryTruckIcon';
+import { ShoppingCart, MapPin, Phone, Truck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
 import { Suspense, lazy } from 'react';
@@ -92,7 +91,7 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <DeliveryTruckIcon size={24} />
+                    <Truck size={24} />
                     <h3 className="text-xl font-bold">Fast Cannabis Delivery</h3>
                   </div>
                   <p className="text-white/90 mb-4">
