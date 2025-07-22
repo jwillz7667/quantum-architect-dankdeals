@@ -1,5 +1,5 @@
 // src/lib/react-query/hooks/useOptimizedProducts.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api/client';
 import { queryKeys, prefetchQuery } from '@/lib/react-query/config';
@@ -234,9 +234,9 @@ export const useInfiniteProducts = (
     search?: string;
   }
 ) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: [...queryKeys.products.list(filters), 'infinite'],
-    queryFn: async ({ pageParam = 0 }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam = 0 }) => {
       const response = await apiClient.get('/products', {
         params: {
           offset: pageParam * pageSize,
@@ -258,6 +258,7 @@ export const useInfiniteProducts = (
         nextPage: result.hasMore ? (pageParam || 0) + 1 : undefined,
       };
     },
+    initialPageParam: 0,
     getNextPageParam: (lastPage: { nextPage?: number }) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000,
   });

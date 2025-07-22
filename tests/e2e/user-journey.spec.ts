@@ -65,7 +65,7 @@ test.describe('Complete User Journey', () => {
     // Set date of birth (25 years old)
     const dob = new Date();
     dob.setFullYear(dob.getFullYear() - 25);
-    await page.getByLabel(/date of birth/i).fill(dob.toISOString().split('T')[0]);
+    await page.getByLabel(/date of birth/i).fill(dob.toISOString().split('T')[0] || '');
 
     // Fill address
     await page.getByLabel(/street address/i).fill('123 Main Street');

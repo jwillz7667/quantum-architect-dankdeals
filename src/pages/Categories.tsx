@@ -67,7 +67,10 @@ export default function Categories() {
     : products;
 
   // Generate structured data
-  const productListingSchema = generateProductListingSchema(filteredProducts, selectedCategory);
+  const productListingSchema = generateProductListingSchema(
+    filteredProducts,
+    selectedCategory || undefined
+  );
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
 
   return (

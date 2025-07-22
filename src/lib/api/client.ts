@@ -94,7 +94,7 @@ export class APIClient {
         ...(config.headers || {}),
       },
       body: config.body,
-      params: config.params,
+      params: config.params || {},
       timeout: config.timeout || this.defaultTimeout,
       retries: config.retries || this.maxRetries,
       schema: config.schema || z.any(),

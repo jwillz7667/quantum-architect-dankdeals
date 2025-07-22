@@ -61,8 +61,9 @@ export function getProductImages(
   _category?: string
 ): ProductImageSet {
   // First check if we have specific images for this product ID
-  if (productImageMap[productId]) {
-    return productImageMap[productId];
+  const specificImages = productImageMap[productId];
+  if (specificImages) {
+    return specificImages;
   }
 
   // Try to match by product name
@@ -70,20 +71,24 @@ export function getProductImages(
     const nameLower = productName.toLowerCase();
 
     if (nameLower.includes('pineapple') && nameLower.includes('fruz')) {
-      return productImageMap['11111111-1111-1111-1111-111111111111'];
+      const pineappleImages = productImageMap['11111111-1111-1111-1111-111111111111'];
+      if (pineappleImages) return pineappleImages;
     }
     if (
       nameLower.includes('rainbow') ||
       nameLower.includes('sherbert') ||
       nameLower.includes('rs11')
     ) {
-      return productImageMap['22222222-2222-2222-2222-222222222222'];
+      const rainbowImages = productImageMap['22222222-2222-2222-2222-222222222222'];
+      if (rainbowImages) return rainbowImages;
     }
     if (nameLower.includes('runtz')) {
-      return productImageMap['33333333-3333-3333-3333-333333333333'];
+      const runtzImages = productImageMap['33333333-3333-3333-3333-333333333333'];
+      if (runtzImages) return runtzImages;
     }
     if (nameLower.includes('wedding') && nameLower.includes('cake')) {
-      return productImageMap['44444444-4444-4444-4444-444444444444'];
+      const weddingImages = productImageMap['44444444-4444-4444-4444-444444444444'];
+      if (weddingImages) return weddingImages;
     }
   }
 

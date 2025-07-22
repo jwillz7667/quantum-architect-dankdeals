@@ -175,7 +175,7 @@ export default defineConfig(({ mode: _mode }) => ({
           // More aggressive vendor splitting by package name
           if (id.includes('node_modules/')) {
             const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
-            if (match) {
+            if (match && match[1]) {
               const packageName = match[1];
 
               // Group type definitions together

@@ -53,7 +53,7 @@ export default function HealthCheck() {
       // Check environment variables
       results.checks.environment = !!(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY);
       if (results.details) {
-        results.details.environment = {
+        results.details['environment'] = {
           mode: env.VITE_ENV,
           hasSupabaseUrl: !!env.VITE_SUPABASE_URL,
           hasSupabaseKey: !!env.VITE_SUPABASE_ANON_KEY,
@@ -64,7 +64,7 @@ export default function HealthCheck() {
       const moduleCheck = performHealthCheck();
       results.checks.modules = moduleCheck.status === 'healthy';
       if (results.details) {
-        results.details.modules = moduleCheck;
+        results.details['modules'] = moduleCheck;
       }
 
       // Check Supabase connection
@@ -72,12 +72,12 @@ export default function HealthCheck() {
         const { error: pingError } = await supabase.from('profiles').select('count').limit(1);
         results.checks.supabase = !pingError;
         if (results.details) {
-          results.details.supabase = { error: pingError?.message };
+          results.details['supabase'] = { error: pingError?.message };
         }
       } catch (_error) {
         results.checks.supabase = false;
         if (results.details) {
-          results.details.supabase = { error: 'Connection failed' };
+          results.details['supabase'] = { error: 'Connection failed' };
         }
       }
 
@@ -86,12 +86,12 @@ export default function HealthCheck() {
         const { error: dbError } = await supabase.from('categories').select('id').limit(1);
         results.checks.database = !dbError;
         if (results.details) {
-          results.details.database = { error: dbError?.message };
+          results.details['database'] = { error: dbError?.message };
         }
       } catch (_error) {
         results.checks.database = false;
         if (results.details) {
-          results.details.database = { error: 'Database query failed' };
+          results.details['database'] = { error: 'Database query failed' };
         }
       }
 
@@ -103,7 +103,7 @@ export default function HealthCheck() {
         } = await supabase.auth.getSession();
         results.checks.auth = !authError;
         if (results.details) {
-          results.details.auth = {
+          results.details['auth'] = {
             hasSession: !!session,
             error: authError?.message,
           };
@@ -111,7 +111,7 @@ export default function HealthCheck() {
       } catch (_error) {
         results.checks.auth = false;
         if (results.details) {
-          results.details.auth = { error: 'Auth service unreachable' };
+          results.details['auth'] = { error: 'Auth service unreachable' };
         }
       }
 
@@ -129,7 +129,7 @@ export default function HealthCheck() {
       }
 
       if (results.details) {
-        results.details.performance = {
+        results.details['performance'] = {
           checkDuration: Date.now() - startTime,
         };
       }

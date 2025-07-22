@@ -39,17 +39,17 @@ export function generateMetaTags(props: SEOProps): Record<string, string> {
   const fullTitle = seo.title === defaultSEO.title ? seo.title : `${seo.title} | DankDeals`;
 
   return {
-    title: fullTitle,
-    description: seo.description || defaultSEO.description,
-    keywords: seo.keywords || defaultSEO.keywords,
-    'og:title': fullTitle,
-    'og:description': seo.description || defaultSEO.description,
-    'og:image': seo.image || defaultSEO.image,
-    'og:url': seo.url || defaultSEO.url,
+    title: fullTitle || '',
+    description: seo.description || defaultSEO.description || '',
+    keywords: seo.keywords || defaultSEO.keywords || '',
+    'og:title': fullTitle || '',
+    'og:description': seo.description || defaultSEO.description || '',
+    'og:image': seo.image || defaultSEO.image || '',
+    'og:url': seo.url || defaultSEO.url || '',
     'og:type': seo.type || 'website',
-    'twitter:title': fullTitle,
-    'twitter:description': seo.description || defaultSEO.description,
-    'twitter:image': seo.image || defaultSEO.image,
+    'twitter:title': fullTitle || '',
+    'twitter:description': seo.description || defaultSEO.description || '',
+    'twitter:image': seo.image || defaultSEO.image || '',
   };
 }
 

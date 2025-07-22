@@ -115,7 +115,7 @@ export class OrderService {
         .single();
 
       if (orderError || !order) {
-        logger.error('Failed to create order', orderError, {
+        logger.error('Failed to create order', orderError || new Error('Order creation failed'), {
           context: {
             userId: userId || 'guest',
             email: orderData.email,
@@ -292,7 +292,7 @@ export class OrderService {
         .single();
 
       if (error || !order) {
-        logger.error('Failed to fetch order', error);
+        logger.error('Failed to fetch order', error || new Error('Order fetch failed'));
         return null;
       }
 

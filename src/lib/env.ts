@@ -16,25 +16,6 @@ export interface AppEnv {
 }
 
 /**
- * Validates that required environment variables are present
- */
-function _validateEnvironment(): void {
-  const requiredVars = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'] as const;
-
-  const missing = requiredVars.filter((varName) => {
-    const value = import.meta.env[varName] as string | undefined;
-    return !value || typeof value !== 'string' || value.trim() === '';
-  });
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}\n` +
-        'Please check your .env file and ensure all required variables are set.'
-    );
-  }
-}
-
-/**
  * Gets the current environment
  */
 function getCurrentEnvironment(): Environment {
