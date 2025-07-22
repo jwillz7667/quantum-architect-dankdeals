@@ -34,77 +34,22 @@ export default defineConfig(({ mode: _mode }) => ({
         'util',
       ],
       output: {
-        // Industry-standard chunking strategy for optimal performance
-        manualChunks: (id) => {
-          // Core React dependencies - loaded immediately
-          if (
-            id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
-            id.includes('node_modules/scheduler/')
-          ) {
-            return 'react';
-          }
-
-          // React Router - needed for navigation
-          if (id.includes('node_modules/react-router')) {
-            return 'react-router';
-          }
-
-          // UI framework dependencies - loaded with first interaction
-          if (
-            id.includes('@radix-ui') ||
-            id.includes('react-remove-scroll') ||
-            id.includes('use-sidecar')
-          ) {
-            return 'ui-framework';
-          }
-
-          // State management and data fetching
-          if (id.includes('@tanstack/react-query') || id.includes('@supabase')) {
-            return 'data-layer';
-          }
-
-          // Heavy dependencies - lazy loaded
-          if (id.includes('lucide-react')) {
-            return 'icons';
-          }
-
-          // Form validation - only loaded on forms
-          if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
-            return 'forms';
-          }
-
-          // Utility libraries
-          if (
-            id.includes('clsx') ||
-            id.includes('class-variance-authority') ||
-            id.includes('tailwind-merge')
-          ) {
-            return 'utils';
-          }
-
-          // Animation libraries - lazy loaded
-          if (id.includes('framer-motion')) {
-            return 'animation';
-          }
-
-          // Date utilities - lazy loaded
-          if (id.includes('date-fns')) {
-            return 'date-utils';
-          }
-
-          // Let Vite handle vendor chunking for remaining modules
-          if (id.includes('node_modules/')) {
-            return 'vendor';
-          }
+        // Use a simpler chunking strategy to ensure React loads properly
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@tanstack/react-query',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-toast',
+          ],
         },
+        // Ensure proper module format
+        format: 'es',
         // Optimize chunk names for caching
-        chunkFileNames: (chunkInfo) => {
-          return `assets/${chunkInfo.name}-[hash].js`;
-        },
-        // Keep chunks under 244KB for optimal HTTP/2 performance
-        // But not too small to avoid excessive requests
-        manualChunksMaxSize: 244000,
+        chunkFileNames: 'assets/[name]-[hash].js',
       },
     },
     cssCodeSplit: true,

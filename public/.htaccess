@@ -1,0 +1,30 @@
+# Set proper MIME types
+AddType application/javascript js mjs
+AddType text/css css
+AddType application/font-otf otf
+AddType application/font-woff woff
+AddType application/font-woff2 woff2
+
+# Enable compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
+
+# Set proper headers
+<FilesMatch "\.(js|mjs)$">
+  Header set Content-Type "application/javascript; charset=utf-8"
+</FilesMatch>
+
+<FilesMatch "\.css$">
+  Header set Content-Type "text/css; charset=utf-8"
+</FilesMatch>
+
+# SPA fallback
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
