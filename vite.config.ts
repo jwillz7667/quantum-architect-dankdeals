@@ -8,21 +8,29 @@ export default defineConfig({
     host: '::',
     port: 8080,
   },
-  plugins: [react()],
+  plugins: [
+    react({
+      jsxRuntime: 'automatic',
+      jsxImportSource: 'react',
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
-    // Simple, working build config
+    // Disable minification to debug the React error
     outDir: 'dist',
-    sourcemap: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: false,
-        drop_debugger: true,
+    sourcemap: true,
+    minify: false,
+    target: 'es2015',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          vendor: ['react-router-dom', '@tanstack/react-query'],
+        },
       },
     },
   },
