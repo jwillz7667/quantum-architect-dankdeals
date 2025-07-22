@@ -1,28 +1,10 @@
-/* Custom Icon Styles */
-@import './styles/icons.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Custom Font Declaration */
-@font-face {
-  font-family: 'Bio Sans';
-  src: url('/assets/fonts/bio-sans.otf') format('opentype');
-  font-weight: 100 900;
-  font-display: swap;
-  font-style: normal;
-}
-
-/* Fallback font stack if Bio Sans fails to load */
+/* Additional global styles can be added here */
 body {
-  font-family:
-    'Bio Sans',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: 'Bio Sans', sans-serif;
 }
 
 /* DankDeals MN Design System - Cannabis Dispensary App */
