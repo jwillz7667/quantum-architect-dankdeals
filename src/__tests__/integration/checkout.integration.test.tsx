@@ -27,6 +27,15 @@ vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 
+// Mock useProducts hook
+vi.mock('@/hooks/useProducts', () => ({
+  useProducts: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 // Mock product data
 const mockProduct: Product = {
   id: 'test-product-123',

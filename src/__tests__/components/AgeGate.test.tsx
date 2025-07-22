@@ -93,9 +93,7 @@ describe('AgeGate Component', () => {
     render(<AgeGate />);
 
     expect(screen.getByText('CASH DUE ON DELIVERY')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Payment in cash required when your order arrives/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/All sales are final/)).toBeInTheDocument();
   });
 
   it('should handle cookie errors gracefully', () => {

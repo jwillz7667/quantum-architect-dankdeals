@@ -1,9 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { ProductCard } from '@/components/ProductCard';
 
-// Wrapper component for tests
-const TestWrapper = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+// Mock useNavigate
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
+// Wrapper component for tests with Router context
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <BrowserRouter>{children}</BrowserRouter>
+);
 
 describe('ProductCard', () => {
   const defaultProps = {
