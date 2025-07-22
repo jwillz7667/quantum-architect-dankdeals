@@ -219,10 +219,48 @@
     </script>
 
     <!-- FAQ Schema -->
-    <script type="application/ld+json" src="/faq-schema.json"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What areas does DankDeals deliver to?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We deliver to Minneapolis, St. Paul, and surrounding metro areas within a 30-mile radius. Check our delivery area page for specific zip codes."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are your delivery hours?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We deliver 7 days a week from 10:00 AM to 10:00 PM. Same-day delivery is available for orders placed before 8:00 PM."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is there a minimum order for delivery?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, we have a $50 minimum order for delivery. Delivery fees vary by distance."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need a medical card?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You must be 21 or older with a valid ID. Medical cards are not required for adult-use cannabis in Minnesota."
+            }
+          }
+        ]
+      }
+    </script>
 
-    <!-- Reviews Schema -->
-    <script type="application/ld+json" src="/reviews-schema.json"></script>
+    <!-- Reviews/Rating Schema (included in LocalBusiness above) -->
 
     <!-- Plausible Analytics - Load after page load -->
     <script>
