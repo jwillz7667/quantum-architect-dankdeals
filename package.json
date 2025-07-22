@@ -26,7 +26,7 @@
     "lighthouse:local": "node scripts/lighthouse-server.js & sleep 5 && lhci autorun --collect.startServerCommand='' --collect.url='http://localhost:5000' && kill %1",
     "analyze": "npx vite-bundle-visualizer",
     "clean": "rm -rf dist coverage test-results playwright-report",
-    "prepare": "husky"
+    "prepare": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', {stdio: 'inherit'}); } catch (e) {}\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
