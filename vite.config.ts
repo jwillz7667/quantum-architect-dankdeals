@@ -33,23 +33,34 @@ export default defineConfig(({ mode: _mode }) => ({
         'stream',
         'util',
       ],
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
       output: {
-        // Use a simpler chunking strategy to ensure React loads properly
-        manualChunks: {
-          vendor: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            '@tanstack/react-query',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-toast',
-          ],
+        // Ensure all React dependencies are bundled together
+        manualChunks: (id) => {
+          // Bundle all React-related modules together to avoid loading issues
+          if (
+            id.includes('react') ||
+            id.includes('react-dom') ||
+            id.includes('scheduler') ||
+            id.includes('react/jsx-runtime') ||
+            id.includes('react/jsx-dev-runtime')
+          ) {
+            return 'react-vendor';
+          }
+          // Keep other vendor modules separate
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
         // Ensure proper module format
         format: 'es',
         // Optimize chunk names for caching
         chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        // Ensure proper exports
+        exports: 'auto',
       },
     },
     cssCodeSplit: true,
@@ -91,20 +102,24 @@ export default defineConfig(({ mode: _mode }) => ({
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-toast',
+      '@tanstack/react-query',
+      '@supabase/supabase-js',
       // Include problematic dependencies
       'use-sidecar',
       'react-remove-scroll',
       // Include tslib for helper functions
       'tslib',
-      // Include resend but exclude server components
-      'resend',
+      // Include styling dependencies
+      'clsx',
+      'class-variance-authority',
+      'tailwind-merge',
     ],
     exclude: ['react-dom/server', 'react-dom/server.node', '@react-email/render'],
     force: true, // Force re-optimization to ensure consistent builds
     esbuildOptions: {
       target: 'es2020',
       keepNames: true,
-      minify: true,
+      minify: false, // Don't minify in optimizeDeps
       treeShaking: true,
       format: 'esm',
     },
@@ -114,6 +129,8 @@ export default defineConfig(({ mode: _mode }) => ({
     target: 'es2020',
     keepNames: true,
     legalComments: 'none',
-    drop: ['console', 'debugger'],
+    // Don't drop console in production for debugging
+    drop: process.env.NODE_ENV === 'production' ? ['debugger'] : [],
+    jsx: 'automatic', // Ensure automatic JSX runtime
   },
 }));
