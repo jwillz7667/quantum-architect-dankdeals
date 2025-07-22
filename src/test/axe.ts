@@ -1,12 +1,35 @@
- 
 import { expect } from 'vitest';
-import * as matchers from 'jest-axe';
+import type { AxeResults } from 'axe-core';
+import { axe } from 'jest-axe';
 
-// @ts-expect-error - jest-axe matchers are compatible but types don't match perfectly
-expect.extend(matchers);
+// Custom matcher implementation for Vitest
+const toHaveNoViolations = {
+  toHaveNoViolations(received: AxeResults) {
+    const pass = received.violations.length === 0;
+
+    if (pass) {
+      return {
+        pass: true,
+        message: () => 'expected violations but received none',
+      };
+    }
+
+    return {
+      pass: false,
+      message: () => {
+        const violations = received.violations.map((v) => `${v.id}: ${v.description}`).join('\n');
+        return `expected no violations but received:\n${violations}`;
+      },
+    };
+  },
+};
+
+expect.extend(toHaveNoViolations);
 
 declare module 'vitest' {
   interface Assertion {
     toHaveNoViolations(): Promise<void>;
   }
 }
+
+export { axe };

@@ -27,10 +27,10 @@ jobs:
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      src: ${{ steps.filter.outputs.src }}
-      tests: ${{ steps.filter.outputs.tests }}
-      deps: ${{ steps.filter.outputs.deps }}
-      ci: ${{ steps.filter.outputs.ci }}
+      src: ${{ steps.filter.outputs.src || 'false' }}
+      tests: ${{ steps.filter.outputs.tests || 'false' }}
+      deps: ${{ steps.filter.outputs.deps || 'false' }}
+      ci: ${{ steps.filter.outputs.ci || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -193,8 +193,8 @@ jobs:
       - name: Build application
         shell: bash
         env:
-          VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL || '' }}
+          VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY || '' }}
         run: |
           export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-'https://example.supabase.co'}"
           export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-'example-anon-key'}"
@@ -251,8 +251,8 @@ jobs:
       - name: Run E2E tests
         shell: bash
         env:
-          VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL || '' }}
+          VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY || '' }}
         run: |
           export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-'https://example.supabase.co'}"
           export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-'example-anon-key'}"
@@ -293,7 +293,7 @@ jobs:
         run: |
           npm run lighthouse:ci
         env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN || '' }}
 
   # Final status check
   ci-status:
