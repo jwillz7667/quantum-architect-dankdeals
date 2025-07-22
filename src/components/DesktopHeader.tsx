@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Phone } from 'lucide-react';
-import { ShoppingCartIcon } from '@/components/icons/CustomIcon';
+import { Phone, ShoppingCart } from 'lucide-react';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
 
 const navItems = [
@@ -53,7 +52,7 @@ export function DesktopHeader() {
 
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCartIcon size={20} />
+                <ShoppingCart className="h-6 w-6" />
                 <span className="sr-only">Shopping Cart</span>
               </Button>
             </Link>

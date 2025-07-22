@@ -1,24 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { CustomIcon } from '@/components/icons/CustomIcon';
 import type { LucideIcon } from 'lucide-react';
 
 interface CategoryCardProps {
-  icon: LucideIcon | string;
+  icon: LucideIcon;
   label: string;
   onClick?: () => void;
   isActive?: boolean;
 }
 
-export function CategoryCard({ icon, label, onClick, isActive = false }: CategoryCardProps) {
-  const renderIcon = () => {
-    if (typeof icon === 'string') {
-      return <CustomIcon name={icon} size={24} className="text-current" />;
-    } else {
-      const Icon = icon;
-      return <Icon className="h-6 w-6" />;
-    }
-  };
-
+export function CategoryCard({ icon: Icon, label, onClick, isActive = false }: CategoryCardProps) {
   return (
     <Button
       variant="default"
@@ -32,7 +22,7 @@ export function CategoryCard({ icon, label, onClick, isActive = false }: Categor
       aria-pressed={isActive}
       aria-label={`${label} category${isActive ? ' - currently selected' : ''}`}
     >
-      {renderIcon()}
+      <Icon className="h-6 w-6" />
       <span className="text-xs font-medium">{label}</span>
     </Button>
   );

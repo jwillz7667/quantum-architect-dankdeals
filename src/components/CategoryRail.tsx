@@ -1,13 +1,20 @@
+import { Flame, Leaf, Grape, Syringe, Sparkles, type LucideIcon } from 'lucide-react';
 import { CategoryCard } from './CategoryCard';
 import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const categories = [
-  { icon: 'cannabis-leaf', label: 'Flower', category: 'flower' },
-  { icon: 'edibles-package', label: 'Edibles', category: 'edibles' },
-  { icon: 'cannabis-leaf-alt', label: 'Prerolls', category: 'prerolls' },
-  { icon: 'dropper', label: 'Topicals', category: 'topicals' },
-  { icon: 'cannabis-plant', label: 'All', category: null },
+interface Category {
+  icon: LucideIcon;
+  label: string;
+  category: string | null;
+}
+
+const categories: Category[] = [
+  { icon: Leaf, label: 'Flower', category: 'flower' },
+  { icon: Grape, label: 'Edibles', category: 'edibles' },
+  { icon: Flame, label: 'Prerolls', category: 'prerolls' },
+  { icon: Syringe, label: 'Topicals', category: 'topicals' },
+  { icon: Sparkles, label: 'All', category: null },
 ];
 
 export function CategoryRail() {
