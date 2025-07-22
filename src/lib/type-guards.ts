@@ -66,17 +66,11 @@ export const isError = (value: unknown): value is Error => {
 };
 
 export const hasErrorMessage = (error: unknown): error is { message: string } => {
-  return (
-    isObject(error) && 'message' in error && isString((error)['message'])
-  );
+  return isObject(error) && 'message' in error && isString(error['message']);
 };
 
 export const hasStatusCode = (error: unknown): error is { statusCode: number } => {
-  return (
-    isObject(error) &&
-    'statusCode' in error &&
-    isNumber((error)['statusCode'])
-  );
+  return isObject(error) && 'statusCode' in error && isNumber(error['statusCode']);
 };
 
 // API response type guards
@@ -88,10 +82,10 @@ export const isApiResponse = <T>(
 
   const res = response;
   if (!('data' in res) || !('status' in res)) return false;
-  if (!isNumber((res)['status'])) return false;
+  if (!isNumber(res['status'])) return false;
 
   if (dataValidator) {
-    return dataValidator((res)['data']);
+    return dataValidator(res['data']);
   }
 
   return true;
@@ -99,17 +93,15 @@ export const isApiResponse = <T>(
 
 // Product type guards
 export const hasPrice = (value: unknown): value is { price: number } => {
-  return (
-    isObject(value) && 'price' in value && isNumber((value)['price'])
-  );
+  return isObject(value) && 'price' in value && isNumber(value['price']);
 };
 
 export const hasId = (value: unknown): value is { id: string } => {
-  return isObject(value) && 'id' in value && isString((value)['id']);
+  return isObject(value) && 'id' in value && isString(value['id']);
 };
 
 export const hasName = (value: unknown): value is { name: string } => {
-  return isObject(value) && 'name' in value && isString((value)['name']);
+  return isObject(value) && 'name' in value && isString(value['name']);
 };
 
 // Utility type guard factory
@@ -118,7 +110,7 @@ export const createPropertyGuard = <K extends string, V>(
   valueGuard: (value: unknown) => value is V
 ) => {
   return (obj: unknown): obj is Record<K, V> => {
-    return isObject(obj) && key in obj && valueGuard((obj)[key]);
+    return isObject(obj) && key in obj && valueGuard(obj[key]);
   };
 };
 
@@ -139,7 +131,7 @@ export const isPartialOf = <T extends Record<string, unknown>>(
 
   for (const [key, guard] of Object.entries(guards)) {
     if (key in value && guard) {
-      const propertyValue = (value)[key];
+      const propertyValue = value[key];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       if (!guard(propertyValue)) {
         return false;
