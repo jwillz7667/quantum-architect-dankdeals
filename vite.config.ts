@@ -33,189 +33,78 @@ export default defineConfig(({ mode: _mode }) => ({
         'stream',
         'util',
       ],
-      // Improve tree shaking
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-      },
       output: {
-        // Use function form for manualChunks to better control chunking
+        // Industry-standard chunking strategy for optimal performance
         manualChunks: (id) => {
-          // Skip server-side modules entirely
-          if (
-            id.includes('react-dom/server') ||
-            id.includes('server.node') ||
-            id.includes('server.browser') ||
-            id.includes('server-legacy')
-          ) {
-            return undefined;
-          }
-
-          // Problematic libraries that need special handling
-          if (id.includes('use-sidecar') || id.includes('react-remove-scroll')) {
-            return 'sidecar-vendor';
-          }
-
-          // React core (keep minimal)
+          // Core React dependencies - loaded immediately
           if (
             id.includes('node_modules/react/') ||
-            (id.includes('node_modules/react-dom/') && !id.includes('server')) ||
+            id.includes('node_modules/react-dom/') ||
             id.includes('node_modules/scheduler/')
           ) {
-            return 'react-vendor';
+            return 'react';
           }
 
-          // React Router (separate from React core)
+          // React Router - needed for navigation
+          if (id.includes('node_modules/react-router')) {
+            return 'react-router';
+          }
+
+          // UI framework dependencies - loaded with first interaction
           if (
-            id.includes('node_modules/react-router') ||
-            id.includes('node_modules/react-router-dom/')
+            id.includes('@radix-ui') ||
+            id.includes('react-remove-scroll') ||
+            id.includes('use-sidecar')
           ) {
-            return 'router-vendor';
+            return 'ui-framework';
           }
 
-          // Radix UI components (split more granularly)
-          if (id.includes('@radix-ui/react-dialog')) {
-            return 'radix-dialog-vendor';
-          }
-          if (id.includes('@radix-ui/react-dropdown-menu')) {
-            return 'radix-dropdown-vendor';
-          }
-          if (id.includes('@radix-ui/react-toast')) {
-            return 'radix-toast-vendor';
-          }
-          if (id.includes('@radix-ui')) {
-            return 'radix-other-vendor';
+          // State management and data fetching
+          if (id.includes('@tanstack/react-query') || id.includes('@supabase')) {
+            return 'data-layer';
           }
 
-          // Split data fetching libraries into separate chunks
-          if (id.includes('@tanstack/react-query')) {
-            return 'query-vendor';
-          }
-
-          if (id.includes('@supabase/supabase-js') || id.includes('node_modules/@supabase/')) {
-            return 'supabase-vendor';
-          }
-
-          // Form libraries (only loaded with forms)
-          if (id.includes('react-hook-form')) {
-            return 'react-hook-form-vendor';
-          }
-          if (id.includes('@hookform/resolvers')) {
-            return 'hookform-resolvers-vendor';
-          }
-          if (id.includes('zod')) {
-            return 'zod-vendor';
-          }
-
-          // Checkout pages (separate chunk - only loaded during checkout)
-          if (id.includes('/pages/checkout/')) {
-            return 'checkout-vendor';
-          }
-
-          // Profile pages (separate chunk - only loaded in profile)
-          if (id.includes('/pages/profile/')) {
-            return 'profile-vendor';
-          }
-
-          // Lucide icons (split from main bundle)
+          // Heavy dependencies - lazy loaded
           if (id.includes('lucide-react')) {
-            return 'icons-vendor';
+            return 'icons';
           }
 
-          // Date handling libraries
-          if (id.includes('node_modules/date-fns')) {
-            return 'date-vendor';
-          }
-
-          // CSS-in-JS and utility libraries
-          if (id.includes('node_modules/tailwind')) {
-            return 'tailwind-vendor';
-          }
-          if (id.includes('node_modules/clsx')) {
-            return 'clsx-vendor';
-          }
-          if (id.includes('node_modules/class-variance-authority')) {
-            return 'cva-vendor';
-          }
-
-          // Split helmet (SEO) into separate chunk
-          if (
-            id.includes('node_modules/react-helmet') ||
-            id.includes('node_modules/react-helmet-async')
-          ) {
-            return 'seo-vendor';
-          }
-
-          // Animation libraries
-          if (id.includes('node_modules/framer-motion')) {
-            return 'animation-vendor';
-          }
-
-          // Chart libraries (only loaded with admin/analytics)
-          if (id.includes('node_modules/recharts')) {
-            return 'recharts-vendor';
-          }
-          if (id.includes('node_modules/d3')) {
-            return 'd3-vendor';
+          // Form validation - only loaded on forms
+          if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
+            return 'forms';
           }
 
           // Utility libraries
-          if (id.includes('node_modules/lodash')) {
-            return 'lodash-vendor';
-          }
-          if (id.includes('node_modules/ramda')) {
-            return 'ramda-vendor';
-          }
-
-          // Split large individual libraries
-          if (id.includes('node_modules/tslib')) {
-            return 'tslib-vendor';
+          if (
+            id.includes('clsx') ||
+            id.includes('class-variance-authority') ||
+            id.includes('tailwind-merge')
+          ) {
+            return 'utils';
           }
 
-          // More aggressive vendor splitting by package name
+          // Animation libraries - lazy loaded
+          if (id.includes('framer-motion')) {
+            return 'animation';
+          }
+
+          // Date utilities - lazy loaded
+          if (id.includes('date-fns')) {
+            return 'date-utils';
+          }
+
+          // Let Vite handle vendor chunking for remaining modules
           if (id.includes('node_modules/')) {
-            const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
-            if (match && match[1]) {
-              const packageName = match[1];
-
-              // Group type definitions together
-              if (packageName.startsWith('@types/')) {
-                return 'types-vendor';
-              }
-
-              // Group build tools together
-              if (
-                packageName.startsWith('@babel/') ||
-                packageName.startsWith('@rollup/') ||
-                packageName.startsWith('@vite/')
-              ) {
-                return 'build-tools-vendor';
-              }
-
-              // Group testing libraries together
-              if (
-                packageName.includes('test') ||
-                packageName.includes('spec') ||
-                packageName.includes('jest') ||
-                packageName.includes('vitest')
-              ) {
-                return 'test-vendor';
-              }
-
-              // Split by individual package for smaller chunks
-              const cleanName = packageName
-                .replace('@', '')
-                .replace('/', '-')
-                .replace(/[^a-zA-Z0-9-]/g, '');
-              return `${cleanName}-vendor`;
-            }
-            return 'misc-vendor';
+            return 'vendor';
           }
         },
-        // Preserve module structure for better debugging
-        preserveModules: false,
-        // Use named exports
-        exports: 'named',
+        // Optimize chunk names for caching
+        chunkFileNames: (chunkInfo) => {
+          return `assets/${chunkInfo.name}-[hash].js`;
+        },
+        // Keep chunks under 244KB for optimal HTTP/2 performance
+        // But not too small to avoid excessive requests
+        manualChunksMaxSize: 244000,
       },
     },
     cssCodeSplit: true,
@@ -236,6 +125,13 @@ export default defineConfig(({ mode: _mode }) => ({
     // Module preloading optimizations
     modulePreload: {
       polyfill: false,
+      // Preload critical chunks
+      resolveDependencies: (filename, deps, _context) => {
+        // Always preload React and main chunks
+        return deps.filter(
+          (dep) => dep.includes('react') || dep.includes('index') || dep.includes('react-router')
+        );
+      },
     },
   },
   optimizeDeps: {
