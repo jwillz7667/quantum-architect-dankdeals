@@ -18,21 +18,21 @@ describe('SearchBar', () => {
   it('renders search input correctly', () => {
     render(<SearchBar onFilter={mockOnFilter} />, { wrapper: TestWrapper });
 
-    const searchInput = screen.getByRole('textbox');
+    const searchInput = screen.getByRole('searchbox');
     expect(searchInput).toBeInTheDocument();
   });
 
   it('renders without onFilter prop', () => {
     render(<SearchBar />, { wrapper: TestWrapper });
 
-    const searchInput = screen.getByRole('textbox');
+    const searchInput = screen.getByRole('searchbox');
     expect(searchInput).toBeInTheDocument();
   });
 
   it('allows user to type in search input', () => {
     render(<SearchBar onFilter={mockOnFilter} />, { wrapper: TestWrapper });
 
-    const searchInput = screen.getByRole('textbox');
+    const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: 'test search' } });
 
     expect(searchInput).toHaveValue('test search');
@@ -41,7 +41,7 @@ describe('SearchBar', () => {
   it('calls onFilter when provided', () => {
     render(<SearchBar onFilter={mockOnFilter} />, { wrapper: TestWrapper });
 
-    const searchInput = screen.getByRole('textbox');
+    const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: 'test' } });
 
     // onFilter might be called on change or we might need to trigger it differently

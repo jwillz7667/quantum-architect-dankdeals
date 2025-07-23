@@ -20,10 +20,9 @@ export default defineConfig({
     },
   },
   build: {
-    // Disable minification to debug the React error
     outDir: 'dist',
     sourcemap: true,
-    minify: false,
+    minify: true,
     target: 'es2015',
     rollupOptions: {
       output: {

@@ -88,7 +88,7 @@ describe('ProductCard', () => {
     render(<ProductCard {...defaultProps} />, { wrapper: TestWrapper });
 
     const image = screen.getByRole('img');
-    expect(image).toHaveAttribute('alt', 'Test Product');
+    expect(image).toHaveAttribute('alt', 'Test Product - Premium flower cannabis product');
   });
 
   it('shows price in correct format', () => {

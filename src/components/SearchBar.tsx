@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Search, ListFilter } from 'lucide-react';
 
 interface SearchBarProps {
-  onFilter: () => void;
+  onFilter?: () => void;
 }
 
 export function SearchBar({ onFilter }: SearchBarProps) {

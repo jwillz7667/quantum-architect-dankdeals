@@ -147,7 +147,7 @@ const Index = () => {
 
       {/* Bottom Navigation */}
       <Suspense fallback={<div className="h-16 bg-gray-100" />}>
-        <BottomNav activeTab="/" />
+        <BottomNav />
       </Suspense>
     </div>
   );
