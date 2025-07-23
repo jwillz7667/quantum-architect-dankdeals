@@ -27,7 +27,9 @@
     />
 
     <link rel="canonical" href="https://dankdealsmn.com/" />
+    <link rel="alternate" hreflang="en" href="https://dankdealsmn.com/" />
     <link rel="alternate" hreflang="en-US" href="https://dankdealsmn.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://dankdealsmn.com/" />
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -39,6 +41,19 @@
     <meta name="theme-color" content="#185a1b" />
     <meta name="msapplication-TileColor" content="#185a1b" />
     <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- Security Headers -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://ralbzuvkyexortqngvxs.supabase.co wss://ralbzuvkyexortqngvxs.supabase.co https://plausible.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Permissions-Policy"
+      content="accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=()"
+    />
 
     <meta property="og:title" content="DankDeals - Premium Cannabis Delivery in Minnesota" />
     <meta
@@ -66,8 +81,6 @@
     <meta name="twitter:image:alt" content="DankDeals Cannabis Delivery Service" />
 
     <!-- Critical Resource Hints for Performance -->
-    <!-- Preload critical font -->
-    <link rel="preload" href="/assets/fonts/bio-sans.otf" as="font" type="font/otf" crossorigin />
 
     <!-- Preconnect to critical origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

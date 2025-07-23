@@ -12,7 +12,7 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/SEOHead';
-import { generateProductSchema } from '@/lib/seo';
+import { generateProductSchema } from '@/lib/productSchema';
 import { OptimizedProductImage } from '@/components/OptimizedProductImage';
 import { getProductImages } from '@/lib/productImages';
 
@@ -206,10 +206,7 @@ export default function ProductDetail() {
     { name: product.name || 'Product', url: canonicalUrl },
   ];
 
-  const productSchema = generateProductSchema({
-    ...product,
-    variants: product.variants || [],
-  });
+  const productSchema = generateProductSchema(product, selectedVariant || undefined);
 
   // Generate product review schema for SEO
   const reviewSchema = {

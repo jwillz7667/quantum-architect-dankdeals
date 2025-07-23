@@ -43,7 +43,7 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
       {/* Main header */}
       <div className="bg-white px-4 py-4 flex items-center justify-between">
         {title ? (
-          <h1 className="text-xl font-bold text-primary">{title}</h1>
+          <h2 className="text-xl font-bold text-primary">{title}</h2>
         ) : (
           <Link to="/" className="flex items-center">
             <OptimizedLogo className="h-8 w-auto" alt="DankDeals" priority={true} />

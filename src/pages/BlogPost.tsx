@@ -7,6 +7,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Clock, Calendar, User } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 // Blog posts data - in production, this would come from a database
 const blogPosts = [
@@ -528,7 +529,34 @@ export default function BlogPost() {
             </div>
           </header>
 
-          <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+          <div
+            className="blog-content"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content, {
+                ALLOWED_TAGS: [
+                  'h1',
+                  'h2',
+                  'h3',
+                  'h4',
+                  'h5',
+                  'h6',
+                  'p',
+                  'ul',
+                  'ol',
+                  'li',
+                  'strong',
+                  'em',
+                  'br',
+                  'table',
+                  'tr',
+                  'th',
+                  'td',
+                ],
+                ALLOWED_ATTR: [],
+                FORBID_SCRIPT_TAGS: true,
+              }),
+            }}
+          />
         </article>
 
         <div className="mt-12 pt-8 border-t">

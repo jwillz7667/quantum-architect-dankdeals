@@ -12,6 +12,8 @@ import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
 import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, User } from 'lucide-react';
+import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeZipCode } from '@/lib/sanitize';
+import { getCSRFToken, validateCSRFToken } from '@/lib/csrf';
 
 interface DeliveryAddress {
   street: string;
@@ -56,6 +58,7 @@ export default function CheckoutAddress() {
   const [isValidAddress, setIsValidAddress] = useState<boolean | null>(null);
   const [deliveryFee, setDeliveryFee] = useState<number>(5.0);
   const [estimatedTime, setEstimatedTime] = useState<string>('30-60 minutes');
+  const [csrfToken, setCsrfToken] = useState<string>('');
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -63,6 +66,11 @@ export default function CheckoutAddress() {
       navigate('/cart');
     }
   }, [items.length, navigate]);
+
+  // Initialize CSRF token
+  useEffect(() => {
+    setCsrfToken(getCSRFToken());
+  }, []);
 
   // Load saved data from localStorage if available
   useEffect(() => {
@@ -87,11 +95,64 @@ export default function CheckoutAddress() {
   }, []);
 
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
-    setPersonalInfo((prev) => ({ ...prev, [field]: value }));
+    let sanitizedValue = value;
+
+    // Apply field-specific sanitization
+    switch (field) {
+      case 'firstName':
+      case 'lastName': {
+        sanitizedValue = sanitizeText(value);
+        break;
+      }
+      case 'email': {
+        // Don't sanitize email during typing, only on validation
+        sanitizedValue = value.toLowerCase().trim();
+        break;
+      }
+      case 'phone': {
+        sanitizedValue = sanitizePhone(value);
+        // Format for display
+        const formatted = sanitizedValue.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+        sanitizedValue = formatted;
+        break;
+      }
+      case 'dateOfBirth': {
+        sanitizedValue = value; // Date inputs are inherently safe
+        break;
+      }
+      default: {
+        sanitizedValue = sanitizeText(value);
+      }
+    }
+
+    setPersonalInfo((prev) => ({ ...prev, [field]: sanitizedValue }));
   };
 
   const handleAddressChange = (field: keyof DeliveryAddress, value: string) => {
-    setAddress((prev) => ({ ...prev, [field]: value }));
+    let sanitizedValue = value;
+
+    // Apply field-specific sanitization
+    switch (field) {
+      case 'street':
+      case 'apartment':
+      case 'city': {
+        sanitizedValue = sanitizeText(value);
+        break;
+      }
+      case 'zipCode': {
+        sanitizedValue = sanitizeZipCode(value);
+        break;
+      }
+      case 'deliveryInstructions': {
+        sanitizedValue = sanitizeText(value);
+        break;
+      }
+      default: {
+        sanitizedValue = sanitizeText(value);
+      }
+    }
+
+    setAddress((prev) => ({ ...prev, [field]: sanitizedValue }));
     setIsValidAddress(null);
     setValidationError(null);
   };
@@ -120,8 +181,8 @@ export default function CheckoutAddress() {
     const age = calculateAge(personalInfo.dateOfBirth);
     if (age < 21) return 'You must be 21 or older to place an order';
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(personalInfo.email)) return 'Please enter a valid email address';
+    const sanitizedEmail = sanitizeEmail(personalInfo.email);
+    if (!sanitizedEmail) return 'Please enter a valid email address';
 
     const phoneRegex = /^\d{10}$/;
     const cleanPhone = personalInfo.phone.replace(/\D/g, '');
@@ -164,6 +225,12 @@ export default function CheckoutAddress() {
   };
 
   const handleContinue = () => {
+    // Validate CSRF token
+    if (!validateCSRFToken(csrfToken)) {
+      setValidationError('Security token invalid. Please refresh the page.');
+      return;
+    }
+
     const formError = validateForm();
     if (formError) {
       setValidationError(formError);
@@ -236,6 +303,8 @@ export default function CheckoutAddress() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Hidden CSRF token */}
+            <input type="hidden" name="csrf_token" value={csrfToken} />
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name *</Label>
@@ -284,11 +353,7 @@ export default function CheckoutAddress() {
                 type="tel"
                 placeholder="(555) 123-4567"
                 value={personalInfo.phone}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/\D/g, '');
-                  const formatted = cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-                  handlePersonalInfoChange('phone', formatted);
-                }}
+                onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
                 className={
                   validationError && !personalInfo.phone.trim() ? 'border-destructive' : ''
                 }
@@ -363,9 +428,7 @@ export default function CheckoutAddress() {
                 id="zipCode"
                 placeholder="55401"
                 value={address.zipCode}
-                onChange={(e) =>
-                  handleAddressChange('zipCode', e.target.value.replace(/\D/g, '').substring(0, 5))
-                }
+                onChange={(e) => handleAddressChange('zipCode', e.target.value)}
                 className={validationError && !address.zipCode ? 'border-destructive' : ''}
               />
             </div>

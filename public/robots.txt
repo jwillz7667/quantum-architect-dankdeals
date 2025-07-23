@@ -1,0 +1,50 @@
+# DankDeals Cannabis Delivery - Minnesota
+# robots.txt for SEO optimization
+
+User-agent: *
+Allow: /
+
+# Disallow private/sensitive areas
+Disallow: /checkout/
+Disallow: /cart
+Disallow: /health
+Disallow: /.well-known/
+Disallow: /api/
+
+# Disallow duplicate content
+Disallow: /*?*search=*
+Disallow: /*?*sort=*
+Disallow: /*?*filter=*
+
+# Allow important pages for SEO
+Allow: /categories
+Allow: /blog
+Allow: /faq
+Allow: /delivery-area
+Allow: /legal
+Allow: /privacy
+Allow: /terms
+
+# Sitemaps
+Sitemap: https://dankdealsmn.com/sitemap.xml
+Sitemap: https://dankdealsmn.com/sitemap-products.xml
+Sitemap: https://dankdealsmn.com/sitemap-blog.xml
+Sitemap: https://dankdealsmn.com/sitemap-index.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Special rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /

@@ -68,12 +68,26 @@ export default function FAQ() {
     { name: 'FAQ', url: 'https://dankdealsmn.com/faq' },
   ];
 
+  const faqStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead
         title="Frequently Asked Questions"
         description="Find answers to common questions about DankDeals cannabis delivery service in Minneapolis. Learn about ordering, delivery, payment, and more."
         breadcrumbs={breadcrumbs}
+        structuredData={faqStructuredData}
       />
       <DesktopHeader />
       <MobileHeader title="FAQ" />

@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { ProductsFilterContext } from './useProductsFilterContext';
+import { sanitizeText } from '@/lib/sanitize';
 
 export function ProductsFilterProvider({ children }: { children: ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const handleSetSearchQuery = (query: string) => {
+    const sanitizedQuery = sanitizeText(query);
+    setSearchQuery(sanitizedQuery);
+  };
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -16,7 +22,7 @@ export function ProductsFilterProvider({ children }: { children: ReactNode }) {
       value={{
         searchQuery,
         selectedCategory,
-        setSearchQuery,
+        setSearchQuery: handleSetSearchQuery,
         setSelectedCategory,
         clearFilters,
       }}

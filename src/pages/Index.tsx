@@ -29,6 +29,39 @@ const Index = () => {
 
   const breadcrumbs = [{ name: 'Home', url: 'https://dankdealsmn.com/' }];
 
+  const homePageStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'DankDeals - Premium Cannabis Delivery in Minnesota',
+    description:
+      "Minnesota's premier cannabis delivery service. Shop premium flower, edibles, concentrates & more.",
+    url: 'https://dankdealsmn.com/',
+    mainEntity: {
+      '@type': 'LocalBusiness',
+      name: 'DankDeals',
+      description: 'Premium cannabis delivery service in Minnesota',
+      url: 'https://dankdealsmn.com',
+      telephone: '+1-763-247-5378',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Minneapolis',
+        addressRegion: 'MN',
+        addressCountry: 'US',
+      },
+      serviceArea: {
+        '@type': 'GeoCircle',
+        geoMidpoint: {
+          '@type': 'GeoCoordinates',
+          latitude: 44.9778,
+          longitude: -93.265,
+        },
+        geoRadius: '30000',
+      },
+      openingHours: ['Mo-Su 10:00-22:00'],
+      priceRange: '$$',
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead
@@ -37,6 +70,7 @@ const Index = () => {
         keywords="cannabis delivery Minnesota, marijuana delivery Minneapolis, weed delivery St Paul, same day cannabis delivery, dispensary near me, legal cannabis Minnesota"
         url="https://dankdealsmn.com/"
         breadcrumbs={breadcrumbs}
+        structuredData={homePageStructuredData}
       />
       <DesktopHeader />
       <MobileHeader title="DankDeals" />

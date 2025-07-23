@@ -72,7 +72,14 @@ export default {
         glow: 'var(--shadow-glow)',
       },
       fontFamily: {
-        sans: ['Bio Sans', 'Inter', 'system-ui', 'sans-serif'],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       borderRadius: {
         lg: 'var(--radius)',

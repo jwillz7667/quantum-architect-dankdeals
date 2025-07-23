@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface OptimizedLogoProps {
   className?: string;
@@ -14,60 +14,29 @@ export function OptimizedLogo({
   variant = 'main',
 }: OptimizedLogoProps) {
   const [hasError, setHasError] = useState(false);
-  const [svgContent, setSvgContent] = useState<string | null>(null);
 
   const logoPath =
     variant === 'cart'
       ? '/assets/logos/dankdeals-cart-logo.svg'
       : '/assets/logos/dankdeals-logo.svg';
 
-  // For main logo, fetch SVG content and inject Bio Sans font style
-  useEffect(() => {
-    if (variant === 'main' && !hasError) {
-      fetch(logoPath)
-        .then((response) => response.text())
-        .then((svg) => {
-          // Update the SVG to use the loaded Bio Sans font
-          const updatedSvg = svg.replace(
-            "font-family:BioSans-Bold, 'Bio Sans'",
-            "font-family:'Bio Sans', BioSans-Bold, sans-serif"
-          );
-          setSvgContent(updatedSvg);
-        })
-        .catch(() => {
-          setHasError(true);
-        });
-    }
-  }, [logoPath, variant, hasError]);
+  // For main logo variant, just use the image directly
+  // No special font handling needed since we're using system fonts
 
   const handleError = () => {
     setHasError(true);
   };
 
   if (hasError) {
-    // Fallback to styled text logo with Bio Sans font
+    // Fallback to styled text logo with system font
     return (
-      <div
-        className={`${className} flex items-center justify-center text-primary`}
-        style={{ fontFamily: "'Bio Sans', sans-serif", fontWeight: 700 }}
-      >
+      <div className={`${className} flex items-center justify-center text-primary font-bold`}>
         DankDeals
       </div>
     );
   }
 
-  // For main variant with fetched SVG content, render inline SVG
-  if (variant === 'main' && svgContent) {
-    return (
-      <div
-        className={className}
-        dangerouslySetInnerHTML={{ __html: svgContent }}
-        style={{ display: 'flex', alignItems: 'center' }}
-      />
-    );
-  }
-
-  // For cart variant or while loading, use img tag
+  // Use img tag for all variants
   return (
     <img
       src={logoPath}

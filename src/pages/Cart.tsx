@@ -58,12 +58,21 @@ export default function Cart() {
     { name: 'Shopping Cart', url: 'https://dankdealsmn.com/cart' },
   ];
 
+  const cartStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'Shopping Cart - DankDeals',
+    description: 'Review your cannabis products and proceed to checkout',
+    url: 'https://dankdealsmn.com/cart',
+  };
+
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-0 animate-fade-in">
       <SEOHead
         title="Shopping Cart"
         description="Review your cannabis products and proceed to checkout. Same-day delivery in Minneapolis & St. Paul."
         breadcrumbs={breadcrumbs}
+        structuredData={cartStructuredData}
       />
       <DesktopHeader />
       <MobileHeader title="Shopping Cart" />

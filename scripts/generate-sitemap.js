@@ -17,18 +17,17 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const BASE_URL = 'https://dankdealsmn.com';
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
-// Optimized static pages with SEO-focused priorities
+// Static pages with SEO priorities (matching actual routes)
 const staticPages = [
   { url: '/', changefreq: 'daily', priority: 1.0 },
   { url: '/categories', changefreq: 'daily', priority: 0.9 },
   { url: '/delivery-area', changefreq: 'weekly', priority: 0.8 },
   { url: '/blog', changefreq: 'weekly', priority: 0.8 },
   { url: '/faq', changefreq: 'monthly', priority: 0.7 },
-  { url: '/about', changefreq: 'monthly', priority: 0.6 },
-  { url: '/contact', changefreq: 'monthly', priority: 0.6 },
-  { url: '/legal', changefreq: 'yearly', priority: 0.5 },
-  { url: '/privacy', changefreq: 'yearly', priority: 0.5 },
-  { url: '/terms', changefreq: 'yearly', priority: 0.5 },
+  { url: '/cart', changefreq: 'never', priority: 0.3 },
+  { url: '/legal', changefreq: 'yearly', priority: 0.4 },
+  { url: '/privacy', changefreq: 'yearly', priority: 0.4 },
+  { url: '/terms', changefreq: 'yearly', priority: 0.4 },
 ];
 
 // Cannabis industry specific categories for better SEO
@@ -119,9 +118,9 @@ async function generateMainSitemap() {
     }
   });
 
-  // Add category pages
+  // Add category pages (using query params to match actual routes)
   productCategories.forEach((category) => {
-    const entry = generateUrlEntry(`/categories/${category}`, CURRENT_DATE, 'weekly', 0.7);
+    const entry = generateUrlEntry(`/categories?category=${category}`, CURRENT_DATE, 'weekly', 0.7);
     if (entry) {
       sitemap += entry;
       totalUrls++;
@@ -148,7 +147,7 @@ async function generateProductSitemap() {
   try {
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, slug, updated_at, category')
+      .select('id, name, image_url, updated_at, category')
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -172,7 +171,7 @@ async function generateProductSitemap() {
         : [];
 
       const entry = generateUrlEntry(
-        `/product/${product.slug || product.id}`,
+        `/product/${product.id}`, // Use ID to match actual routes
         product.updated_at,
         'weekly',
         0.8,
