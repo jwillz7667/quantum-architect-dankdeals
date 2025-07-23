@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from '@/App';
@@ -14,7 +14,23 @@ vi.mock('@/integrations/supabase/client', () => ({
         eq: () => ({
           single: () => Promise.resolve({ data: null, error: null }),
         }),
-        in: () => Promise.resolve({ data: [] }),
+        in: (field: string, values: string[]) => {
+          // Return the test products if they're in the requested IDs
+          const validProducts = [];
+          if (values.includes('test-product-123')) {
+            validProducts.push({ id: 'test-product-123' });
+          }
+          if (values.includes('product-1')) {
+            validProducts.push({ id: 'product-1' });
+          }
+          if (values.includes('product-2')) {
+            validProducts.push({ id: 'product-2' });
+          }
+          return Promise.resolve({
+            data: validProducts,
+            error: null,
+          });
+        },
       }),
       insert: () => Promise.resolve({ data: { id: 'test-order-123' }, error: null }),
     }),
@@ -34,6 +50,12 @@ vi.mock('@/hooks/useProducts', () => ({
     isLoading: false,
     error: null,
   }),
+}));
+
+// Mock cookies to simulate age verification already completed
+vi.mock('@/lib/cookies', () => ({
+  getCookie: vi.fn(() => 'true'), // User is age verified
+  setCookie: vi.fn(),
 }));
 
 // Mock product data
@@ -83,7 +105,7 @@ describe('Checkout Flow Integration', () => {
     mockToast.mockClear();
   });
 
-  it('should complete full checkout flow from cart to confirmation', () => {
+  it('should complete full checkout flow from cart to confirmation', async () => {
     // Start with item in cart
     const cartItem = {
       id: 'cart-item-1',
@@ -102,8 +124,10 @@ describe('Checkout Flow Integration', () => {
       wrapper: createWrapper(['/cart']),
     });
 
-    // Verify we're on cart page with items
-    expect(screen.getByText('Shopping Cart')).toBeInTheDocument();
+    // Wait for lazy-loaded component and verify we're on cart page with items
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /shopping cart/i })).toBeInTheDocument();
+    });
     expect(screen.getByText('Test Strain')).toBeInTheDocument();
     expect(screen.getByText('3.5g')).toBeInTheDocument();
 
@@ -176,13 +200,15 @@ describe('Checkout Flow Integration', () => {
     expect(storedCart).toBe('[]');
   });
 
-  it('should enforce age verification during checkout', () => {
+  it('should enforce age verification during checkout', async () => {
     render(<App />, {
       wrapper: createWrapper(['/checkout/address']),
     });
 
-    // Fill form with underage date of birth
-    expect(screen.getByLabelText(/date of birth/i)).toBeInTheDocument();
+    // Wait for component to load and fill form with underage date of birth
+    await waitFor(() => {
+      expect(screen.getByLabelText(/date of birth/i)).toBeInTheDocument();
+    });
 
     const dobInput = screen.getByLabelText(/date of birth/i);
     const underageDate = new Date();
@@ -200,31 +226,39 @@ describe('Checkout Flow Integration', () => {
     expect(screen.getByText(/must be 21 or older/i)).toBeInTheDocument();
   });
 
-  it('should validate all required fields', () => {
+  it('should validate all required fields', async () => {
     render(<App />, {
       wrapper: createWrapper(['/checkout/address']),
     });
 
-    // Try to continue without filling fields
+    // Wait for component to load, then try to continue without filling fields
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
+    });
+
     const continueButton = screen.getByRole('button', { name: /continue/i });
     fireEvent.click(continueButton);
 
     // Should show validation errors
-    expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
+    });
   });
 
-  it('should display Cash Due on Delivery prominently', () => {
+  it('should display Cash Due on Delivery prominently', async () => {
     render(<App />, {
       wrapper: createWrapper(['/checkout/payment']),
     });
 
-    // Check Cash Due on Delivery is visible and emphasized
-    expect(screen.getByText('Cash Due on Delivery')).toBeInTheDocument();
+    // Wait for component to load and check Cash Due on Delivery is visible and emphasized
+    await waitFor(() => {
+      expect(screen.getByText('Cash Due on Delivery')).toBeInTheDocument();
+    });
     expect(screen.getByText(/payment in cash required/i)).toBeInTheDocument();
     expect(screen.getByText(/please have exact cash ready/i)).toBeInTheDocument();
   });
 
-  it('should calculate and display order totals correctly', () => {
+  it('should calculate and display order totals correctly', async () => {
     const cartItems = [
       {
         id: 'item-1',
@@ -254,7 +288,10 @@ describe('Checkout Flow Integration', () => {
       wrapper: createWrapper(['/cart']),
     });
 
-    // Check subtotal (45*2 + 80 = 170)
+    // Wait for component to load and check subtotal (45*2 + 80 = 170)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /shopping cart/i })).toBeInTheDocument();
+    });
     expect(screen.getByText('$170.00')).toBeInTheDocument();
 
     // Check tax is calculated (170 * 0.1025 = 17.43)
@@ -264,14 +301,16 @@ describe('Checkout Flow Integration', () => {
     expect(screen.getByText('$5.00')).toBeInTheDocument();
   });
 
-  it('should redirect to cart if checkout accessed with empty cart', () => {
+  it('should redirect to cart if checkout accessed with empty cart', async () => {
     localStorage.setItem('dankdeals_cart', JSON.stringify([]));
 
     render(<App />, {
       wrapper: createWrapper(['/checkout/address']),
     });
 
-    // Should redirect to cart page
-    expect(screen.getByText(/your cart is empty/i)).toBeInTheDocument();
+    // Wait for component to load and should redirect to cart page
+    await waitFor(() => {
+      expect(screen.getByText(/your cart is empty/i)).toBeInTheDocument();
+    });
   });
 });

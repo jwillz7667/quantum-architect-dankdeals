@@ -77,7 +77,7 @@ export function OptimizedLogo({
       loading={priority ? 'eager' : 'lazy'}
       decoding="async"
       // Add fetchpriority for critical above-the-fold logos
-      {...(priority && { fetchPriority: 'high' as const })}
+      {...(priority && { fetchpriority: 'high' as const })}
     />
   );
 }
