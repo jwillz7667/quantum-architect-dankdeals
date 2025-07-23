@@ -12,6 +12,23 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
   
+# JavaScript and TypeScript modules with correct MIME types
+/assets/*.js
+  Content-Type: text/javascript
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.mjs  
+  Content-Type: text/javascript
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.tsx
+  Content-Type: text/javascript
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.ts
+  Content-Type: text/javascript
+  Cache-Control: public, max-age=31536000, immutable
+  
 # Don't cache HTML files
 /*.html
   Cache-Control: no-cache
