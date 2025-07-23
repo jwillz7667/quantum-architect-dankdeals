@@ -39,91 +39,84 @@
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/about</loc>
+    <loc>https://dankdealsmn.com/cart</loc>
     <lastmod>2025-07-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-    <mobile:mobile/>
-  </url>
-  <url>
-    <loc>https://dankdealsmn.com/contact</loc>
-    <lastmod>2025-07-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <changefreq>never</changefreq>
+    <priority>0.3</priority>
     <mobile:mobile/>
   </url>
   <url>
     <loc>https://dankdealsmn.com/legal</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
     <mobile:mobile/>
   </url>
   <url>
     <loc>https://dankdealsmn.com/privacy</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
     <mobile:mobile/>
   </url>
   <url>
     <loc>https://dankdealsmn.com/terms</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/flower</loc>
+    <loc>https://dankdealsmn.com/categories?category=flower</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/concentrates</loc>
+    <loc>https://dankdealsmn.com/categories?category=concentrates</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/edibles</loc>
+    <loc>https://dankdealsmn.com/categories?category=edibles</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/pre-rolls</loc>
+    <loc>https://dankdealsmn.com/categories?category=pre-rolls</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/vapes</loc>
+    <loc>https://dankdealsmn.com/categories?category=vapes</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/topicals</loc>
+    <loc>https://dankdealsmn.com/categories?category=topicals</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/accessories</loc>
+    <loc>https://dankdealsmn.com/categories?category=accessories</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/categories/wellness</loc>
+    <loc>https://dankdealsmn.com/categories?category=wellness</loc>
     <lastmod>2025-07-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
