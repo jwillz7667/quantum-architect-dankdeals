@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
   requireAdmin = false,
-  redirectTo = '/auth/login' 
+  redirectTo = '/auth/login',
 }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -25,7 +25,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && !user.user_metadata?.is_admin) {
+  if (requireAdmin && !user.user_metadata?.['is_admin']) {
     return <Navigate to="/" replace />;
   }
 

@@ -7,7 +7,14 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, ArrowLeft } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
@@ -34,9 +41,9 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true);
-    
+
     const { error } = await resetPassword(data.email);
-    
+
     if (error) {
       setError('root', {
         type: 'manual',
@@ -68,14 +75,11 @@ export default function ForgotPassword() {
             <CardContent className="space-y-4">
               <Alert>
                 <AlertDescription>
-                  If you don't see the email, check your spam folder or try resending the instructions.
+                  If you don't see the email, check your spam folder or try resending the
+                  instructions.
                 </AlertDescription>
               </Alert>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => setIsSubmitted(false)}
-              >
+              <Button variant="outline" className="w-full" onClick={() => setIsSubmitted(false)}>
                 Send again
               </Button>
             </CardContent>
@@ -109,13 +113,13 @@ export default function ForgotPassword() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
               {errors.root && (
                 <Alert variant="destructive">
                   <AlertDescription>{errors.root.message}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -129,16 +133,10 @@ export default function ForgotPassword() {
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email.message}</p>
-                )}
+                {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

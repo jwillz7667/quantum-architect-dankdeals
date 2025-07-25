@@ -13,7 +13,7 @@ export default function AuthCallback() {
     const handleAuthCallback = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           logger.error('Auth callback error', error);
           toast({
@@ -26,16 +26,16 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          logger.info('OAuth sign in successful', { 
+          logger.info('OAuth sign in successful', {
             userId: data.session.user.id,
-            provider: data.session.user.app_metadata.provider 
+            provider: data.session.user.app_metadata.provider,
           });
-          
+
           toast({
             title: 'Welcome!',
             description: 'You have successfully signed in.',
           });
-          
+
           // Redirect to home page or intended destination
           const redirectTo = new URLSearchParams(window.location.search).get('redirect_to') || '/';
           navigate(redirectTo);
@@ -54,7 +54,7 @@ export default function AuthCallback() {
       }
     };
 
-    handleAuthCallback();
+    void handleAuthCallback();
   }, [navigate, toast]);
 
   return <PageLoader />;

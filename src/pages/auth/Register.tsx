@@ -7,7 +7,14 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
@@ -16,25 +23,28 @@ import { SEOHead } from '@/components/SEOHead';
 import { sanitizeText, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
 import { isLegalAge } from '@/lib/security';
 
-const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  phone: z.string().regex(/^\d{10}$/, 'Phone number must be 10 digits'),
-  dateOfBirth: z.string().refine((date) => {
-    return isLegalAge(date);
-  }, 'You must be 21 or older to register'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: z.string(),
-  agreeToTerms: z.boolean().refine(val => val === true, 'You must agree to the terms'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    firstName: z.string().min(2, 'First name must be at least 2 characters'),
+    lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+    email: z.string().email('Please enter a valid email address'),
+    phone: z.string().regex(/^\d{10}$/, 'Phone number must be 10 digits'),
+    dateOfBirth: z.string().refine((date) => {
+      return isLegalAge(date);
+    }, 'You must be 21 or older to register'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .regex(/[0-9]/, 'Password must contain at least one number'),
+    confirmPassword: z.string(),
+    agreeToTerms: z.boolean().refine((val) => val === true, 'You must agree to the terms'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -55,7 +65,7 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
-    
+
     // Sanitize inputs
     const sanitizedData = {
       firstName: sanitizeText(data.firstName),
@@ -71,7 +81,7 @@ export default function Register() {
       phone: sanitizedData.phone,
       date_of_birth: sanitizedData.dateOfBirth,
     });
-    
+
     if (error) {
       setError('root', {
         type: 'manual',
@@ -129,7 +139,7 @@ export default function Register() {
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={handleGoogleSignIn}
+                onClick={() => void handleGoogleSignIn()}
                 disabled={isLoading || isOAuthLoading !== null}
               >
                 {isOAuthLoading === 'google' ? (
@@ -161,12 +171,12 @@ export default function Register() {
                   </>
                 )}
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={handleAppleSignIn}
+                onClick={() => void handleAppleSignIn()}
                 disabled={isLoading || isOAuthLoading !== null}
               >
                 {isOAuthLoading === 'apple' ? (
@@ -177,7 +187,7 @@ export default function Register() {
                 ) : (
                   <>
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/>
+                      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z" />
                     </svg>
                     Continue with Apple
                   </>
@@ -190,17 +200,19 @@ export default function Register() {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
+            <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4 mt-6">
               {errors.root && (
                 <Alert variant="destructive">
                   <AlertDescription>{errors.root.message}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First name</Label>
@@ -246,9 +258,7 @@ export default function Register() {
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email.message}</p>
-                )}
+                {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -264,9 +274,7 @@ export default function Register() {
                     disabled={isLoading}
                   />
                 </div>
-                {errors.phone && (
-                  <p className="text-sm text-red-600">{errors.phone.message}</p>
-                )}
+                {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -323,11 +331,7 @@ export default function Register() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="agreeToTerms"
-                  {...register('agreeToTerms')}
-                  disabled={isLoading}
-                />
+                <Checkbox id="agreeToTerms" {...register('agreeToTerms')} disabled={isLoading} />
                 <Label
                   htmlFor="agreeToTerms"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -346,11 +350,7 @@ export default function Register() {
                 <p className="text-sm text-red-600">{errors.agreeToTerms.message}</p>
               )}
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

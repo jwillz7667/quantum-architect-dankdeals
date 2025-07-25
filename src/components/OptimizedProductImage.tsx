@@ -128,7 +128,7 @@ export function OptimizedProductImage({
         style={getImageStyle()}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
-        fetchpriority={priority ? 'high' : 'auto'}
+        fetchPriority={priority ? 'high' : 'auto'}
         onLoad={handleLoad}
         onError={handleError}
         sizes={sizes}

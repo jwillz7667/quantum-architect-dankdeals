@@ -23,8 +23,9 @@ class RequestSigner {
   private readonly timestampTolerance: number = 300000; // 5 minutes
 
   constructor(secretKey?: string) {
-    this.clientVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
-    this.secretKey = secretKey || import.meta.env.VITE_API_SECRET || 'default-secret';
+    this.clientVersion = (import.meta.env['VITE_APP_VERSION'] as string) || '1.0.0';
+    this.secretKey =
+      secretKey || (import.meta.env['VITE_API_SECRET'] as string) || 'default-secret';
   }
 
   /**
@@ -34,13 +35,15 @@ class RequestSigner {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint8Array(16);
       crypto.getRandomValues(array);
-      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+      return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
     }
-    
+
     // Fallback for environments without crypto API
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15) +
-           Date.now().toString(36);
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15) +
+      Date.now().toString(36)
+    );
   }
 
   /**
@@ -50,11 +53,11 @@ class RequestSigner {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID();
     }
-    
+
     // Fallback UUID generation
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }
@@ -69,13 +72,7 @@ class RequestSigner {
     nonce: string,
     body?: string
   ): Promise<string> {
-    const payload = [
-      method.toUpperCase(),
-      url,
-      timestamp,
-      nonce,
-      body || ''
-    ].join('\n');
+    const payload = [method.toUpperCase(), url, timestamp, nonce, body || ''].join('\n');
 
     try {
       // Use Web Crypto API if available
@@ -88,18 +85,16 @@ class RequestSigner {
           ['sign']
         );
 
-        const signature = await crypto.subtle.sign(
-          'HMAC',
-          key,
-          new TextEncoder().encode(payload)
-        );
+        const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
 
         return Array.from(new Uint8Array(signature))
-          .map(b => b.toString(16).padStart(2, '0'))
+          .map((b) => b.toString(16).padStart(2, '0'))
           .join('');
       }
     } catch (error) {
-      logger.warn('Web Crypto API not available, using fallback', { error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.warn('Web Crypto API not available, using fallback', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
 
     // Fallback: Simple hash function (not cryptographically secure)
@@ -113,7 +108,7 @@ class RequestSigner {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -122,15 +117,11 @@ class RequestSigner {
   /**
    * Sign a request and return headers
    */
-  async signRequest(
-    method: string,
-    url: string,
-    body?: string
-  ): Promise<SignedRequestHeaders> {
+  async signRequest(method: string, url: string, body?: string): Promise<SignedRequestHeaders> {
     const timestamp = Date.now().toString();
     const nonce = this.generateNonce();
     const requestId = this.generateRequestId();
-    
+
     try {
       const signature = await this.createSignature(method, url, timestamp, nonce, body);
 
@@ -171,7 +162,7 @@ class RequestSigner {
     // Check timestamp to prevent replay attacks
     const requestTime = parseInt(timestamp, 10);
     const now = Date.now();
-    
+
     if (Math.abs(now - requestTime) > this.timestampTolerance) {
       logger.warn('Request timestamp outside tolerance', {
         requestTime,
@@ -185,7 +176,7 @@ class RequestSigner {
     try {
       const expectedSignature = await this.createSignature(method, url, timestamp, nonce, body);
       const isValid = signature === expectedSignature;
-      
+
       if (!isValid) {
         logger.warn('Invalid request signature', {
           method,
@@ -194,7 +185,7 @@ class RequestSigner {
           expected: expectedSignature.substring(0, 8) + '...',
         });
       }
-      
+
       return isValid;
     } catch (error) {
       logger.error('Error validating request signature', error as Error);
@@ -228,19 +219,20 @@ class RequestSigner {
 export const requestSigner = new RequestSigner();
 
 // Middleware for fetch requests
-export async function signedFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function signedFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const method = options.method || 'GET';
-  const body = options.body ? String(options.body) : undefined;
+  const body = options.body
+    ? typeof options.body === 'string'
+      ? options.body
+      : JSON.stringify(options.body)
+    : undefined;
 
   try {
     const signatureHeaders = await requestSigner.signRequest(method, url, body);
-    
+
     const headers = new Headers(options.headers);
     Object.entries(signatureHeaders).forEach(([key, value]) => {
-      headers.set(key, value);
+      headers.set(key, value as string);
     });
 
     return fetch(url, {
@@ -254,15 +246,15 @@ export async function signedFetch(
 }
 
 // Wrapper for Supabase client requests
-export function withRequestSigning<T extends (...args: any[]) => Promise<any>>(
+export function withRequestSigning<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   urlExtractor?: (...args: Parameters<T>) => string
 ): T {
-  return (async (...args: Parameters<T>) => {
+  return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
     // For now, just add request ID for tracking
     // Full signing can be implemented when needed
     const requestId = requestSigner['generateRequestId']();
-    
+
     logger.debug('Starting signed request', {
       requestId,
       function: fn.name,
@@ -271,13 +263,13 @@ export function withRequestSigning<T extends (...args: any[]) => Promise<any>>(
 
     try {
       const result = await fn(...args);
-      
+
       logger.debug('Signed request completed', {
         requestId,
         success: true,
       });
-      
-      return result;
+
+      return result as ReturnType<T>;
     } catch (error) {
       logger.error('Signed request failed', error as Error, {
         requestId,

@@ -71,17 +71,23 @@ export class APIClient {
   /**
    * Generate security headers for requests
    */
-  private async generateSecurityHeaders(method: string, url: string, body?: string): Promise<SecurityHeaders> {
+  private async generateSecurityHeaders(
+    method: string,
+    url: string,
+    body?: string
+  ): Promise<SecurityHeaders> {
     try {
       const signatureHeaders = await requestSigner.signRequest(method, url, body);
-      
+
       return {
         'Content-Type': 'application/json',
         ...signatureHeaders,
       };
     } catch (error) {
-      logger.warn('Failed to generate signature headers, using basic headers', { error: error instanceof Error ? error.message : 'Unknown error' });
-      
+      logger.warn('Failed to generate signature headers, using basic headers', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+
       // Fallback to basic headers
       return {
         'Content-Type': 'application/json',
@@ -104,7 +110,7 @@ export class APIClient {
     const securityHeaders = await this.generateSecurityHeaders(method, url, body);
 
     return {
-      method: (config.method || 'GET') as any,
+      method: config.method || 'GET',
       headers: {
         ...securityHeaders,
         ...(config.headers || {}),
@@ -113,7 +119,7 @@ export class APIClient {
       params: config.params || {},
       timeout: config.timeout || this.defaultTimeout,
       retries: config.retries || this.maxRetries,
-      schema: config.schema || z.any(),
+      schema: (config.schema || z.unknown()) as z.ZodType<T>,
       signal: config.signal || new AbortController().signal,
     };
   }
@@ -138,7 +144,7 @@ export class APIClient {
     }
 
     // Validate response data if schema provided
-    if (schema && schema !== z.any()) {
+    if (schema && schema !== z.unknown()) {
       try {
         return schema.parse(data);
       } catch (error) {
@@ -166,7 +172,11 @@ export class APIClient {
     if (!apiRateLimiter.isAllowed(rateLimitKey)) {
       const resetTime = apiRateLimiter.getResetTime(rateLimitKey);
       const waitTime = Math.ceil((resetTime - Date.now()) / 1000);
-      throw new APIError(`Rate limit exceeded. Try again in ${waitTime} seconds.`, 429, 'RATE_LIMIT_EXCEEDED');
+      throw new APIError(
+        `Rate limit exceeded. Try again in ${waitTime} seconds.`,
+        429,
+        'RATE_LIMIT_EXCEEDED'
+      );
     }
 
     for (let attempt = 0; attempt <= config.retries; attempt++) {
@@ -282,11 +292,16 @@ export class APIClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const body = data ? JSON.stringify(data) : undefined;
-    const processedConfig = await this.processConfig({
-      ...config,
-      method: 'POST',
-      body: data,
-    }, 'POST', url, body);
+    const processedConfig = await this.processConfig(
+      {
+        ...config,
+        method: 'POST',
+        body: data,
+      },
+      'POST',
+      url,
+      body
+    );
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -301,11 +316,16 @@ export class APIClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const body = data ? JSON.stringify(data) : undefined;
-    const processedConfig = await this.processConfig({
-      ...config,
-      method: 'PUT',
-      body: data,
-    }, 'PUT', url, body);
+    const processedConfig = await this.processConfig(
+      {
+        ...config,
+        method: 'PUT',
+        body: data,
+      },
+      'PUT',
+      url,
+      body
+    );
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -318,7 +338,11 @@ export class APIClient {
     config: Omit<APIRequestConfig<T>, 'method' | 'body'> = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const processedConfig = await this.processConfig({ ...config, method: 'DELETE' }, 'DELETE', url);
+    const processedConfig = await this.processConfig(
+      { ...config, method: 'DELETE' },
+      'DELETE',
+      url
+    );
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -333,11 +357,16 @@ export class APIClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const body = data ? JSON.stringify(data) : undefined;
-    const processedConfig = await this.processConfig({
-      ...config,
-      method: 'PATCH',
-      body: data,
-    }, 'PATCH', url, body);
+    const processedConfig = await this.processConfig(
+      {
+        ...config,
+        method: 'PATCH',
+        body: data,
+      },
+      'PATCH',
+      url,
+      body
+    );
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }

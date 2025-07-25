@@ -13,7 +13,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AgeGate } from '@/components/AgeGate';
 import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+// import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Lazy load all page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));

@@ -47,7 +47,7 @@ class RateLimiter {
       if (this.config.onLimitReached) {
         this.config.onLimitReached(key);
       }
-      
+
       logger.warn('Rate limit exceeded', {
         key,
         count: entry.count,
@@ -55,7 +55,7 @@ class RateLimiter {
         windowMs: this.config.windowMs,
         timeRemaining: entry.resetTime - now,
       });
-      
+
       return false;
     }
 
@@ -149,7 +149,7 @@ export async function rateLimitedFetch(
     const response = await fetch(url, options);
 
     // Don't count successful GET requests toward limit (if configured)
-    if (limiter.config.skipSuccessfulGET && (options.method || 'GET') === 'GET' && response.ok) {
+    if (limiter['config'].skipSuccessfulGET && (options.method || 'GET') === 'GET' && response.ok) {
       limiter.reset(key);
     }
 

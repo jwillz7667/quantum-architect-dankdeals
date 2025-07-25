@@ -99,7 +99,7 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
                       </div>
                       <button
                         onClick={() => {
-                          signOut();
+                          void signOut();
                           setIsOpen(false);
                         }}
                         className="w-full flex items-center px-4 py-2 text-lg text-foreground hover:bg-muted rounded-md transition-colors"

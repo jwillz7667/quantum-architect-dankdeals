@@ -6,7 +6,7 @@ import './index.css';
 import { env } from './lib/env';
 import { initializeAxe } from './utils/axe';
 import { analytics } from './lib/analytics';
-import { initSentry } from './lib/sentry';
+// import { initSentry } from './lib/sentry';
 
 // Global error handler for uncaught errors
 window.addEventListener('error', (event) => {

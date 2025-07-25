@@ -50,7 +50,7 @@ export class OrderService {
     return `${dateStr}-${timeStr}${random}`;
   }
 
-  static createOrder = withRateLimit(
+  static createOrder = withRateLimit<(orderData: CreateOrderData) => Promise<OrderResponse>>(
     async (orderData: CreateOrderData): Promise<OrderResponse> => {
       try {
         // Get current user session
