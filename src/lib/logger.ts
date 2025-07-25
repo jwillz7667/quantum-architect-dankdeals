@@ -1,4 +1,5 @@
 import { env } from './env';
+import { captureException, captureMessage } from './sentry';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -92,9 +93,9 @@ class Logger {
     const sanitizedContext = this.sanitizeData(context);
     console.warn(this.formatMessage('warn', message, sanitizedContext));
 
-    // Send to monitoring service in production
-    if (this.isProduction && window.Sentry) {
-      window.Sentry.captureMessage(message, 'warning');
+    // Send to Sentry in production
+    if (this.isProduction) {
+      captureMessage(message, 'warning');
     }
   }
 
@@ -104,11 +105,13 @@ class Logger {
     const sanitizedContext = this.sanitizeData(context);
     console.error(this.formatMessage('error', message, sanitizedContext), error);
 
-    // Send to monitoring service in production
-    if (this.isProduction && window.Sentry) {
-      window.Sentry.captureException(error || new Error(message), {
-        extra: sanitizedContext,
-      });
+    // Send to Sentry in production
+    if (this.isProduction) {
+      if (error) {
+        captureException(error, sanitizedContext);
+      } else {
+        captureMessage(message, 'error');
+      }
     }
   }
 

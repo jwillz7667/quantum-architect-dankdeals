@@ -6,6 +6,7 @@ import './index.css';
 import { env } from './lib/env';
 import { initializeAxe } from './utils/axe';
 import { analytics } from './lib/analytics';
+import { initSentry } from './lib/sentry';
 
 // Global error handler for uncaught errors
 window.addEventListener('error', (event) => {
@@ -18,6 +19,9 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
+
+// Initialize Sentry error tracking - BLOCKING for proper error capture
+initSentry();
 
 // Initialize accessibility testing in development - NON-BLOCKING
 if (import.meta.env.DEV) {

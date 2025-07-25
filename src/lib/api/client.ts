@@ -1,6 +1,8 @@
 // src/lib/api/client.ts
 import { z } from 'zod';
 import { logger } from '../logger';
+import { requestSigner } from '../requestSigning';
+import { apiRateLimiter } from '../rateLimiter';
 
 // Security headers configuration
 interface SecurityHeaders {
@@ -69,26 +71,40 @@ export class APIClient {
   /**
    * Generate security headers for requests
    */
-  private generateSecurityHeaders(): SecurityHeaders {
-    const timestamp = Date.now().toString();
-    const requestId = crypto.randomUUID();
-
-    return {
-      'Content-Type': 'application/json',
-      'X-Client-Version': (import.meta.env['VITE_APP_VERSION'] as string) || '1.0.0',
-      'X-Timestamp': timestamp,
-      'X-Request-ID': requestId,
-    };
+  private async generateSecurityHeaders(method: string, url: string, body?: string): Promise<SecurityHeaders> {
+    try {
+      const signatureHeaders = await requestSigner.signRequest(method, url, body);
+      
+      return {
+        'Content-Type': 'application/json',
+        ...signatureHeaders,
+      };
+    } catch (error) {
+      logger.warn('Failed to generate signature headers, using basic headers', { error: error instanceof Error ? error.message : 'Unknown error' });
+      
+      // Fallback to basic headers
+      return {
+        'Content-Type': 'application/json',
+        'X-Client-Version': (import.meta.env['VITE_APP_VERSION'] as string) || '1.0.0',
+        'X-Timestamp': Date.now().toString(),
+        'X-Request-ID': crypto.randomUUID(),
+      };
+    }
   }
 
   /**
    * Process request configuration and merge with defaults
    */
-  private processConfig<T>(config: APIRequestConfig<T> = {}): Required<APIRequestConfig<T>> {
-    const securityHeaders = this.generateSecurityHeaders();
+  private async processConfig<T>(
+    config: APIRequestConfig<T> = {},
+    method: string,
+    url: string,
+    body?: string
+  ): Promise<Required<APIRequestConfig<T>>> {
+    const securityHeaders = await this.generateSecurityHeaders(method, url, body);
 
     return {
-      method: config.method || 'GET',
+      method: (config.method || 'GET') as any,
       headers: {
         ...securityHeaders,
         ...(config.headers || {}),
@@ -144,6 +160,14 @@ export class APIClient {
     config: Required<APIRequestConfig<T>>
   ): Promise<APIResponse<T>> {
     let lastError: Error | null = null;
+
+    // Check rate limit before making request
+    const rateLimitKey = `${config.method}:${url}`;
+    if (!apiRateLimiter.isAllowed(rateLimitKey)) {
+      const resetTime = apiRateLimiter.getResetTime(rateLimitKey);
+      const waitTime = Math.ceil((resetTime - Date.now()) / 1000);
+      throw new APIError(`Rate limit exceeded. Try again in ${waitTime} seconds.`, 429, 'RATE_LIMIT_EXCEEDED');
+    }
 
     for (let attempt = 0; attempt <= config.retries; attempt++) {
       try {
@@ -243,7 +267,7 @@ export class APIClient {
       }
     }
 
-    const processedConfig = this.processConfig({ ...config, method: 'GET' });
+    const processedConfig = await this.processConfig({ ...config, method: 'GET' }, 'GET', url);
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -257,11 +281,12 @@ export class APIClient {
     config: Omit<APIRequestConfig<T>, 'method'> = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const processedConfig = this.processConfig({
+    const body = data ? JSON.stringify(data) : undefined;
+    const processedConfig = await this.processConfig({
       ...config,
       method: 'POST',
       body: data,
-    });
+    }, 'POST', url, body);
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -275,11 +300,12 @@ export class APIClient {
     config: Omit<APIRequestConfig<T>, 'method'> = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const processedConfig = this.processConfig({
+    const body = data ? JSON.stringify(data) : undefined;
+    const processedConfig = await this.processConfig({
       ...config,
       method: 'PUT',
       body: data,
-    });
+    }, 'PUT', url, body);
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -292,7 +318,7 @@ export class APIClient {
     config: Omit<APIRequestConfig<T>, 'method' | 'body'> = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const processedConfig = this.processConfig({ ...config, method: 'DELETE' });
+    const processedConfig = await this.processConfig({ ...config, method: 'DELETE' }, 'DELETE', url);
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }
@@ -306,11 +332,12 @@ export class APIClient {
     config: Omit<APIRequestConfig<T>, 'method'> = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const processedConfig = this.processConfig({
+    const body = data ? JSON.stringify(data) : undefined;
+    const processedConfig = await this.processConfig({
       ...config,
       method: 'PATCH',
       body: data,
-    });
+    }, 'PATCH', url, body);
     const response = await this.executeRequest(url, processedConfig);
     return response.data;
   }

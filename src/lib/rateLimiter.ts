@@ -1,13 +1,17 @@
 // Client-side rate limiting for API calls
+import { logger } from './logger';
+
 interface RateLimitEntry {
   count: number;
   resetTime: number;
+  firstRequest: number;
 }
 
 interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
   skipSuccessfulGET?: boolean;
+  onLimitReached?: (key: string) => void;
 }
 
 class RateLimiter {
@@ -33,11 +37,25 @@ class RateLimiter {
       this.storage.set(key, {
         count: 1,
         resetTime: now + this.config.windowMs,
+        firstRequest: now,
       });
       return true;
     }
 
     if (entry.count >= this.config.maxRequests) {
+      // Rate limit exceeded
+      if (this.config.onLimitReached) {
+        this.config.onLimitReached(key);
+      }
+      
+      logger.warn('Rate limit exceeded', {
+        key,
+        count: entry.count,
+        limit: this.config.maxRequests,
+        windowMs: this.config.windowMs,
+        timeRemaining: entry.resetTime - now,
+      });
+      
       return false;
     }
 
@@ -98,8 +116,16 @@ export const orderRateLimiter = new RateLimiter({
 });
 
 export const authRateLimiter = new RateLimiter({
-  maxRequests: 10,
+  maxRequests: 5,
   windowMs: 15 * 60 * 1000, // 15 minutes
+  onLimitReached: (key) => {
+    logger.security('Authentication rate limit exceeded', { key });
+  },
+});
+
+export const searchRateLimiter = new RateLimiter({
+  maxRequests: 30,
+  windowMs: 60 * 1000, // 1 minute
 });
 
 /**

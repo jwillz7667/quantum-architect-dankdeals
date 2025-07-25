@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Menu, Phone } from 'lucide-react';
+import { Menu, Phone, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
-// import { useAuth } from "@/hooks/useAuth";
-// import { useAdminAuth } from "@/hooks/useAdminAuth";
-// import { useCart } from "@/hooks/useCart";
+import { useAuth } from '@/context/AuthContext';
 
 interface MobileHeaderProps {
   title?: string;
@@ -15,6 +13,7 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const menuItems = [
     { label: 'Home', href: '/' },
@@ -90,17 +89,36 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
                   </Link>
                 ))}
 
-                {/* Admin Dashboard Link - Only visible to admin users - COMMENTED OUT */}
-                {/* {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="block px-4 py-2 text-lg text-foreground hover:bg-muted rounded-md transition-colors flex items-center gap-2"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Settings className="h-5 w-5" />
-                    Admin Dashboard
-                  </Link>
-                )} */}
+                {/* User Account Section */}
+                <div className="border-t pt-4 mt-4">
+                  {user ? (
+                    <>
+                      <div className="px-4 py-2">
+                        <p className="text-sm font-medium text-muted-foreground">Signed in as</p>
+                        <p className="text-sm font-semibold">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setIsOpen(false);
+                        }}
+                        className="w-full flex items-center px-4 py-2 text-lg text-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        <LogOut className="mr-2 h-5 w-5" />
+                        Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      to="/auth/login"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center px-4 py-2 text-lg text-foreground hover:bg-muted rounded-md transition-colors"
+                    >
+                      <User className="mr-2 h-5 w-5" />
+                      Sign In
+                    </Link>
+                  )}
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

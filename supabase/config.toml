@@ -1,1 +1,19 @@
 project_id = "ralbzuvkyexortqngvxs"
+
+[auth]
+enabled = true
+site_url = "http://localhost:8082"
+additional_redirect_urls = ["https://dankdealsmn.com"]
+jwt_expiry = 3600
+
+[auth.external.google]
+enabled = true
+client_id = "995705962018-jtt48rrhl2jnk8ns42v5guij680e1kqq.apps.googleusercontent.com"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+redirect_uri = "http://localhost:8082/auth/callback"
+
+[auth.external.apple]
+enabled = false
+client_id = ""
+secret = ""
+redirect_uri = "http://localhost:8082/auth/callback"

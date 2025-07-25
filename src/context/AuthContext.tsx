@@ -1,0 +1,348 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session, AuthError } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+import { useToast } from '@/hooks/use-toast';
+import { setSentryUser, clearSentryUser } from '@/lib/sentry';
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  signUp: (email: string, password: string, metadata?: Record<string, any>) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  signInWithApple: () => Promise<{ error: AuthError | null }>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
+  updateProfile: (updates: Record<string, any>) => Promise<{ error: Error | null }>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check active sessions and sets the user
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error) {
+        logger.error('Error initializing auth', error as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for changes on auth state (sign in, sign out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      logger.info('Auth state changed', { event, userId: session?.user?.id });
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      // Update Sentry user context
+      if (session?.user) {
+        setSentryUser({
+          id: session.user.id,
+          email: session.user.email,
+          username: session.user.user_metadata?.first_name || session.user.email,
+        });
+      } else {
+        clearSentryUser();
+      }
+
+      // Handle specific auth events
+      switch (event) {
+        case 'SIGNED_IN':
+          toast({
+            title: 'Welcome back!',
+            description: 'You have successfully signed in.',
+          });
+          break;
+        case 'SIGNED_OUT':
+          toast({
+            title: 'Signed out',
+            description: 'You have been signed out successfully.',
+          });
+          break;
+        case 'USER_UPDATED':
+          toast({
+            title: 'Profile updated',
+            description: 'Your profile has been updated successfully.',
+          });
+          break;
+        case 'PASSWORD_RECOVERY':
+          toast({
+            title: 'Password reset',
+            description: 'Check your email for the password reset link.',
+          });
+          break;
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [toast]);
+
+  const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        logger.error('Sign up error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Sign up failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      if (data.user && !data.session) {
+        toast({
+          title: 'Check your email',
+          description: 'Please check your email to confirm your account.',
+        });
+      }
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected sign up error', error as Error);
+      return { error: error as AuthError };
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        logger.error('Sign in error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Sign in failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected sign in error', error as Error);
+      return { error: error as AuthError };
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        logger.error('Google sign in error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Google sign in failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected Google sign in error', error as Error);
+      return { error: error as AuthError };
+    }
+  };
+
+  const signInWithApple = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        logger.error('Apple sign in error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Apple sign in failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected Apple sign in error', error as Error);
+      return { error: error as AuthError };
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        logger.error('Sign out error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Sign out failed',
+          description: error.message,
+        });
+      }
+    } catch (error) {
+      logger.error('Unexpected sign out error', error as Error);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) {
+        logger.error('Password reset error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Password reset failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      toast({
+        title: 'Password reset email sent',
+        description: 'Check your email for the password reset link.',
+      });
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected password reset error', error as Error);
+      return { error: error as AuthError };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        logger.error('Password update error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Password update failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      toast({
+        title: 'Password updated',
+        description: 'Your password has been updated successfully.',
+      });
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected password update error', error as Error);
+      return { error: error as AuthError };
+    }
+  };
+
+  const updateProfile = async (updates: Record<string, any>) => {
+    try {
+      if (!user) {
+        throw new Error('No user logged in');
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) {
+        logger.error('Profile update error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Profile update failed',
+          description: error.message,
+        });
+        return { error };
+      }
+
+      // Update user metadata
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: updates,
+      });
+
+      if (metadataError) {
+        logger.error('User metadata update error', metadataError);
+      }
+
+      toast({
+        title: 'Profile updated',
+        description: 'Your profile has been updated successfully.',
+      });
+
+      return { error: null };
+    } catch (error) {
+      logger.error('Unexpected profile update error', error as Error);
+      return { error: error as Error };
+    }
+  };
+
+  const value = {
+    user,
+    session,
+    loading,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signInWithApple,
+    signOut,
+    resetPassword,
+    updatePassword,
+    updateProfile,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

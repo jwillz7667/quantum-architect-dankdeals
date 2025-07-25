@@ -1,7 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Phone, ShoppingCart } from 'lucide-react';
+import { Phone, ShoppingCart, User, LogOut } from 'lucide-react';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
+import { useAuth } from '@/context/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -13,6 +21,7 @@ const navItems = [
 
 export function DesktopHeader() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="hidden md:block bg-background border-b border-border sticky top-0 z-40">
@@ -49,6 +58,38 @@ export function DesktopHeader() {
               <span className="hidden xl:inline">763-247-5378</span>
               <span className="hidden lg:inline xl:hidden text-sm">Call Now</span>
             </a>
+
+            {/* User Account */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-6 w-6" />
+                    <span className="sr-only">User Account</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <div className="flex flex-col space-y-1 px-2 py-1.5">
+                      <p className="text-sm font-medium">Signed in as</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth/login">
+                <Button variant="ghost" size="sm">
+                  <User className="mr-2 h-4 w-4" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
 
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
