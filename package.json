@@ -104,7 +104,7 @@
     "@playwright/test": "^1.48.0",
     "@tailwindcss/typography": "^0.5.15",
     "@testing-library/jest-dom": "^6.2.0",
-    "@testing-library/react": "^14.2.0",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/jest-axe": "^3.5.9",
     "@types/node": "^20.14.10",
