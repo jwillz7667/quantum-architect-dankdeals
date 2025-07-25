@@ -21,7 +21,8 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 // Initialize Sentry error tracking - BLOCKING for proper error capture
-initSentry();
+// Temporarily disabled due to module issues
+// initSentry();
 
 // Initialize accessibility testing in development - NON-BLOCKING
 if (import.meta.env.DEV) {

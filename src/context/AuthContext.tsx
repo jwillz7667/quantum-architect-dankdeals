@@ -3,7 +3,7 @@ import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
-import { setSentryUser, clearSentryUser } from '@/lib/sentry';
+// import { setSentryUser, clearSentryUser } from '@/lib/sentry';
 
 interface AuthContextType {
   user: User | null;
@@ -62,16 +62,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Update Sentry user context
-      if (session?.user) {
-        setSentryUser({
-          id: session.user.id,
-          email: session.user.email,
-          username: session.user.user_metadata?.first_name || session.user.email,
-        });
-      } else {
-        clearSentryUser();
-      }
+      // Update Sentry user context (temporarily disabled)
+      // if (session?.user) {
+      //   setSentryUser({
+      //     id: session.user.id,
+      //     email: session.user.email,
+      //     username: session.user.user_metadata?.first_name || session.user.email,
+      //   });
+      // } else {
+      //   clearSentryUser();
+      // }
 
       // Handle specific auth events
       switch (event) {
