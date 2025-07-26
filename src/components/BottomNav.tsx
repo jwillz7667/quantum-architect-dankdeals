@@ -1,15 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, ShoppingCart, Menu } from 'lucide-react';
-
-const navItems = [
-  { icon: Home, label: 'Home', href: '/' },
-  { icon: LayoutGrid, label: 'Categories', href: '/categories' },
-  { icon: ShoppingCart, label: 'Cart', href: '/cart' },
-  { icon: Menu, label: 'More', href: '/faq' }, // 'More' could link to FAQ or a dedicated menu page
-];
+import { Home, LayoutGrid, ShoppingCart, User, Menu } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export function BottomNav() {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const navItems = [
+    { icon: Home, label: 'Home', href: '/' },
+    { icon: LayoutGrid, label: 'Categories', href: '/categories' },
+    { icon: ShoppingCart, label: 'Cart', href: '/cart' },
+    user 
+      ? { icon: User, label: 'Profile', href: '/profile' }
+      : { icon: Menu, label: 'More', href: '/faq' },
+  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t border-border shadow-up md:hidden z-50">

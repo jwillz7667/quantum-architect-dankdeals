@@ -76,6 +76,12 @@ export function DesktopHeader() {
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center w-full">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => void signOut()}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out

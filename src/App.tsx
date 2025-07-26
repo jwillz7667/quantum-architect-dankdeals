@@ -13,7 +13,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AgeGate } from '@/components/AgeGate';
 import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
-// import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Lazy load all page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));
@@ -41,6 +41,9 @@ const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
 const AuthCallback = lazy(() => import('./pages/auth/AuthCallback'));
+
+// Lazy load profile page
+const Profile = lazy(() => import('./pages/Profile'));
 
 const App = () => (
   <ErrorBoundary>
@@ -82,8 +85,8 @@ const App = () => (
                       <Route path="/checkout/review" element={<CheckoutReview />} />
                       <Route path="/checkout/complete" element={<CheckoutComplete />} />
 
-                      {/* Protected routes - could add user dashboard, order history, etc. */}
-                      {/* <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> */}
+                      {/* Protected routes */}
+                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
