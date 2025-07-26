@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -7,56 +7,52 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Bell, 
-  Mail, 
-  Smartphone, 
-  Package, 
-  ShoppingCart,
-  Star,
+import {
+  Bell,
+  Mail,
+  Smartphone,
   DollarSign,
   AlertCircle,
   CheckCircle,
   Save,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 
 interface NotificationPreferences {
   email_notifications: boolean;
   sms_notifications: boolean;
   push_notifications: boolean;
-  order_updates: boolean;
-  delivery_notifications: boolean;
-  promotional_emails: boolean;
-  weekly_deals: boolean;
-  product_recommendations: boolean;
-  price_alerts: boolean;
-  stock_alerts: boolean;
-  review_reminders: boolean;
+  marketing_emails: boolean;
 }
 
-interface UserPreferences {
+interface DatabasePreferences {
   id: string;
   user_id: string;
-  preferred_delivery_window: string | null;
-  communication_preferences: NotificationPreferences;
-  favorite_categories: string[];
+  email_notifications: boolean;
+  sms_notifications: boolean;
+  push_notifications: boolean;
+  marketing_emails: boolean;
+  dark_mode: boolean;
+  two_factor_enabled: boolean;
   created_at: string;
   updated_at: string;
+}
+
+interface SupabaseError {
+  code: string;
+  message: string;
+}
+
+interface SupabaseResponse<T> {
+  data: T | null;
+  error: SupabaseError | null;
 }
 
 const defaultPreferences: NotificationPreferences = {
   email_notifications: true,
   sms_notifications: false,
   push_notifications: true,
-  order_updates: true,
-  delivery_notifications: true,
-  promotional_emails: false,
-  weekly_deals: false,
-  product_recommendations: false,
-  price_alerts: false,
-  stock_alerts: false,
-  review_reminders: true,
+  marketing_emails: false,
 };
 
 export function NotificationSettings() {
@@ -67,48 +63,65 @@ export function NotificationSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchPreferences();
-    }
-  }, [user]);
-
-  const fetchPreferences = async () => {
+  const fetchPreferences = useCallback(async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const response = (await supabase
         .from('user_preferences')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .single()) as SupabaseResponse<DatabasePreferences>;
+
+      const { data, error } = response;
 
       if (error) {
         // If no preferences exist, create default ones
         if (error.code === 'PGRST116') {
           const newPreferences = {
             user_id: user.id,
-            communication_preferences: defaultPreferences,
-            favorite_categories: [],
+            ...defaultPreferences,
+            dark_mode: false,
+            two_factor_enabled: false,
           };
 
-          const { data: createdData, error: createError } = await supabase
+          const createResponse = (await supabase
             .from('user_preferences')
             .insert([newPreferences])
             .select()
-            .single();
+            .single()) as SupabaseResponse<DatabasePreferences>;
+
+          const { data: createdData, error: createError } = createResponse;
 
           if (createError) {
-            throw createError;
+            throw new Error(createError.message || 'Failed to create preferences');
           }
 
-          setPreferences(createdData.communication_preferences || defaultPreferences);
+          if (!createdData) {
+            throw new Error('Failed to create preferences');
+          }
+          const typedData = createdData;
+          setPreferences({
+            email_notifications: typedData.email_notifications,
+            sms_notifications: typedData.sms_notifications,
+            push_notifications: typedData.push_notifications,
+            marketing_emails: typedData.marketing_emails,
+          });
         } else {
-          throw error;
+          throw new Error(error.message || 'Unknown error occurred');
         }
       } else {
-        setPreferences(data.communication_preferences || defaultPreferences);
+        if (!data) {
+          throw new Error('No preferences data found');
+        }
+        const typedData = data;
+        setPreferences({
+          email_notifications: typedData.email_notifications,
+          sms_notifications: typedData.sms_notifications,
+          push_notifications: typedData.push_notifications,
+          marketing_emails: typedData.marketing_emails,
+        });
       }
     } catch (error) {
       console.error('Error fetching preferences:', error);
@@ -120,12 +133,18 @@ export function NotificationSettings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchPreferences();
+    }
+  }, [user, fetchPreferences]);
 
   const updatePreference = (key: keyof NotificationPreferences, value: boolean) => {
-    setPreferences(prev => ({
+    setPreferences((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
     setHasChanges(true);
   };
@@ -138,7 +157,10 @@ export function NotificationSettings() {
       const { error } = await supabase
         .from('user_preferences')
         .update({
-          communication_preferences: preferences,
+          email_notifications: preferences.email_notifications,
+          sms_notifications: preferences.sms_notifications,
+          push_notifications: preferences.push_notifications,
+          marketing_emails: preferences.marketing_emails,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id);
@@ -189,83 +211,27 @@ export function NotificationSettings() {
           description: 'Receive browser push notifications',
           icon: Bell,
         },
-      ]
-    },
-    {
-      title: 'Order & Delivery',
-      description: 'Stay updated about your orders',
-      icon: Package,
-      items: [
-        {
-          key: 'order_updates' as keyof NotificationPreferences,
-          label: 'Order Updates',
-          description: 'Get notified when your order status changes',
-          icon: Package,
-        },
-        {
-          key: 'delivery_notifications' as keyof NotificationPreferences,
-          label: 'Delivery Notifications',
-          description: 'Receive updates about delivery schedules',
-          icon: Package,
-        },
-        {
-          key: 'review_reminders' as keyof NotificationPreferences,
-          label: 'Review Reminders',
-          description: 'Gentle reminders to review your purchases',
-          icon: Star,
-        },
-      ]
+      ],
     },
     {
       title: 'Marketing & Promotions',
-      description: 'Deals, offers, and product updates',
+      description: 'Deals, offers, and promotional content',
       icon: DollarSign,
       items: [
         {
-          key: 'promotional_emails' as keyof NotificationPreferences,
-          label: 'Promotional Emails',
-          description: 'Special offers and discount notifications',
+          key: 'marketing_emails' as keyof NotificationPreferences,
+          label: 'Marketing Emails',
+          description: 'Special offers, deals, and promotional notifications',
           icon: DollarSign,
         },
-        {
-          key: 'weekly_deals' as keyof NotificationPreferences,
-          label: 'Weekly Deals',
-          description: 'Weekly roundup of best deals and offers',
-          icon: DollarSign,
-        },
-        {
-          key: 'product_recommendations' as keyof NotificationPreferences,
-          label: 'Product Recommendations',
-          description: 'Personalized product suggestions',
-          icon: ShoppingCart,
-        },
-      ]
-    },
-    {
-      title: 'Product Alerts',
-      description: 'Stay informed about products you care about',
-      icon: AlertCircle,
-      items: [
-        {
-          key: 'price_alerts' as keyof NotificationPreferences,
-          label: 'Price Drop Alerts',
-          description: 'Get notified when prices drop on favorited items',
-          icon: DollarSign,
-        },
-        {
-          key: 'stock_alerts' as keyof NotificationPreferences,
-          label: 'Back in Stock Alerts',
-          description: 'Know when out-of-stock items are available again',
-          icon: Package,
-        },
-      ]
+      ],
     },
   ];
 
   if (loading) {
     return (
       <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
+        {Array.from({ length: 3 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-3">
@@ -289,9 +255,7 @@ export function NotificationSettings() {
             <Bell className="h-5 w-5" />
             <span>Notification Preferences</span>
           </CardTitle>
-          <CardDescription>
-            Customize how and when you receive notifications
-          </CardDescription>
+          <CardDescription>Customize how and when you receive notifications</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -299,13 +263,11 @@ export function NotificationSettings() {
               <CheckCircle className="h-5 w-5 text-green-500" />
               <div>
                 <div className="font-medium">Notification Status</div>
-                <div className="text-sm text-muted-foreground">
-                  All systems operational
-                </div>
+                <div className="text-sm text-muted-foreground">All systems operational</div>
               </div>
             </div>
             {hasChanges && (
-              <Button onClick={savePreferences} disabled={saving}>
+              <Button onClick={() => void savePreferences()} disabled={saving}>
                 {saving ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
@@ -338,9 +300,7 @@ export function NotificationSettings() {
                       <Label htmlFor={item.key} className="text-sm font-medium">
                         {item.label}
                       </Label>
-                      <div className="text-xs text-muted-foreground">
-                        {item.description}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{item.description}</div>
                     </div>
                   </div>
                   <Switch
@@ -349,9 +309,7 @@ export function NotificationSettings() {
                     onCheckedChange={(checked) => updatePreference(item.key, checked)}
                   />
                 </div>
-                {itemIndex < group.items.length - 1 && (
-                  <Separator className="mt-4" />
-                )}
+                {itemIndex < group.items.length - 1 && <Separator className="mt-4" />}
               </div>
             ))}
           </CardContent>
@@ -373,14 +331,14 @@ export function NotificationSettings() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    fetchPreferences();
+                    void fetchPreferences();
                     setHasChanges(false);
                   }}
                   disabled={saving}
                 >
                   Cancel
                 </Button>
-                <Button onClick={savePreferences} disabled={saving}>
+                <Button onClick={() => void savePreferences()} disabled={saving}>
                   {saving ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
@@ -398,9 +356,7 @@ export function NotificationSettings() {
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Common notification preference presets
-          </CardDescription>
+          <CardDescription>Common notification preference presets</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -409,13 +365,10 @@ export function NotificationSettings() {
               className="h-auto p-4 flex flex-col items-center space-y-2"
               onClick={() => {
                 setPreferences({
-                  ...defaultPreferences,
                   email_notifications: true,
-                  order_updates: true,
-                  delivery_notifications: true,
-                  promotional_emails: false,
-                  weekly_deals: false,
-                  product_recommendations: false,
+                  sms_notifications: false,
+                  push_notifications: true,
+                  marketing_emails: false,
                 });
                 setHasChanges(true);
               }}
@@ -423,7 +376,7 @@ export function NotificationSettings() {
               <Bell className="h-6 w-6" />
               <div className="text-center">
                 <div className="font-medium">Essential Only</div>
-                <div className="text-xs text-muted-foreground">Order & delivery updates</div>
+                <div className="text-xs text-muted-foreground">Email & push notifications only</div>
               </div>
             </Button>
 
@@ -432,21 +385,18 @@ export function NotificationSettings() {
               className="h-auto p-4 flex flex-col items-center space-y-2"
               onClick={() => {
                 setPreferences({
-                  ...defaultPreferences,
                   email_notifications: true,
-                  order_updates: true,
-                  delivery_notifications: true,
-                  promotional_emails: true,
-                  weekly_deals: true,
-                  product_recommendations: true,
+                  sms_notifications: true,
+                  push_notifications: true,
+                  marketing_emails: true,
                 });
                 setHasChanges(true);
               }}
             >
               <DollarSign className="h-6 w-6" />
               <div className="text-center">
-                <div className="font-medium">All Deals</div>
-                <div className="text-xs text-muted-foreground">Include promotions & offers</div>
+                <div className="font-medium">All Notifications</div>
+                <div className="text-xs text-muted-foreground">Enable all notification types</div>
               </div>
             </Button>
 
@@ -454,10 +404,12 @@ export function NotificationSettings() {
               variant="outline"
               className="h-auto p-4 flex flex-col items-center space-y-2"
               onClick={() => {
-                setPreferences(Object.keys(defaultPreferences).reduce((acc, key) => ({
-                  ...acc,
-                  [key]: false
-                }), {} as NotificationPreferences));
+                setPreferences({
+                  email_notifications: false,
+                  sms_notifications: false,
+                  push_notifications: false,
+                  marketing_emails: false,
+                });
                 setHasChanges(true);
               }}
             >

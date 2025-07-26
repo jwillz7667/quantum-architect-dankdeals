@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,6 +39,11 @@ interface UserProfile {
   updated_at: string;
 }
 
+interface SupabaseProfileResponse {
+  data: UserProfile | null;
+  error: { code: string; message: string } | null;
+}
+
 export function ProfileInfo() {
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -52,28 +57,24 @@ export function ProfileInfo() {
     formState: { errors, isDirty },
     reset,
     setValue,
-    watch
+    watch,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   });
 
   const marketingConsent = watch('marketing_consent');
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const response = (await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .single()) as SupabaseProfileResponse;
+
+      const { data, error } = response;
 
       if (error) {
         // If profile doesn't exist, create one
@@ -81,20 +82,26 @@ export function ProfileInfo() {
           const newProfile = {
             id: user.id,
             email: user.email,
-            first_name: user.user_metadata?.first_name || '',
-            last_name: user.user_metadata?.last_name || '',
+            first_name: (user.user_metadata?.first_name as string) || '',
+            last_name: (user.user_metadata?.last_name as string) || '',
             phone: user.phone || '',
             marketing_consent: false,
           };
 
-          const { data: createdProfile, error: createError } = await supabase
+          const createResponse = (await supabase
             .from('profiles')
             .insert([newProfile])
             .select()
-            .single();
+            .single()) as SupabaseProfileResponse;
+
+          const { data: createdProfile, error: createError } = createResponse;
 
           if (createError) {
-            throw createError;
+            throw new Error(createError.message || 'Failed to create profile');
+          }
+
+          if (!createdProfile) {
+            throw new Error('Failed to create profile');
           }
 
           setProfile(createdProfile);
@@ -107,9 +114,12 @@ export function ProfileInfo() {
             marketing_consent: createdProfile.marketing_consent || false,
           });
         } else {
-          throw error;
+          throw new Error(error.message || 'Unknown error occurred');
         }
       } else {
+        if (!data) {
+          throw new Error('No profile data found');
+        }
         setProfile(data);
         reset({
           first_name: data.first_name || '',
@@ -128,7 +138,13 @@ export function ProfileInfo() {
         description: 'Unable to load your profile information. Please try again.',
       });
     }
-  };
+  }, [user, reset, toast]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchProfile();
+    }
+  }, [user, fetchProfile]);
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user || !profile) return;
@@ -169,7 +185,7 @@ export function ProfileInfo() {
       });
 
       setIsEditing(false);
-      fetchProfile();
+      void fetchProfile();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -271,18 +287,14 @@ export function ProfileInfo() {
               </CardDescription>
             </div>
             {!isEditing && (
-              <Button
-                variant="outline"
-                onClick={() => setIsEditing(true)}
-                className="shrink-0"
-              >
+              <Button variant="outline" onClick={() => setIsEditing(true)} className="shrink-0">
                 Edit Profile
               </Button>
             )}
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="first_name">First Name</Label>
@@ -320,9 +332,7 @@ export function ProfileInfo() {
                 disabled={!isEditing}
                 placeholder="Enter your email address"
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -334,9 +344,7 @@ export function ProfileInfo() {
                 disabled={!isEditing}
                 placeholder="Enter your phone number"
               />
-              {errors.phone && (
-                <p className="text-sm text-destructive">{errors.phone.message}</p>
-              )}
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -366,11 +374,7 @@ export function ProfileInfo() {
 
             {isEditing && (
               <div className="flex space-x-2 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isLoading || !isDirty}
-                  className="flex-1"
-                >
+                <Button type="submit" disabled={isLoading || !isDirty} className="flex-1">
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (

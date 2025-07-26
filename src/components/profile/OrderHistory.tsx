@@ -1,24 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Package, 
-  Truck, 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
+import {
+  Package,
+  Truck,
+  CheckCircle,
+  Clock,
+  XCircle,
   Search,
   Filter,
   Calendar,
   DollarSign,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -35,7 +41,14 @@ interface OrderItem {
 interface Order {
   id: string;
   order_number: string;
-  status: 'pending' | 'confirmed' | 'processing' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'refunded';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'processing'
+    | 'out_for_delivery'
+    | 'delivered'
+    | 'cancelled'
+    | 'refunded';
   subtotal: number;
   tax_amount: number;
   delivery_fee: number;
@@ -55,13 +68,37 @@ interface Order {
 }
 
 const statusConfig = {
-  pending: { label: 'Pending', icon: Clock, color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  confirmed: { label: 'Confirmed', icon: CheckCircle, color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  processing: { label: 'Processing', icon: Package, color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  out_for_delivery: { label: 'Out for Delivery', icon: Truck, color: 'bg-orange-50 text-orange-700 border-orange-200' },
-  delivered: { label: 'Delivered', icon: CheckCircle, color: 'bg-green-50 text-green-700 border-green-200' },
+  pending: {
+    label: 'Pending',
+    icon: Clock,
+    color: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    icon: CheckCircle,
+    color: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  processing: {
+    label: 'Processing',
+    icon: Package,
+    color: 'bg-purple-50 text-purple-700 border-purple-200',
+  },
+  out_for_delivery: {
+    label: 'Out for Delivery',
+    icon: Truck,
+    color: 'bg-orange-50 text-orange-700 border-orange-200',
+  },
+  delivered: {
+    label: 'Delivered',
+    icon: CheckCircle,
+    color: 'bg-green-50 text-green-700 border-green-200',
+  },
   cancelled: { label: 'Cancelled', icon: XCircle, color: 'bg-red-50 text-red-700 border-red-200' },
-  refunded: { label: 'Refunded', icon: RefreshCw, color: 'bg-gray-50 text-gray-700 border-gray-200' },
+  refunded: {
+    label: 'Refunded',
+    icon: RefreshCw,
+    color: 'bg-gray-50 text-gray-700 border-gray-200',
+  },
 };
 
 export function OrderHistory() {
@@ -73,23 +110,19 @@ export function OrderHistory() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-  }, [user]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!user) return;
 
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('orders')
-        .select(`
+        .select(
+          `
           *,
           order_items (*)
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -108,13 +141,20 @@ export function OrderHistory() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.order_items.some(item => 
-                           item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
-                         );
+  useEffect(() => {
+    if (user) {
+      void fetchOrders();
+    }
+  }, [user, fetchOrders]);
+
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.order_items.some((item) =>
+        item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -122,7 +162,7 @@ export function OrderHistory() {
   const getOrderStatusBadge = (status: Order['status']) => {
     const config = statusConfig[status];
     const Icon = config.icon;
-    
+
     return (
       <Badge variant="outline" className={config.color}>
         <Icon className="h-3 w-3 mr-1" />
@@ -142,7 +182,7 @@ export function OrderHistory() {
   if (loading) {
     return (
       <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
+        {Array.from({ length: 3 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-3">
@@ -166,9 +206,7 @@ export function OrderHistory() {
             <Package className="h-5 w-5" />
             <span>Order History</span>
           </CardTitle>
-          <CardDescription>
-            View and track all your orders
-          </CardDescription>
+          <CardDescription>View and track all your orders</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4">
@@ -208,14 +246,11 @@ export function OrderHistory() {
             <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No orders found</h3>
             <p className="text-muted-foreground mb-4">
-              {orders.length === 0 
-                ? "You haven't placed any orders yet." 
-                : "No orders match your current filters."
-              }
+              {orders.length === 0
+                ? "You haven't placed any orders yet."
+                : 'No orders match your current filters.'}
             </p>
-            <Button onClick={() => window.location.href = '/categories'}>
-              Start Shopping
-            </Button>
+            <Button onClick={() => (window.location.href = '/categories')}>Start Shopping</Button>
           </CardContent>
         </Card>
       ) : (
@@ -223,7 +258,7 @@ export function OrderHistory() {
           {filteredOrders.map((order) => (
             <Card key={order.id} className="overflow-hidden">
               <CardContent className="p-0">
-                <div 
+                <div
                   className="p-6 cursor-pointer hover:bg-muted/50 transition-colors"
                   onClick={() => toggleOrderExpansion(order.id)}
                 >
@@ -233,7 +268,7 @@ export function OrderHistory() {
                         <h3 className="font-semibold">#{order.order_number}</h3>
                         {getOrderStatusBadge(order.status)}
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-2">
                           <Calendar className="h-4 w-4" />
@@ -245,15 +280,18 @@ export function OrderHistory() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Package className="h-4 w-4" />
-                          <span>{order.order_items.length} item{order.order_items.length !== 1 ? 's' : ''}</span>
+                          <span>
+                            {order.order_items.length} item
+                            {order.order_items.length !== 1 ? 's' : ''}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
-                    <ChevronRight 
+
+                    <ChevronRight
                       className={`h-5 w-5 text-muted-foreground transition-transform ${
                         expandedOrder === order.id ? 'rotate-90' : ''
-                      }`} 
+                      }`}
                     />
                   </div>
                 </div>
@@ -265,7 +303,10 @@ export function OrderHistory() {
                       <h4 className="font-semibold mb-3">Order Items</h4>
                       <div className="space-y-2">
                         {order.order_items.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center p-3 bg-background rounded-lg">
+                          <div
+                            key={item.id}
+                            className="flex justify-between items-center p-3 bg-background rounded-lg"
+                          >
                             <div className="flex-1">
                               <div className="font-medium">{item.product_name}</div>
                               <div className="text-sm text-muted-foreground">
@@ -288,12 +329,16 @@ export function OrderHistory() {
                       <div>
                         <h4 className="font-semibold mb-3">Delivery Address</h4>
                         <div className="text-sm space-y-1">
-                          <div>{order.delivery_first_name} {order.delivery_last_name}</div>
+                          <div>
+                            {order.delivery_first_name} {order.delivery_last_name}
+                          </div>
                           <div>{order.delivery_street_address}</div>
-                          <div>{order.delivery_city}, {order.delivery_state} {order.delivery_zip_code}</div>
+                          <div>
+                            {order.delivery_city}, {order.delivery_state} {order.delivery_zip_code}
+                          </div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <h4 className="font-semibold mb-3">Order Summary</h4>
                         <div className="space-y-2 text-sm">

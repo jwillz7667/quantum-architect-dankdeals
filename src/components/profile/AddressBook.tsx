@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,21 +9,18 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  MapPin, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Star, 
-  Home, 
-  Building,
-  Loader2,
-  Save
-} from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Star, Home, Loader2, Save } from 'lucide-react';
 
 const addressSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -35,7 +32,7 @@ const addressSchema = z.object({
   zip_code: z.string().min(5, 'Valid ZIP code is required'),
   phone: z.string().optional(),
   delivery_instructions: z.string().optional(),
-  is_default: z.boolean().default(false),
+  is_default: z.boolean(),
 });
 
 type AddressFormData = z.infer<typeof addressSchema>;
@@ -73,23 +70,18 @@ export function AddressBook() {
     formState: { errors },
     reset,
     setValue,
-    watch
+    watch,
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
       state: 'MN', // Default to Minnesota
-    }
+      is_default: false,
+    },
   });
 
   const isDefault = watch('is_default');
 
-  useEffect(() => {
-    if (user) {
-      fetchAddresses();
-    }
-  }, [user]);
-
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -116,7 +108,13 @@ export function AddressBook() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (user) {
+      void fetchAddresses();
+    }
+  }, [user, fetchAddresses]);
 
   const onSubmit = async (data: AddressFormData) => {
     if (!user) return;
@@ -156,9 +154,7 @@ export function AddressBook() {
         });
       } else {
         // Create new address
-        const { error } = await supabase
-          .from('addresses')
-          .insert([addressData]);
+        const { error } = await supabase.from('addresses').insert([addressData]);
 
         if (error) throw error;
 
@@ -171,7 +167,7 @@ export function AddressBook() {
       setIsDialogOpen(false);
       setEditingAddress(null);
       reset();
-      fetchAddresses();
+      void fetchAddresses();
     } catch (error) {
       console.error('Error saving address:', error);
       toast({
@@ -203,10 +199,7 @@ export function AddressBook() {
 
   const handleDelete = async (addressId: string) => {
     try {
-      const { error } = await supabase
-        .from('addresses')
-        .delete()
-        .eq('id', addressId);
+      const { error } = await supabase.from('addresses').delete().eq('id', addressId);
 
       if (error) throw error;
 
@@ -215,7 +208,7 @@ export function AddressBook() {
         description: 'The address has been removed from your account.',
       });
 
-      fetchAddresses();
+      void fetchAddresses();
     } catch (error) {
       console.error('Error deleting address:', error);
       toast({
@@ -229,23 +222,17 @@ export function AddressBook() {
   const setAsDefault = async (addressId: string) => {
     try {
       // Unset all defaults first
-      await supabase
-        .from('addresses')
-        .update({ is_default: false })
-        .eq('user_id', user!.id);
+      await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id);
 
       // Set new default
-      await supabase
-        .from('addresses')
-        .update({ is_default: true })
-        .eq('id', addressId);
+      await supabase.from('addresses').update({ is_default: true }).eq('id', addressId);
 
       toast({
         title: 'Default address updated',
         description: 'Your default delivery address has been changed.',
       });
 
-      fetchAddresses();
+      void fetchAddresses();
     } catch (error) {
       console.error('Error setting default address:', error);
       toast({
@@ -276,7 +263,7 @@ export function AddressBook() {
   if (loading) {
     return (
       <div className="space-y-4">
-        {[...Array(2)].map((_, i) => (
+        {Array.from({ length: 2 }).map((_, i) => (
           <Card key={i}>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-3">
@@ -302,9 +289,7 @@ export function AddressBook() {
                 <MapPin className="h-5 w-5" />
                 <span>Address Book</span>
               </CardTitle>
-              <CardDescription>
-                Manage your delivery and billing addresses
-              </CardDescription>
+              <CardDescription>Manage your delivery and billing addresses</CardDescription>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -315,18 +300,15 @@ export function AddressBook() {
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>
-                    {editingAddress ? 'Edit Address' : 'Add New Address'}
-                  </DialogTitle>
+                  <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
                   <DialogDescription>
-                    {editingAddress 
+                    {editingAddress
                       ? 'Update your address information below.'
-                      : 'Add a new delivery address to your account.'
-                    }
+                      : 'Add a new delivery address to your account.'}
                   </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="first_name">First Name</Label>
@@ -377,11 +359,7 @@ export function AddressBook() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        {...register('city')}
-                        placeholder="City"
-                      />
+                      <Input id="city" {...register('city')} placeholder="City" />
                       {errors.city && (
                         <p className="text-sm text-destructive">{errors.city.message}</p>
                       )}
@@ -400,11 +378,7 @@ export function AddressBook() {
 
                     <div className="space-y-2">
                       <Label htmlFor="zip_code">ZIP Code</Label>
-                      <Input
-                        id="zip_code"
-                        {...register('zip_code')}
-                        placeholder="ZIP"
-                      />
+                      <Input id="zip_code" {...register('zip_code')} placeholder="ZIP" />
                       {errors.zip_code && (
                         <p className="text-sm text-destructive">{errors.zip_code.message}</p>
                       )}
@@ -497,17 +471,13 @@ export function AddressBook() {
                     )}
                   </div>
                   <div className="flex space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(address)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => void handleEdit(address)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDelete(address.id)}
+                      onClick={() => void handleDelete(address.id)}
                       disabled={address.is_default}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -522,7 +492,9 @@ export function AddressBook() {
                   <div className="text-sm text-muted-foreground">
                     <div>{address.street_address}</div>
                     {address.apartment && <div>{address.apartment}</div>}
-                    <div>{address.city}, {address.state} {address.zip_code}</div>
+                    <div>
+                      {address.city}, {address.state} {address.zip_code}
+                    </div>
                     {address.phone && <div>{address.phone}</div>}
                   </div>
                   {address.delivery_instructions && (
@@ -536,7 +508,7 @@ export function AddressBook() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setAsDefault(address.id)}
+                    onClick={() => void setAsDefault(address.id)}
                     className="w-full mt-4"
                   >
                     Set as Default

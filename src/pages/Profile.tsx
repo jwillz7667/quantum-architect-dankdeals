@@ -1,26 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
+import { useOrderStats } from '@/hooks/useOrderStats';
 import { Navigate } from 'react-router-dom';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { SEOHead } from '@/components/SEOHead';
-import { 
-  User, 
-  Package, 
-  MapPin, 
-  Settings, 
-  Shield, 
+import {
+  User,
+  Package,
+  MapPin,
+  Shield,
   Bell,
-  ChevronRight,
   Truck,
-  Clock,
   CheckCircle,
-  XCircle
+  DollarSign,
+  Loader2,
 } from 'lucide-react';
 import { ProfileInfo } from '@/components/profile/ProfileInfo';
 import { OrderHistory } from '@/components/profile/OrderHistory';
@@ -30,6 +29,13 @@ import { NotificationSettings } from '@/components/profile/NotificationSettings'
 
 export default function Profile() {
   const { user, loading } = useAuth();
+  const {
+    totalOrders,
+    activeOrders,
+    deliveredOrders,
+    totalSpent,
+    loading: statsLoading,
+  } = useOrderStats();
   const [activeTab, setActiveTab] = useState('profile');
 
   if (loading) {
@@ -58,32 +64,32 @@ export default function Profile() {
       value: 'profile',
       label: 'Profile',
       icon: User,
-      description: 'Personal information and preferences'
+      description: 'Personal information and preferences',
     },
     {
       value: 'orders',
       label: 'Orders',
       icon: Package,
-      description: 'Order history and tracking'
+      description: 'Order history and tracking',
     },
     {
       value: 'addresses',
       label: 'Addresses',
       icon: MapPin,
-      description: 'Delivery and billing addresses'
+      description: 'Delivery and billing addresses',
     },
     {
       value: 'security',
       label: 'Security',
       icon: Shield,
-      description: 'Password and account security'
+      description: 'Password and account security',
     },
     {
       value: 'notifications',
       label: 'Notifications',
       icon: Bell,
-      description: 'Communication preferences'
-    }
+      description: 'Communication preferences',
+    },
   ];
 
   return (
@@ -93,7 +99,7 @@ export default function Profile() {
         description="Manage your account settings, view order history, update delivery addresses, and customize your preferences."
         url="https://dankdealsmn.com/profile"
       />
-      
+
       <div className="min-h-screen bg-background pb-20 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="My Profile" />
@@ -103,9 +109,7 @@ export default function Profile() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
-                  Welcome back!
-                </h1>
+                <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back!</h1>
                 <p className="text-muted-foreground">
                   Manage your account settings and preferences
                 </p>
@@ -125,7 +129,7 @@ export default function Profile() {
               {tabItems.slice(0, 4).map((tab) => (
                 <Button
                   key={tab.value}
-                  variant={activeTab === tab.value ? "default" : "outline"}
+                  variant={activeTab === tab.value ? 'default' : 'outline'}
                   className="h-16 flex flex-col items-center justify-center"
                   onClick={() => setActiveTab(tab.value)}
                 >
@@ -137,7 +141,7 @@ export default function Profile() {
             {tabItems.length > 4 && (
               <div className="mt-2">
                 <Button
-                  variant={activeTab === 'notifications' ? "default" : "outline"}
+                  variant={activeTab === 'notifications' ? 'default' : 'outline'}
                   className="w-full h-12 flex items-center justify-center"
                   onClick={() => setActiveTab('notifications')}
                 >
@@ -152,9 +156,9 @@ export default function Profile() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="hidden md:block">
             <TabsList className="grid w-full grid-cols-5 mb-8">
               {tabItems.map((tab) => (
-                <TabsTrigger 
-                  key={tab.value} 
-                  value={tab.value} 
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
                   className="flex items-center space-x-2"
                 >
                   <tab.icon className="h-4 w-4" />
@@ -172,7 +176,7 @@ export default function Profile() {
                     <p className="text-sm text-muted-foreground">{tab.description}</p>
                   </div>
                 </div>
-                
+
                 {tab.value === 'profile' && <ProfileInfo />}
                 {tab.value === 'orders' && <OrderHistory />}
                 {tab.value === 'addresses' && <AddressBook />}
@@ -196,17 +200,87 @@ export default function Profile() {
             <Card>
               <CardContent className="p-4 text-center">
                 <Package className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">12</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? (
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                  ) : (
+                    totalOrders
+                  )}
+                </div>
                 <div className="text-sm text-muted-foreground">Total Orders</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <Truck className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">2</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? (
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                  ) : (
+                    activeOrders
+                  )}
+                </div>
                 <div className="text-sm text-muted-foreground">Active Orders</div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Additional Stats for Desktop */}
+          <div className="hidden md:block mt-8">
+            <div className="grid grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Package className="h-8 w-8 mx-auto mb-3 text-primary" />
+                  <div className="text-3xl font-bold">
+                    {statsLoading ? (
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                    ) : (
+                      totalOrders
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Orders</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Truck className="h-8 w-8 mx-auto mb-3 text-primary" />
+                  <div className="text-3xl font-bold">
+                    {statsLoading ? (
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                    ) : (
+                      activeOrders
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Active Orders</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <CheckCircle className="h-8 w-8 mx-auto mb-3 text-green-500" />
+                  <div className="text-3xl font-bold">
+                    {statsLoading ? (
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                    ) : (
+                      deliveredOrders
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Delivered</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <DollarSign className="h-8 w-8 mx-auto mb-3 text-green-600" />
+                  <div className="text-3xl font-bold">
+                    {statsLoading ? (
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                    ) : (
+                      `$${totalSpent.toFixed(2)}`
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Spent</div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
