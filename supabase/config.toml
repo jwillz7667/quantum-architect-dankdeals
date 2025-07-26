@@ -10,7 +10,7 @@ jwt_expiry = 3600
 enabled = true
 client_id = "995705962018-jtt48rrhl2jnk8ns42v5guij680e1kqq.apps.googleusercontent.com"
 secret = "env(GOOGLE_CLIENT_SECRET)"
-redirect_uri = "https://dankdealsmn.com/auth/callback"
+redirect_uri = "https://auth.dankdealsmn.com/auth/v1/callback"
 
 [auth.external.apple]
 enabled = false
