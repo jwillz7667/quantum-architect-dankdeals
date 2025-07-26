@@ -69,19 +69,27 @@ export function CategoriesProductGrid() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            price={25} // Use a default price or get from variants
-            category={product.category}
-            imageUrl={product.image_url || undefined}
-            thcContent={product.thc_content || undefined}
-            cbdContent={product.cbd_content || undefined}
-            description={product.description ?? undefined}
-          />
-        ))}
+        {filteredProducts.map((product) => {
+          // Get the lowest price from available variants
+          const basePrice =
+            product.variants && product.variants.length > 0
+              ? Math.min(...product.variants.filter((v) => v.is_active).map((v) => v.price))
+              : 25; // fallback price
+
+          return (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              price={basePrice}
+              category={product.category}
+              imageUrl={product.image_url || undefined}
+              thcContent={product.thc_content || undefined}
+              cbdContent={product.cbd_content || undefined}
+              description={product.description ?? undefined}
+            />
+          );
+        })}
       </div>
     </div>
   );

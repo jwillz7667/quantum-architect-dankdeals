@@ -61,7 +61,7 @@ export const ProductCard = memo(function ProductCard({
             src={displayImage}
             fallback={imageUrl}
             alt={`${name} - Premium ${category} cannabis product`}
-            className="w-full h-full hover:scale-105 transition-transform duration-200"
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             variant="card"
           />
