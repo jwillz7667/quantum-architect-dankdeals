@@ -6,6 +6,7 @@ import './index.css';
 import { env } from './lib/env';
 import { initializeAxe } from './utils/axe';
 import { analytics } from './lib/analytics';
+import { initializePWA } from './lib/pwa';
 // import { initSentry } from './lib/sentry';
 
 // Global error handler for uncaught errors
@@ -31,6 +32,9 @@ if (import.meta.env.DEV) {
 
 // Initialize analytics - NON-BLOCKING
 setTimeout(() => void analytics.initialize(), 500);
+
+// Initialize PWA features - NON-BLOCKING
+setTimeout(() => void initializePWA(), 1000);
 
 // Validate environment variables on startup
 (function validateEnvironment() {

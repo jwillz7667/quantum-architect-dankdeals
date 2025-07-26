@@ -14,6 +14,7 @@ import { AgeGate } from '@/components/AgeGate';
 import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { PWAInstallButton, PWAStatusIndicator } from '@/components/PWAInstallButton';
 
 // Lazy load all page components for better code splitting
 const Index = lazy(() => import('./pages/Index'));
@@ -86,7 +87,14 @@ const App = () => (
                       <Route path="/checkout/complete" element={<CheckoutComplete />} />
 
                       {/* Protected routes */}
-                      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                      <Route
+                        path="/profile"
+                        element={
+                          <ProtectedRoute>
+                            <Profile />
+                          </ProtectedRoute>
+                        }
+                      />
 
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
@@ -95,6 +103,10 @@ const App = () => (
                 </ProductsFilterProvider>
               </CartProvider>
             </RealTimeProvider>
+
+            {/* PWA Components */}
+            <PWAInstallButton />
+            <PWAStatusIndicator />
           </TooltipProvider>
         </SEOProvider>
       </AuthProvider>

@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Phone, ShoppingCart, User, LogOut } from 'lucide-react';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
+import { PWAInstallButton } from '@/components/PWAInstallButton';
 import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,
@@ -96,6 +97,9 @@ export function DesktopHeader() {
                 </Button>
               </Link>
             )}
+
+            {/* PWA Install Button */}
+            <PWAInstallButton variant="outline" size="sm" className="hidden lg:flex" />
 
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
