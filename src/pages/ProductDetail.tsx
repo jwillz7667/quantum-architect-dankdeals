@@ -130,8 +130,8 @@ export default function ProductDetail() {
     return productImages.gallery;
   };
 
-  const formatPrice = (priceInCents: number): string => {
-    return (priceInCents / 100).toFixed(2);
+  const formatPrice = (priceInDollars: number): string => {
+    return priceInDollars.toFixed(2);
   };
 
   const nextImage = () => {
@@ -206,7 +206,10 @@ export default function ProductDetail() {
     { name: product.name || 'Product', url: canonicalUrl },
   ];
 
-  const productSchema = generateProductSchema(product, selectedVariant || undefined);
+  const productSchema = generateProductSchema(
+    product as Product & { variants?: ProductVariant[] },
+    selectedVariant || undefined
+  );
 
   // Generate product review schema for SEO
   const reviewSchema = {

@@ -1,22 +1,69 @@
 // lib/productSchema.ts
 import type { Product, ProductVariant } from '@/hooks/useProducts';
 
-export const generateProductSchema = (product: Product, selectedVariant?: ProductVariant) => {
-  const price = selectedVariant ? selectedVariant.price / 100 : 0;
+interface ProductSchema {
+  '@context': string;
+  '@type': string;
+  name: string;
+  description: string;
+  sku: string;
+  mpn: string;
+  brand: {
+    '@type': string;
+    name: string;
+  };
+  manufacturer: {
+    '@type': string;
+    name: string;
+  };
+  image: string[];
+  aggregateRating: {
+    '@type': string;
+    ratingValue: string;
+    reviewCount: string;
+    bestRating: string;
+    worstRating: string;
+  };
+  review: Array<{
+    '@type': string;
+    reviewRating: {
+      '@type': string;
+      ratingValue: string;
+      bestRating: string;
+    };
+    author: {
+      '@type': string;
+      name: string;
+    };
+    reviewBody: string;
+  }>;
+  additionalProperty: Array<{
+    '@type': string;
+    name: string;
+    value: string;
+  }>;
+  offers?: any;
+}
+
+export const generateProductSchema = (
+  product: Product & { variants?: ProductVariant[] },
+  selectedVariant?: ProductVariant
+): ProductSchema => {
+  // Price is stored as dollars in DB, not cents
+  const price = selectedVariant ? selectedVariant.price : 0;
   const availability =
     (selectedVariant?.inventory_count || 0) > 0
       ? 'https://schema.org/InStock'
       : 'https://schema.org/OutOfStock';
 
-  return {
+  // Base product data
+  const schema: ProductSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description || `Premium ${product.category} - ${product.name}`,
     sku: product.id,
     mpn: product.id,
-    gtin: product.id,
-    category: product.category,
     brand: {
       '@type': 'Brand',
       name: 'DankDeals',
@@ -32,48 +79,6 @@ export const generateProductSchema = (product: Product, selectedVariant?: Produc
             : `https://dankdealsmn.com${product.image_url}`,
         ]
       : [],
-    offers: {
-      '@type': 'Offer',
-      url: `https://dankdealsmn.com/product/${product.id}`,
-      priceCurrency: 'USD',
-      price: price,
-      availability: availability,
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      seller: {
-        '@type': 'Organization',
-        name: 'DankDeals MN',
-        url: 'https://dankdealsmn.com',
-      },
-      deliveryLeadTime: {
-        '@type': 'QuantitativeValue',
-        minValue: 30,
-        maxValue: 90,
-        unitCode: 'MIN',
-      },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: '5.00',
-          currency: 'USD',
-        },
-        deliveryTime: {
-          '@type': 'ShippingDeliveryTime',
-          businessDays: {
-            '@type': 'OpeningHoursSpecification',
-            dayOfWeek: [
-              'Monday',
-              'Tuesday',
-              'Wednesday',
-              'Thursday',
-              'Friday',
-              'Saturday',
-              'Sunday',
-            ],
-          },
-        },
-      },
-    },
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
@@ -106,7 +111,7 @@ export const generateProductSchema = (product: Product, selectedVariant?: Produc
             },
           ]
         : []),
-      ...(product.cbd_content
+      ...(product.cbd_content && product.cbd_content > 0
         ? [
             {
               '@type': 'PropertyValue',
@@ -115,15 +120,104 @@ export const generateProductSchema = (product: Product, selectedVariant?: Produc
             },
           ]
         : []),
-      ...(selectedVariant
-        ? [
-            {
-              '@type': 'PropertyValue',
-              name: 'Weight',
-              value: `${selectedVariant.weight_grams}g`,
-            },
-          ]
-        : []),
     ],
   };
+
+  // If we have variants, create multiple offers
+  if (product.variants && product.variants.length > 0) {
+    schema.offers = product.variants.map((variant) => ({
+      '@type': 'Offer',
+      url: `https://dankdealsmn.com/product/${product.id}`,
+      priceCurrency: 'USD',
+      price: variant.price.toFixed(2),
+      availability:
+        variant.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      seller: {
+        '@type': 'Organization',
+        name: 'DankDeals MN',
+        url: 'https://dankdealsmn.com',
+      },
+      name: variant.name,
+      sku: variant.id,
+      additionalProperty: {
+        '@type': 'PropertyValue',
+        name: 'Weight',
+        value: `${variant.weight_grams}g`,
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '5.00',
+          currency: 'USD',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+          addressRegion: ['MN'],
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 1,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 2,
+            unitCode: 'HUR',
+          },
+        },
+      },
+    }));
+  } else if (selectedVariant) {
+    // Single offer for selected variant
+    schema.offers = {
+      '@type': 'Offer',
+      url: `https://dankdealsmn.com/product/${product.id}`,
+      priceCurrency: 'USD',
+      price: price.toFixed(2),
+      availability: availability,
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      seller: {
+        '@type': 'Organization',
+        name: 'DankDeals MN',
+        url: 'https://dankdealsmn.com',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '5.00',
+          currency: 'USD',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+          addressRegion: ['MN'],
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 1,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 2,
+            unitCode: 'HUR',
+          },
+        },
+      },
+    };
+  }
+
+  return schema;
 };

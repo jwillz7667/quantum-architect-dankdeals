@@ -54,8 +54,8 @@ export function generateMetaTags(props: SEOProps): Record<string, string> {
 }
 
 export function generateProductSchema(product: Product) {
-  const minPrice = Math.min(...product.variants.map((v) => v.price / 100));
-  const maxPrice = Math.max(...product.variants.map((v) => v.price / 100));
+  const minPrice = Math.min(...product.variants.map((v) => v.price));
+  const maxPrice = Math.max(...product.variants.map((v) => v.price));
   const inStock = product.variants.some((v) => (v.inventory_count || 0) > 0);
 
   // Enhanced image data for better SEO
@@ -207,8 +207,8 @@ export function generateProductListingSchema(products: Product[], category?: str
       : 'Premium cannabis products available for same-day delivery in Minnesota',
     numberOfItems: products.length,
     itemListElement: products.map((product, index) => {
-      const minPrice = Math.min(...product.variants.map((v) => v.price / 100));
-      const maxPrice = Math.max(...product.variants.map((v) => v.price / 100));
+      const minPrice = Math.min(...product.variants.map((v) => v.price));
+      const maxPrice = Math.max(...product.variants.map((v) => v.price));
       const inStock = product.variants.some((v) => (v.inventory_count || 0) > 0);
 
       return {

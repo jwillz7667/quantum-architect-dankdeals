@@ -128,7 +128,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             productId: product.id,
             variantId: variant.id,
             name: product.name,
-            price: variant.price / 100, // Convert from cents to dollars
+            price: variant.price, // Price is already in dollars
             quantity,
             image: product.image_url || '/placeholder.svg',
             variant: {

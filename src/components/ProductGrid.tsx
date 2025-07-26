@@ -10,7 +10,7 @@ import { FixedSizeGrid as Grid, type GridChildComponentProps } from 'react-windo
 
 const getMinPrice = (variants: Array<{ price: number }> | undefined): number => {
   if (!variants || variants.length === 0) return 0;
-  return Math.min(...variants.map((v) => v.price / 100)); // Convert from cents to dollars
+  return Math.min(...variants.map((v) => v.price)); // Price is already in dollars
 };
 
 // Memoized grid cell component
