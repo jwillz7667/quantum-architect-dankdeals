@@ -1,0 +1,189 @@
+name: Performance & Security Monitoring
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  # Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate --production || {
+            echo "::warning::Security vulnerabilities found in dependencies"
+            npm audit --audit-level=moderate --production --json > audit-results.json
+          }
+
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-results
+          path: audit-results.json
+          retention-days: 30
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          languages: javascript
+
+      - name: Run Semgrep Security Scan
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/react
+            p/typescript
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # Bundle analysis
+  bundle-analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build for analysis
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: example-anon-key
+          VITE_ADMIN_EMAIL: admin@example.com
+          VITE_ENV: production
+
+      - name: Analyze bundle size
+        uses: vio/bundle-size-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          build-script: echo "Already built"
+          dist-folder: dist
+
+      - name: Upload bundle stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-stats
+          path: dist/
+          retention-days: 7
+
+  # Performance monitoring
+  performance-audit:
+    name: Performance Audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: example-anon-key
+          VITE_ADMIN_EMAIL: admin@example.com
+          VITE_ENV: production
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: './lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  # Accessibility testing
+  accessibility-test:
+    name: Accessibility Testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: example-anon-key
+          VITE_ADMIN_EMAIL: admin@example.com
+          VITE_ENV: production
+
+      - name: Install axe-core CLI
+        run: npm install -g @axe-core/cli
+
+      - name: Serve built application
+        run: |
+          npx serve -s dist -l 3000 &
+          sleep 5
+        
+      - name: Run axe accessibility tests
+        run: |
+          axe http://localhost:3000 --exit || echo "::warning::Accessibility issues found"
+          axe http://localhost:3000/categories --exit || echo "::warning::Accessibility issues found on categories page"
+          axe http://localhost:3000/cart --exit || echo "::warning::Accessibility issues found on cart page"
+
+  # Dependency vulnerability check
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC

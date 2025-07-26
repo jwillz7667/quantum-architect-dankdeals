@@ -49,14 +49,38 @@ jobs:
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
           
-          # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
+          # Allow Claude to run common development commands
+          allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint*),Bash(npm run type-check),Bash(npm run format*),Bash(git status),Bash(git diff)"
           
-          # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          # Custom instructions for Claude to follow project standards
+          custom_instructions: |
+            You are working on DankDeals MN - a cannabis delivery application built with React, TypeScript, Vite, and Supabase.
+            
+            **Project Guidelines:**
+            - Always use TypeScript for new files
+            - Follow existing code patterns and component structure
+            - Ensure all new features have proper tests
+            - Use Tailwind CSS for styling with existing design system
+            - Follow the established folder structure in src/
+            - Maintain existing security practices and RLS policies
+            - Use the established UI components from src/components/ui/
+            - Follow the existing cart and auth patterns
+            - Ensure mobile-first responsive design
+            - Add proper SEO meta tags for new pages
+            - Use existing hooks and context patterns
+            
+            **Code Quality:**
+            - Run ESLint and fix all errors before committing
+            - Ensure TypeScript strict mode compliance
+            - Add proper error handling and loading states
+            - Follow accessibility best practices
+            - Optimize images and performance
+            
+            **Testing:**
+            - Write unit tests for new components and hooks
+            - Add integration tests for complex workflows
+            - Ensure E2E tests cover critical user journeys
+            - Test responsive design across devices
           
           # Optional: Custom environment variables for Claude
           # claude_env: |

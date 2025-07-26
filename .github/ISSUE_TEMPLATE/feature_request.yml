@@ -1,0 +1,132 @@
+name: ✨ Feature Request
+description: Suggest a new feature for DankDeals MN
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! 
+        
+        **Note:** You can mention @claude in your issue description to get AI-powered assistance with feature planning and implementation guidance.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Describe the feature you want to add
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: "As a [user type], I want [goal] so that [benefit]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: Describe your proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: Describe any alternatives you've considered
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature Area
+      description: Which area of the application would this feature affect?
+      options:
+        - User Experience (UX/UI)
+        - Shopping & Cart
+        - Checkout & Payments
+        - User Account & Profile
+        - Product Management
+        - Order Management
+        - Analytics & Reporting
+        - Performance & Optimization
+        - Security & Compliance
+        - Mobile Experience
+        - Admin/Backend
+        - Third-party Integrations
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Low (nice to have)
+        - Medium (would improve experience)
+        - High (important for business goals)
+        - Critical (blocking current operations)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user-type
+    attributes:
+      label: User Type
+      description: Who would primarily benefit from this feature?
+      options:
+        - End customers
+        - Admin users
+        - Both customers and admins
+        - Developers/Maintainers
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: technical-considerations
+    attributes:
+      label: Technical Considerations
+      description: Are there any technical aspects to consider?
+      options:
+        - label: This may require database changes
+        - label: This may affect performance
+        - label: This may require third-party integration
+        - label: This may affect mobile compatibility
+        - label: This may require security review
+        - label: This may affect SEO
+        - label: This may require legal/compliance review
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What would make this feature complete?
+      placeholder: |
+        - [ ] User can...
+        - [ ] System should...
+        - [ ] When..., then...
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups/Wireframes
+      description: Any visual ideas or mockups for this feature
+      placeholder: Drag and drop images here or describe the visual design
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context, research, or references
+      placeholder: Links, research, competitive analysis, etc.
