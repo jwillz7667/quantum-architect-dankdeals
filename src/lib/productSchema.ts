@@ -42,7 +42,57 @@ interface ProductSchema {
     name: string;
     value: string;
   }>;
-  offers?: any;
+  offers?: Array<{
+    '@type': string;
+    price: string;
+    priceCurrency: string;
+    availability: string;
+    url: string;
+    priceValidUntil?: string;
+    seller?: {
+      '@type': string;
+      name: string;
+      url: string;
+    };
+    name?: string;
+    sku?: string;
+    additionalProperty?: Array<{
+      '@type': string;
+      name: string;
+      value: string;
+    }>;
+    shippingDetails?: {
+      '@type': string;
+      shippingRate: {
+        '@type': string;
+        value: string;
+        currency: string;
+      };
+      shippingDestination: {
+        '@type': string;
+        addressCountry: string;
+        addressRegion: string | string[];
+      };
+      deliveryTime: {
+        '@type': string;
+        minValue?: string;
+        maxValue?: string;
+        unitCode?: string;
+        handlingTime?: {
+          '@type': string;
+          minValue: number;
+          maxValue: number;
+          unitCode: string;
+        };
+        transitTime?: {
+          '@type': string;
+          minValue: number;
+          maxValue: number;
+          unitCode: string;
+        };
+      };
+    };
+  }>;
 }
 
 export const generateProductSchema = (
@@ -131,7 +181,9 @@ export const generateProductSchema = (
       priceCurrency: 'USD',
       price: variant.price.toFixed(2),
       availability:
-        variant.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        (variant.inventory_count ?? 0) > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
       priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       seller: {
         '@type': 'Organization',
@@ -140,11 +192,13 @@ export const generateProductSchema = (
       },
       name: variant.name,
       sku: variant.id,
-      additionalProperty: {
-        '@type': 'PropertyValue',
-        name: 'Weight',
-        value: `${variant.weight_grams}g`,
-      },
+      additionalProperty: [
+        {
+          '@type': 'PropertyValue',
+          name: 'Weight',
+          value: `${variant.weight_grams}g`,
+        },
+      ],
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
@@ -176,47 +230,51 @@ export const generateProductSchema = (
     }));
   } else if (selectedVariant) {
     // Single offer for selected variant
-    schema.offers = {
-      '@type': 'Offer',
-      url: `https://dankdealsmn.com/product/${product.id}`,
-      priceCurrency: 'USD',
-      price: price.toFixed(2),
-      availability: availability,
-      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      seller: {
-        '@type': 'Organization',
-        name: 'DankDeals MN',
-        url: 'https://dankdealsmn.com',
-      },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: '5.00',
-          currency: 'USD',
+    schema.offers = [
+      {
+        '@type': 'Offer',
+        url: `https://dankdealsmn.com/product/${product.id}`,
+        priceCurrency: 'USD',
+        price: price.toFixed(2),
+        availability: availability,
+        priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0],
+        seller: {
+          '@type': 'Organization',
+          name: 'DankDeals MN',
+          url: 'https://dankdealsmn.com',
         },
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'US',
-          addressRegion: ['MN'],
-        },
-        deliveryTime: {
-          '@type': 'ShippingDeliveryTime',
-          handlingTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 0,
-            maxValue: 1,
-            unitCode: 'DAY',
+        shippingDetails: {
+          '@type': 'OfferShippingDetails',
+          shippingRate: {
+            '@type': 'MonetaryAmount',
+            value: '5.00',
+            currency: 'USD',
           },
-          transitTime: {
-            '@type': 'QuantitativeValue',
-            minValue: 0,
-            maxValue: 2,
-            unitCode: 'HUR',
+          shippingDestination: {
+            '@type': 'DefinedRegion',
+            addressCountry: 'US',
+            addressRegion: ['MN'],
+          },
+          deliveryTime: {
+            '@type': 'ShippingDeliveryTime',
+            handlingTime: {
+              '@type': 'QuantitativeValue',
+              minValue: 0,
+              maxValue: 1,
+              unitCode: 'DAY',
+            },
+            transitTime: {
+              '@type': 'QuantitativeValue',
+              minValue: 0,
+              maxValue: 2,
+              unitCode: 'HUR',
+            },
           },
         },
       },
-    };
+    ];
   }
 
   return schema;

@@ -553,7 +553,7 @@ export default function BlogPost() {
                   'td',
                 ],
                 ALLOWED_ATTR: [],
-                FORBID_SCRIPT_TAGS: true,
+                FORBID_TAGS: ['script', 'style'],
               }),
             }}
           />

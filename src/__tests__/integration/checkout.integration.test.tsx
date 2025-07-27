@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from '@/App';
 import { CartProvider } from '@/hooks/CartProvider';
 import type { Product, ProductVariant } from '@/hooks/useProducts';
+import type { CartItem } from '@/types/cart';
 
 // Mock Supabase
 vi.mock('@/integrations/supabase/client', () => ({
@@ -14,7 +15,7 @@ vi.mock('@/integrations/supabase/client', () => ({
         eq: () => ({
           single: () => Promise.resolve({ data: null, error: null }),
         }),
-        in: (field: string, values: string[]) => {
+        in: (_field: string, values: string[]) => {
           // Return the test products if they're in the requested IDs
           const validProducts = [];
           if (values.includes('test-product-123')) {
@@ -60,7 +61,7 @@ vi.mock('@/lib/cookies', () => ({
 
 // Mock the CartProvider to return controlled cart data
 const mockUseCart = vi.fn(() => ({
-  items: [],
+  items: [] as CartItem[],
   totalItems: 0,
   subtotal: 0,
   taxAmount: 0,
@@ -140,19 +141,19 @@ describe('Checkout Flow Integration', () => {
 
   it('should complete full checkout flow from cart to confirmation', async () => {
     // Start with item in cart
-    const cartItem = {
+    const cartItem: CartItem = {
       id: 'cart-item-1',
       productId: mockProduct.id,
       variantId: mockVariant.id,
       name: mockProduct.name,
       price: 45.0, // Converted to dollars
       quantity: 2,
-      image: mockProduct.image_url,
+      image: mockProduct.image_url || '/placeholder.jpg',
       variant: {
         name: mockVariant.name,
         weight_grams: mockVariant.weight_grams,
       },
-      category: mockProduct.category,
+      category: mockProduct.category || 'Flower',
     };
 
     // Configure the cart mock with our test data
@@ -313,7 +314,7 @@ describe('Checkout Flow Integration', () => {
   });
 
   it('should calculate and display order totals correctly', async () => {
-    const cartItems = [
+    const cartItems: CartItem[] = [
       {
         id: 'item-1',
         productId: 'product-1',

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { Loader2, Save, User, Mail, Phone, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -19,30 +20,12 @@ const profileSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().optional(),
   date_of_birth: z.string().optional(),
-  marketing_consent: z.boolean().default(false),
+  marketing_consent: z.boolean(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-interface UserProfile {
-  id: string;
-  email: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  phone: string | null;
-  date_of_birth: string | null;
-  age_verified: boolean;
-  age_verified_at: string | null;
-  marketing_consent: boolean;
-  terms_accepted_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface SupabaseProfileResponse {
-  data: UserProfile | null;
-  error: { code: string; message: string } | null;
-}
+type UserProfile = Database['public']['Tables']['profiles']['Row'];
 
 export function ProfileInfo() {
   const [isLoading, setIsLoading] = useState(false);
@@ -68,13 +51,14 @@ export function ProfileInfo() {
     if (!user) return;
 
     try {
-      const response = (await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()) as SupabaseProfileResponse;
+      const response = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
-      const { data, error } = response;
+      const data = response.data as UserProfile | null;
+      const error = response.error;
+
+      if (!data && !error) {
+        throw new Error('No response data received');
+      }
 
       if (error) {
         // If profile doesn't exist, create one
@@ -82,52 +66,52 @@ export function ProfileInfo() {
           const newProfile = {
             id: user.id,
             email: user.email,
-            first_name: (user.user_metadata?.first_name as string) || '',
-            last_name: (user.user_metadata?.last_name as string) || '',
+            first_name: (user.user_metadata?.['first_name'] as string) || '',
+            last_name: (user.user_metadata?.['last_name'] as string) || '',
             phone: user.phone || '',
             marketing_consent: false,
           };
 
-          const createResponse = (await supabase
+          const createResponse = await supabase
             .from('profiles')
             .insert([newProfile])
             .select()
-            .single()) as SupabaseProfileResponse;
+            .single();
 
-          const { data: createdProfile, error: createError } = createResponse;
-
-          if (createError) {
-            throw new Error(createError.message || 'Failed to create profile');
+          if (createResponse.error) {
+            throw new Error(createResponse.error.message || 'Failed to create profile');
           }
 
+          const createdProfile = createResponse.data as UserProfile;
           if (!createdProfile) {
             throw new Error('Failed to create profile');
           }
 
           setProfile(createdProfile);
           reset({
-            first_name: createdProfile.first_name || '',
-            last_name: createdProfile.last_name || '',
-            email: createdProfile.email || '',
-            phone: createdProfile.phone || '',
-            date_of_birth: createdProfile.date_of_birth || '',
-            marketing_consent: createdProfile.marketing_consent || false,
+            first_name: createdProfile.first_name ?? '',
+            last_name: createdProfile.last_name ?? '',
+            email: createdProfile.email ?? '',
+            phone: createdProfile.phone ?? '',
+            date_of_birth: createdProfile.date_of_birth ?? '',
+            marketing_consent: createdProfile.marketing_consent ?? false,
           });
         } else {
           throw new Error(error.message || 'Unknown error occurred');
         }
       } else {
-        if (!data) {
+        const profileData = data as UserProfile;
+        if (!profileData) {
           throw new Error('No profile data found');
         }
-        setProfile(data);
+        setProfile(profileData);
         reset({
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          date_of_birth: data.date_of_birth || '',
-          marketing_consent: data.marketing_consent || false,
+          first_name: profileData.first_name ?? '',
+          last_name: profileData.last_name ?? '',
+          email: profileData.email ?? '',
+          phone: profileData.phone ?? '',
+          date_of_birth: profileData.date_of_birth ?? '',
+          marketing_consent: profileData.marketing_consent ?? false,
         });
       }
     } catch (error) {
@@ -151,21 +135,28 @@ export function ProfileInfo() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      const updateResponse = await supabase
         .from('profiles')
         .update({
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
-          phone: data.phone,
+          phone: data.phone || null,
           date_of_birth: data.date_of_birth || null,
           marketing_consent: data.marketing_consent,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select()
+        .single();
 
-      if (error) {
-        throw error;
+      if (updateResponse.error) {
+        throw updateResponse.error;
+      }
+
+      const updatedProfile = updateResponse.data as UserProfile;
+      if (!updatedProfile) {
+        throw new Error('Failed to update profile');
       }
 
       // Update auth user email if changed
@@ -179,13 +170,25 @@ export function ProfileInfo() {
         }
       }
 
+      // Update local profile state with the returned data from database
+      setProfile(updatedProfile);
+
+      // Reset form with the updated profile data to ensure consistency
+      reset({
+        first_name: updatedProfile.first_name ?? '',
+        last_name: updatedProfile.last_name ?? '',
+        email: updatedProfile.email ?? '',
+        phone: updatedProfile.phone ?? '',
+        date_of_birth: updatedProfile.date_of_birth ?? '',
+        marketing_consent: updatedProfile.marketing_consent ?? false,
+      });
+
       toast({
         title: 'Profile updated',
         description: 'Your profile information has been saved successfully.',
       });
 
       setIsEditing(false);
-      void fetchProfile();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -269,7 +272,7 @@ export function ProfileInfo() {
               <Calendar className="h-6 w-6 mx-auto mb-2 text-primary" />
               <div className="text-sm font-medium">Member Since</div>
               <div className="text-xs text-muted-foreground">
-                {new Date(profile.created_at).toLocaleDateString()}
+                {profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
               </div>
             </div>
           </div>
@@ -294,7 +297,13 @@ export function ProfileInfo() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleSubmit(onSubmit)(e);
+            }}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="first_name">First Name</Label>

@@ -50,8 +50,9 @@ export class OrderService {
     return `${dateStr}-${timeStr}${random}`;
   }
 
-  static createOrder = withRateLimit<(orderData: CreateOrderData) => Promise<OrderResponse>>(
-    async (orderData: CreateOrderData): Promise<OrderResponse> => {
+  static createOrder = withRateLimit(
+    async (...args: unknown[]): Promise<OrderResponse> => {
+      const orderData = args[0] as CreateOrderData;
       try {
         // Get current user session
         const {
@@ -277,7 +278,7 @@ export class OrderService {
       }
     },
     orderRateLimiter,
-    (orderData: CreateOrderData) => `order:${orderData.email}`
+    (...args: unknown[]) => `order:${(args[0] as CreateOrderData).email}`
   );
 
   static async getOrder(orderNumber: string) {

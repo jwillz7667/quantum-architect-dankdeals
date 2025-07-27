@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,11 @@ import { useCart } from '@/hooks/useCart';
 import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, User } from 'lucide-react';
 import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeZipCode } from '@/lib/sanitize';
 import { getCSRFToken, validateCSRFToken } from '@/lib/csrf';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
+
+type UserProfile = Database['public']['Tables']['profiles']['Row'];
 
 interface DeliveryAddress {
   street: string;
@@ -35,6 +40,7 @@ interface PersonalInfo {
 export default function CheckoutAddress() {
   const { items, totalItems, totalPrice } = useCart();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     firstName: '',
@@ -59,6 +65,7 @@ export default function CheckoutAddress() {
   const [deliveryFee, setDeliveryFee] = useState<number>(5.0);
   const [estimatedTime, setEstimatedTime] = useState<string>('30-60 minutes');
   const [csrfToken, setCsrfToken] = useState<string>('');
+  const [profileDataLoaded, setProfileDataLoaded] = useState(false);
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -72,7 +79,55 @@ export default function CheckoutAddress() {
     setCsrfToken(getCSRFToken());
   }, []);
 
-  // Load saved data from localStorage if available
+  // Fetch user profile data if logged in
+  const fetchUserProfile = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const response = await supabase.from('profiles').select('*').eq('id', user.id).single();
+
+      const profile = response.data as UserProfile | null;
+      const error = response.error;
+
+      if (!profile && !error) {
+        console.error('No profile data received');
+        return;
+      }
+
+      if (error || !profile) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      // Pre-populate form with profile data
+      setPersonalInfo({
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        email: profile.email || user.email || '',
+        phone: profile.phone || '',
+        dateOfBirth: profile.date_of_birth || '',
+      });
+
+      // If profile has a delivery address, pre-populate that too
+      if (profile.delivery_address && typeof profile.delivery_address === 'object') {
+        const savedAddr = profile.delivery_address as DeliveryAddress;
+        setAddress({
+          street: savedAddr.street || '',
+          apartment: savedAddr.apartment || '',
+          city: savedAddr.city || '',
+          state: 'MN',
+          zipCode: savedAddr.zipCode || '',
+          deliveryInstructions: savedAddr.deliveryInstructions || '',
+        });
+      }
+
+      setProfileDataLoaded(true);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  }, [user]);
+
+  // Load saved data from localStorage or user profile
   useEffect(() => {
     const savedPersonalInfo = localStorage.getItem('checkout_personal_info');
     const savedAddress = localStorage.getItem('checkout_address');
@@ -92,7 +147,12 @@ export default function CheckoutAddress() {
         console.error('Error loading saved address:', error);
       }
     }
-  }, []);
+
+    // If no saved data, try to load from user profile
+    if (!savedPersonalInfo && !savedAddress && user) {
+      void fetchUserProfile();
+    }
+  }, [user, fetchUserProfile]);
 
   const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
     let sanitizedValue = value;
@@ -224,7 +284,7 @@ export default function CheckoutAddress() {
     }, 1000);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Validate CSRF token
     if (!validateCSRFToken(csrfToken)) {
       setValidationError('Security token invalid. Please refresh the page.');
@@ -252,6 +312,29 @@ export default function CheckoutAddress() {
     localStorage.setItem('checkout_personal_info', JSON.stringify(personalInfo));
     localStorage.setItem('checkout_address', JSON.stringify(addressWithFees));
     localStorage.setItem('delivery_address', JSON.stringify(addressWithFees));
+
+    // If user is logged in, save the delivery address to their profile
+    if (user) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            delivery_address: {
+              street: address.street,
+              apartment: address.apartment,
+              city: address.city,
+              state: address.state,
+              zipCode: address.zipCode,
+              deliveryInstructions: address.deliveryInstructions,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+      } catch (error) {
+        console.error('Error saving delivery address to profile:', error);
+        // Don't block checkout if profile update fails
+      }
+    }
 
     // Navigate to payment step
     navigate('/checkout/payment');
@@ -293,6 +376,17 @@ export default function CheckoutAddress() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pre-populated data notice */}
+        {profileDataLoaded && user && (
+          <Alert className="border-primary bg-primary/5">
+            <CheckCircle className="h-4 w-4 text-primary" />
+            <AlertDescription>
+              We've pre-filled this form with your saved profile information. Please review and
+              confirm all details are correct before proceeding.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Personal Information Form */}
         <Card>
@@ -498,7 +592,11 @@ export default function CheckoutAddress() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Button>
-          <Button onClick={handleContinue} disabled={!isValidAddress} className="flex-1">
+          <Button
+            onClick={() => void handleContinue()}
+            disabled={!isValidAddress}
+            className="flex-1"
+          >
             Continue
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>

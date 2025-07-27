@@ -205,8 +205,8 @@ async function updateServiceWorker(): Promise<void> {
 // Track PWA installation (integrate with your analytics)
 function trackPWAInstall(): void {
   // Track with your analytics service
-  if (typeof (window as { gtag?: (...args: unknown[]) => void }).gtag === 'function') {
-    (window as { gtag: (...args: unknown[]) => void }).gtag('event', 'pwa_install', {
+  if (typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === 'function') {
+    (window as unknown as { gtag: (...args: unknown[]) => void }).gtag('event', 'pwa_install', {
       event_category: 'engagement',
       event_label: 'DankDeals PWA Installed',
     });
@@ -225,9 +225,9 @@ export async function scheduleBackgroundSync(tag: string, data?: unknown): Promi
   if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
     try {
       const registration = await navigator.serviceWorker.ready;
-      await (registration as { sync: { register: (tag: string) => Promise<void> } }).sync.register(
-        tag
-      );
+      await (
+        registration as unknown as { sync: { register: (tag: string) => Promise<void> } }
+      ).sync.register(tag);
 
       // Store data in IndexedDB for the service worker to use
       if (data) {

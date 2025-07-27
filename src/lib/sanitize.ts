@@ -11,7 +11,7 @@ export function sanitizeText(input: string): string {
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
-    FORBID_SCRIPT_TAGS: true,
+    FORBID_TAGS: ['script', 'style'],
   }).trim();
 }
 
@@ -24,7 +24,7 @@ export function sanitizeHtml(input: string, allowedTags: string[] = []): string 
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: allowedTags,
     ALLOWED_ATTR: [],
-    FORBID_SCRIPT_TAGS: true,
+    FORBID_TAGS: ['script', 'style'],
     FORBID_ATTR: ['onclick', 'onerror', 'onload', 'onmouseover'],
   });
 }

@@ -22,11 +22,10 @@ export function getCSRFToken(): string {
   if (!token) {
     token = generateCSRFToken();
     // Set token with secure flags - expires in 4 hours
-    setCookie(CSRF_TOKEN_KEY, token, {
-      maxAge: 4 * 60 * 60,
-      sameSite: 'Strict',
+    // Set cookie for 4 hours (1/6 of a day)
+    setCookie(CSRF_TOKEN_KEY, token, 1 / 6, {
+      sameSite: 'strict',
       secure: window.location.protocol === 'https:',
-      httpOnly: false, // Need access from JS for forms
     });
   }
 
@@ -75,9 +74,9 @@ export function addCSRFToHeaders(headers: Record<string, string> = {}): Record<s
  */
 export function refreshCSRFToken(): string {
   const newToken = generateCSRFToken();
-  setCookie(CSRF_TOKEN_KEY, newToken, {
-    maxAge: 4 * 60 * 60,
-    sameSite: 'Strict',
+  // Set cookie for 4 hours (1/6 of a day)
+  setCookie(CSRF_TOKEN_KEY, newToken, 1 / 6, {
+    sameSite: 'strict',
     secure: window.location.protocol === 'https:',
     httpOnly: false,
   });

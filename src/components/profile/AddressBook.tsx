@@ -222,7 +222,10 @@ export function AddressBook() {
   const setAsDefault = async (addressId: string) => {
     try {
       // Unset all defaults first
-      await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id);
+      await supabase
+        .from('addresses')
+        .update({ is_default: false })
+        .eq('user_id', user?.id || '');
 
       // Set new default
       await supabase.from('addresses').update({ is_default: true }).eq('id', addressId);

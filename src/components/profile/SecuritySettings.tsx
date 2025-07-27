@@ -11,29 +11,31 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Shield, 
-  Key, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  CheckCircle, 
+import {
+  Shield,
+  Key,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
   AlertTriangle,
   Smartphone,
   Mail,
   Clock,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(6, 'Current password is required'),
-  newPassword: z.string().min(8, 'New password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(6, 'Current password is required'),
+    newPassword: z.string().min(8, 'New password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
@@ -43,14 +45,14 @@ export function SecuritySettings() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
   });
@@ -59,7 +61,7 @@ export function SecuritySettings() {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({
-        password: data.newPassword
+        password: data.newPassword,
       });
 
       if (error) {
@@ -73,12 +75,15 @@ export function SecuritySettings() {
 
       reset();
       setIsChangingPassword(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating password:', error);
       toast({
         variant: 'destructive',
         title: 'Password update failed',
-        description: error.message || 'Unable to update your password. Please try again.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Unable to update your password. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -102,44 +107,28 @@ export function SecuritySettings() {
     }
   };
 
-  const getPasswordStrength = (password: string) => {
-    if (password.length === 0) return { strength: 0, label: '', color: '' };
-    
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 2) return { strength: score, label: 'Weak', color: 'bg-red-500' };
-    if (score <= 3) return { strength: score, label: 'Fair', color: 'bg-yellow-500' };
-    if (score <= 4) return { strength: score, label: 'Good', color: 'bg-blue-500' };
-    return { strength: score, label: 'Strong', color: 'bg-green-500' };
-  };
-
   const securityFeatures = [
     {
       title: 'Two-Factor Authentication',
       description: 'Add an extra layer of security to your account',
       status: 'not_enabled',
       icon: Smartphone,
-      action: 'Enable 2FA'
+      action: 'Enable 2FA',
     },
     {
       title: 'Email Verification',
       description: 'Verify your email address for account security',
       status: user?.email_confirmed_at ? 'enabled' : 'not_enabled',
       icon: Mail,
-      action: user?.email_confirmed_at ? 'Verified' : 'Verify Email'
+      action: user?.email_confirmed_at ? 'Verified' : 'Verify Email',
     },
     {
       title: 'Login Alerts',
       description: 'Get notified of suspicious login activity',
       status: 'enabled',
       icon: AlertTriangle,
-      action: 'Enabled'
-    }
+      action: 'Enabled',
+    },
   ];
 
   return (
@@ -151,9 +140,7 @@ export function SecuritySettings() {
             <Shield className="h-5 w-5" />
             <span>Account Security</span>
           </CardTitle>
-          <CardDescription>
-            Manage your account security settings and preferences
-          </CardDescription>
+          <CardDescription>Manage your account security settings and preferences</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,10 +164,9 @@ export function SecuritySettings() {
                   <div>
                     <div className="font-medium">Last Login</div>
                     <div className="text-sm text-muted-foreground">
-                      {user?.last_sign_in_at 
+                      {user?.last_sign_in_at
                         ? format(new Date(user.last_sign_in_at), 'MMM dd, yyyy at HH:mm')
-                        : 'Never'
-                      }
+                        : 'Never'}
                     </div>
                   </div>
                 </div>
@@ -190,7 +176,10 @@ export function SecuritySettings() {
             <div className="space-y-4">
               <div className="text-sm font-medium mb-2">Security Features</div>
               {securityFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex items-center space-x-3">
                     <feature.icon className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -198,11 +187,12 @@ export function SecuritySettings() {
                       <div className="text-xs text-muted-foreground">{feature.description}</div>
                     </div>
                   </div>
-                  <Badge 
+                  <Badge
                     variant={feature.status === 'enabled' ? 'default' : 'outline'}
-                    className={feature.status === 'enabled' 
-                      ? 'bg-green-50 text-green-700 border-green-200' 
-                      : 'text-muted-foreground'
+                    className={
+                      feature.status === 'enabled'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'text-muted-foreground'
                     }
                   >
                     {feature.action}
@@ -221,9 +211,7 @@ export function SecuritySettings() {
             <Key className="h-5 w-5" />
             <span>Password Security</span>
           </CardTitle>
-          <CardDescription>
-            Keep your account secure with a strong password
-          </CardDescription>
+          <CardDescription>Keep your account secure with a strong password</CardDescription>
         </CardHeader>
         <CardContent>
           {!isChangingPassword ? (
@@ -234,17 +222,20 @@ export function SecuritySettings() {
                   <div>
                     <div className="font-medium">Password</div>
                     <div className="text-sm text-muted-foreground">
-                      Last changed: {user?.created_at ? format(new Date(user.created_at), 'MMM dd, yyyy') : 'Unknown'}
+                      Last changed:{' '}
+                      {user?.created_at
+                        ? format(new Date(user.created_at), 'MMM dd, yyyy')
+                        : 'Unknown'}
                     </div>
                   </div>
                 </div>
-                <Button onClick={() => setIsChangingPassword(true)}>
-                  Change Password
-                </Button>
+                <Button onClick={() => setIsChangingPassword(true)}>Change Password</Button>
               </div>
 
               <div className="text-sm text-muted-foreground">
-                <p className="mb-2"><strong>Password Requirements:</strong></p>
+                <p className="mb-2">
+                  <strong>Password Requirements:</strong>
+                </p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>At least 8 characters long</li>
                   <li>Contains uppercase and lowercase letters</li>
@@ -254,7 +245,13 @@ export function SecuritySettings() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onPasswordSubmit)} className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void handleSubmit(onPasswordSubmit)(e);
+              }}
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <div className="relative">
@@ -299,11 +296,7 @@ export function SecuritySettings() {
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowNewPassword(!showNewPassword)}
                   >
-                    {showNewPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
                 {errors.newPassword && (
@@ -373,18 +366,14 @@ export function SecuritySettings() {
             <Smartphone className="h-5 w-5" />
             <span>Active Sessions</span>
           </CardTitle>
-          <CardDescription>
-            Manage your active login sessions across devices
-          </CardDescription>
+          <CardDescription>Manage your active login sessions across devices</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <div className="font-medium">Current Session</div>
-                <div className="text-sm text-muted-foreground">
-                  This device • Active now
-                </div>
+                <div className="text-sm text-muted-foreground">This device • Active now</div>
               </div>
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 Current
@@ -397,15 +386,13 @@ export function SecuritySettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">Security Actions</div>
-                  <div className="text-xs text-muted-foreground">
-                    Manage access to your account
-                  </div>
+                  <div className="text-xs text-muted-foreground">Manage access to your account</div>
                 </div>
               </div>
 
               <Button
                 variant="outline"
-                onClick={handleSignOutAllDevices}
+                onClick={() => void handleSignOutAllDevices()}
                 className="w-full justify-start"
               >
                 <Shield className="h-4 w-4 mr-2" />

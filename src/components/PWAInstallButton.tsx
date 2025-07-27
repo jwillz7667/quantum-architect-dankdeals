@@ -171,7 +171,7 @@ export function PWAStatusIndicator() {
   }, []);
 
   // Only show in development
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env['NODE_ENV'] !== 'development') {
     return null;
   }
 

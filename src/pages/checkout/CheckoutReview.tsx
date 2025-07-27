@@ -129,7 +129,11 @@ export default function CheckoutReview() {
         paymentMethod: paymentInfo.paymentMethod,
       };
 
-      const result = await OrderService.createOrder(orderData);
+      const result = (await OrderService.createOrder(orderData)) as {
+        success: boolean;
+        orderNumber?: string;
+        error?: string;
+      };
 
       if (result.success && result.orderNumber) {
         // Clear cart and localStorage
