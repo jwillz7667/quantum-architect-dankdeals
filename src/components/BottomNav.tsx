@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, ShoppingCart, User, Menu } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingCart, User, Menu } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
 
 export function BottomNav() {
@@ -10,7 +10,7 @@ export function BottomNav() {
     { icon: Home, label: 'Home', href: '/' },
     { icon: LayoutGrid, label: 'Categories', href: '/categories' },
     { icon: ShoppingCart, label: 'Cart', href: '/cart' },
-    user 
+    user
       ? { icon: User, label: 'Profile', href: '/profile' }
       : { icon: Menu, label: 'More', href: '/faq' },
   ];

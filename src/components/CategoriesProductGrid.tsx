@@ -2,7 +2,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/hooks/useProducts';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/lib/icons';
 import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 
 export function CategoriesProductGrid() {

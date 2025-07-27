@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, X, Smartphone, Monitor } from 'lucide-react';
+import { Download, X, Smartphone, Monitor } from '@/lib/icons';
 import { showPWAInstallPrompt, isPWA, isPWAInstallAvailable } from '@/lib/pwa';
 
 interface PWAInstallButtonProps {

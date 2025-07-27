@@ -1,4 +1,4 @@
-import { Flame, Leaf, Grape, Syringe, Sparkles, type LucideIcon } from 'lucide-react';
+import { Flame, Leaf, Grape, Syringe, Sparkles, type LucideIcon } from '@/lib/icons';
 import { CategoryCard } from './CategoryCard';
 import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 import { useNavigate, useLocation } from 'react-router-dom';

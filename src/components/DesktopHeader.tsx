@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Phone, ShoppingCart, User, LogOut } from 'lucide-react';
+import { Phone, ShoppingCart, User, LogOut } from '@/lib/icons';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
 import { PWAInstallButton } from '@/components/PWAInstallButton';
 import { useAuth } from '@/context/AuthContext';

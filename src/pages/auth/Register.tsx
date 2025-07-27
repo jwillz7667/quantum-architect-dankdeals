@@ -18,7 +18,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Mail, Lock, User, Calendar, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Calendar, Phone } from '@/lib/icons';
 import { SEOHead } from '@/components/SEOHead';
 import { sanitizeText, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
 import { isLegalAge } from '@/lib/security';

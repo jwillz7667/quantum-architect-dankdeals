@@ -16,7 +16,7 @@ import {
   CheckCircle,
   Save,
   Loader2,
-} from 'lucide-react';
+} from '@/lib/icons';
 
 interface NotificationPreferences {
   email_notifications: boolean;

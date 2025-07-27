@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from '@/lib/icons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';

@@ -23,7 +23,7 @@ import {
   Mail,
   Clock,
   Loader2,
-} from 'lucide-react';
+} from '@/lib/icons';
 import { format } from 'date-fns';
 
 const passwordSchema = z

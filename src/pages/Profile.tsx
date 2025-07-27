@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,35 @@ import {
   CheckCircle,
   DollarSign,
   Loader2,
-} from 'lucide-react';
-import { ProfileInfo } from '@/components/profile/ProfileInfo';
-import { OrderHistory } from '@/components/profile/OrderHistory';
-import { AddressBook } from '@/components/profile/AddressBook';
-import { SecuritySettings } from '@/components/profile/SecuritySettings';
-import { NotificationSettings } from '@/components/profile/NotificationSettings';
+} from '@/lib/icons';
+
+// Lazy load profile components to reduce initial bundle size
+const ProfileInfo = lazy(() =>
+  import('@/components/profile/ProfileInfo').then((module) => ({ default: module.ProfileInfo }))
+);
+const OrderHistory = lazy(() =>
+  import('@/components/profile/OrderHistory').then((module) => ({ default: module.OrderHistory }))
+);
+const AddressBook = lazy(() =>
+  import('@/components/profile/AddressBook').then((module) => ({ default: module.AddressBook }))
+);
+const SecuritySettings = lazy(() =>
+  import('@/components/profile/SecuritySettings').then((module) => ({
+    default: module.SecuritySettings,
+  }))
+);
+const NotificationSettings = lazy(() =>
+  import('@/components/profile/NotificationSettings').then((module) => ({
+    default: module.NotificationSettings,
+  }))
+);
+
+// Component loading fallback
+const ComponentLoader = () => (
+  <div className="flex items-center justify-center py-8">
+    <Loader2 className="h-8 w-8 animate-spin" />
+  </div>
+);
 
 export default function Profile() {
   const { user, loading } = useAuth();
@@ -177,22 +200,62 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {tab.value === 'profile' && <ProfileInfo />}
-                {tab.value === 'orders' && <OrderHistory />}
-                {tab.value === 'addresses' && <AddressBook />}
-                {tab.value === 'security' && <SecuritySettings />}
-                {tab.value === 'notifications' && <NotificationSettings />}
+                {tab.value === 'profile' && (
+                  <Suspense fallback={<ComponentLoader />}>
+                    <ProfileInfo />
+                  </Suspense>
+                )}
+                {tab.value === 'orders' && (
+                  <Suspense fallback={<ComponentLoader />}>
+                    <OrderHistory />
+                  </Suspense>
+                )}
+                {tab.value === 'addresses' && (
+                  <Suspense fallback={<ComponentLoader />}>
+                    <AddressBook />
+                  </Suspense>
+                )}
+                {tab.value === 'security' && (
+                  <Suspense fallback={<ComponentLoader />}>
+                    <SecuritySettings />
+                  </Suspense>
+                )}
+                {tab.value === 'notifications' && (
+                  <Suspense fallback={<ComponentLoader />}>
+                    <NotificationSettings />
+                  </Suspense>
+                )}
               </TabsContent>
             ))}
           </Tabs>
 
           {/* Mobile Content */}
           <div className="md:hidden">
-            {activeTab === 'profile' && <ProfileInfo />}
-            {activeTab === 'orders' && <OrderHistory />}
-            {activeTab === 'addresses' && <AddressBook />}
-            {activeTab === 'security' && <SecuritySettings />}
-            {activeTab === 'notifications' && <NotificationSettings />}
+            {activeTab === 'profile' && (
+              <Suspense fallback={<ComponentLoader />}>
+                <ProfileInfo />
+              </Suspense>
+            )}
+            {activeTab === 'orders' && (
+              <Suspense fallback={<ComponentLoader />}>
+                <OrderHistory />
+              </Suspense>
+            )}
+            {activeTab === 'addresses' && (
+              <Suspense fallback={<ComponentLoader />}>
+                <AddressBook />
+              </Suspense>
+            )}
+            {activeTab === 'security' && (
+              <Suspense fallback={<ComponentLoader />}>
+                <SecuritySettings />
+              </Suspense>
+            )}
+            {activeTab === 'notifications' && (
+              <Suspense fallback={<ComponentLoader />}>
+                <NotificationSettings />
+              </Suspense>
+            )}
           </div>
 
           {/* Quick Stats Cards - Mobile Only */}

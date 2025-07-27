@@ -4,7 +4,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Clock, DollarSign, CheckCircle, Phone } from 'lucide-react';
+import { MapPin, Clock, DollarSign, CheckCircle, Phone } from '@/lib/icons';
 
 export default function DeliveryArea() {
   useEffect(() => {

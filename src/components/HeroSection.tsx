@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Leaf } from 'lucide-react';
+import { Leaf } from '@/lib/icons';
 import { useNavigate } from 'react-router-dom';
 
 export function HeroSection() {

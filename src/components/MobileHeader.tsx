@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Menu, Phone, User, LogOut } from 'lucide-react';
+import { Menu, Phone, User, LogOut } from '@/lib/icons';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';

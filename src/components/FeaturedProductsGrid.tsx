@@ -1,7 +1,7 @@
 import { SimpleProductCard } from '@/components/SimpleProductCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/lib/icons';
 
 export function FeaturedProductsGrid() {
   const { products, loading, error } = useProducts();

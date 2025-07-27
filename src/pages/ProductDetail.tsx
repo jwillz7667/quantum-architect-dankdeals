@@ -1,5 +1,5 @@
 // src/pages/ProductDetail.tsx
-import { Minus, Plus, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, ChevronLeft, ChevronRight } from '@/lib/icons';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';

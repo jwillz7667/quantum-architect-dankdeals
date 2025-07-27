@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Phone } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Phone } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import { BottomNav } from '@/components/BottomNav';
 import { MobileHeader } from '@/components/MobileHeader';

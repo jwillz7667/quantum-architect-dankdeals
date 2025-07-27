@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { Loader2, Save, User, Mail, Phone, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Save, User, Mail, Phone, Calendar, CheckCircle, AlertCircle } from '@/lib/icons';
 
 const profileSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),

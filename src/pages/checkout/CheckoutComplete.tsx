@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
-import { CheckCircle, Clock, Home, Phone } from 'lucide-react';
+import { CheckCircle, Clock, Home, Phone } from '@/lib/icons';
 
 export default function CheckoutComplete() {
   const navigate = useNavigate();

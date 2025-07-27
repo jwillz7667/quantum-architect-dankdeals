@@ -1,7 +1,7 @@
 // src/components/ErrorBoundary.tsx
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

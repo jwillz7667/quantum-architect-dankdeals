@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Mail, Lock } from 'lucide-react';
+import { Loader2, Mail, Lock } from '@/lib/icons';
 import { SEOHead } from '@/components/SEOHead';
 
 const loginSchema = z.object({

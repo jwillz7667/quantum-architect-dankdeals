@@ -25,7 +25,7 @@ import {
   DollarSign,
   ChevronRight,
   RefreshCw,
-} from 'lucide-react';
+} from '@/lib/icons';
 import { format } from 'date-fns';
 
 interface OrderItem {

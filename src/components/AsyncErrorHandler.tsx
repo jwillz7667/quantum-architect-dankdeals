@@ -1,6 +1,6 @@
 // src/components/AsyncErrorHandler.tsx
 import React from 'react';
-import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, ArrowLeft } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { APIError, ValidationError } from '@/lib/api/client';

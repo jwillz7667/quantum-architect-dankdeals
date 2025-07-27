@@ -20,7 +20,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-} from 'lucide-react';
+} from '@/lib/icons';
 import { useToast } from '@/components/ui/use-toast';
 
 interface DeliveryInfo {

@@ -3,7 +3,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, MapPin, Phone, Truck } from 'lucide-react';
+import { ShoppingCart, MapPin, Phone, Truck } from '@/lib/icons';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
 import { Suspense, lazy } from 'react';

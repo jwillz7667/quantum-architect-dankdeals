@@ -11,7 +11,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
-import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, User } from 'lucide-react';
+import { MapPin, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, User } from '@/lib/icons';
 import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeZipCode } from '@/lib/sanitize';
 import { getCSRFToken, validateCSRFToken } from '@/lib/csrf';
 import { useAuth } from '@/context/AuthContext';

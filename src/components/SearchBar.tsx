@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ListFilter } from 'lucide-react';
+import { Search, ListFilter } from '@/lib/icons';
 
 interface SearchBarProps {
   onFilter?: () => void;

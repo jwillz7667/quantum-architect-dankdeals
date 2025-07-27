@@ -20,7 +20,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Plus, Edit, Trash2, Star, Home, Loader2, Save } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Star, Home, Loader2, Save } from '@/lib/icons';
 
 const addressSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),

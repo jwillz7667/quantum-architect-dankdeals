@@ -10,7 +10,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { useCart } from '@/hooks/useCart';
-import { CreditCard, DollarSign, ArrowRight, ArrowLeft, Info, MapPin, Clock } from 'lucide-react';
+import { CreditCard, DollarSign, ArrowRight, ArrowLeft, Info, MapPin, Clock } from '@/lib/icons';
 
 interface DeliveryInfo {
   street: string;
