@@ -77,9 +77,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://ralbzuvkyexortqngvxs.supabase.co" />
+    <link rel="preconnect" href="https://plausible.io" />
 
-    <!-- DNS prefetch for non-critical origins -->
-    <link rel="dns-prefetch" href="https://plausible.io" />
+    <!-- DNS prefetch for additional origins -->
+    <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
 
     <!-- Module preload for critical chunks (will be injected by Vite) -->
 
@@ -265,12 +266,16 @@
 
     <!-- Reviews/Rating Schema (included in LocalBusiness above) -->
 
-    <!-- Plausible Analytics - Load after page load -->
-    <script src="/js/analytics.js"></script>
+    <!-- Plausible Analytics - Load asynchronously -->
+    <script async src="/js/analytics.js"></script>
   </head>
 
   <body>
-    <script src="/js/polyfills.js"></script>
+    <!-- Polyfills - Load inline for critical functionality -->
+    <script>
+      // Inline critical polyfills to avoid render blocking
+      !function(){if("function"!=typeof globalThis.__name&&(globalThis.__name=function(t,n){if("function"==typeof t&&n)try{Object.defineProperty(t,"name",{value:n,configurable:!0,writable:!1})}catch(t){}return t}),"function"!=typeof globalThis.__assign&&(globalThis.__assign=function(){return(globalThis.__assign=Object.assign||function(t){for(var n,o=1,e=arguments.length;o<e;o++)for(var i in n=arguments[o])Object.prototype.hasOwnProperty.call(n,i)&&(t[i]=n[i]);return t}).apply(this,arguments)}),"function"!=typeof globalThis.__extends&&(globalThis.__extends=function(t,n){function o(){this.constructor=t}t.prototype=null===n?Object.create(n):(o.prototype=n.prototype,new o)}),"function"!=typeof globalThis.__rest&&(globalThis.__rest=function(t,n){var o={};for(var e in t)Object.prototype.hasOwnProperty.call(t,e)&&n.indexOf(e)<0&&(o[e]=t[e]);if(null!=t&&"function"==typeof Object.getOwnPropertySymbols)for(var i=0,r=Object.getOwnPropertySymbols(t);i<r.length;i++)n.indexOf(r[i])<0&&Object.prototype.propertyIsEnumerable.call(t,r[i])&&(o[r[i]]=t[r[i]]);return o}),"function"!=typeof globalThis.__spreadArray&&(globalThis.__spreadArray=function(t,n,o){if(o||2===arguments.length)for(var e,i=0,r=n.length;i<r;i++)!e&&i in n||(e||(e=Array.prototype.slice.call(n,0,i)),e[i]=n[i]);return t.concat(e||Array.prototype.slice.call(n))}),"undefined"==typeof globalThis&&(window.globalThis=window),Object.hasOwn||(Object.hasOwn=function(t,n){return Object.prototype.hasOwnProperty.call(t,n)})}();
+    </script>
     <noscript>
       <div style="padding: 20px; text-align: center; font-family: system-ui">
         <h1>JavaScript Required</h1>

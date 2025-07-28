@@ -7,6 +7,7 @@ import { env } from './lib/env';
 import { initializeAxe } from './utils/axe';
 import { analytics } from './lib/analytics';
 import { initializePWA } from './lib/pwa';
+import { preloadSupabaseConnection } from './lib/preload-supabase';
 // import { initSentry } from './lib/sentry';
 
 // Global error handler for uncaught errors
@@ -35,6 +36,9 @@ setTimeout(() => void analytics.initialize(), 500);
 
 // Initialize PWA features - NON-BLOCKING
 setTimeout(() => void initializePWA(), 1000);
+
+// Preload Supabase connection - NON-BLOCKING
+preloadSupabaseConnection();
 
 // Validate environment variables on startup
 (function validateEnvironment() {

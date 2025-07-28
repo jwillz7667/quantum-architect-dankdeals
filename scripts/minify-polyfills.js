@@ -1,3 +1,8 @@
+// Script to generate minified polyfills for inlining
+const fs = require('fs');
+const path = require('path');
+
+const polyfillsContent = `
 // Polyfills for production compatibility
 (function () {
   // Polyfill for __name function
@@ -85,3 +90,21 @@
     };
   }
 })();
+`;
+
+// Simple minification - remove comments and excessive whitespace
+const minified = polyfillsContent
+  .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '') // Remove comments
+  .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+  .replace(/\s*([{}();,:])\s*/g, '$1') // Remove spaces around punctuation
+  .replace(/;\s*}/g, '}') // Remove semicolons before closing braces
+  .trim();
+
+console.log('Original size:', polyfillsContent.length, 'bytes');
+console.log('Minified size:', minified.length, 'bytes');
+console.log('Reduction:', Math.round((1 - minified.length / polyfillsContent.length) * 100) + '%');
+console.log('\nMinified polyfills:');
+console.log(minified);
+
+// Save to file for reference
+fs.writeFileSync(path.join(__dirname, 'polyfills.min.js'), minified);
