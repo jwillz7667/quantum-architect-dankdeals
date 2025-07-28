@@ -273,8 +273,103 @@
   <body>
     <!-- Polyfills - Load inline for critical functionality -->
     <script>
-      // Inline critical polyfills to avoid render blocking
-      !function(){if("function"!=typeof globalThis.__name&&(globalThis.__name=function(t,n){if("function"==typeof t&&n)try{Object.defineProperty(t,"name",{value:n,configurable:!0,writable:!1})}catch(t){}return t}),"function"!=typeof globalThis.__assign&&(globalThis.__assign=function(){return(globalThis.__assign=Object.assign||function(t){for(var n,o=1,e=arguments.length;o<e;o++)for(var i in n=arguments[o])Object.prototype.hasOwnProperty.call(n,i)&&(t[i]=n[i]);return t}).apply(this,arguments)}),"function"!=typeof globalThis.__extends&&(globalThis.__extends=function(t,n){function o(){this.constructor=t}t.prototype=null===n?Object.create(n):(o.prototype=n.prototype,new o)}),"function"!=typeof globalThis.__rest&&(globalThis.__rest=function(t,n){var o={};for(var e in t)Object.prototype.hasOwnProperty.call(t,e)&&n.indexOf(e)<0&&(o[e]=t[e]);if(null!=t&&"function"==typeof Object.getOwnPropertySymbols)for(var i=0,r=Object.getOwnPropertySymbols(t);i<r.length;i++)n.indexOf(r[i])<0&&Object.prototype.propertyIsEnumerable.call(t,r[i])&&(o[r[i]]=t[r[i]]);return o}),"function"!=typeof globalThis.__spreadArray&&(globalThis.__spreadArray=function(t,n,o){if(o||2===arguments.length)for(var e,i=0,r=n.length;i<r;i++)!e&&i in n||(e||(e=Array.prototype.slice.call(n,0,i)),e[i]=n[i]);return t.concat(e||Array.prototype.slice.call(n))}),"undefined"==typeof globalThis&&(window.globalThis=window),Object.hasOwn||(Object.hasOwn=function(t,n){return Object.prototype.hasOwnProperty.call(t,n)})}();
+      // Ensure globalThis exists
+      if (typeof globalThis === 'undefined') {
+        window.globalThis = window;
+      }
+
+      // TypeScript helper polyfills
+      (function () {
+        var g = globalThis;
+
+        // __name helper
+        if (typeof g.__name !== 'function') {
+          g.__name = function (fn, name) {
+            if (typeof fn === 'function' && name) {
+              try {
+                Object.defineProperty(fn, 'name', {
+                  value: name,
+                  configurable: true,
+                  writable: false,
+                });
+              } catch (e) {}
+            }
+            return fn;
+          };
+        }
+
+        // __assign helper (Object.assign polyfill)
+        if (typeof g.__assign !== 'function') {
+          g.__assign = function () {
+            g.__assign =
+              Object.assign ||
+              function (t) {
+                for (var s, i = 1, n = arguments.length; i < n; i++) {
+                  s = arguments[i];
+                  for (var p in s) {
+                    if (Object.prototype.hasOwnProperty.call(s, p)) {
+                      t[p] = s[p];
+                    }
+                  }
+                }
+                return t;
+              };
+            return g.__assign.apply(this, arguments);
+          };
+        }
+
+        // __extends helper
+        if (typeof g.__extends !== 'function') {
+          g.__extends = function (d, b) {
+            function __() {
+              this.constructor = d;
+            }
+            d.prototype = b === null ? Object.create(b) : ((__.prototype = b.prototype), new __());
+          };
+        }
+
+        // __rest helper
+        if (typeof g.__rest !== 'function') {
+          g.__rest = function (s, e) {
+            var t = {};
+            for (var p in s) {
+              if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) {
+                t[p] = s[p];
+              }
+            }
+            if (s != null && typeof Object.getOwnPropertySymbols === 'function') {
+              for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+                if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) {
+                  t[p[i]] = s[p[i]];
+                }
+              }
+            }
+            return t;
+          };
+        }
+
+        // __spreadArray helper
+        if (typeof g.__spreadArray !== 'function') {
+          g.__spreadArray = function (to, from, pack) {
+            if (pack || arguments.length === 2) {
+              for (var i = 0, l = from.length, ar; i < l; i++) {
+                if (ar || !(i in from)) {
+                  if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                  ar[i] = from[i];
+                }
+              }
+            }
+            return to.concat(ar || Array.prototype.slice.call(from));
+          };
+        }
+
+        // Object.hasOwn polyfill
+        if (!Object.hasOwn) {
+          Object.hasOwn = function (obj, prop) {
+            return Object.prototype.hasOwnProperty.call(obj, prop);
+          };
+        }
+      })();
     </script>
     <noscript>
       <div style="padding: 20px; text-align: center; font-family: system-ui">
