@@ -16,8 +16,8 @@ const HeroSection = lazy(() =>
   import('@/components/HeroSection').then((module) => ({ default: module.HeroSection }))
 );
 const FeaturedProductsGrid = lazy(() =>
-  import('@/components/FeaturedProductsGridDeferred').then((module) => ({
-    default: module.FeaturedProductsGridDeferred,
+  import('@/components/FeaturedProductsGrid').then((module) => ({
+    default: module.FeaturedProductsGrid,
   }))
 );
 const BottomNav = lazy(() =>
