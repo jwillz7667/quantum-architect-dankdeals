@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, LayoutGrid, ShoppingCart, User, Menu } from '@/lib/icons';
 import { useAuth } from '@/context/AuthContext';
+import { useMobileMenu } from '@/context/MobileMenuContext';
 
 export function BottomNav() {
   const location = useLocation();
   const { user } = useAuth();
+  const { toggleMenu } = useMobileMenu();
 
   const navItems = [
     { icon: Home, label: 'Home', href: '/' },
@@ -18,20 +20,36 @@ export function BottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t border-border shadow-up md:hidden z-50">
       <div className="flex justify-around items-center h-full">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            to={item.href}
-            className={`flex flex-col items-center justify-center w-full h-full transition-colors duration-200 ${
-              location.pathname === item.href
-                ? 'text-primary'
-                : 'text-muted-foreground hover:text-primary'
-            }`}
-          >
-            <item.icon className="h-6 w-6" />
-            <span className="text-xs font-medium">{item.label}</span>
-          </Link>
-        ))}
+        {navItems.map((item) => {
+          // Special handling for the "More" button
+          if (item.label === 'More') {
+            return (
+              <button
+                key={item.label}
+                onClick={toggleMenu}
+                className="flex flex-col items-center justify-center w-full h-full transition-colors duration-200 text-muted-foreground hover:text-primary"
+              >
+                <item.icon className="h-6 w-6" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            );
+          }
+
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={`flex flex-col items-center justify-center w-full h-full transition-colors duration-200 ${
+                location.pathname === item.href
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-primary'
+              }`}
+            >
+              <item.icon className="h-6 w-6" />
+              <span className="text-xs font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

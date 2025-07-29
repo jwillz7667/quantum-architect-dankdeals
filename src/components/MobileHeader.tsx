@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { Menu, Phone, User, LogOut } from '@/lib/icons';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
 import { useAuth } from '@/context/AuthContext';
+import { useMobileMenu } from '@/context/MobileMenuContext';
 
 interface MobileHeaderProps {
   title?: string;
@@ -12,7 +12,7 @@ interface MobileHeaderProps {
 }
 
 export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useMobileMenu();
   const { user, signOut } = useAuth();
 
   const menuItems = [
