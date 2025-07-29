@@ -42,6 +42,7 @@ interface ProductSchema {
     '@type': string;
     name: string;
     value: string;
+    url?: string;
   }>;
   offers?: Array<{
     '@type': string;
