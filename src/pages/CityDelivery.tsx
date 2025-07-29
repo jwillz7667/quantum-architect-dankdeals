@@ -159,7 +159,7 @@ export default function CityDelivery() {
             </div>
 
             <div className="flex gap-4">
-              <Link to="/products">
+              <Link to="/categories">
                 <Button size="lg" className="bg-primary hover:bg-primary/90">
                   Shop Now
                 </Button>
@@ -254,7 +254,7 @@ export default function CityDelivery() {
               Join thousands of satisfied customers in {city.name} who trust DankDeals for their
               cannabis delivery needs. Order now and get it delivered today!
             </p>
-            <Link to="/products">
+            <Link to="/categories">
               <Button size="lg" className="bg-primary hover:bg-primary/90">
                 Start Shopping
               </Button>
