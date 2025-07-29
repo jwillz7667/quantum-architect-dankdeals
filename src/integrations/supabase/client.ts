@@ -6,11 +6,18 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] as string | undefined;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined;
 
+// For production builds, use placeholder values if environment variables are missing
+// This prevents the app from crashing during build time
+const url = SUPABASE_URL || 'https://placeholder.supabase.co';
+const key = SUPABASE_PUBLISHABLE_KEY || 'placeholder-key';
+
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing Supabase environment variables');
+  console.error('Missing Supabase environment variables. The app will not function properly.');
+  console.error('VITE_SUPABASE_URL:', SUPABASE_URL ? 'Set' : 'Missing');
+  console.error('VITE_SUPABASE_ANON_KEY:', SUPABASE_PUBLISHABLE_KEY ? 'Set' : 'Missing');
 }
 
-const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+const supabase = createClient<Database>(url, key, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,

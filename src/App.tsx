@@ -3,7 +3,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import { Suspense, useEffect } from 'react';
 import { ProductsFilterProvider } from '@/hooks/useProductsFilter';
 import { CartProvider } from '@/hooks/CartProvider';
 import { PageLoader } from '@/components/PageLoader';
@@ -17,107 +17,119 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PWAInstallButton, PWAStatusIndicator } from '@/components/PWAInstallButton';
 import { MobileMenuProvider } from '@/context/MobileMenuContext';
 
+import { lazyWithPrefetch, prefetchCriticalRoutes } from '@/lib/lazyWithPrefetch';
+
 // Lazy load all page components for better code splitting
-const Index = lazy(() => import('./pages/Index'));
-const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const Categories = lazy(() => import('./pages/Categories'));
-const Cart = lazy(() => import('./pages/Cart'));
-const FAQ = lazy(() => import('./pages/FAQ'));
-const Blog = lazy(() => import('./pages/Blog'));
-const BlogPost = lazy(() => import('./pages/BlogPost'));
-const Privacy = lazy(() => import('./pages/Privacy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const Legal = lazy(() => import('./pages/Legal'));
-const DeliveryArea = lazy(() => import('./pages/DeliveryArea'));
-const CityDelivery = lazy(() => import('./pages/CityDelivery'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const HealthCheck = lazy(() => import('./pages/HealthCheck'));
+const Index = lazyWithPrefetch(() => import('./pages/Index'));
+const ProductDetail = lazyWithPrefetch(() => import('./pages/ProductDetail'));
+const Categories = lazyWithPrefetch(() => import('./pages/Categories'));
+const Cart = lazyWithPrefetch(() => import('./pages/Cart'));
+const FAQ = lazyWithPrefetch(() => import('./pages/FAQ'));
+const Blog = lazyWithPrefetch(() => import('./pages/Blog'));
+const BlogPost = lazyWithPrefetch(() => import('./pages/BlogPost'));
+const Privacy = lazyWithPrefetch(() => import('./pages/Privacy'));
+const Terms = lazyWithPrefetch(() => import('./pages/Terms'));
+const Legal = lazyWithPrefetch(() => import('./pages/Legal'));
+const DeliveryArea = lazyWithPrefetch(() => import('./pages/DeliveryArea'));
+const CityDelivery = lazyWithPrefetch(() => import('./pages/CityDelivery'));
+const NotFound = lazyWithPrefetch(() => import('./pages/NotFound'));
+const HealthCheck = lazyWithPrefetch(() => import('./pages/HealthCheck'));
 
 // Lazy load checkout pages (only loaded when user checks out)
-const CheckoutAddress = lazy(() => import('./pages/checkout/CheckoutAddress'));
-const CheckoutPayment = lazy(() => import('./pages/checkout/CheckoutPayment'));
-const CheckoutReview = lazy(() => import('./pages/checkout/CheckoutReview'));
-const CheckoutComplete = lazy(() => import('./pages/checkout/CheckoutComplete'));
+const CheckoutAddress = lazyWithPrefetch(() => import('./pages/checkout/CheckoutAddress'));
+const CheckoutPayment = lazyWithPrefetch(() => import('./pages/checkout/CheckoutPayment'));
+const CheckoutReview = lazyWithPrefetch(() => import('./pages/checkout/CheckoutReview'));
+const CheckoutComplete = lazyWithPrefetch(() => import('./pages/checkout/CheckoutComplete'));
 
 // Lazy load auth pages
-const Login = lazy(() => import('./pages/auth/Login'));
-const Register = lazy(() => import('./pages/auth/Register'));
-const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
-const AuthCallback = lazy(() => import('./pages/auth/AuthCallback'));
+const Login = lazyWithPrefetch(() => import('./pages/auth/Login'));
+const Register = lazyWithPrefetch(() => import('./pages/auth/Register'));
+const ForgotPassword = lazyWithPrefetch(() => import('./pages/auth/ForgotPassword'));
+const AuthCallback = lazyWithPrefetch(() => import('./pages/auth/AuthCallback'));
 
 // Lazy load profile page
-const Profile = lazy(() => import('./pages/Profile'));
+const Profile = lazyWithPrefetch(() => import('./pages/Profile'));
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SEOProvider>
-          <TooltipProvider>
-            <MobileMenuProvider>
-              <AgeGate />
-              <Toaster />
-              <Sonner />
-              <RealTimeProvider>
-                <CartProvider>
-                  <ProductsFilterProvider>
-                    <Suspense fallback={<PageLoader />}>
-                      <Routes>
-                        {/* Public routes */}
-                        <Route path="/" element={<Index />} />
-                        <Route path="/product/:id" element={<ProductDetail />} />
-                        <Route path="/categories" element={<Categories />} />
-                        <Route path="/delivery-area" element={<DeliveryArea />} />
-                        <Route path="/delivery-areas" element={<DeliveryArea />} />
-                        <Route path="/delivery/:city" element={<CityDelivery />} />
-                        <Route path="/faq" element={<FAQ />} />
-                        <Route path="/blog" element={<Blog />} />
-                        <Route path="/blog/:slug" element={<BlogPost />} />
-                        <Route path="/privacy" element={<Privacy />} />
-                        <Route path="/terms" element={<Terms />} />
-                        <Route path="/legal" element={<Legal />} />
-                        <Route path="/health" element={<HealthCheck />} />
+// Critical routes to prefetch after initial load
+const criticalRoutes = [Categories, ProductDetail, Cart];
 
-                        {/* Auth routes */}
-                        <Route path="/auth/login" element={<Login />} />
-                        <Route path="/auth/register" element={<Register />} />
-                        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/auth/callback" element={<AuthCallback />} />
+const App = () => {
+  // Prefetch critical routes after initial load
+  useEffect(() => {
+    prefetchCriticalRoutes(criticalRoutes);
+  }, []);
 
-                        {/* Cart and checkout - require age verification but not authentication */}
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/checkout/address" element={<CheckoutAddress />} />
-                        <Route path="/checkout/payment" element={<CheckoutPayment />} />
-                        <Route path="/checkout/review" element={<CheckoutReview />} />
-                        <Route path="/checkout/complete" element={<CheckoutComplete />} />
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SEOProvider>
+            <TooltipProvider>
+              <MobileMenuProvider>
+                <AgeGate />
+                <Toaster />
+                <Sonner />
+                <RealTimeProvider>
+                  <CartProvider>
+                    <ProductsFilterProvider>
+                      <Suspense fallback={<PageLoader />}>
+                        <Routes>
+                          {/* Public routes */}
+                          <Route path="/" element={<Index />} />
+                          <Route path="/product/:id" element={<ProductDetail />} />
+                          <Route path="/categories" element={<Categories />} />
+                          <Route path="/delivery-area" element={<DeliveryArea />} />
+                          <Route path="/delivery-areas" element={<DeliveryArea />} />
+                          <Route path="/delivery/:city" element={<CityDelivery />} />
+                          <Route path="/faq" element={<FAQ />} />
+                          <Route path="/blog" element={<Blog />} />
+                          <Route path="/blog/:slug" element={<BlogPost />} />
+                          <Route path="/privacy" element={<Privacy />} />
+                          <Route path="/terms" element={<Terms />} />
+                          <Route path="/legal" element={<Legal />} />
+                          <Route path="/health" element={<HealthCheck />} />
 
-                        {/* Protected routes */}
-                        <Route
-                          path="/profile"
-                          element={
-                            <ProtectedRoute>
-                              <Profile />
-                            </ProtectedRoute>
-                          }
-                        />
+                          {/* Auth routes */}
+                          <Route path="/auth/login" element={<Login />} />
+                          <Route path="/auth/register" element={<Register />} />
+                          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                          <Route path="/auth/callback" element={<AuthCallback />} />
 
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Suspense>
-                  </ProductsFilterProvider>
-                </CartProvider>
-              </RealTimeProvider>
+                          {/* Cart and checkout - require age verification but not authentication */}
+                          <Route path="/cart" element={<Cart />} />
+                          <Route path="/checkout/address" element={<CheckoutAddress />} />
+                          <Route path="/checkout/payment" element={<CheckoutPayment />} />
+                          <Route path="/checkout/review" element={<CheckoutReview />} />
+                          <Route path="/checkout/complete" element={<CheckoutComplete />} />
 
-              {/* PWA Components */}
-              <PWAInstallButton />
-              <PWAStatusIndicator />
-            </MobileMenuProvider>
-          </TooltipProvider>
-        </SEOProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+                          {/* Protected routes */}
+                          <Route
+                            path="/profile"
+                            element={
+                              <ProtectedRoute>
+                                <Profile />
+                              </ProtectedRoute>
+                            }
+                          />
+
+                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </Suspense>
+                    </ProductsFilterProvider>
+                  </CartProvider>
+                </RealTimeProvider>
+
+                {/* PWA Components */}
+                <PWAInstallButton />
+                <PWAStatusIndicator />
+              </MobileMenuProvider>
+            </TooltipProvider>
+          </SEOProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

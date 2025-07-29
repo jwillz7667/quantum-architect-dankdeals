@@ -1,54 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import type { Plugin } from 'vite';
-
-// Custom plugin to preserve structured data in HTML
-function preserveStructuredData(): Plugin {
-  return {
-    name: 'preserve-structured-data',
-    enforce: 'post',
-    transformIndexHtml: {
-      order: 'post',
-      handler(html) {
-        // First, handle minified JSON-LD that might be on one line
-        const fixedHtml = html.replace(
-          /<script type="application\/ld\+json">(.+?)<\/script>/g,
-          (match, jsonContent: string) => {
-            try {
-              // Attempt to parse the potentially minified JSON
-              const trimmedJson = jsonContent.trim();
-              const parsed = JSON.parse(trimmedJson) as Record<string, unknown>;
-              // Re-format with proper spacing
-              const formatted = JSON.stringify(parsed, null, 2);
-              return `<script type="application/ld+json">\n${formatted}\n</script>`;
-            } catch (e) {
-              console.warn('Failed to parse minified JSON-LD:', e);
-              return match;
-            }
-          }
-        );
-
-        // Then handle multi-line JSON-LD
-        return fixedHtml.replace(
-          /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
-          (match, jsonContent: string) => {
-            try {
-              const trimmedJson = jsonContent.trim();
-              if (!trimmedJson) return match;
-              const parsed = JSON.parse(trimmedJson) as Record<string, unknown>;
-              const formatted = JSON.stringify(parsed, null, 2);
-              return `<script type="application/ld+json">\n${formatted}\n</script>`;
-            } catch (e) {
-              console.warn('Failed to parse JSON-LD:', e);
-              return match;
-            }
-          }
-        );
-      },
-    },
-  };
-}
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -60,20 +13,44 @@ export default defineConfig({
     react({
       jsxRuntime: 'automatic',
       jsxImportSource: 'react',
+      babel: {
+        plugins: [
+          // Remove propTypes in production for smaller bundle
+          ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }],
+        ],
+      },
     }),
-    preserveStructuredData(),
+    // Bundle visualization only in analyze mode
+    ...(process.env['ANALYZE']
+      ? [
+          visualizer({
+            filename: './dist/stats.html',
+            open: true,
+            gzipSize: true,
+            brotliSize: true,
+          }),
+        ]
+      : []),
   ],
   define: {
     // Enable better tree shaking in production
     __DEV__: JSON.stringify(false),
+    'process.env.NODE_ENV': JSON.stringify(process.env['NODE_ENV'] || 'production'),
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
-    exclude: [
-      // Exclude heavy libraries from pre-bundling to enable better tree shaking
-      'dompurify',
-      'recharts',
+    // Pre-bundle core dependencies for faster dev server startup
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      '@supabase/supabase-js',
+      'lucide-react',
     ],
+    // Exclude heavy libraries from pre-bundling to enable better tree shaking
+    exclude: ['dompurify', 'recharts'],
+    // Force optimize deps even in production builds
+    force: true,
   },
   resolve: {
     alias: {
@@ -82,67 +59,76 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: process.env['NODE_ENV'] !== 'production', // Only in dev/staging
     minify: 'terser',
-    target: 'es2015',
-    chunkSizeWarningLimit: 1000,
+    target: 'es2018', // Modern browsers support
+    chunkSizeWarningLimit: 500, // Stricter limit
     // Configure terser to be less aggressive with HTML
     terserOptions: {
       compress: {
-        drop_console: false,
+        drop_console: process.env['NODE_ENV'] === 'production',
         drop_debugger: true,
+        dead_code: true,
+        unused: true,
+        // Advanced optimizations
+        passes: 3,
+        pure_funcs: ['console.log', 'console.debug', 'console.trace'],
+        pure_getters: true,
+        side_effects: false,
+      },
+      mangle: {
+        safari10: true,
       },
       format: {
         comments: false,
+        // Preserve necessary comments for licenses
+        preserve_annotations: true,
       },
     },
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Core React libraries
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'react';
+        // Let Vite handle automatic chunking for better optimization
+        // Optimize chunk loading with shorter hashes
+        chunkFileNames: 'assets/js/[name]-[hash:8].js',
+        entryFileNames: 'assets/js/[name]-[hash:8].js',
+        assetFileNames: (assetInfo) => {
+          const extType = assetInfo.name?.split('.').pop() || '';
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            return `assets/img/[name]-[hash:8][extname]`;
           }
-
-          // UI component libraries
-          if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('cmdk')) {
-            return 'ui-components';
+          if (/css/i.test(extType)) {
+            return `assets/css/[name]-[hash:8][extname]`;
           }
-
-          // Form handling
-          if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
-            return 'forms';
+          if (/woff2?|ttf|otf|eot/i.test(extType)) {
+            return `assets/fonts/[name]-[hash:8][extname]`;
           }
-
-          // Supabase
-          if (id.includes('@supabase') || id.includes('supabase')) {
-            return 'supabase';
-          }
-
-          // Date handling
-          if (id.includes('date-fns') || id.includes('react-day-picker')) {
-            return 'date-utils';
-          }
-
-          // Charts and data visualization
-          if (
-            id.includes('recharts') ||
-            id.includes('react-window') ||
-            id.includes('react-virtualized')
-          ) {
-            return 'charts';
-          }
-
-          // Other vendor libraries
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+          return `assets/[name]-[hash:8][extname]`;
         },
-        // Optimize chunk loading
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Generate clean sourcemap references
+        sourcemapFileNames: '[name]-[hash:8].map',
       },
+      // Tree shaking optimizations
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+      },
+      // Experimental features for better optimization
+      experimentalLogSideEffects: true,
+    },
+    // CSS optimization
+    cssCodeSplit: true,
+    cssMinify: 'lightningcss',
+    // Asset optimization
+    assetsInlineLimit: 4096, // 4KB
+    // Report compressed sizes
+    reportCompressedSize: true,
+  },
+  // Experimental features
+  experimental: {
+    renderBuiltUrl() {
+      // Use relative paths for better CDN support
+      return { relative: true };
     },
   },
 });
