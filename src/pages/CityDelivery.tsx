@@ -5,6 +5,9 @@ import { getCityBySlug } from '@/lib/cities';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { FeaturedProductsGrid } from '@/components/FeaturedProductsGrid';
+import { DesktopHeader } from '@/components/DesktopHeader';
+import { MobileHeader } from '@/components/MobileHeader';
+import { BottomNav } from '@/components/BottomNav';
 
 export default function CityDelivery() {
   const { city: citySlug } = useParams();
@@ -103,7 +106,9 @@ export default function CityDelivery() {
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background pb-20 md:pb-0">
+        <DesktopHeader />
+        <MobileHeader title={`${city.name} Delivery`} />
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-primary/10 to-white py-16">
           <div className="container mx-auto px-4">
@@ -257,6 +262,8 @@ export default function CityDelivery() {
           </div>
         </section>
       </div>
+
+      <BottomNav />
     </>
   );
 }
