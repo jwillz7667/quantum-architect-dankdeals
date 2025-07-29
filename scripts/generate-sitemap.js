@@ -22,12 +22,35 @@ const staticPages = [
   { url: '/', changefreq: 'daily', priority: 1.0 },
   { url: '/categories', changefreq: 'daily', priority: 0.9 },
   { url: '/delivery-area', changefreq: 'weekly', priority: 0.8 },
+  { url: '/delivery-areas', changefreq: 'weekly', priority: 0.8 },
   { url: '/blog', changefreq: 'weekly', priority: 0.8 },
   { url: '/faq', changefreq: 'monthly', priority: 0.7 },
   { url: '/cart', changefreq: 'never', priority: 0.3 },
   { url: '/legal', changefreq: 'yearly', priority: 0.4 },
   { url: '/privacy', changefreq: 'yearly', priority: 0.4 },
   { url: '/terms', changefreq: 'yearly', priority: 0.4 },
+];
+
+// Twin Cities suburbs for city-specific delivery pages
+const cityPages = [
+  'minneapolis',
+  'st-paul',
+  'bloomington',
+  'plymouth',
+  'maple-grove',
+  'edina',
+  'eden-prairie',
+  'minnetonka',
+  'burnsville',
+  'woodbury',
+  'lakeville',
+  'blaine',
+  'richfield',
+  'roseville',
+  'eagan',
+  'coon-rapids',
+  'apple-valley',
+  'shakopee',
 ];
 
 // Cannabis industry specific categories for better SEO
@@ -121,6 +144,21 @@ async function generateMainSitemap() {
   // Add category pages (using query params to match actual routes)
   productCategories.forEach((category) => {
     const entry = generateUrlEntry(`/categories?category=${category}`, CURRENT_DATE, 'weekly', 0.7);
+    if (entry) {
+      sitemap += entry;
+      totalUrls++;
+    }
+  });
+
+  // Add city-specific delivery pages
+  cityPages.forEach((city) => {
+    const entry = generateUrlEntry(`/delivery/${city}`, CURRENT_DATE, 'weekly', 0.8, [
+      {
+        url: `${BASE_URL}/cannabis-delivery-${city}.jpg`,
+        caption: `Cannabis delivery service in ${city.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,
+        title: `${city.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} Cannabis Delivery`,
+      },
+    ]);
     if (entry) {
       sitemap += entry;
       totalUrls++;

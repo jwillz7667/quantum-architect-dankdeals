@@ -1,5 +1,6 @@
 // lib/productSchema.ts
 import type { Product, ProductVariant } from '@/hooks/useProducts';
+import type { Product as SupabaseProduct, Category } from '@/integrations/supabase/types';
 
 interface ProductSchema {
   '@context': string;
@@ -96,8 +97,9 @@ interface ProductSchema {
 }
 
 export const generateProductSchema = (
-  product: Product & { variants?: ProductVariant[] },
-  selectedVariant?: ProductVariant
+  product: Product & { variants?: ProductVariant[] } & Partial<SupabaseProduct>,
+  selectedVariant?: ProductVariant,
+  category?: Category
 ): ProductSchema => {
   // Price is stored as dollars in DB, not cents
   const price = selectedVariant ? selectedVariant.price : 0;
@@ -111,7 +113,9 @@ export const generateProductSchema = (
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    description: product.description || `Premium ${product.category} - ${product.name}`,
+    description:
+      product.description ||
+      `Premium ${category?.name || product.category || 'cannabis product'} - ${product.name}`,
     sku: product.id,
     mpn: product.id,
     brand: {
@@ -152,21 +156,40 @@ export const generateProductSchema = (
       },
     ],
     additionalProperty: [
-      ...(product.thc_content
+      ...(product.thc_content || product.thc_percentage
         ? [
             {
               '@type': 'PropertyValue',
               name: 'THC Content',
-              value: `${product.thc_content}%`,
+              value: `${product.thc_content || product.thc_percentage}%`,
             },
           ]
         : []),
-      ...(product.cbd_content && product.cbd_content > 0
+      ...(product.cbd_content || product.cbd_percentage
         ? [
             {
               '@type': 'PropertyValue',
               name: 'CBD Content',
-              value: `${product.cbd_content}%`,
+              value: `${product.cbd_content || product.cbd_percentage}%`,
+            },
+          ]
+        : []),
+      ...(product.strain_type
+        ? [
+            {
+              '@type': 'PropertyValue',
+              name: 'Strain Type',
+              value: product.strain_type.charAt(0).toUpperCase() + product.strain_type.slice(1),
+            },
+          ]
+        : []),
+      ...(product.lab_tested
+        ? [
+            {
+              '@type': 'PropertyValue',
+              name: 'Lab Tested',
+              value: 'Yes',
+              url: product.lab_results_url || undefined,
             },
           ]
         : []),
@@ -203,7 +226,7 @@ export const generateProductSchema = (
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: '5.00',
+          value: '10.00',
           currency: 'USD',
         },
         shippingDestination: {
@@ -222,8 +245,8 @@ export const generateProductSchema = (
           transitTime: {
             '@type': 'QuantitativeValue',
             minValue: 0,
-            maxValue: 2,
-            unitCode: 'HUR',
+            maxValue: 1,
+            unitCode: 'DAY',
           },
         },
       },

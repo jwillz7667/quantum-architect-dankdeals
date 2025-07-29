@@ -1,6 +1,36 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import type { Plugin } from 'vite';
+
+// Custom plugin to preserve structured data in HTML
+function preserveStructuredData(): Plugin {
+  return {
+    name: 'preserve-structured-data',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        // Preserve JSON-LD structured data formatting
+        // This prevents minification from breaking the JSON-LD scripts
+        return html.replace(
+          /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+          (match, json) => {
+            try {
+              // Parse and re-stringify to ensure valid JSON while preserving structure
+              const parsed = JSON.parse(json as string) as Record<string, unknown>;
+              const formatted = JSON.stringify(parsed, null, 2);
+              return `<script type="application/ld+json">\n${formatted}\n</script>`;
+            } catch (e) {
+              // If parsing fails, return original
+              console.warn('Failed to parse JSON-LD:', e);
+              return match;
+            }
+          }
+        );
+      },
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,6 +43,7 @@ export default defineConfig({
       jsxRuntime: 'automatic',
       jsxImportSource: 'react',
     }),
+    preserveStructuredData(),
   ],
   define: {
     // Enable better tree shaking in production
@@ -37,6 +68,16 @@ export default defineConfig({
     minify: 'terser',
     target: 'es2015',
     chunkSizeWarningLimit: 1000,
+    // Configure terser to be less aggressive with HTML
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        drop_debugger: true,
+      },
+      format: {
+        comments: false,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {

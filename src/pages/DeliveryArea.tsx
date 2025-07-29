@@ -5,6 +5,9 @@ import { BottomNav } from '@/components/BottomNav';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Clock, DollarSign, CheckCircle, Phone } from '@/lib/icons';
+import { Link } from 'react-router-dom';
+import { TWIN_CITIES_SUBURBS } from '@/lib/cities';
+import { Button } from '@/components/ui/button';
 
 export default function DeliveryArea() {
   useEffect(() => {
@@ -247,6 +250,30 @@ export default function DeliveryArea() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        {/* City-Specific Delivery Pages */}
+        <section className="mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+            Cannabis Delivery by City
+          </h2>
+          <p className="text-muted-foreground mb-8 text-lg">
+            Select your city below for specific delivery information, local deals, and faster
+            service.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {TWIN_CITIES_SUBURBS.map((city) => (
+              <Link key={city.id} to={`/delivery/${city.slug}`}>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start hover:bg-primary/5 hover:border-primary transition-colors"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  {city.name}
+                </Button>
+              </Link>
+            ))}
           </div>
         </section>
 

@@ -28,6 +28,7 @@ const Privacy = lazy(() => import('./pages/Privacy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Legal = lazy(() => import('./pages/Legal'));
 const DeliveryArea = lazy(() => import('./pages/DeliveryArea'));
+const CityDelivery = lazy(() => import('./pages/CityDelivery'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const HealthCheck = lazy(() => import('./pages/HealthCheck'));
 
@@ -65,6 +66,8 @@ const App = () => (
                       <Route path="/product/:id" element={<ProductDetail />} />
                       <Route path="/categories" element={<Categories />} />
                       <Route path="/delivery-area" element={<DeliveryArea />} />
+                      <Route path="/delivery-areas" element={<DeliveryArea />} />
+                      <Route path="/delivery/:city" element={<CityDelivery />} />
                       <Route path="/faq" element={<FAQ />} />
                       <Route path="/blog" element={<Blog />} />
                       <Route path="/blog/:slug" element={<BlogPost />} />
