@@ -7,21 +7,39 @@ import type { Plugin } from 'vite';
 function preserveStructuredData(): Plugin {
   return {
     name: 'preserve-structured-data',
+    enforce: 'post',
     transformIndexHtml: {
       order: 'post',
       handler(html) {
-        // Preserve JSON-LD structured data formatting
-        // This prevents minification from breaking the JSON-LD scripts
-        return html.replace(
-          /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
-          (match, json) => {
+        // First, handle minified JSON-LD that might be on one line
+        const fixedHtml = html.replace(
+          /<script type="application\/ld\+json">(.+?)<\/script>/g,
+          (match, jsonContent: string) => {
             try {
-              // Parse and re-stringify to ensure valid JSON while preserving structure
-              const parsed = JSON.parse(json as string) as Record<string, unknown>;
+              // Attempt to parse the potentially minified JSON
+              const trimmedJson = jsonContent.trim();
+              const parsed = JSON.parse(trimmedJson) as Record<string, unknown>;
+              // Re-format with proper spacing
               const formatted = JSON.stringify(parsed, null, 2);
               return `<script type="application/ld+json">\n${formatted}\n</script>`;
             } catch (e) {
-              // If parsing fails, return original
+              console.warn('Failed to parse minified JSON-LD:', e);
+              return match;
+            }
+          }
+        );
+
+        // Then handle multi-line JSON-LD
+        return fixedHtml.replace(
+          /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+          (match, jsonContent: string) => {
+            try {
+              const trimmedJson = jsonContent.trim();
+              if (!trimmedJson) return match;
+              const parsed = JSON.parse(trimmedJson) as Record<string, unknown>;
+              const formatted = JSON.stringify(parsed, null, 2);
+              return `<script type="application/ld+json">\n${formatted}\n</script>`;
+            } catch (e) {
               console.warn('Failed to parse JSON-LD:', e);
               return match;
             }
