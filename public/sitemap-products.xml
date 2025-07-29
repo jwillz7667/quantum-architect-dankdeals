@@ -28,18 +28,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://dankdealsmn.com/product/22222222-2222-2222-2222-222222222222</loc>
-    <lastmod>2025-07-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <mobile:mobile/>
-    <image:image>
-      <image:loc>https://dankdealsmn.com/assets/products/rs11/rainbow-sherbert11-1.webp</image:loc>
-      <image:caption>Rainbow Sherbert #11</image:caption>
-      <image:title>Rainbow Sherbert #11</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://dankdealsmn.com/product/44444444-4444-4444-4444-444444444444</loc>
     <lastmod>2025-07-13</lastmod>
     <changefreq>weekly</changefreq>
@@ -49,6 +37,18 @@
       <image:loc>https://dankdealsmn.com/assets/products/wedding-cake/wedding-cake-1.webp</image:loc>
       <image:caption>Wedding Cake</image:caption>
       <image:title>Wedding Cake</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://dankdealsmn.com/product/22222222-2222-2222-2222-222222222222</loc>
+    <lastmod>2025-07-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+    <image:image>
+      <image:loc>https://dankdealsmn.com/assets/products/rs11/rainbow-sherbert11-1.webp</image:loc>
+      <image:caption>Rainbow Sherbert #11</image:caption>
+      <image:title>Rainbow Sherbert #11</image:title>
     </image:image>
   </url>
   <url>

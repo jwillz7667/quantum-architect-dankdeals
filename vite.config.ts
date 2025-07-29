@@ -118,7 +118,6 @@ export default defineConfig({
     },
     // CSS optimization
     cssCodeSplit: true,
-    cssMinify: 'lightningcss',
     // Asset optimization
     assetsInlineLimit: 4096, // 4KB
     // Report compressed sizes
