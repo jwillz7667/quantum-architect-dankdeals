@@ -56,16 +56,18 @@ export function MobileHeader({ title, showMenu = true }: MobileHeaderProps) {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80">
-              <SheetHeader>
-                <div className="flex items-center justify-between">
-                  <SheetTitle>Menu</SheetTitle>
-                  <OptimizedLogo
-                    variant="cart"
-                    alt="DankDeals"
-                    className="h-8 w-8"
-                    priority={false}
-                  />
+            <SheetContent side="right" className="w-[280px] sm:w-[350px] max-w-[85vw]">
+              <SheetHeader className="pb-4">
+                <div className="flex items-center justify-between gap-3 pr-2">
+                  <SheetTitle className="text-lg font-bold">Menu</SheetTitle>
+                  <div className="flex-shrink-0">
+                    <OptimizedLogo
+                      variant="cart"
+                      alt="DankDeals"
+                      className="h-8 w-8"
+                      priority={false}
+                    />
+                  </div>
                 </div>
               </SheetHeader>
               <nav className="mt-6 space-y-4">
