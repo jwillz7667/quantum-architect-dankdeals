@@ -34,7 +34,7 @@ export function FeaturedProductsGrid() {
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       {featuredProducts.map((product) => {
         const minPrice =
           product.variants && product.variants.length > 0
