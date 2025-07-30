@@ -11,6 +11,8 @@ const STATIC_CACHE_FILES = [
   '/site.webmanifest',
   '/favicon.ico',
   '/apple-touch-icon.png',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
   // Add critical assets that are needed for offline functionality
 ];
 

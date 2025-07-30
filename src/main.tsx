@@ -66,6 +66,20 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 })();
 
+// Register service worker for PWA functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('ServiceWorker registration successful:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('ServiceWorker registration failed:', error);
+      });
+  });
+}
+
 // Render the app
 try {
   const root = document.getElementById('root');
