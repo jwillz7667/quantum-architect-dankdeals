@@ -55,7 +55,7 @@ export default defineConfig({
         },
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-label'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-label', '@radix-ui/react-toast'],
           supabase: ['@supabase/supabase-js'],
           utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
         },
