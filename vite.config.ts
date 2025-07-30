@@ -71,13 +71,4 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
     exclude: ['@vite/client', '@vite/env'],
   },
-  // Enable experimental features for better performance
-  experimental: {
-    renderBuiltUrl(filename, { hostType }) {
-      if (hostType === 'js') {
-        return { runtime: `window.__assetPath(${JSON.stringify(filename)})` };
-      }
-      return { relative: true };
-    },
-  },
 });
