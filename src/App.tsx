@@ -29,8 +29,8 @@ const BlogPost = lazyWithPrefetch(() => import('./pages/BlogPost'));
 const Privacy = lazyWithPrefetch(() => import('./pages/Privacy'));
 const Terms = lazyWithPrefetch(() => import('./pages/Terms'));
 const Legal = lazyWithPrefetch(() => import('./pages/Legal'));
-const DeliveryArea = lazyWithPrefetch(() => import('./pages/DeliveryArea'));
-const CityDelivery = lazyWithPrefetch(() => import('./pages/CityDelivery'));
+const DeliveryArea = lazyWithPrefetch(() => import('./pages/DeliveryAreaSimplified'));
+const CityDelivery = lazyWithPrefetch(() => import('./pages/CityDeliverySimplified'));
 const NotFound = lazyWithPrefetch(() => import('./pages/NotFound'));
 
 // Lazy load checkout pages (only loaded when user checks out)

@@ -329,6 +329,23 @@ body {
   .product-card:active {
     @apply scale-[0.98];
   }
+
+  /* Mobile-specific delivery page optimizations */
+  .delivery-map {
+    @apply rounded-lg;
+    touch-action: pan-x pan-y;
+  }
+
+  /* Optimize button tap targets for mobile */
+  .city-select-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better mobile spacing for delivery zones */
+  .delivery-zone-card {
+    @apply p-4;
+  }
 }
 
 /* Critical CSS for image performance */

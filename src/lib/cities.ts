@@ -14,6 +14,7 @@ export interface City {
   deliveryTime: string;
   minimumOrder: number;
   deliveryFee: number;
+  nearbyIds?: string[];
 }
 
 export const TWIN_CITIES_SUBURBS: City[] = [
@@ -54,6 +55,7 @@ export const TWIN_CITIES_SUBURBS: City[] = [
     deliveryTime: '1-2 hours',
     minimumOrder: 50,
     deliveryFee: 0,
+    nearbyIds: ['st-paul', 'bloomington', 'edina', 'minnetonka', 'roseville', 'richfield'],
   },
   {
     id: 'st-paul',
@@ -83,6 +85,7 @@ export const TWIN_CITIES_SUBURBS: City[] = [
     deliveryTime: '1-2 hours',
     minimumOrder: 50,
     deliveryFee: 0,
+    nearbyIds: ['minneapolis', 'roseville', 'maplewood', 'west-st-paul', 'woodbury'],
   },
   {
     id: 'bloomington',
