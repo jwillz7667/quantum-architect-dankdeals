@@ -199,12 +199,13 @@ export default function OnePageCheckout() {
               </div>
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">City *</Label>
                   <Input
                     id="city"
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    readOnly
+                    placeholder="Enter your city"
+                    required
                   />
                 </div>
                 <div>
