@@ -37,7 +37,7 @@ export default function Cart() {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
-    navigate('/checkout/address');
+    navigate('/checkout');
   };
 
   if (isLoading) {

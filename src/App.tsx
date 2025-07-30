@@ -36,9 +36,7 @@ const NotFound = lazyWithPrefetch(() => import('./pages/NotFound'));
 const HealthCheck = lazyWithPrefetch(() => import('./pages/HealthCheck'));
 
 // Lazy load checkout pages (only loaded when user checks out)
-const CheckoutAddress = lazyWithPrefetch(() => import('./pages/checkout/CheckoutAddress'));
-const CheckoutPayment = lazyWithPrefetch(() => import('./pages/checkout/CheckoutPayment'));
-const CheckoutReview = lazyWithPrefetch(() => import('./pages/checkout/CheckoutReview'));
+const OnePageCheckout = lazyWithPrefetch(() => import('./pages/checkout/OnePageCheckout'));
 const CheckoutComplete = lazyWithPrefetch(() => import('./pages/checkout/CheckoutComplete'));
 
 // Lazy load auth pages
@@ -48,7 +46,9 @@ const ForgotPassword = lazyWithPrefetch(() => import('./pages/auth/ForgotPasswor
 const AuthCallback = lazyWithPrefetch(() => import('./pages/auth/AuthCallback'));
 
 // Lazy load profile page
-const Profile = lazyWithPrefetch(() => import('./pages/Profile'));
+const Profile = lazyWithPrefetch(() => import('./pages/ProfileSimplified'));
+const Orders = lazyWithPrefetch(() => import('./pages/Orders'));
+const Settings = lazyWithPrefetch(() => import('./pages/Settings'));
 
 // Critical routes to prefetch after initial load
 const criticalRoutes = [Categories, ProductDetail, Cart];
@@ -97,9 +97,7 @@ const App = () => {
 
                           {/* Cart and checkout - require age verification but not authentication */}
                           <Route path="/cart" element={<Cart />} />
-                          <Route path="/checkout/address" element={<CheckoutAddress />} />
-                          <Route path="/checkout/payment" element={<CheckoutPayment />} />
-                          <Route path="/checkout/review" element={<CheckoutReview />} />
+                          <Route path="/checkout" element={<OnePageCheckout />} />
                           <Route path="/checkout/complete" element={<CheckoutComplete />} />
 
                           {/* Protected routes */}
@@ -108,6 +106,22 @@ const App = () => {
                             element={
                               <ProtectedRoute>
                                 <Profile />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/orders"
+                            element={
+                              <ProtectedRoute>
+                                <Orders />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/settings"
+                            element={
+                              <ProtectedRoute>
+                                <Settings />
                               </ProtectedRoute>
                             }
                           />

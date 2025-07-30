@@ -85,8 +85,6 @@ export function CategoriesProductGrid() {
               category={product.category}
               imageUrl={product.image_url || undefined}
               thcContent={product.thc_content || undefined}
-              cbdContent={product.cbd_content || undefined}
-              description={product.description ?? undefined}
             />
           );
         })}

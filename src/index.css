@@ -11,96 +11,87 @@ body {
 
 @layer base {
   :root {
+    /* Simplified color palette - matching Dank District's minimalist approach */
     --background: 0 0% 100%;
-    --foreground: 140 64% 22%;
+    --foreground: 0 0% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 140 64% 22%;
+    --card-foreground: 0 0% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 140 64% 22%;
+    --popover-foreground: 0 0% 13%;
 
-    /* Primary Cannabis Green */
-    --primary: 140 64% 18%;
+    /* Primary Green - Similar to Dank District's #4caf50 */
+    --primary: 122 39% 49%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 140 64% 17%;
-    --primary-light: 140 64% 27%;
+    --primary-hover: 122 39% 44%;
+    --primary-light: 122 39% 95%;
 
-    /* Accent Mint */
-    --accent-mint: 166 94% 47%;
-    --accent-mint-foreground: 0 0% 100%;
+    /* Simplified secondary colors */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 13%;
 
-    --secondary: 155 15% 94%;
-    --secondary-foreground: 140 64% 22%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --muted: 155 15% 96%;
-    --muted-foreground: 0 0% 0%;
-
-    --accent: 155 15% 94%;
-    --accent-foreground: 140 64% 22%;
+    --accent: 122 39% 49%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 155 20% 90%;
-    --input: 155 20% 90%;
-    --ring: 140 64% 22%;
+    /* Simplified borders and inputs */
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
+    --ring: 122 39% 49%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Custom gradients for cannabis theme */
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-card: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --gradient-overlay: linear-gradient(
-      to top,
-      hsl(0 0% 0% / 0.6),
-      hsl(0 0% 0% / 0.3),
-      transparent
-    );
-    --gradient-mobile-header: linear-gradient(
-      180deg,
-      hsl(var(--primary)),
-      hsl(var(--primary-hover))
-    );
+    /* Simplified shadows for cleaner look */
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.05);
+    --shadow-elevated: 0 4px 12px hsl(0 0% 0% / 0.08);
 
-    /* Shadows */
-    --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.08);
-    --shadow-elevated: 0 8px 24px hsl(0 0% 0% / 0.12);
-    --shadow-glow: 0 0 20px hsl(var(--accent-mint) / 0.3);
+    /* Simplified animations */
+    --transition-smooth: all 0.2s ease;
 
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Spacing scale for consistent whitespace */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
   }
 
   .dark {
-    --background: 155 85% 6%;
-    --foreground: 140 64% 35%;
+    /* Simplified dark mode - less colors, more contrast */
+    --background: 0 0% 9%;
+    --foreground: 0 0% 95%;
 
-    --card: 155 50% 8%;
-    --card-foreground: 140 64% 35%;
+    --card: 0 0% 13%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 155 50% 8%;
-    --popover-foreground: 140 64% 35%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 140 64% 27%;
+    --primary: 122 39% 49%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 140 64% 22%;
+    --primary-hover: 122 39% 44%;
 
-    --secondary: 155 25% 15%;
-    --secondary-foreground: 140 64% 35%;
+    --secondary: 0 0% 17%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 155 25% 12%;
-    --muted-foreground: 0 0% 90%;
+    --muted: 0 0% 17%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 155 25% 15%;
-    --accent-foreground: 140 64% 35%;
+    --accent: 122 39% 49%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 63% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 155 25% 18%;
-    --input: 155 25% 18%;
-    --ring: 140 64% 27%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 122 39% 49%;
   }
 }
 
@@ -119,38 +110,49 @@ body {
   html {
     scroll-behavior: smooth;
     /* Set custom overscroll background to match brand */
-    background-color: #185a1b; /* Cannabis green for overscroll area */
+    background-color: #4caf50; /* Primary green for overscroll area */
     overscroll-behavior: contain;
     overscroll-behavior-y: contain;
   }
 }
 
 @layer components {
+  /* Simplified component styles with more whitespace */
   .category-card {
-    @apply w-20 h-20 flex flex-col items-center justify-center rounded-lg bg-primary text-primary-foreground gap-1 shadow-sm transition-transform duration-150 hover:scale-105;
+    @apply w-24 h-24 flex flex-col items-center justify-center rounded-md bg-secondary text-foreground gap-2 transition-all duration-200 hover:bg-primary hover:text-primary-foreground;
   }
 
   .product-card {
-    @apply bg-card rounded-lg overflow-hidden shadow-sm border border-border transition-transform duration-150 hover:scale-[1.01];
+    @apply bg-card rounded-md overflow-hidden border border-border transition-all duration-200 hover:shadow-md hover:border-primary/20;
   }
 
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border z-50;
+    @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50;
     padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
   }
 
   .search-bar {
-    @apply flex items-center gap-3 bg-muted rounded-lg px-4 py-3 border border-border focus-within:border-ring transition-colors;
+    @apply flex items-center gap-3 bg-secondary rounded-md px-4 py-3 transition-colors duration-200 focus-within:ring-2 focus-within:ring-primary/20;
   }
 
-  .gradient-overlay {
-    background: var(--gradient-overlay);
+  /* Simplified button styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium transition-all duration-200 hover:bg-primary-hover active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-md font-medium transition-all duration-200 hover:bg-muted active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Clean card layout */
+  .content-card {
+    @apply bg-card p-6 rounded-md border border-border;
+  }
+
+  /* Simplified loading state */
   .shimmer {
-    background: linear-gradient(90deg, transparent, hsl(var(--muted)) 50%, transparent);
-    animation: shimmer 1.25s ease-in-out infinite;
-    will-change: transform;
+    @apply bg-muted animate-pulse rounded-md;
   }
 }
 
@@ -216,6 +218,48 @@ body {
     contain: layout size;
     will-change: auto;
   }
+
+  /* Mobile touch optimization */
+  @media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets for mobile */
+    button,
+    a,
+    [role='button'] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Better tap highlight */
+    * {
+      -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+    }
+
+    /* Prevent text selection on UI elements */
+    button,
+    a,
+    [role='button'] {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Improve form inputs on mobile */
+    input,
+    textarea,
+    select {
+      font-size: 16px; /* Prevents zoom on iOS */
+      min-height: 48px;
+    }
+  }
+
+  /* Sticky mobile CTA button */
+  .mobile-sticky-cta {
+    @apply fixed bottom-20 left-0 right-0 p-4 bg-background border-t border-border z-40 md:hidden;
+  }
+
+  /* Touch-friendly spacing */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
 }
 
 /* Hide scrollbar for category rail */
@@ -233,7 +277,7 @@ body {
   html {
     /* iOS Safari specific fix */
     -webkit-overflow-scrolling: touch;
-    background: #185a1b !important;
+    background: #4caf50 !important;
   }
 
   body {
@@ -267,7 +311,7 @@ body {
   /* Chrome on Android */
   html {
     overscroll-behavior-y: none;
-    background: #185a1b !important;
+    background: #4caf50 !important;
   }
 
   /* PWA viewport fixes */

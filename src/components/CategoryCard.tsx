@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import type { LucideIcon } from '@/lib/icons';
 
 interface CategoryCardProps {
@@ -10,20 +9,18 @@ interface CategoryCardProps {
 
 export function CategoryCard({ icon: Icon, label, onClick, isActive = false }: CategoryCardProps) {
   return (
-    <Button
-      variant="default"
-      size="category"
+    <button
       onClick={onClick}
-      className={`category-card min-w-[5rem] shrink-0 transition-all duration-200 ${
+      className={`category-card ${
         isActive
-          ? 'bg-primary-hover shadow-md scale-105 ring-2 ring-primary ring-offset-2'
-          : 'bg-primary hover:bg-primary-hover hover:scale-105 hover:shadow-md'
+          ? 'bg-primary text-primary-foreground scale-105'
+          : 'hover:bg-primary hover:text-primary-foreground'
       }`}
       aria-pressed={isActive}
       aria-label={`${label} category${isActive ? ' - currently selected' : ''}`}
     >
       <Icon className="h-6 w-6" />
       <span className="text-xs font-medium">{label}</span>
-    </Button>
+    </button>
   );
 }
