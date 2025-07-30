@@ -86,10 +86,10 @@ serve(async (req: Request) => {
     // Add profiles data to order for compatibility with existing template code
     order.profiles = profileData;
 
-    // Extract customer email for guest orders FIRST (before using it in templates)
-    let customerEmail = order.profiles?.email;
+    // Extract customer email - use customer_email field first, then fall back to profile
+    let customerEmail = order.customer_email || order.profiles?.email;
     if (!customerEmail && order.notes) {
-      // Try multiple patterns to extract email from notes
+      // Legacy support: Try to extract email from notes for old orders
       const emailMatch =
         order.notes.match(/Email:\s*([^,\s]+)/i) ||
         order.notes.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);

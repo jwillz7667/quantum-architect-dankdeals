@@ -101,6 +101,7 @@ export class OrderService {
             tax_amount: orderData.taxAmount,
             delivery_fee: orderData.deliveryFee,
             total_amount: orderData.totalAmount,
+            customer_email: orderData.email,
             delivery_first_name: orderData.firstName,
             delivery_last_name: orderData.lastName,
             delivery_street_address: orderData.deliveryAddress.street,
@@ -112,7 +113,7 @@ export class OrderService {
             delivery_instructions: orderData.deliveryAddress.deliveryInstructions,
             payment_method: orderData.paymentMethod,
             payment_status: 'pending',
-            notes: `Guest order - Email: ${orderData.email}, DOB: ${orderData.dateOfBirth}`,
+            notes: `DOB: ${orderData.dateOfBirth}`,
           })
           .select()
           .single();
