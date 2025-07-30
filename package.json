@@ -29,7 +29,7 @@
     "prepare": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', {stdio: 'inherit'}); } catch (e) {}\""
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.1.1",
+    "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
