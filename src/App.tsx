@@ -14,7 +14,6 @@ import { AgeGate } from '@/components/AgeGate';
 import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { PWAInstallButton, PWAStatusIndicator } from '@/components/PWAInstallButton';
 import { MobileMenuProvider } from '@/context/MobileMenuContext';
 
 import { lazyWithPrefetch, prefetchCriticalRoutes } from '@/lib/lazyWithPrefetch';
@@ -33,7 +32,6 @@ const Legal = lazyWithPrefetch(() => import('./pages/Legal'));
 const DeliveryArea = lazyWithPrefetch(() => import('./pages/DeliveryArea'));
 const CityDelivery = lazyWithPrefetch(() => import('./pages/CityDelivery'));
 const NotFound = lazyWithPrefetch(() => import('./pages/NotFound'));
-const HealthCheck = lazyWithPrefetch(() => import('./pages/HealthCheck'));
 
 // Lazy load checkout pages (only loaded when user checks out)
 const OnePageCheckout = lazyWithPrefetch(() => import('./pages/checkout/OnePageCheckout'));
@@ -87,7 +85,6 @@ const App = () => {
                           <Route path="/privacy" element={<Privacy />} />
                           <Route path="/terms" element={<Terms />} />
                           <Route path="/legal" element={<Legal />} />
-                          <Route path="/health" element={<HealthCheck />} />
 
                           {/* Auth routes */}
                           <Route path="/auth/login" element={<Login />} />
@@ -133,10 +130,6 @@ const App = () => {
                     </ProductsFilterProvider>
                   </CartProvider>
                 </RealTimeProvider>
-
-                {/* PWA Components */}
-                <PWAInstallButton />
-                <PWAStatusIndicator />
               </MobileMenuProvider>
             </TooltipProvider>
           </SEOProvider>

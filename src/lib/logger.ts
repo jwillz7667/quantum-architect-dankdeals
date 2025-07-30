@@ -1,5 +1,4 @@
 import { env } from './env';
-import { captureException, captureMessage } from './sentry';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -13,19 +12,6 @@ export interface LogEntry {
   message: string;
   timestamp: number;
   context?: LogContext;
-}
-
-type SanitizableValue =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SanitizableObject
-  | SanitizableValue[];
-
-interface SanitizableObject {
-  [key: string]: SanitizableValue;
 }
 
 class Logger {
@@ -92,11 +78,6 @@ class Logger {
 
     const sanitizedContext = this.sanitizeData(context);
     console.warn(this.formatMessage('warn', message, sanitizedContext));
-
-    // Send to Sentry in production
-    if (this.isProduction) {
-      captureMessage(message, 'warning');
-    }
   }
 
   error(message: string, error?: Error, context?: LogContext) {
@@ -104,15 +85,6 @@ class Logger {
 
     const sanitizedContext = this.sanitizeData(context);
     console.error(this.formatMessage('error', message, sanitizedContext), error);
-
-    // Send to Sentry in production
-    if (this.isProduction) {
-      if (error) {
-        captureException(error, sanitizedContext);
-      } else {
-        captureMessage(message, 'error');
-      }
-    }
   }
 
   // Performance logging
@@ -146,13 +118,3 @@ class Logger {
 
 // Export singleton instance
 export const logger = new Logger();
-
-// Type augmentation for Sentry
-declare global {
-  interface Window {
-    Sentry?: {
-      captureException: (error: Error, context?: { extra?: unknown }) => void;
-      captureMessage: (message: string, level?: string) => void;
-    };
-  }
-}

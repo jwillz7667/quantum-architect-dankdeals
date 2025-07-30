@@ -4,10 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { env } from './lib/env';
-import { initializeAxe } from './utils/axe';
-import { analytics } from './lib/analytics';
-import { initializePWA } from './lib/pwa';
-// import { initSentry } from './lib/sentry';
 
 // Global error handler for uncaught errors
 window.addEventListener('error', (event) => {
@@ -20,21 +16,6 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
-
-// Initialize Sentry error tracking - BLOCKING for proper error capture
-// Temporarily disabled due to module issues
-// initSentry();
-
-// Initialize accessibility testing in development - NON-BLOCKING
-if (import.meta.env.DEV) {
-  setTimeout(() => void initializeAxe(), 1000);
-}
-
-// Initialize analytics - NON-BLOCKING
-setTimeout(() => void analytics.initialize(), 500);
-
-// Initialize PWA features - NON-BLOCKING
-setTimeout(() => void initializePWA(), 1000);
 
 // Validate environment variables on startup
 (function validateEnvironment() {
@@ -84,34 +65,6 @@ setTimeout(() => void initializePWA(), 1000);
     }
   }
 })();
-
-// Sentry removed to improve performance - 389KB bundle eliminated
-// Using native browser error handling instead
-
-// Set up lightweight performance monitoring
-if (env.VITE_ENV === 'production') {
-  // Log performance metrics
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      try {
-        const perfData = performance.getEntriesByType(
-          'navigation'
-        )[0] as PerformanceNavigationTiming;
-        if (perfData) {
-          console.log('Page Load Performance:', {
-            domContentLoaded: Math.round(
-              perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart
-            ),
-            loadComplete: Math.round(perfData.loadEventEnd - perfData.loadEventStart),
-            totalTime: Math.round(perfData.loadEventEnd - perfData.fetchStart),
-          });
-        }
-      } catch (error) {
-        console.error('Failed to log performance metrics:', error);
-      }
-    }, 0);
-  });
-}
 
 // Render the app
 try {

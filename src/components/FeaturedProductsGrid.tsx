@@ -1,4 +1,4 @@
-import { SimpleProductCard } from '@/components/SimpleProductCard';
+import { ProductCard } from '@/components/ProductCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProducts } from '@/hooks/useProducts';
 import { Loader2 } from '@/lib/icons';
@@ -35,15 +35,24 @@ export function FeaturedProductsGrid() {
 
   return (
     <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-      {featuredProducts.map((product) => (
-        <SimpleProductCard
-          key={product.id}
-          id={product.id}
-          name={product.name}
-          category={product.category}
-          imageUrl={product.image_url || undefined}
-        />
-      ))}
+      {featuredProducts.map((product) => {
+        const minPrice =
+          product.variants && product.variants.length > 0
+            ? Math.min(...product.variants.map((v) => v.price))
+            : 0;
+
+        return (
+          <ProductCard
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            price={minPrice}
+            category={product.category}
+            imageUrl={product.image_url || undefined}
+            thcContent={product.thc_content ?? undefined}
+          />
+        );
+      })}
     </div>
   );
 }
