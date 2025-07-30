@@ -32,8 +32,14 @@ const NETWORK_FIRST_PATTERNS = [
 
 // Cache-first patterns (for static assets)
 const CACHE_FIRST_PATTERNS = [
-  new RegExp('\\.(?:js|css|woff2?|png|jpg|jpeg|webp|svg|ico)$'),
+  new RegExp('\\.(?:js|css|woff2?|png|jpg|jpeg|webp|avif|svg|ico)$'),
   new RegExp('/assets/'),
+];
+
+// Image optimization patterns
+const IMAGE_PATTERNS = [
+  new RegExp('\\.(?:png|jpg|jpeg|webp|avif|svg)$'),
+  new RegExp('supabase\\.co.*storage.*image'),
 ];
 
 // Install event - Cache essential files
@@ -110,6 +116,11 @@ async function handleRequest(request) {
     // Network-first strategy for critical user data
     if (isNetworkFirst(url)) {
       return await networkFirst(request);
+    }
+
+    // Special handling for images with optimization
+    if (isImage(url)) {
+      return await handleImageRequest(request);
     }
 
     // Cache-first strategy for static assets
@@ -295,6 +306,59 @@ function isCacheFirst(url) {
 
 function isApiRequest(url) {
   return API_CACHE_PATTERNS.some((pattern) => pattern.test(url.href));
+}
+
+function isImage(url) {
+  return IMAGE_PATTERNS.some((pattern) => pattern.test(url.href));
+}
+
+// Advanced image handling with optimization
+async function handleImageRequest(request) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cachedResponse = await cache.match(request);
+
+  // If we have a cached version, return it immediately
+  if (cachedResponse) {
+    // Update cache in background
+    const fetchPromise = fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse.ok) {
+          cache.put(request, networkResponse.clone());
+        }
+        return networkResponse;
+      })
+      .catch(() => null);
+
+    return cachedResponse;
+  }
+
+  // No cache, fetch with timeout for better performance
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+  try {
+    const networkResponse = await fetch(request, {
+      signal: controller.signal,
+      // Add cache headers for better CDN caching
+      headers: {
+        ...request.headers,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    });
+
+    clearTimeout(timeoutId);
+
+    if (networkResponse.ok) {
+      // Clone response before caching
+      cache.put(request, networkResponse.clone());
+      return networkResponse;
+    }
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    // Return placeholder image on error
+    return fetch('/assets/placeholder.svg');
+  }
 }
 
 // Background sync for offline actions

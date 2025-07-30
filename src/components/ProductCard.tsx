@@ -1,7 +1,6 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OptimizedProductImage } from './OptimizedProductImage';
-import { getProductImages } from '@/lib/productImages';
+import { PerformanceOptimizedImage } from './PerformanceOptimizedImage';
 
 interface ProductCardProps {
   id: string;
@@ -16,7 +15,7 @@ export const ProductCard = memo(function ProductCard({
   id,
   name,
   price,
-  category,
+  category: _category,
   imageUrl,
   thcContent,
 }: ProductCardProps) {
@@ -26,16 +25,7 @@ export const ProductCard = memo(function ProductCard({
     navigate(`/product/${id}`);
   }, [navigate, id]);
 
-  const displayPrice = useMemo(
-    () => (typeof price === 'number' ? price.toFixed(2) : '0.00'),
-    [price]
-  );
-
-  // Get optimized images for this product
-  const { displayImage } = useMemo(() => {
-    const productImages = getProductImages(id, name, category);
-    return { displayImage: productImages.main };
-  }, [id, name, category]);
+  const displayPrice = typeof price === 'number' ? price.toFixed(2) : '0.00';
 
   return (
     <article
@@ -47,13 +37,12 @@ export const ProductCard = memo(function ProductCard({
     >
       {/* Image */}
       <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-        <OptimizedProductImage
-          src={displayImage}
-          fallback={imageUrl}
+        <PerformanceOptimizedImage
+          src={imageUrl}
           alt={name}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           variant="card"
+          aspectRatio="1/1"
         />
       </div>
 

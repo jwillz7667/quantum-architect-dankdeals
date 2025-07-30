@@ -330,3 +330,46 @@ body {
     @apply scale-[0.98];
   }
 }
+
+/* Critical CSS for image performance */
+img {
+  content-visibility: auto;
+  contain-intrinsic-size: 320px 320px;
+}
+
+/* Prevent layout shift for images */
+img[loading='lazy'] {
+  background-color: #f3f4f6;
+}
+
+/* Optimize image rendering */
+.performance-optimized img {
+  will-change: opacity;
+  transform: translateZ(0);
+}
+
+/* Aspect ratio boxes for consistent layout */
+[style*='aspect-ratio'] {
+  position: relative;
+  overflow: hidden;
+}
+
+[style*='aspect-ratio'] > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .transition-transform,
+  .transition-opacity {
+    transition: none !important;
+  }
+
+  .animate-pulse,
+  .animate-shimmer {
+    animation: none !important;
+  }
+}

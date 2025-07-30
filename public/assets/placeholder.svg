@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#f3f4f6"/>
+  <g opacity="0.5">
+    <path d="M200 150c-27.6 0-50 22.4-50 50s22.4 50 50 50 50-22.4 50-50-22.4-50-50-50zm0 80c-16.5 0-30-13.5-30-30s13.5-30 30-30 30 13.5 30 30-13.5 30-30 30z" fill="#d1d5db"/>
+    <path d="M300 100H100c-11 0-20 9-20 20v160c0 11 9 20 20 20h200c11 0 20-9 20-20V120c0-11-9-20-20-20zm0 180H100V120h200v160z" fill="#d1d5db"/>
+    <path d="M150 240l50-60 30 36 20-24 50 60" fill="none" stroke="#d1d5db" stroke-width="2"/>
+  </g>
+  <text x="200" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#9ca3af">Product Image</text>
+</svg>

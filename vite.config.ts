@@ -29,6 +29,8 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
+        passes: 2,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
       },
       format: {
         comments: false,
@@ -40,7 +42,7 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           const extType = assetInfo.name?.split('.').pop() || '';
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(extType)) {
             return `assets/img/[name]-[hash][extname]`;
           }
           if (/css/i.test(extType)) {
@@ -51,7 +53,31 @@ export default defineConfig({
           }
           return `assets/[name]-[hash][extname]`;
         },
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-label'],
+          supabase: ['@supabase/supabase-js'],
+          utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        },
       },
+    },
+    // Modern optimizations
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096, // Inline assets < 4kb
+    reportCompressedSize: false, // Faster builds
+  },
+  // Performance optimizations
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+    exclude: ['@vite/client', '@vite/env'],
+  },
+  // Enable experimental features for better performance
+  experimental: {
+    renderBuiltUrl(filename, { hostType }) {
+      if (hostType === 'js') {
+        return { runtime: `window.__assetPath(${JSON.stringify(filename)})` };
+      }
+      return { relative: true };
     },
   },
 });
