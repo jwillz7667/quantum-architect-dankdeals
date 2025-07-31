@@ -11,6 +11,9 @@
   NETLIFY_USE_PNPM = "false"
   # Prevent Google Maps API key from being exposed in build
   VITE_GOOGLE_MAPS_API_KEY = "DISABLED_FOR_SECURITY"
+  # Supabase configuration (these should be set in Netlify UI for security)
+  # VITE_SUPABASE_URL = "set in Netlify UI"
+  # VITE_SUPABASE_ANON_KEY = "set in Netlify UI"
 
 # SPA routing
 [[redirects]]
@@ -25,6 +28,8 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Allow images from Supabase Storage
+    Content-Security-Policy = "default-src 'self'; img-src 'self' https://ralbzuvkyexortqngvxs.supabase.co data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://ralbzuvkyexortqngvxs.supabase.co https://plausible.io; font-src 'self' https://fonts.gstatic.com; frame-src 'none'; object-src 'none';"
 
 # Asset caching
 [[headers]]
