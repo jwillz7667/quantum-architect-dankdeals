@@ -129,6 +129,7 @@ export default function OnePageCheckout() {
 
       if (error) {
         console.error('Edge function error:', error);
+        console.error('Full response:', response);
         const errorMessage = error instanceof Error ? error.message : 'Failed to create order';
         throw new Error(errorMessage);
       }
