@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PerformanceOptimizedImage } from './PerformanceOptimizedImage';
+import { RobustProductImage } from './RobustProductImage';
 
 interface ProductCardProps {
   id: string;
@@ -37,11 +37,10 @@ export const ProductCard = memo(function ProductCard({
     >
       {/* Image */}
       <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-        <PerformanceOptimizedImage
+        <RobustProductImage
           src={imageUrl}
           alt={name}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          variant="card"
           aspectRatio="1/1"
         />
       </div>

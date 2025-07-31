@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/SEOHead';
 import { generateProductSchema } from '@/lib/productSchema';
-import { OptimizedProductImage } from '@/components/OptimizedProductImage';
+import { RobustProductImage } from '@/components/RobustProductImage';
 import { getProductImages } from '@/lib/productImages';
 
 interface ExtendedProduct extends Product {
@@ -245,13 +245,12 @@ export default function ProductDetail() {
 
       {/* Product Image Gallery */}
       <div className="aspect-[4/3] overflow-hidden relative group bg-gray-100">
-        <OptimizedProductImage
+        <RobustProductImage
           src={images[currentImageIndex] || ''}
           alt={`${product.name} - Premium ${product.category} cannabis strain, image ${currentImageIndex + 1} of ${images.length}`}
           className="w-full h-full object-contain"
           priority={currentImageIndex === 0}
           sizes="100vw"
-          variant="detail"
         />
 
         {images.length > 1 && (

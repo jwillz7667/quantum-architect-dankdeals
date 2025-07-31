@@ -70,32 +70,30 @@ export function DeliveryMap({
     }
 
     // Load Google Maps script if not already loaded
-    if (!window.google) {
+    if (!window.google || !window.google.maps) {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
       script.async = true;
       script.defer = true;
-      script.onload = initializeMap;
+
+      // Define global callback
+      const windowWithCallback = window as Window & { initMap?: () => void };
+      windowWithCallback.initMap = () => {
+        initializeMap();
+        delete windowWithCallback.initMap;
+      };
+
       script.onerror = () => {
         console.error('Failed to load Google Maps');
+        delete windowWithCallback.initMap;
       };
       document.head.appendChild(script);
     } else {
-      void initializeMap();
+      initializeMap();
     }
 
-    async function initializeMap() {
+    function initializeMap() {
       if (!mapRef.current || mapInstanceRef.current) return;
-
-      // Wait for the Maps library to be ready
-      await google.maps.importLibrary('maps');
-
-      // Import marker library if available
-      try {
-        await google.maps.importLibrary('marker');
-      } catch (_e) {
-        console.log('Advanced markers not available, using legacy markers');
-      }
 
       // Initialize map
       const map = new google.maps.Map(mapRef.current, {
@@ -139,47 +137,25 @@ export function DeliveryMap({
 
       mapInstanceRef.current = map;
 
-      // Add center marker (DankDeals HQ) using AdvancedMarkerElement
-      if (google.maps.marker?.AdvancedMarkerElement) {
-        // Create custom pin content
-        const pinContent = document.createElement('div');
-        pinContent.innerHTML = `
-          <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
-            <path d="M20 10 L25 15 L25 25 L20 30 L15 25 L15 15 Z" fill="#ffffff"/>
-            <circle cx="20" cy="20" r="3" fill="#22c55e"/>
-          </svg>
-        `;
-        pinContent.style.cursor = 'pointer';
-        pinContent.title = 'DankDeals Cannabis Delivery';
-
-        new google.maps.marker.AdvancedMarkerElement({
-          map,
-          position: center,
-          content: pinContent,
-          title: 'DankDeals Cannabis Delivery',
-        });
-      } else {
-        // Fallback to regular marker if AdvancedMarkerElement not available
-        new google.maps.Marker({
-          position: center,
-          map,
-          title: 'DankDeals Cannabis Delivery',
-          icon: {
-            url:
-              'data:image/svg+xml;charset=UTF-8,' +
-              encodeURIComponent(`
-              <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
-                <path d="M20 10 L25 15 L25 25 L20 30 L15 25 L15 15 Z" fill="#ffffff"/>
-                <circle cx="20" cy="20" r="3" fill="#22c55e"/>
-              </svg>
-            `),
-            scaledSize: new google.maps.Size(40, 40),
-            anchor: new google.maps.Point(20, 20),
-          },
-        });
-      }
+      // Add center marker (DankDeals HQ)
+      new google.maps.Marker({
+        position: center,
+        map,
+        title: 'DankDeals Cannabis Delivery',
+        icon: {
+          url:
+            'data:image/svg+xml;charset=UTF-8,' +
+            encodeURIComponent(`
+            <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+              <path d="M20 10 L25 15 L25 25 L20 30 L15 25 L15 15 Z" fill="#ffffff"/>
+              <circle cx="20" cy="20" r="3" fill="#22c55e"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(40, 40),
+          anchor: new google.maps.Point(20, 20),
+        },
+      });
 
       // Add delivery zones if enabled
       if (showCoverage) {
