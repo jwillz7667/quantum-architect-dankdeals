@@ -42,6 +42,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasShownWelcomeToast, setHasShownWelcomeToast] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -57,6 +59,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.error('Error initializing auth', error as Error);
       } finally {
         setLoading(false);
+        // Mark initial load as complete after first check
+        setTimeout(() => setIsInitialLoad(false), 1000);
       }
     };
 
@@ -85,22 +89,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Handle specific auth events
       switch (event) {
         case 'SIGNED_IN':
-          toast({
-            title: 'Welcome back!',
-            description: 'You have successfully signed in.',
-          });
+          // Only show welcome toast if:
+          // 1. Not the initial load (page refresh/revisit)
+          // 2. Haven't shown it already in this session
+          // 3. There's an actual user (not just session restoration)
+          if (!isInitialLoad && !hasShownWelcomeToast && session?.user) {
+            toast({
+              title: 'Welcome back!',
+              description: 'You have successfully signed in.',
+            });
+            setHasShownWelcomeToast(true);
+          }
           break;
         case 'SIGNED_OUT':
+          // Reset the welcome toast flag on sign out
+          setHasShownWelcomeToast(false);
           toast({
             title: 'Signed out',
             description: 'You have been signed out successfully.',
           });
           break;
         case 'USER_UPDATED':
-          toast({
-            title: 'Profile updated',
-            description: 'Your profile has been updated successfully.',
-          });
+          // Only show if not initial load to avoid showing on page refresh
+          if (!isInitialLoad) {
+            toast({
+              title: 'Profile updated',
+              description: 'Your profile has been updated successfully.',
+            });
+          }
           break;
         case 'PASSWORD_RECOVERY':
           toast({
@@ -112,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [toast]);
+  }, [toast, isInitialLoad, hasShownWelcomeToast]);
 
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
     try {
@@ -151,6 +167,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Reset the toast flag before sign in to ensure it shows
+      setHasShownWelcomeToast(false);
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -175,6 +194,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     try {
+      // Reset the toast flag before sign in to ensure it shows
+      setHasShownWelcomeToast(false);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -201,6 +223,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithApple = async () => {
     try {
+      // Reset the toast flag before sign in to ensure it shows
+      setHasShownWelcomeToast(false);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
@@ -227,6 +252,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithFacebook = async () => {
     try {
+      // Reset the toast flag before sign in to ensure it shows
+      setHasShownWelcomeToast(false);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {

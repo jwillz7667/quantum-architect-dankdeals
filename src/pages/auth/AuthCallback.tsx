@@ -31,12 +31,8 @@ export default function AuthCallback() {
             provider: data.session.user.app_metadata.provider,
           });
 
-          toast({
-            title: 'Welcome!',
-            description: 'You have successfully signed in.',
-          });
-
           // Redirect to home page or intended destination
+          // Toast will be shown by AuthContext on SIGNED_IN event
           const redirectTo = new URLSearchParams(window.location.search).get('redirect_to') || '/';
           navigate(redirectTo);
         } else {
