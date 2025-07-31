@@ -109,7 +109,7 @@ export default function OnePageCheckout() {
       };
 
       // Call edge function to create order
-      const { data, error } = await supabase.functions.invoke<{
+      type CreateOrderResponse = {
         success: boolean;
         error?: string;
         order?: {
@@ -118,9 +118,14 @@ export default function OnePageCheckout() {
           status: string;
           total: number;
         };
-      }>('create-order', {
+      };
+
+      const response = await supabase.functions.invoke<CreateOrderResponse>('create-order', {
         body: orderData,
       });
+
+      const data = response.data;
+      const error = response.error as Error | null;
 
       if (error) {
         console.error('Edge function error:', error);
@@ -155,7 +160,8 @@ export default function OnePageCheckout() {
       toast.success('Order placed successfully!');
     } catch (error) {
       console.error('Error creating order:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to place order. Please try again.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to place order. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
