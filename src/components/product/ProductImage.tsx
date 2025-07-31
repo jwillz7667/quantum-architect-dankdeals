@@ -29,7 +29,7 @@ interface ProductImageProps {
  */
 export const ProductImage = forwardRef<HTMLImageElement, ProductImageProps>(
   ({ src, alt, className, priority = false, size = 'card', onLoad, onError }, ref) => {
-    // Normalize image URL
+    // Use the src directly - it now comes from Supabase Storage
     const imageUrl = src || '/assets/placeholder.svg';
 
     // Size configuration is available but not used directly
