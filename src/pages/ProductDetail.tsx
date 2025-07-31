@@ -14,7 +14,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SEOHead } from '@/components/SEOHead';
 import { generateProductSchema } from '@/lib/productSchema';
 import { ProductImage } from '@/components/product/ProductImage';
-import { getProductImages } from '@/lib/productImages';
 
 interface ExtendedProduct extends Product {
   gallery_urls?: string[];
@@ -126,8 +125,18 @@ export default function ProductDetail() {
   const getImagesForProduct = (product: ExtendedProduct | null): string[] => {
     if (!product) return [];
 
-    const productImages = getProductImages(product.id, product.name, product.category);
-    return productImages.gallery;
+    // Use gallery_urls if available, otherwise use the main image_url
+    if (product.gallery_urls && product.gallery_urls.length > 0) {
+      return product.gallery_urls;
+    }
+
+    // Fallback to single image_url if no gallery
+    if (product.image_url) {
+      return [product.image_url];
+    }
+
+    // Ultimate fallback
+    return ['/assets/placeholder.svg'];
   };
 
   const formatPrice = (priceInDollars: number): string => {

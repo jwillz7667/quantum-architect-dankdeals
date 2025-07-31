@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test Supabase Images</title>
+  </head>
+  <body>
+    <h1>Testing Supabase Image Loading</h1>
+
+    <h2>Direct Image Tags</h2>
+    <p>Pineapple Fruz:</p>
+    <img
+      src="https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/11111111-1111-1111-1111-111111111111/pineapple-fruz-1.webp"
+      alt="Pineapple Fruz"
+      style="width: 300px; height: 300px; object-fit: cover; border: 2px solid green"
+      onload="console.log('Image loaded successfully')"
+      onerror="console.error('Image failed to load:', this.src)"
+    />
+
+    <p>Runtz:</p>
+    <img
+      src="https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/33333333-3333-3333-3333-333333333333/runtz-1.webp"
+      alt="Runtz"
+      style="width: 300px; height: 300px; object-fit: cover; border: 2px solid green"
+    />
+
+    <h2>Check Browser Console</h2>
+    <p>Open browser console (F12) to see any errors</p>
+
+    <script>
+      // Test fetching image
+      fetch(
+        'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/11111111-1111-1111-1111-111111111111/pineapple-fruz-1.webp'
+      )
+        .then((res) => {
+          console.log('Fetch response:', res.status, res.statusText);
+          console.log('Headers:', [...res.headers.entries()]);
+          return res.blob();
+        })
+        .then((blob) => {
+          console.log('Image blob size:', blob.size);
+          console.log('Image type:', blob.type);
+        })
+        .catch((err) => console.error('Fetch error:', err));
+    </script>
+  </body>
+</html>

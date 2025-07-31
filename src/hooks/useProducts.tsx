@@ -31,7 +31,8 @@ const MOCK_PRODUCTS: Product[] = [
     name: 'Pineapple Fruz',
     description:
       'A tropical-flavored hybrid strain with sweet pineapple notes and balanced effects.',
-    image_url: '/assets/products/pineapple-fruz/pineapple-fruz-1.webp',
+    image_url:
+      'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/11111111-1111-1111-1111-111111111111/pineapple-fruz-1.webp',
     category: 'Flower',
     thc_content: 22.5,
     cbd_content: 0.8,
@@ -61,7 +62,8 @@ const MOCK_PRODUCTS: Product[] = [
     id: '22222222-2222-2222-2222-222222222222',
     name: 'Rainbow Sherbert #11',
     description: 'A fruity indica-dominant hybrid with colorful buds and sweet berry flavors.',
-    image_url: '/assets/products/rs11/rainbow-sherbert11-1.webp',
+    image_url:
+      'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/22222222-2222-2222-2222-222222222222/rainbow-sherbert11-1.webp',
     category: 'Flower',
     thc_content: 24.8,
     cbd_content: 0.5,
@@ -91,7 +93,8 @@ const MOCK_PRODUCTS: Product[] = [
     id: '33333333-3333-3333-3333-333333333333',
     name: 'Runtz',
     description: 'A popular hybrid strain known for its candy-like flavor and balanced effects.',
-    image_url: '/assets/products/runtz/runtz-1.webp',
+    image_url:
+      'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/33333333-3333-3333-3333-333333333333/runtz-1.webp',
     category: 'Flower',
     thc_content: 26.2,
     cbd_content: 0.3,
@@ -122,7 +125,8 @@ const MOCK_PRODUCTS: Product[] = [
     name: 'Wedding Cake',
     description:
       'An indica-dominant hybrid with vanilla and earthy flavors, perfect for relaxation.',
-    image_url: '/assets/products/wedding-cake/wedding-cake-1.webp',
+    image_url:
+      'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/44444444-4444-4444-4444-444444444444/wedding-cake-1.webp',
     category: 'Flower',
     thc_content: 23.7,
     cbd_content: 0.6,
