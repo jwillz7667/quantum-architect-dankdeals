@@ -1,20 +1,28 @@
-import { useEffect, useRef } from 'react';
+/// <reference types="@types/google.maps" />
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface DeliveryMapProps {
-  center?: { lat: number; lng: number };
+  center?: google.maps.LatLngLiteral;
   zoom?: number;
   className?: string;
   showCoverage?: boolean;
 }
 
+interface DeliveryZone {
+  name: string;
+  color: string;
+  opacity: number;
+  coordinates: google.maps.LatLngLiteral[];
+}
+
 // Minneapolis-St. Paul center coordinates
-const DEFAULT_CENTER = { lat: 44.9537, lng: -93.09 };
+const DEFAULT_CENTER: google.maps.LatLngLiteral = { lat: 44.9537, lng: -93.09 };
 
 // Delivery zones with coordinates for polygon drawing
-const DELIVERY_ZONES = [
+const DELIVERY_ZONES: DeliveryZone[] = [
   {
     name: 'Minneapolis Metro',
     color: '#22c55e',
@@ -50,6 +58,43 @@ const DELIVERY_ZONES = [
   },
 ];
 
+// Google Maps styles for consistent appearance
+const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  {
+    featureType: 'all',
+    elementType: 'geometry',
+    stylers: [{ color: '#f3f4f6' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#e0e7ff' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#ffffff' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#e5e7eb' }],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+];
+
+/**
+ * DeliveryMap component following industry best practices
+ * - Proper TypeScript typing with Google Maps types
+ * - Error handling and loading states
+ * - Memory leak prevention with cleanup
+ * - Accessible fallback UI
+ * - Performance optimized with useCallback
+ */
 export function DeliveryMap({
   center = DEFAULT_CENTER,
   zoom = 11,
@@ -58,74 +103,43 @@ export function DeliveryMap({
 }: DeliveryMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const polygonsRef = useRef<google.maps.Polygon[]>([]);
+  const infoWindowsRef = useRef<google.maps.InfoWindow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
-  useEffect(() => {
-    // Check if API key is available
-    const apiKey = import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string | undefined;
+  // Check if API key is available
+  const apiKey = import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string | undefined;
+  const isApiKeyValid = apiKey && apiKey !== 'your_google_maps_api_key';
 
-    if (!apiKey || apiKey === 'your_google_maps_api_key') {
-      // Show static fallback if no API key
-      console.info('Google Maps API key not configured. Using static map fallback.');
-      return;
-    }
+  // Create custom marker icon
+  const createMarkerIcon = useCallback((): google.maps.Icon => {
+    return {
+      url:
+        'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(`
+          <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
+            <path d="M20 10 L25 15 L25 25 L20 30 L15 25 L15 15 Z" fill="#ffffff"/>
+            <circle cx="20" cy="20" r="3" fill="#22c55e"/>
+          </svg>
+        `),
+      scaledSize: new google.maps.Size(40, 40),
+      anchor: new google.maps.Point(20, 20),
+    };
+  }, []);
 
-    // Load Google Maps script if not already loaded
-    if (!window.google || !window.google.maps) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
-      script.async = true;
-      script.defer = true;
+  // Initialize map
+  const initializeMap = useCallback(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
 
-      // Define global callback
-      const windowWithCallback = window as Window & { initMap?: () => void };
-      windowWithCallback.initMap = () => {
-        initializeMap();
-        delete windowWithCallback.initMap;
-      };
-
-      script.onerror = () => {
-        console.error('Failed to load Google Maps');
-        delete windowWithCallback.initMap;
-      };
-      document.head.appendChild(script);
-    } else {
-      initializeMap();
-    }
-
-    function initializeMap() {
-      if (!mapRef.current || mapInstanceRef.current) return;
-
-      // Initialize map
+    try {
+      // Create map instance
       const map = new google.maps.Map(mapRef.current, {
         center,
         zoom,
-        styles: [
-          {
-            featureType: 'all',
-            elementType: 'geometry',
-            stylers: [{ color: '#f3f4f6' }],
-          },
-          {
-            featureType: 'water',
-            elementType: 'geometry',
-            stylers: [{ color: '#e0e7ff' }],
-          },
-          {
-            featureType: 'road',
-            elementType: 'geometry',
-            stylers: [{ color: '#ffffff' }],
-          },
-          {
-            featureType: 'road',
-            elementType: 'geometry.stroke',
-            stylers: [{ color: '#e5e7eb' }],
-          },
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }],
-          },
-        ],
+        styles: MAP_STYLES,
         mapTypeControl: false,
         fullscreenControl: false,
         streetViewControl: false,
@@ -138,28 +152,18 @@ export function DeliveryMap({
       mapInstanceRef.current = map;
 
       // Add center marker (DankDeals HQ)
-      new google.maps.Marker({
+      const marker = new google.maps.Marker({
         position: center,
         map,
         title: 'DankDeals Cannabis Delivery',
-        icon: {
-          url:
-            'data:image/svg+xml;charset=UTF-8,' +
-            encodeURIComponent(`
-            <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="20" cy="20" r="18" fill="#22c55e" stroke="#ffffff" stroke-width="2"/>
-              <path d="M20 10 L25 15 L25 25 L20 30 L15 25 L15 15 Z" fill="#ffffff"/>
-              <circle cx="20" cy="20" r="3" fill="#22c55e"/>
-            </svg>
-          `),
-          scaledSize: new google.maps.Size(40, 40),
-          anchor: new google.maps.Point(20, 20),
-        },
+        icon: createMarkerIcon(),
       });
+      markersRef.current.push(marker);
 
       // Add delivery zones if enabled
       if (showCoverage) {
         DELIVERY_ZONES.forEach((zone) => {
+          // Create polygon
           const polygon = new google.maps.Polygon({
             paths: zone.coordinates,
             strokeColor: zone.color,
@@ -169,8 +173,9 @@ export function DeliveryMap({
             fillOpacity: zone.opacity,
             map,
           });
+          polygonsRef.current.push(polygon);
 
-          // Add info window on click
+          // Create info window
           const infoWindow = new google.maps.InfoWindow({
             content: `
               <div style="padding: 8px; font-family: system-ui, sans-serif;">
@@ -179,26 +184,96 @@ export function DeliveryMap({
               </div>
             `,
           });
+          infoWindowsRef.current.push(infoWindow);
 
+          // Add click listener
           polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
-            infoWindow.setPosition(event.latLng);
-            infoWindow.open(map);
+            if (event.latLng) {
+              infoWindow.setPosition(event.latLng);
+              infoWindow.open(map);
+            }
           });
         });
       }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setHasError(true);
+      setIsLoading(false);
+    }
+  }, [center, zoom, showCoverage, createMarkerIcon]);
+
+  // Load Google Maps script
+  const loadGoogleMaps = useCallback(() => {
+    if (!isApiKeyValid) {
+      setIsLoading(false);
+      return;
     }
 
-    return () => {
-      // Cleanup if needed
-      mapInstanceRef.current = null;
+    // Check if already loaded
+    if (window.google && window.google.maps) {
+      initializeMap();
+      return;
+    }
+
+    // Create script element
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+
+    // Define global callback
+    const windowWithCallback = window as typeof window & { initMap?: () => void };
+    windowWithCallback.initMap = () => {
+      initializeMap();
+      delete windowWithCallback.initMap;
     };
-  }, [center, zoom, showCoverage]);
 
-  // Show static fallback if no API key
-  const apiKey = import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string | undefined;
-  const showStaticFallback = !apiKey || apiKey === 'your_google_maps_api_key';
+    // Handle script errors
+    script.onerror = () => {
+      console.error('Failed to load Google Maps');
+      setHasError(true);
+      setIsLoading(false);
+      delete windowWithCallback.initMap;
+    };
 
-  if (showStaticFallback) {
+    document.head.appendChild(script);
+  }, [apiKey, isApiKeyValid, initializeMap]);
+
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    // Remove markers
+    markersRef.current.forEach((marker) => {
+      marker.setMap(null);
+    });
+    markersRef.current = [];
+
+    // Remove polygons
+    polygonsRef.current.forEach((polygon) => {
+      polygon.setMap(null);
+    });
+    polygonsRef.current = [];
+
+    // Close info windows
+    infoWindowsRef.current.forEach((infoWindow) => {
+      infoWindow.close();
+    });
+    infoWindowsRef.current = [];
+
+    // Clear map instance
+    mapInstanceRef.current = null;
+  }, []);
+
+  // Effect to load map
+  useEffect(() => {
+    loadGoogleMaps();
+
+    return cleanup;
+  }, [loadGoogleMaps, cleanup]);
+
+  // Static fallback UI
+  if (!isApiKeyValid || hasError) {
     return (
       <div className={cn('relative overflow-hidden rounded-lg bg-muted', className)}>
         <div className="w-full h-full flex items-center justify-center">
@@ -224,13 +299,16 @@ export function DeliveryMap({
   return (
     <div className={cn('relative overflow-hidden rounded-lg', className)}>
       <div ref={mapRef} className="w-full h-full" />
+
       {/* Loading state */}
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 pointer-events-none opacity-0 transition-opacity duration-300">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Loading map...</p>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Loading map...</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
