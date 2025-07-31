@@ -109,9 +109,9 @@ export function DeliveryMap({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // Check if API key is available
+  // Check if API key is available from environment variables
   const apiKey = import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string | undefined;
-  const isApiKeyValid = apiKey && apiKey !== 'your_google_maps_api_key';
+  const isApiKeyValid = apiKey && apiKey !== 'your_google_maps_api_key' && apiKey.length > 0;
 
   // Create custom marker icon
   const createMarkerIcon = useCallback((): google.maps.Icon => {
@@ -207,6 +207,7 @@ export function DeliveryMap({
   // Load Google Maps script
   const loadGoogleMaps = useCallback(() => {
     if (!isApiKeyValid) {
+      console.info('Google Maps API key not configured. Using static fallback.');
       setIsLoading(false);
       return;
     }
@@ -217,7 +218,7 @@ export function DeliveryMap({
       return;
     }
 
-    // Create script element
+    // Create script element - only if we have a valid API key
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
     script.async = true;
