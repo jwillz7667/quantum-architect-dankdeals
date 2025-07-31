@@ -1,8 +1,9 @@
 // DankDeals Cannabis Delivery - Service Worker
-// Version: 1.0.0
+// Version: 1.0.1
+// Fixed: External image loading from Supabase Storage
 
-const CACHE_NAME = 'dankdeals-v1.0.0';
-const RUNTIME_CACHE = 'dankdeals-runtime-v1.0.0';
+const CACHE_NAME = 'dankdeals-v1.0.1';
+const RUNTIME_CACHE = 'dankdeals-runtime-v1.0.1';
 
 // Essential files to cache for offline functionality
 const STATIC_CACHE_FILES = [
@@ -19,7 +20,7 @@ const STATIC_CACHE_FILES = [
 // API endpoints that should be cached
 const API_CACHE_PATTERNS = [
   new RegExp('^https://.*\\.supabase\\.co/rest/.*'),
-  new RegExp('^https://.*\\.supabase\\.co/storage/.*'),
+  // Storage is handled directly by browser, not cached by SW
 ];
 
 // Network-first patterns (always try network first)
@@ -36,10 +37,10 @@ const CACHE_FIRST_PATTERNS = [
   new RegExp('/assets/'),
 ];
 
-// Image optimization patterns
+// Image optimization patterns (local images only)
 const IMAGE_PATTERNS = [
   new RegExp('\\.(?:png|jpg|jpeg|webp|avif|svg)$'),
-  new RegExp('supabase\\.co.*storage.*image'),
+  // Supabase storage images are handled directly by browser
 ];
 
 // Install event - Cache essential files
@@ -100,8 +101,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip requests to different origins (except API endpoints)
-  if (url.origin !== location.origin && !isApiRequest(url)) {
+  // Skip requests to different origins (except API endpoints and Supabase storage)
+  if (url.origin !== location.origin && !isApiRequest(url) && !isSupabaseStorage(url)) {
+    return;
+  }
+
+  // For Supabase storage URLs, let the browser handle them directly
+  if (isSupabaseStorage(url)) {
     return;
   }
 
@@ -310,6 +316,10 @@ function isApiRequest(url) {
 
 function isImage(url) {
   return IMAGE_PATTERNS.some((pattern) => pattern.test(url.href));
+}
+
+function isSupabaseStorage(url) {
+  return url.href.includes('supabase.co/storage/v1/object/public/');
 }
 
 // Advanced image handling with optimization
