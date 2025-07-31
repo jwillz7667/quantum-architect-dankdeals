@@ -64,53 +64,99 @@ export default function OnePageCheckout() {
       return;
     }
 
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    // Validate phone
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Create order in database
+      // Prepare order data for edge function
       const orderData = {
-        user_id: user?.id || null,
         customer_name: name,
-        customer_email: email,
+        customer_email: email || `guest_${Date.now()}@dankdealsmn.com`,
         customer_phone: phone,
-        delivery_address: JSON.stringify(address),
+        delivery_address: {
+          street: address.street,
+          apartment: address.apartment,
+          city: address.city,
+          state: address.state,
+          zipcode: address.zipcode,
+          instructions: address.instructions,
+        },
         subtotal: subtotal,
         delivery_fee: deliveryFee,
         tax: tax,
         total: finalTotal,
         payment_method: paymentMethod,
-        status: 'pending',
         items: items.map((item) => ({
           product_id: item.id,
           quantity: item.quantity,
           price: item.price,
           name: item.name,
         })),
+        user_id: user?.id || null,
       };
 
-      const { data: order, error } = (await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single()) as { data: { id: string } | null; error: Error | null };
+      // Call edge function to create order
+      const { data, error } = await supabase.functions.invoke<{
+        success: boolean;
+        error?: string;
+        order?: {
+          id: string;
+          order_number: string;
+          status: string;
+          total: number;
+        };
+      }>('create-order', {
+        body: orderData,
+      });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create order';
+        throw new Error(errorMessage);
+      }
+
+      if (!data?.success || !data?.order) {
+        throw new Error(data?.error || 'Order creation failed');
+      }
+
+      // Send confirmation email
+      try {
+        await supabase.functions.invoke('send-order-emails', {
+          body: { orderId: data.order.id },
+        });
+      } catch (emailError) {
+        console.warn('Email notification failed:', emailError);
+        // Don't fail the order if email fails
+      }
 
       // Clear cart and redirect to success page
       clearCart();
-      if (order) {
-        navigate('/checkout/complete', {
-          state: {
-            orderId: order.id,
-            orderNumber: `DD-${order.id.slice(0, 8).toUpperCase()}`,
-          },
-        });
-      }
+      navigate('/checkout/complete', {
+        state: {
+          orderId: data.order.id,
+          orderNumber: data.order.order_number,
+          total: data.order.total,
+        },
+      });
 
       toast.success('Order placed successfully!');
     } catch (error) {
       console.error('Error creating order:', error);
-      toast.error('Failed to place order. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to place order. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

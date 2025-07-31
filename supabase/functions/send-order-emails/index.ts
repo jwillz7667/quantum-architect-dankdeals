@@ -175,7 +175,7 @@ serve(async (req: Request) => {
           ${order.delivery_first_name} ${order.delivery_last_name}<br>
           ${order.delivery_street_address} ${order.delivery_apartment || ''}<br>
           ${order.delivery_city}, ${order.delivery_state} ${order.delivery_zip_code}<br>
-          Phone: ${order.delivery_phone}
+          Phone: ${order.customer_phone_number || order.delivery_phone || 'N/A'}
         </p>
         ${order.delivery_instructions ? `<p style="margin: 10px 0 0;"><em>Delivery Instructions: ${order.delivery_instructions}</em></p>` : ''}
       </div>
@@ -254,7 +254,7 @@ serve(async (req: Request) => {
       <div class="info-box">
         <h2 style="margin-top: 0;">Customer Information</h2>
         <p><span class="label">Name:</span> <span class="value">${order.profiles?.first_name || order.delivery_first_name} ${order.profiles?.last_name || order.delivery_last_name}</span></p>
-        <p><span class="label">Phone:</span> <span class="value" style="font-size: 1.1em; color: #dc2626;">${order.delivery_phone}</span></p>
+        <p><span class="label">Phone:</span> <span class="value" style="font-size: 1.1em; color: #dc2626;">${order.customer_phone_number || order.delivery_phone || 'N/A'}</span></p>
         <p><span class="label">Email:</span> <span class="value">${customerEmail || 'N/A'}</span></p>
       </div>
       
@@ -297,7 +297,7 @@ serve(async (req: Request) => {
       <div style="background: #fee2e2; border: 1px solid #dc2626; padding: 15px; border-radius: 8px; margin-top: 30px;">
         <strong>Action Items:</strong>
         <ol style="margin: 10px 0;">
-          <li>Call customer immediately at ${order.delivery_phone}</li>
+          <li>Call customer immediately at ${order.customer_phone_number || order.delivery_phone || 'N/A'}</li>
           <li>Confirm delivery address and time window</li>
           <li>Verify age (21+) and remind about ID requirement</li>
           <li>Confirm cash payment of $${order.total_amount.toFixed(2)}</li>
