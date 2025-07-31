@@ -9,6 +9,8 @@
   NPM_FLAGS = "--legacy-peer-deps"
   NETLIFY_USE_YARN = "false"
   NETLIFY_USE_PNPM = "false"
+  # Prevent Google Maps API key from being exposed in build
+  VITE_GOOGLE_MAPS_API_KEY = "DISABLED_FOR_SECURITY"
 
 # SPA routing
 [[redirects]]

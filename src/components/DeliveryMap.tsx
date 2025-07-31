@@ -110,8 +110,18 @@ export function DeliveryMap({
   const [hasError, setHasError] = useState(false);
 
   // Check if API key is available from environment variables
+  // IMPORTANT: Google Maps is disabled in production builds for security
   const apiKey = import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string | undefined;
-  const isApiKeyValid = apiKey && apiKey !== 'your_google_maps_api_key' && apiKey.length > 0;
+
+  // Disable Google Maps if:
+  // 1. No API key provided
+  // 2. Using placeholder value
+  // 3. Explicitly disabled for security
+  const isApiKeyValid =
+    apiKey &&
+    apiKey !== 'your_google_maps_api_key' &&
+    apiKey !== 'DISABLED_FOR_SECURITY' &&
+    apiKey.length > 0;
 
   // Create custom marker icon
   const createMarkerIcon = useCallback((): google.maps.Icon => {
