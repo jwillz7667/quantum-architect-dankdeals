@@ -22,6 +22,8 @@ interface CreateOrderRequest {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  delivery_first_name: string;
+  delivery_last_name: string;
   delivery_address: DeliveryAddress;
   subtotal: number;
   delivery_fee: number;
@@ -76,6 +78,8 @@ serve(async (req) => {
       'customer_name',
       'customer_email',
       'customer_phone',
+      'delivery_first_name',
+      'delivery_last_name',
       'delivery_address',
       'items',
     ];
@@ -134,8 +138,8 @@ serve(async (req) => {
         total_amount: orderData.total,
 
         // Delivery info
-        delivery_first_name: orderData.customer_name.split(' ')[0] || orderData.customer_name,
-        delivery_last_name: orderData.customer_name.split(' ').slice(1).join(' ') || '',
+        delivery_first_name: orderData.delivery_first_name,
+        delivery_last_name: orderData.delivery_last_name,
         delivery_street_address: orderData.delivery_address.street,
         delivery_apartment: orderData.delivery_address.apartment || null,
         delivery_city: orderData.delivery_address.city,

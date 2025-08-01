@@ -42,7 +42,8 @@ export default function OnePageCheckout() {
 
   const [paymentMethod] = useState('cash');
   const [phone, setPhone] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState(user?.email ?? '');
 
   const subtotal = Number(cartSubtotal) || 0;
@@ -59,14 +60,14 @@ export default function OnePageCheckout() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!address.street || !address.zipcode || !phone || !name) {
+    if (!address.street || !address.zipcode || !phone || !firstName || !lastName || !email) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Validate email
+    // Validate email (now required)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
+    if (!emailRegex.test(email)) {
       toast.error('Please enter a valid email address');
       return;
     }
@@ -83,9 +84,11 @@ export default function OnePageCheckout() {
     try {
       // Prepare order data for edge function
       const orderData = {
-        customer_name: name,
-        customer_email: email || `guest_${Date.now()}@dankdealsmn.com`,
+        customer_name: `${firstName} ${lastName}`,
+        customer_email: email,
         customer_phone: phone,
+        delivery_first_name: firstName,
+        delivery_last_name: lastName,
         delivery_address: {
           street: address.street,
           apartment: address.apartment,
@@ -193,12 +196,35 @@ export default function OnePageCheckout() {
             <div className="grid gap-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="firstName">First Name *</Label>
                   <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="john@example.com"
                     required
                   />
                 </div>
@@ -213,16 +239,6 @@ export default function OnePageCheckout() {
                     required
                   />
                 </div>
-              </div>
-              <div>
-                <Label htmlFor="email">Email (optional)</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john@example.com"
-                />
               </div>
             </div>
           </Card>
