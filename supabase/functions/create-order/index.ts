@@ -159,15 +159,14 @@ serve(async (req) => {
         order_number: orderNumber,
         status: 'pending',
 
-        // Customer info
-        customer_email: orderData.customer_email,
-        customer_phone_number: formattedPhone,
+        // Store customer info in notes for now
+        notes: `Email: ${orderData.customer_email}, Phone: ${formattedPhone}`,
+        delivery_phone: formattedPhone,
 
         // Totals
         subtotal: orderData.subtotal,
         tax_amount: orderData.tax,
         delivery_fee: orderData.delivery_fee,
-        discount_amount: 0,
         total_amount: orderData.total,
 
         // Delivery info
