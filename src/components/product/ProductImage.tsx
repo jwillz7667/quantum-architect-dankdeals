@@ -56,7 +56,7 @@ export const ProductImage = forwardRef<HTMLImageElement, ProductImageProps>(
         sizes={sizes}
         onLoadingComplete={onLoad}
         onError={onError}
-        className={cn('bg-gray-100', className)}
+        className={cn(className)}
         // Add structured data for SEO
         itemProp="image"
       />

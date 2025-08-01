@@ -23,13 +23,15 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
     ref
   ) => {
     const [imageSrc, setImageSrc] = useState(src || fallback);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     // Update source when prop changes
     useEffect(() => {
       if (src) {
         setImageSrc(src);
         setIsLoading(true);
+        setHasError(false);
       }
     }, [src]);
 
@@ -40,6 +42,7 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
 
     const handleError = useCallback(() => {
       setIsLoading(false);
+      setHasError(true);
 
       if (imageSrc !== fallback) {
         setImageSrc(fallback);
@@ -54,7 +57,7 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
         alt={alt}
         className={cn(
           'transition-opacity duration-300',
-          isLoading ? 'opacity-0' : 'opacity-100',
+          isLoading && !hasError ? 'opacity-0' : 'opacity-100',
           className
         )}
         onLoad={handleLoad}
@@ -79,7 +82,7 @@ export const AspectRatioImage = forwardRef<HTMLImageElement, AspectRatioImagePro
   ({ aspectRatio = 1, objectFit = 'cover', className, style, ...props }, ref) => {
     return (
       <div
-        className="relative overflow-hidden bg-muted"
+        className="relative overflow-hidden"
         style={{
           paddingBottom: `${(1 / aspectRatio) * 100}%`,
           ...style,
@@ -87,7 +90,17 @@ export const AspectRatioImage = forwardRef<HTMLImageElement, AspectRatioImagePro
       >
         <Image
           ref={ref}
-          className={cn('absolute inset-0 w-full h-full', `object-${objectFit}`, className)}
+          className={cn(
+            'absolute inset-0 w-full h-full',
+            {
+              'object-contain': objectFit === 'contain',
+              'object-cover': objectFit === 'cover',
+              'object-fill': objectFit === 'fill',
+              'object-none': objectFit === 'none',
+              'object-scale-down': objectFit === 'scale-down',
+            },
+            className
+          )}
           {...props}
         />
       </div>
