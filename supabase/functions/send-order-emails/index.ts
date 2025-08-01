@@ -1,42 +1,74 @@
-/// <reference path="../deno.d.ts" />
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
-const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'jwillz7667@gmail.com';
+// Environment variables are automatically injected by Supabase
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@dankdealsmn.com';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'orders@dankdealsmn.com';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from '../_shared/cors.ts';
 
 interface OrderEmailPayload {
   orderId: string;
 }
 
-serve(async (req: Request) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    console.log('Starting email function with environment variables:');
-    console.log('- SUPABASE_URL:', SUPABASE_URL ? 'Set' : 'Missing');
-    console.log('- SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing');
-    console.log('- RESEND_API_KEY:', RESEND_API_KEY ? 'Set' : 'Missing');
-    console.log('- ADMIN_EMAIL:', ADMIN_EMAIL);
-    console.log('- FROM_EMAIL:', FROM_EMAIL);
+    // Validate environment variables
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing required Supabase environment variables');
+      throw new Error('Server configuration error');
+    }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY environment variable');
+      throw new Error('Email service not configured');
+    }
 
-    const { orderId } = (await req.json()) as OrderEmailPayload;
-    console.log('Processing order ID:', orderId);
+    console.log('send-order-emails function called:', {
+      method: req.method,
+      admin_email: ADMIN_EMAIL,
+      from_email: FROM_EMAIL,
+    });
 
-    // Check if orderId is a UUID (32 chars + 4 hyphens) or order number (shorter string)
+    // Create admin client for database operations
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Parse request body
+    let payload: OrderEmailPayload;
+    try {
+      payload = await req.json();
+    } catch (error) {
+      console.error('Invalid JSON in request body:', error);
+      return new Response(JSON.stringify({ success: false, error: 'Invalid request body' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
+    const { orderId } = payload;
+
+    if (!orderId) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing orderId' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
+    console.log('Processing order:', orderId);
+
+    // Validate orderId format
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
 
     // First fetch order details with items
@@ -64,7 +96,8 @@ serve(async (req: Request) => {
     const { data: order, error: orderError } = await orderQuery.single();
 
     if (orderError || !order) {
-      throw new Error(`Order not found: ${orderError?.message}`);
+      console.error('Order lookup failed:', orderError);
+      throw new Error('Order not found');
     }
 
     // Fetch profile data if user_id exists
@@ -78,7 +111,7 @@ serve(async (req: Request) => {
       profileData = profile;
     }
 
-    // Add profiles data to order for compatibility with existing template code
+    // Add profiles data to order for email template
     order.profiles = profileData;
 
     // Extract customer email - use customer_email field first, then fall back to profile
@@ -326,7 +359,9 @@ serve(async (req: Request) => {
         })
       );
     } else {
-      console.warn(`No valid customer email found for order ${order.order_number}`);
+      console.log(
+        `No customer email for order ${order.order_number}, skipping customer notification`
+      );
     }
 
     // Always send admin notification email
@@ -336,14 +371,6 @@ serve(async (req: Request) => {
       subject: `🚨 NEW ORDER - ${order.order_number} - $${order.total_amount.toFixed(2)}`,
       html: adminEmailHtml,
     };
-    console.log(
-      'Preparing to send admin email:',
-      JSON.stringify({
-        to: adminEmailPayload.to,
-        from: adminEmailPayload.from,
-        subject: adminEmailPayload.subject,
-      })
-    );
 
     emailPromises.push(
       fetch('https://api.resend.com/emails', {
@@ -356,12 +383,12 @@ serve(async (req: Request) => {
       })
     );
 
-    // Log what emails are being sent
-    console.log(`Sending emails for order ${order.order_number}:`);
-    console.log(`- Customer email: ${customerEmail || 'None'}`);
-    console.log(`- Admin email: ${ADMIN_EMAIL}`);
-    console.log(`- FROM_EMAIL: ${FROM_EMAIL}`);
-    console.log(`- Total emails to send: ${emailPromises.length}`);
+    console.log('Sending emails:', {
+      order_number: order.order_number,
+      customer_email: customerEmail || 'None',
+      admin_email: ADMIN_EMAIL,
+      email_count: emailPromises.length,
+    });
 
     // Execute email sends with delay to avoid rate limiting
     const results = [];
@@ -377,15 +404,16 @@ serve(async (req: Request) => {
       const emailType = hasCustomerEmail && i === 0 ? 'customer' : 'admin';
       emailTypes.push(emailType);
 
-      console.log(`${emailType} email result: ${result.status} ${result.statusText}`);
-
       if (!result.ok) {
         const errorText = await result.text();
-        console.error(`${emailType} email failed with status ${result.status}:`, errorText);
+        console.error(`${emailType} email failed:`, {
+          status: result.status,
+          error: errorText,
+        });
         results.push({ success: false, type: emailType, error: errorText, status: result.status });
       } else {
         const responseData = await result.json();
-        console.log(`${emailType} email sent successfully:`, JSON.stringify(responseData));
+        console.log(`${emailType} email sent successfully`);
         results.push({ success: true, type: emailType, response: responseData });
       }
 
@@ -395,41 +423,41 @@ serve(async (req: Request) => {
       }
     }
 
-    // Check if emails were sent successfully
+    // Check email results
     const successCount = results.filter((result) => result.success).length;
     const adminEmailResult = results.find((r) => r.type === 'admin');
-    console.log(`Email results: ${successCount}/${results.length} emails sent successfully`);
-    console.log('Admin email result:', JSON.stringify(adminEmailResult));
+
+    console.log('Email send results:', {
+      success_count: successCount,
+      total_count: results.length,
+      admin_sent: adminEmailResult?.success || false,
+    });
 
     if (successCount === 0) {
-      const errorMessages = results
-        .map((r) => `${r.type}: ${r.error || 'Unknown error'} (status: ${r.status || 'unknown'})`)
-        .join(', ');
-      throw new Error(`Failed to send any emails: ${errorMessages}`);
+      console.error('All email sends failed');
+      throw new Error('Failed to send notification emails');
     } else if (successCount < results.length) {
       const failedTypes = results.filter((r) => !r.success).map((r) => r.type);
-      console.warn(
-        `Some emails failed to send (${failedTypes.join(', ')}), but ${successCount} were successful`
-      );
-
-      // Log specific failure details
-      results
-        .filter((r) => !r.success)
-        .forEach((r) => {
-          console.error(`Failed to send ${r.type} email:`, r.error);
-        });
+      console.warn('Some emails failed:', {
+        failed: failedTypes,
+        successful: successCount,
+      });
     }
 
-    // Log email sent in notifications table
-    await supabase.from('notifications').insert([
-      {
+    // Create notification record if user is authenticated
+    if (order.user_id) {
+      const { error: notificationError } = await supabase.from('notifications').insert({
         user_id: order.user_id,
         type: 'order_update',
         title: 'Order Confirmation',
         message: `Your order ${order.order_number} has been confirmed. Check your email for details.`,
         data: { orderId: order.id, orderNumber: order.order_number },
-      },
-    ]);
+      });
+
+      if (notificationError) {
+        console.warn('Failed to create notification:', notificationError);
+      }
+    }
 
     return new Response(
       JSON.stringify({
@@ -446,15 +474,19 @@ serve(async (req: Request) => {
       }
     );
   } catch (error) {
-    console.error('Error sending order emails:', error);
+    console.error('send-order-emails error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Failed to send emails',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: error instanceof Error && error.message.includes('not found') ? 404 : 500,
       }
     );
   }

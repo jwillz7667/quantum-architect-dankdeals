@@ -1,5 +1,3 @@
-/// <reference path="../deno.d.ts" />
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 import { corsHeaders } from '../_shared/cors.ts';
@@ -36,44 +34,69 @@ interface CreateOrderRequest {
   user_id?: string | null;
 }
 
-serve(async (req: Request) => {
+serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    console.log('Starting create-order function');
+    // Log request details for debugging
+    console.log('create-order function called:', {
+      method: req.method,
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries()),
+    });
 
+    // Environment variables are automatically injected by Supabase
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('Missing required environment variables');
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_ANON_KEY) {
+      console.error('Missing environment variables');
+      throw new Error('Server configuration error');
     }
 
-    // Create Supabase client with service role for server-side operations
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // Create admin client for database operations
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
-    console.log('Supabase clients created');
-
-    // Create client for auth operations if needed
+    // Create anon client for auth verification
     const authHeader = req.headers.get('Authorization');
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: {
-            Authorization: authHeader ?? '',
-          },
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: {
+        headers: {
+          Authorization: authHeader ?? '',
         },
-      }
-    );
+      },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
-    // Parse request body
-    const orderData: CreateOrderRequest = await req.json();
-    console.log('Received order data:', JSON.stringify(orderData, null, 2));
+    // Parse and validate request body
+    let orderData: CreateOrderRequest;
+    try {
+      orderData = await req.json();
+    } catch (error) {
+      console.error('Invalid JSON in request body:', error);
+      return new Response(JSON.stringify({ success: false, error: 'Invalid request body' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+
+    console.log('Order data received:', {
+      order_number: orderData.customer_email,
+      items_count: orderData.items?.length,
+      total: orderData.total,
+    });
 
     // Validate required fields
     const requiredFields = [
@@ -97,12 +120,15 @@ serve(async (req: Request) => {
       throw new Error('Invalid email format');
     }
 
-    // Validate phone format (US)
-    const phoneRegex = /^\+?1?\d{10,11}$/;
+    // Validate and clean phone number
+    const phoneRegex = /^\+?1?\d{10,15}$/;
     const cleanPhone = orderData.customer_phone.replace(/\D/g, '');
     if (!phoneRegex.test(cleanPhone)) {
       throw new Error('Invalid phone number format');
     }
+
+    // Format phone for consistency
+    const formattedPhone = cleanPhone.length === 10 ? `1${cleanPhone}` : cleanPhone;
 
     // Validate items array
     if (!Array.isArray(orderData.items) || orderData.items.length === 0) {
@@ -112,13 +138,18 @@ serve(async (req: Request) => {
     // Get authenticated user if available
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
+    if (authError) {
+      console.log('Auth check failed:', authError.message);
+    }
 
-    // Generate order number
-    const timestamp = Date.now();
+    // Generate unique order number with better format
+    const timestamp = new Date().toISOString().slice(2, 10).replace(/-/g, '');
     const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const orderNumber = `DD${timestamp}${randomStr}`;
-    console.log('Generated order number:', orderNumber);
+    const orderNumber = `DD-${timestamp}-${randomStr}`;
+
+    console.log('Creating order:', orderNumber);
 
     // Create the order using admin client to bypass RLS
     const { data: order, error: orderError } = await supabaseAdmin
@@ -130,7 +161,7 @@ serve(async (req: Request) => {
 
         // Customer info
         customer_email: orderData.customer_email,
-        customer_phone_number: cleanPhone,
+        customer_phone_number: formattedPhone,
 
         // Totals
         subtotal: orderData.subtotal,
@@ -161,21 +192,12 @@ serve(async (req: Request) => {
       .single();
 
     if (orderError) {
-      console.error('Order creation error:', orderError);
-      console.error(
-        'Order data that failed:',
-        JSON.stringify(
-          {
-            user_id: user?.id || orderData.user_id || null,
-            order_number: orderNumber,
-            customer_email: orderData.customer_email,
-            delivery_city: orderData.delivery_address.city,
-          },
-          null,
-          2
-        )
-      );
-      throw new Error(`Failed to create order: ${orderError.message}`);
+      console.error('Order creation failed:', {
+        error: orderError.message,
+        code: orderError.code,
+        details: orderError.details,
+      });
+      throw new Error('Failed to create order. Please try again.');
     }
 
     if (!order) {
@@ -194,14 +216,18 @@ serve(async (req: Request) => {
     const { error: itemsError } = await supabaseAdmin.from('order_items').insert(orderItems);
 
     if (itemsError) {
-      // If items fail, we should delete the order to maintain consistency
+      // Rollback order on items failure
+      console.error('Order items creation failed:', itemsError);
       await supabaseAdmin.from('orders').delete().eq('id', order.id);
-      console.error('Order items creation error:', itemsError);
-      throw new Error(`Failed to create order items: ${itemsError.message}`);
+      throw new Error('Failed to create order. Please try again.');
     }
 
-    // Trigger email notification (async, don't wait)
-    // The email trigger will handle this automatically
+    // Log successful order creation
+    console.log('Order created successfully:', {
+      order_id: order.id,
+      order_number: order.order_number,
+      total: order.total_amount,
+    });
 
     // Return success response
     return new Response(
@@ -223,18 +249,41 @@ serve(async (req: Request) => {
       }
     );
   } catch (error) {
-    console.error('Error in create-order function:', error);
+    // Log error details
+    console.error('create-order error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    // Determine appropriate status code
+    let status = 500;
+    let message = 'An unexpected error occurred';
+
+    if (error instanceof Error) {
+      if (
+        error.message.includes('Missing required') ||
+        error.message.includes('Invalid') ||
+        error.message.includes('must contain')
+      ) {
+        status = 400;
+        message = error.message;
+      } else if (error.message.includes('Server configuration')) {
+        status = 500;
+        message = 'Server error. Please try again later.';
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        error: message,
       }),
       {
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
-        status: error instanceof Error && error.message.includes('Missing required') ? 400 : 500,
+        status,
       }
     );
   }

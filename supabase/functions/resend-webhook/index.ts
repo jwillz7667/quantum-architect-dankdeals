@@ -1,11 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, resend-signature',
-};
+import { corsHeaders } from '../_shared/cors.ts';
 
 interface ResendWebhookEvent {
   type: string;
@@ -38,27 +33,47 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Environment variables
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    // Verify webhook signature (optional but recommended)
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing required environment variables');
+      throw new Error('Server configuration error');
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Verify webhook signature for security
     const signature = req.headers.get('resend-signature');
     const webhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET');
 
     if (webhookSecret && signature) {
-      // In production, verify the webhook signature here
-      // This is a security measure to ensure the webhook is from Resend
-      console.log('Webhook signature verification would go here');
+      // TODO: Implement proper webhook signature verification
+      console.log('Webhook signature present, verification recommended');
     }
 
-    const body = await req.text();
-    const event: ResendWebhookEvent = JSON.parse(body);
+    // Parse webhook payload
+    let event: ResendWebhookEvent;
+    try {
+      const body = await req.text();
+      event = JSON.parse(body);
+    } catch (error) {
+      console.error('Invalid webhook payload:', error);
+      return new Response(JSON.stringify({ success: false, error: 'Invalid payload' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
 
-    console.log('Received Resend webhook event:', {
+    console.log('Resend webhook received:', {
       type: event.type,
-      emailId: event.data.email_id,
+      email_id: event.data.email_id,
       timestamp: event.created_at,
     });
 
@@ -74,7 +89,8 @@ serve(async (req) => {
     });
 
     if (logError) {
-      console.error('Error logging email event:', logError);
+      console.error('Failed to log email event:', logError);
+      // Don't fail the webhook, just log the error
     }
 
     // Handle specific event types
@@ -133,12 +149,15 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    console.error('resend-webhook error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Webhook processing failed',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
