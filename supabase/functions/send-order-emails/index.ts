@@ -1,12 +1,7 @@
-// @ts-ignore - Deno types
-/// <reference types="https://deno.land/x/types/index.d.ts" />
+/// <reference path="../deno.d.ts" />
 
-// @ts-ignore - Deno module
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-// @ts-ignore - Deno module
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
-
-declare const Deno: any;
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
