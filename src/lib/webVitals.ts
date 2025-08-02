@@ -1,26 +1,8 @@
 import type { Metric } from 'web-vitals';
 import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 
-const vitalsUrl = 'https://vitals.vercel-insights.com/v1/vitals';
-
-interface NetworkInformation {
-  effectiveType?: string;
-}
-
-interface NavigatorWithConnection extends Navigator {
-  connection?: NetworkInformation;
-  mozConnection?: NetworkInformation;
-  webkitConnection?: NetworkInformation;
-}
-
-function getConnectionSpeed() {
-  const nav = navigator as NavigatorWithConnection;
-  const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
-  
-  if (!conn) return 'unknown';
-  
-  return conn.effectiveType || 'unknown';
-}
+// Removed Vercel Analytics specific code since we're deploying on Netlify
+// This prevents CSP violations and unnecessary dependencies
 
 declare global {
   interface Window {
@@ -34,7 +16,10 @@ function sendToAnalytics(metric: Metric) {
     console.log(`[Web Vitals] ${metric.name}:`, metric.value, metric.rating);
   }
 
-  // Send to analytics endpoint
+  // Send to analytics endpoint - disabled for Netlify deployment
+  // Vercel Analytics is not needed when deployed on Netlify
+  // This prevents CSP violations and unnecessary network requests
+  /*
   if (import.meta.env.PROD && window.location.hostname !== 'localhost') {
     const body = {
       dsn: import.meta.env['VITE_VERCEL_ANALYTICS_ID'] as string | undefined,
@@ -61,6 +46,7 @@ function sendToAnalytics(metric: Metric) {
       });
     }
   }
+  */
 
   // Custom analytics handling
   if (window.gtag) {
@@ -91,7 +77,7 @@ export function observeResourceTiming() {
       for (const entry of list.getEntries()) {
         if (entry.entryType === 'resource') {
           const resourceEntry = entry as PerformanceResourceTiming;
-          
+
           // Log slow resources
           if (resourceEntry.duration > 1000) {
             console.warn(`Slow resource: ${resourceEntry.name} took ${resourceEntry.duration}ms`);
@@ -116,7 +102,7 @@ export function measurePerformance(measureName: string, startMark: string, endMa
     try {
       performance.measure(measureName, startMark, endMark);
       const measure = performance.getEntriesByName(measureName)[0];
-      
+
       if (measure && import.meta.env.DEV) {
         console.log(`[Performance] ${measureName}: ${measure.duration}ms`);
       }
