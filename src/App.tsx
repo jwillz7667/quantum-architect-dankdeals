@@ -15,6 +15,7 @@ import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { MobileMenuProvider } from '@/context/MobileMenuContext';
+import { GTMTracker } from '@/components/GTMTracker';
 
 import { lazyWithPrefetch, prefetchCriticalRoutes } from '@/lib/lazyWithPrefetch';
 
@@ -65,6 +66,7 @@ const App = () => {
             <TooltipProvider>
               <MobileMenuProvider>
                 <AgeGate />
+                <GTMTracker />
                 <Toaster />
                 <Sonner />
                 <RealTimeProvider>

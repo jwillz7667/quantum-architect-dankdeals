@@ -29,7 +29,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     # Allow images from Supabase Storage
-    Content-Security-Policy = "default-src 'self'; img-src 'self' https://ralbzuvkyexortqngvxs.supabase.co data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://ralbzuvkyexortqngvxs.supabase.co https://plausible.io; font-src 'self' https://fonts.gstatic.com; frame-src 'none'; object-src 'none';"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' https://ralbzuvkyexortqngvxs.supabase.co https://www.googletagmanager.com https://www.google-analytics.com data: blob:; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://ralbzuvkyexortqngvxs.supabase.co https://plausible.io https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com; font-src 'self' https://fonts.gstatic.com; frame-src https://www.googletagmanager.com; object-src 'none';"
 
 # Asset caching
 [[headers]]
