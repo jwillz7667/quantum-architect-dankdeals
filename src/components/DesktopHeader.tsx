@@ -23,25 +23,17 @@ export function DesktopHeader() {
         </div>
       </div>
 
-      {/* Main header with logo section */}
+      {/* Main header with centered logo */}
       <div className="bg-primary">
         <div className="container max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo on green background */}
-            <Link to="/" className="flex items-center py-4">
-              <OptimizedLogo className="h-12 w-auto" alt="DankDeals" priority={true} />
+          <div className="relative flex items-center justify-center py-4">
+            {/* Centered Logo */}
+            <Link to="/">
+              <OptimizedLogo className="h-14 w-auto" alt="DankDeals" priority={true} />
             </Link>
 
-            {/* Simplified navigation - right aligned */}
-            <nav className="flex items-center gap-8" role="navigation">
-              <Link
-                to="/"
-                className={`text-base font-medium transition-colors ${
-                  location.pathname === '/' ? 'text-white' : 'text-white/80 hover:text-white'
-                }`}
-              >
-                Shop
-              </Link>
+            {/* Right-aligned navigation */}
+            <nav className="absolute right-0 flex items-center gap-4" role="navigation">
               <Link
                 to="/cart"
                 className={`flex items-center gap-2 text-base font-medium transition-colors ${

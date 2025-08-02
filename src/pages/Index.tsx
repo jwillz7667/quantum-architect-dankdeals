@@ -3,10 +3,11 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, MapPin, Phone, Truck } from '@/lib/icons';
+import { ShoppingCart, MapPin, Truck } from '@/lib/icons';
 import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
 import { Suspense, lazy } from 'react';
+import { Footer } from '@/components/Footer';
 
 // Lazy load non-critical components to reduce initial bundle size
 const CategoryRail = lazy(() =>
@@ -73,7 +74,7 @@ const Index = () => {
         structuredData={homePageStructuredData}
       />
       <DesktopHeader />
-      <MobileHeader title="DankDeals" />
+      <MobileHeader />
 
       {/* Main Content */}
       <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8">
@@ -83,7 +84,7 @@ const Index = () => {
 
         {/* Categories Section */}
         <div className="space-y-4">
-          <h2 className="text-xl md:text-2xl font-bold text-foreground">Categories</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground text-center">Categories</h2>
           <Suspense fallback={<div className="h-24 bg-gray-100 rounded-lg animate-pulse" />}>
             <CategoryRail />
           </Suspense>
@@ -158,25 +159,7 @@ const Index = () => {
         </div>
 
         {/* Footer Section */}
-        <div className="mt-12 mb-8 pb-8 border-t pt-8">
-          <div className="text-center space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Premium Cannabis Delivery in Minnesota
-              </p>
-              <a
-                href="tel:763-247-5378"
-                className="inline-flex items-center gap-2 text-lg font-semibold text-primary hover:text-primary/80 transition-colors"
-              >
-                <Phone className="h-5 w-5" />
-                Call/Text: 763-247-5378
-              </a>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Licensed Minnesota Cannabis Retailer • 21+ Only • Cash on Delivery
-            </p>
-          </div>
-        </div>
+        <Footer />
       </main>
 
       {/* Bottom Navigation */}

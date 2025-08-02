@@ -10,7 +10,7 @@ export function MobileHeader({ title }: MobileHeaderProps) {
   return (
     <header className="md:hidden sticky top-0 z-40 bg-background border-b border-border">
       {/* Simplified header with phone number */}
-      <div className="bg-primary text-primary-foreground px-4 py-3">
+      <div className="bg-white text-[#4caf50] px-4 py-3">
         <a
           href="tel:763-247-5378"
           className="flex items-center justify-center gap-2 text-sm font-medium"

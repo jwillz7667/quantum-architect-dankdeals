@@ -65,12 +65,14 @@ export class EmailService {
       border-bottom: 3px solid #2d5a2d; 
       padding-bottom: 20px; 
       margin-bottom: 30px; 
+      background: #f0fdf4;
+      border-radius: 10px 10px 0 0;
+      padding-top: 20px;
     }
     .logo { 
-      font-size: 28px; 
-      font-weight: bold; 
-      color: #2d5a2d; 
-      margin-bottom: 10px; 
+      height: 60px;
+      width: auto;
+      margin-bottom: 15px;
     }
     .order-number { 
       background: #2d5a2d; 
@@ -139,7 +141,7 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">🌿 DankDeals MN</div>
+      <img src="https://dankdealsmn.com/logos/white-green-logo.svg" alt="DankDeals MN" class="logo" />
       <p>Premium Cannabis Delivery Service</p>
       <div class="order-number">Order #${orderNumber}</div>
     </div>

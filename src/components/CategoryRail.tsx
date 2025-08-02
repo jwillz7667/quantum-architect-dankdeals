@@ -47,16 +47,18 @@ export function CategoryRail() {
   };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-6 pt-3 px-4 scrollbar-hide -mx-4">
-      {categories.map((cat) => (
-        <CategoryCard
-          key={cat.category || 'all'}
-          icon={cat.icon}
-          label={cat.label}
-          onClick={() => handleCategoryClick(cat.category)}
-          isActive={selectedCategory === cat.category}
-        />
-      ))}
+    <div className="flex justify-center">
+      <div className="flex gap-3 overflow-x-auto pb-6 pt-3 px-4 scrollbar-hide max-w-fit">
+        {categories.map((cat) => (
+          <CategoryCard
+            key={cat.category || 'all'}
+            icon={cat.icon}
+            label={cat.label}
+            onClick={() => handleCategoryClick(cat.category)}
+            isActive={selectedCategory === cat.category}
+          />
+        ))}
+      </div>
     </div>
   );
 }

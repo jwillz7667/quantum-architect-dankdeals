@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { env } from './lib/env';
+import { reportWebVitals, observeResourceTiming, markPerformance } from './lib/webVitals';
 
 // Global error handler for uncaught errors
 window.addEventListener('error', (event) => {
@@ -79,6 +80,11 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// Start performance monitoring
+markPerformance('app-start');
+reportWebVitals();
+observeResourceTiming();
 
 // Render the app
 try {

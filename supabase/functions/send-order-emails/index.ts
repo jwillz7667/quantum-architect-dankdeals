@@ -135,12 +135,13 @@ serve(async (req) => {
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #1e40af; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .header { background: #4caf50; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .logo { height: 60px; margin-bottom: 20px; }
     .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px; }
     .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
     .item { padding: 15px 0; border-bottom: 1px solid #e5e7eb; }
     .item:last-child { border-bottom: none; }
-    .total { font-size: 1.2em; font-weight: bold; color: #1e40af; margin-top: 20px; }
+    .total { font-size: 1.2em; font-weight: bold; color: #4caf50; margin-top: 20px; }
     .address { background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0; }
     .steps { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
     .step { padding: 10px 0; }
@@ -151,6 +152,7 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="header">
+      <img src="https://dankdealsmn.com/logos/white-green-logo.svg" alt="DankDeals" class="logo" style="height: 60px; width: auto;" />
       <h1>Order Confirmed!</h1>
       <p style="margin: 0;">Order #${order.order_number}</p>
     </div>
@@ -177,7 +179,7 @@ serve(async (req) => {
           )
           .join('')}
         
-        <div style="border-top: 2px solid #1e40af; padding-top: 15px; margin-top: 15px;">
+        <div style="border-top: 2px solid #4caf50; padding-top: 15px; margin-top: 15px;">
           <div style="display: flex; justify-content: space-between;">
             <span>Subtotal:</span>
             <span>$${order.subtotal.toFixed(2)}</span>
@@ -249,6 +251,7 @@ serve(async (req) => {
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { background: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+    .logo { height: 50px; margin-bottom: 15px; }
     .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px; }
     .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .label { font-weight: bold; color: #4b5563; }
@@ -262,6 +265,7 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="header">
+      <img src="https://dankdealsmn.com/logos/white-green-logo.svg" alt="DankDeals" class="logo" style="height: 50px; width: auto;" />
       <h1>🚨 NEW ORDER ALERT</h1>
       <p style="margin: 0; font-size: 1.2em;">Immediate Action Required</p>
     </div>
