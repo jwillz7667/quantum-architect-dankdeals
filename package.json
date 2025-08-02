@@ -59,7 +59,7 @@
     "react-router-dom": "^6.24.1",
     "sonner": "^1.5.0",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^5.1.0",
     "zod": "^3.25.76"
@@ -120,7 +120,7 @@
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-pwa": "^0.20.5",
+    "vite-plugin-pwa": "^1.0.2",
     "vitest": "^2.1.8"
   },
   "husky": {
