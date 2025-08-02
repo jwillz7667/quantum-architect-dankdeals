@@ -1,32 +1,103 @@
+# GitHub Dependabot configuration
+# Keeps dependencies up-to-date automatically with grouped updates
+
 version: 2
 updates:
-  # Enable version updates for npm
+  # JavaScript/npm dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "04:00"
+      time: "03:00"
+      timezone: "America/Chicago"
     open-pull-requests-limit: 10
-    reviewers:
-      - "admin"
-    assignees:
-      - "admin"
+    # Group updates to reduce PR noise
+    groups:
+      # Group all production dependencies
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group all development dependencies
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group React ecosystem updates
+      react:
+        patterns:
+          - "react"
+          - "react-*"
+          - "@types/react*"
+      # Group testing dependencies
+      testing:
+        patterns:
+          - "*test*"
+          - "vitest*"
+          - "@testing-library/*"
+          - "playwright*"
+      # Group linting and formatting
+      linting:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "@typescript-eslint/*"
+          - "husky"
+          - "lint-staged"
+      # Group build tools
+      build-tools:
+        patterns:
+          - "vite*"
+          - "@vitejs/*"
+          - "typescript"
+          - "postcss*"
+          - "tailwind*"
+    # Labels to add to PRs
     labels:
       - "dependencies"
-      - "security"
+      - "automated"
+    # Commit message customization
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Security updates should be prioritized
+    allow:
+      - dependency-type: "all"
     ignore:
-      # Ignore updates to packages that frequently publish patches
-      - dependency-name: "@types/*"
-        update-types: ["version-update:semver-patch"]
-      
-  # Enable security updates
-  - package-ecosystem: "npm"
+      # Ignore major version updates for critical packages
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+    # Reviewers and assignees
+    reviewers:
+      - "jwillz7667"
+    assignees:
+      - "jwillz7667"
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-    target-branch: "main"
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "America/Chicago"
     labels:
-      - "security"
-      - "high-priority"
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    reviewers:
+      - "jwillz7667"
+    assignees:
+      - "jwillz7667"

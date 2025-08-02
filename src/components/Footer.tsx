@@ -17,11 +17,13 @@ export function Footer() {
           <div className="flex flex-col space-y-8">
             {/* Logo and tagline section */}
             <div className="text-center space-y-3">
-              <LogoWithLink
-                className="h-14 w-auto mx-auto transition-transform hover:scale-105"
-                priority={false}
-                variant="default"
-              />
+              <div className="inline-block p-3 rounded-lg bg-white/10 backdrop-blur-sm">
+                <LogoWithLink
+                  className="h-14 w-auto mx-auto transition-transform hover:scale-105"
+                  priority={false}
+                  variant="default"
+                />
+              </div>
               <p className="text-white/90 text-sm font-medium max-w-xs mx-auto">
                 Premium Cannabis Delivery in Minnesota
               </p>

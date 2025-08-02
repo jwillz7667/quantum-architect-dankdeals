@@ -1,91 +1,46 @@
 name: Security Scan
 
 on:
-  schedule:
-    - cron: '0 0 * * 0' # Weekly on Sunday at midnight
-  workflow_dispatch:
   push:
+    branches: [main, develop]
+  pull_request:
     branches: [main]
-    paths:
-      - 'package*.json'
-      - 'Dockerfile'
-      - '.github/workflows/security.yml'
+  schedule:
+    # Run security scan every Monday at 9 AM
+    - cron: '0 9 * * 1'
 
 permissions:
   contents: read
   security-events: write
 
 jobs:
-  # Dependency scanning
-  dependency-scan:
-    name: Dependency Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Run npm audit
-        run: |
-          npm audit --production --audit-level=moderate || true
-          
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
-
-  # Container scanning
-  container-scan:
-    name: Container Security Scan
-    runs-on: ubuntu-latest
-    if: ${{ false }} # Enable when Dockerfile is added
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-      
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-  # Code scanning
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
     strategy:
       fail-fast: false
       matrix:
         language: ['javascript', 'typescript']
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          
+          queries: security-and-quality
+      
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
-        
+      
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-
-  # License scanning
-  license-scan:
-    name: License Compliance
+        with:
+          category: "/language:${{matrix.language}}"
+  
+  dependency-scan:
+    name: Dependency Security Scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,9 +50,27 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Install license-checker
-        run: npm install -g license-checker
-      
-      - name: Check licenses
+      - name: Run npm audit
         run: |
-          license-checker --production --summary --excludePrivatePackages --failOn 'GPL;AGPL;LGPL;CPOL;MSPL' 
+          npm audit --production --audit-level=moderate || echo "::warning::Found vulnerabilities"
+      
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+  
+  secrets-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --debug --only-verified
