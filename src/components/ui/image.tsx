@@ -6,6 +6,7 @@ interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'onError'
   fallback?: string;
   onLoadingComplete?: () => void;
   onError?: (error: Error) => void;
+  srcSet?: string;
 }
 
 const FALLBACK_IMAGE = '/assets/placeholder.svg';
@@ -19,7 +20,16 @@ const FALLBACK_IMAGE = '/assets/placeholder.svg';
  */
 export const Image = forwardRef<HTMLImageElement, ImageProps>(
   (
-    { src, alt, fallback = FALLBACK_IMAGE, className, onLoadingComplete, onError, ...props },
+    {
+      src,
+      alt,
+      fallback = FALLBACK_IMAGE,
+      className,
+      onLoadingComplete,
+      onError,
+      srcSet,
+      ...props
+    },
     ref
   ) => {
     const [imageSrc, setImageSrc] = useState(src || fallback);
@@ -54,6 +64,7 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
       <img
         ref={ref}
         src={imageSrc}
+        srcSet={srcSet}
         alt={alt}
         className={cn(
           'transition-opacity duration-300',

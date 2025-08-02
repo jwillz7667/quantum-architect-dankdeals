@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { AspectRatioImage, ProgressiveImage } from '@/components/ui/image';
 import { cn } from '@/lib/utils';
+import { getOptimizedImageProps } from '@/lib/supabase-image';
 
 interface ProductImageProps {
   src?: string | null;
@@ -29,24 +30,14 @@ interface ProductImageProps {
  */
 export const ProductImage = forwardRef<HTMLImageElement, ProductImageProps>(
   ({ src, alt, className, priority = false, size = 'card', onLoad, onError }, ref) => {
-    // Use the src directly - it now comes from Supabase Storage
-    const imageUrl = src || '/assets/placeholder.svg';
-
-    // Size configuration is available but not used directly
-    // const config = SIZE_CONFIG[size];
-
-    // Generate responsive sizes attribute
-    const sizes = {
-      thumbnail: '64px',
-      card: '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px',
-      detail: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px',
-      gallery: '(max-width: 768px) 100vw, 1200px',
-    }[size];
+    // Get optimized image props with srcset for responsive loading
+    const { src: optimizedSrc, srcSet, sizes } = getOptimizedImageProps(src, size);
 
     return (
       <AspectRatioImage
         ref={ref}
-        src={imageUrl}
+        src={optimizedSrc}
+        srcSet={srcSet}
         alt={alt}
         aspectRatio={1}
         objectFit="cover"
