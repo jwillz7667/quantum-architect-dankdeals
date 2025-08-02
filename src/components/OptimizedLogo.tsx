@@ -1,45 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getWhiteLogoUrl } from '@/lib/logoStorage';
 
 interface OptimizedLogoProps {
   className?: string;
   alt?: string;
   priority?: boolean; // For above-the-fold logos
-  variant?: 'main' | 'cart'; // Different logo variants
 }
 
 export function OptimizedLogo({
   className = 'h-10 w-auto',
   alt = 'DankDeals',
   priority = false,
-  variant = 'main',
 }: OptimizedLogoProps) {
   const [hasError, setHasError] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string>('');
 
-  const logoPath =
-    variant === 'cart'
-      ? '/assets/logos/dankdeals-cart-logo.svg'
-      : '/assets/logos/dankdeals-logo.svg';
-
-  // For main logo variant, just use the image directly
-  // No special font handling needed since we're using system fonts
+  useEffect(() => {
+    // Get the white logo URL from Supabase storage
+    const url = getWhiteLogoUrl();
+    setLogoUrl(url);
+  }, []);
 
   const handleError = () => {
     setHasError(true);
   };
 
   if (hasError) {
-    // Fallback to styled text logo with system font
+    // Fallback to styled text logo with white text for visibility on green background
     return (
-      <div className={`${className} flex items-center justify-center text-primary font-bold`}>
+      <div
+        className={`${className} flex items-center justify-center text-white font-bold tracking-wide`}
+      >
         DankDeals
       </div>
     );
   }
 
-  // Use img tag for all variants
+  // Use the white logo from Supabase storage
   return (
     <img
-      src={logoPath}
+      src={logoUrl}
       alt={alt}
       className={className}
       onError={handleError}

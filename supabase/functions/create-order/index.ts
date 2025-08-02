@@ -159,7 +159,9 @@ serve(async (req) => {
         order_number: orderNumber,
         status: 'pending',
 
-        // Store customer info in notes for now
+        // Store customer info
+        customer_email: orderData.customer_email,
+        customer_phone_number: formattedPhone,
         notes: `Email: ${orderData.customer_email}, Phone: ${formattedPhone}`,
         delivery_phone: formattedPhone,
 

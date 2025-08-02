@@ -23,53 +23,53 @@ export function DesktopHeader() {
         </div>
       </div>
 
-      {/* Main header */}
-      <div className="container max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <OptimizedLogo className="h-12 w-auto" alt="DankDeals" priority={true} />
-          </Link>
+      {/* Main header with logo section */}
+      <div className="bg-primary">
+        <div className="container max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo on green background */}
+            <Link to="/" className="flex items-center py-4">
+              <OptimizedLogo className="h-12 w-auto" alt="DankDeals" priority={true} />
+            </Link>
 
-          {/* Simplified navigation - right aligned */}
-          <nav className="flex items-center gap-8" role="navigation">
-            <Link
-              to="/"
-              className={`text-base font-medium transition-colors ${
-                location.pathname === '/' ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Shop
-            </Link>
-            <Link
-              to="/cart"
-              className={`flex items-center gap-2 text-base font-medium transition-colors ${
-                location.pathname === '/cart'
-                  ? 'text-primary'
-                  : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <ShoppingCart className="h-5 w-5" aria-hidden="true" />
-              <span>Cart</span>
-            </Link>
-            {user ? (
+            {/* Simplified navigation - right aligned */}
+            <nav className="flex items-center gap-8" role="navigation">
               <Link
-                to="/profile"
-                className={`flex items-center gap-2 text-base font-medium transition-colors ${
-                  location.pathname === '/profile'
-                    ? 'text-primary'
-                    : 'text-foreground hover:text-primary'
+                to="/"
+                className={`text-base font-medium transition-colors ${
+                  location.pathname === '/' ? 'text-white' : 'text-white/80 hover:text-white'
                 }`}
               >
-                <User className="h-5 w-5" aria-hidden="true" />
-                <span>Account</span>
+                Shop
               </Link>
-            ) : (
-              <Link to="/auth/login">
-                <Button className="btn-primary">Sign In</Button>
+              <Link
+                to="/cart"
+                className={`flex items-center gap-2 text-base font-medium transition-colors ${
+                  location.pathname === '/cart' ? 'text-white' : 'text-white/80 hover:text-white'
+                }`}
+              >
+                <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+                <span>Cart</span>
               </Link>
-            )}
-          </nav>
+              {user ? (
+                <Link
+                  to="/profile"
+                  className={`flex items-center gap-2 text-base font-medium transition-colors ${
+                    location.pathname === '/profile'
+                      ? 'text-white'
+                      : 'text-white/80 hover:text-white'
+                  }`}
+                >
+                  <User className="h-5 w-5" aria-hidden="true" />
+                  <span>Account</span>
+                </Link>
+              ) : (
+                <Link to="/auth/login">
+                  <Button className="bg-white text-primary hover:bg-white/90">Sign In</Button>
+                </Link>
+              )}
+            </nav>
+          </div>
         </div>
       </div>
     </header>

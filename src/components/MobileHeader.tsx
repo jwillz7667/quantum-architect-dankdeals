@@ -21,10 +21,10 @@ export function MobileHeader({ title }: MobileHeaderProps) {
         </a>
       </div>
 
-      {/* Logo section */}
-      <div className="px-4 py-4">
+      {/* Logo section with green background */}
+      <div className="bg-primary px-4 py-4">
         {title ? (
-          <h1 className="text-xl font-semibold text-center">{title}</h1>
+          <h1 className="text-xl font-semibold text-center text-white">{title}</h1>
         ) : (
           <Link to="/" className="flex justify-center">
             <OptimizedLogo className="h-10 w-auto" alt="DankDeals" priority={true} />
