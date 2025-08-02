@@ -1,6 +1,5 @@
 import { Phone, MapPin, Clock, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { LogoWithLink } from './logo';
 
 export function Footer() {
   return (
@@ -15,15 +14,9 @@ export function Footer() {
         {/* Mobile-first responsive container */}
         <div className="container mx-auto px-6 py-10 md:py-12">
           <div className="flex flex-col space-y-8">
-            {/* Logo and tagline section */}
+            {/* Tagline section */}
             <div className="text-center space-y-3">
-              <div className="inline-block p-3 rounded-lg bg-white/10 backdrop-blur-sm">
-                <LogoWithLink
-                  className="h-14 w-auto mx-auto transition-transform hover:scale-105"
-                  priority={false}
-                  variant="default"
-                />
-              </div>
+              <h2 className="text-2xl font-bold text-white">DankDeals</h2>
               <p className="text-white/90 text-sm font-medium max-w-xs mx-auto">
                 Premium Cannabis Delivery in Minnesota
               </p>

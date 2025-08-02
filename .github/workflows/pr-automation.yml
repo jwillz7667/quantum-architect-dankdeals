@@ -1,0 +1,153 @@
+name: PR Automation
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Auto-label PRs based on changed files
+  labeler:
+    name: Auto Label
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  # Add size labels to PRs
+  size-label:
+    name: Size Label
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - name: Add size label
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/xs'
+          xs_max_size: '10'
+          s_label: 'size/s'
+          s_max_size: '100'
+          m_label: 'size/m'
+          m_max_size: '500'
+          l_label: 'size/l'
+          l_max_size: '1000'
+          xl_label: 'size/xl'
+          fail_if_xl: false
+
+  # Auto-assign PR to author
+  auto-assign:
+    name: Auto Assign Author
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target' && github.event.action == 'opened'
+    steps:
+      - name: Auto-assign PR author
+        uses: toshimaru/auto-author-assign@v2.1.0
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+
+  # Check PR title follows conventional commits
+  semantic-pr:
+    name: Semantic PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title "{title}"
+            didn't match the configured pattern. Please ensure that the subject
+            doesn't start with an uppercase character.
+
+  # Welcome new contributors
+  welcome:
+    name: Welcome New Contributors
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target' && github.event.action == 'opened'
+    steps:
+      - name: Check if first contribution
+        id: first_contribution
+        uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: |
+            👋 Welcome @${{ github.actor }}! 
+            
+            Thank you for your first contribution to DankDeals! We're excited to have you here.
+            
+            Our team will review your PR shortly. In the meantime, please ensure you've:
+            - [ ] Read our contributing guidelines
+            - [ ] Signed the CLA (if applicable)
+            - [ ] Added tests for your changes
+            - [ ] Updated documentation if needed
+            
+            If you have any questions, feel free to ask!
+
+  # Handle slash commands in PR comments
+  slash-command:
+    name: Slash Command Handler
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/')
+    steps:
+      - name: Check commenter permissions
+        id: check_permissions
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: 'write'
+          
+      - name: Handle rebase command
+        if: steps.check_permissions.outputs.require-result == 'true' && startsWith(github.event.comment.body, '/rebase')
+        uses: cirrus-actions/rebase@1.8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Handle update branch command  
+        if: steps.check_permissions.outputs.require-result == 'true' && startsWith(github.event.comment.body, '/update')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            await github.rest.pulls.updateBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ Branch updated with latest changes from base branch!'
+            });

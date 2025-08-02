@@ -1,0 +1,140 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/dependency-review.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause, ISC, CC0-1.0
+          deny-licenses: GPL-3.0, AGPL-3.0
+          
+  license-check:
+    name: License Compatibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: Check licenses
+        run: |
+          npx license-checker --production --summary --excludePrivatePackages --onlyAllow 'MIT;Apache-2.0;BSD-3-Clause;BSD-2-Clause;ISC;CC0-1.0;Unlicense'
+          
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: Build and analyze bundle
+        run: |
+          npm run build
+          npm run analyze > bundle-stats.txt || true
+      
+      - name: Upload bundle stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: |
+            bundle-stats.txt
+            dist/assets/*.js
+          retention-days: 7
+      
+      - name: Comment PR with bundle size
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Calculate total bundle size
+            const distPath = './dist/assets';
+            let totalSize = 0;
+            
+            if (fs.existsSync(distPath)) {
+              const files = fs.readdirSync(distPath);
+              for (const file of files) {
+                if (file.endsWith('.js')) {
+                  const stats = fs.statSync(path.join(distPath, file));
+                  totalSize += stats.size;
+                }
+              }
+            }
+            
+            const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
+            
+            const comment = `## 📦 Bundle Size Report
+            
+            Total JavaScript bundle size: **${sizeMB} MB**
+            
+            <details>
+            <summary>Bundle Analysis Details</summary>
+            
+            \`\`\`
+            ${fs.existsSync('./bundle-stats.txt') ? fs.readFileSync('./bundle-stats.txt', 'utf8') : 'No bundle stats available'}
+            \`\`\`
+            </details>`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Bundle Size Report')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }

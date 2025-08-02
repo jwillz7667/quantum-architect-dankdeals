@@ -1,0 +1,86 @@
+{
+  "categories": [
+    {
+      "title": "## 🚀 Features",
+      "labels": ["feature", "enhancement", "feat"]
+    },
+    {
+      "title": "## 🐛 Bug Fixes",
+      "labels": ["bug", "fix", "bugfix", "hotfix"]
+    },
+    {
+      "title": "## 🔧 Maintenance",
+      "labels": ["chore", "maintenance", "ci", "build"]
+    },
+    {
+      "title": "## 📚 Documentation",
+      "labels": ["documentation", "docs"]
+    },
+    {
+      "title": "## 🎨 Styling",
+      "labels": ["style", "styles", "ui", "ux"]
+    },
+    {
+      "title": "## ⚡ Performance",
+      "labels": ["performance", "perf", "optimization"]
+    },
+    {
+      "title": "## 🔒 Security",
+      "labels": ["security", "vulnerability"]
+    },
+    {
+      "title": "## ♻️ Refactoring",
+      "labels": ["refactor", "refactoring"]
+    },
+    {
+      "title": "## 🧪 Testing",
+      "labels": ["test", "tests", "testing"]
+    },
+    {
+      "title": "## 📦 Dependencies",
+      "labels": ["dependencies", "deps"]
+    }
+  ],
+  "ignore_labels": ["ignore", "wontfix", "duplicate", "invalid"],
+  "sort": {
+    "order": "ASC",
+    "on_property": "mergedAt"
+  },
+  "template": "${{CHANGELOG}}",
+  "pr_template": "- ${{TITLE}} by @${{AUTHOR}} in #${{NUMBER}}",
+  "empty_template": "- No changes",
+  "label_extractor": [
+    {
+      "pattern": "(feat|feature)\\((\\w+)\\)",
+      "target": "$1"
+    },
+    {
+      "pattern": "(fix|bugfix)\\((\\w+)\\)",
+      "target": "$1"
+    }
+  ],
+  "duplicate_filter": {
+    "pattern": "^(Revert|revert)",
+    "on_property": "title",
+    "method": "match"
+  },
+  "transformers": [
+    {
+      "pattern": "\\[.*\\]",
+      "flags": "g",
+      "target": ""
+    }
+  ],
+  "max_tags_to_fetch": 200,
+  "max_pull_requests": 200,
+  "max_back_track_time_days": 365,
+  "exclude_merge_branches": ["main", "develop"],
+  "tag_resolver": {
+    "method": "semver",
+    "filter": {
+      "pattern": "v.*",
+      "flags": "i"
+    }
+  },
+  "base_branches": ["main"]
+}

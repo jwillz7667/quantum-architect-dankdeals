@@ -1,0 +1,107 @@
+# Configuration for auto-labeling PRs based on changed files
+
+# Frontend labels
+frontend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/**/*.{ts,tsx,js,jsx}'
+      - 'src/**/*.css'
+      - 'public/**/*'
+
+components:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/components/**/*'
+
+pages:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/pages/**/*'
+
+styles:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.css'
+      - 'tailwind.config.ts'
+      - 'postcss.config.js'
+
+# Backend labels
+backend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'supabase/**/*'
+      - 'src/integrations/supabase/**/*'
+
+database:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'supabase/migrations/**/*'
+
+edge-functions:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'supabase/functions/**/*'
+
+# Testing labels
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.{ts,tsx,js,jsx}'
+      - '**/*.spec.{ts,tsx,js,jsx}'
+      - 'tests/**/*'
+      - 'playwright.config.ts'
+      - 'vitest.config.ts'
+
+e2e:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'tests/e2e/**/*'
+      - 'playwright.config.ts'
+
+# Configuration labels
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.config.{js,ts}'
+      - '.env*'
+      - 'package.json'
+      - 'tsconfig.json'
+
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+
+# Documentation labels
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+
+# Type labels based on specific patterns
+bug:
+  - head-branch:
+    - '^fix/.*'
+    - '^hotfix/.*'
+
+feature:
+  - head-branch:
+    - '^feat/.*'
+    - '^feature/.*'
+
+enhancement:
+  - head-branch:
+    - '^enhance/.*'
+    - '^improvement/.*'
+
+chore:
+  - head-branch:
+    - '^chore/.*'
+    - '^deps/.*'
