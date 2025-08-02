@@ -16,9 +16,7 @@ export default defineConfig({
       jsxRuntime: 'automatic',
       jsxImportSource: 'react',
       babel: {
-        plugins: [
-          ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }],
-        ],
+        plugins: [['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]],
       },
     }),
     // Gzip compression
@@ -83,11 +81,12 @@ export default defineConfig({
       },
     }),
     // Bundle analyzer (only in analyze mode)
-    process.env['ANALYZE'] && visualizer({
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-    }),
+    process.env['ANALYZE'] &&
+      visualizer({
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+      }),
   ].filter(Boolean) as PluginOption[],
   resolve: {
     alias: {
@@ -129,31 +128,65 @@ export default defineConfig({
           return `assets/[name]-[hash][extname]`;
         },
         manualChunks: (id) => {
-          // Core React dependencies
-          if (id.includes('react-dom')) return 'react-dom';
-          if (id.includes('react-router-dom')) return 'react-router';
-          if (id.includes('react') && !id.includes('react-dom') && !id.includes('react-router')) return 'react';
-          
+          // Core React dependencies - must be handled first and separately
+          if (id.includes('node_modules/react-dom/')) return 'react-dom';
+          if (id.includes('node_modules/react/')) return 'react';
+          if (id.includes('node_modules/react-router-dom/')) return 'react-router';
+
           // UI libraries
           if (id.includes('@radix-ui')) return 'radix-ui';
           if (id.includes('lucide-react')) return 'icons';
-          
+
           // Data & API
           if (id.includes('@supabase')) return 'supabase';
           if (id.includes('@tanstack/react-query')) return 'react-query';
-          
+
           // Utilities
-          if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) return 'utils';
+          if (
+            id.includes('clsx') ||
+            id.includes('tailwind-merge') ||
+            id.includes('class-variance-authority')
+          )
+            return 'utils';
           if (id.includes('date-fns')) return 'date-fns';
-          
-          // Large libraries
+
+          // Form libraries
+          if (id.includes('react-hook-form')) return 'forms';
+          if (id.includes('@hookform')) return 'forms';
+
+          // Other UI/DOM related
+          if (id.includes('react-helmet-async')) return 'seo';
+          if (id.includes('sonner')) return 'notifications';
+          if (id.includes('next-themes')) return 'themes';
+
+          // Large libraries and remaining node_modules
           if (id.includes('node_modules')) {
             const directories = id.split('/');
             const nodeModulesIndex = directories.indexOf('node_modules');
             if (nodeModulesIndex !== -1 && nodeModulesIndex < directories.length - 1) {
               const packageName = directories[nodeModulesIndex + 1];
-              // Group small packages together
-              if (packageName && !['react', '@radix-ui', '@supabase', '@tanstack', 'lucide-react'].some(name => packageName.includes(name))) {
+              // Group small packages together, excluding already handled packages
+              if (
+                packageName &&
+                ![
+                  'react',
+                  'react-dom',
+                  'react-router-dom',
+                  '@radix-ui',
+                  '@supabase',
+                  '@tanstack',
+                  'lucide-react',
+                  'react-hook-form',
+                  '@hookform',
+                  'clsx',
+                  'tailwind-merge',
+                  'class-variance-authority',
+                  'date-fns',
+                  'react-helmet-async',
+                  'sonner',
+                  'next-themes',
+                ].some((name) => packageName.includes(name))
+              ) {
                 return 'vendor';
               }
             }
