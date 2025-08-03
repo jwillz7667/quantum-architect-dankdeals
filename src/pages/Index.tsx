@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
 import { Suspense, lazy } from 'react';
 import { Footer } from '@/components/Footer';
+import { DeliveryAreaMap } from '@/components/DeliveryAreaMap';
 
 // Lazy load non-critical components to reduce initial bundle size
 const CategoryRail = lazy(() =>
@@ -123,7 +124,7 @@ const Index = () => {
         <div className="space-y-4">
           <Card className="bg-gradient-hero text-white overflow-hidden">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Truck size={24} />
@@ -150,9 +151,14 @@ const Index = () => {
                     View Delivery Areas
                   </Button>
                 </div>
-                <div className="hidden md:block">
-                  <MapPin className="h-20 w-20 text-white/20" />
+                {/* Map on desktop */}
+                <div className="hidden lg:block w-full lg:w-96">
+                  <DeliveryAreaMap height="200px" className="border-2 border-white/20" />
                 </div>
+              </div>
+              {/* Map on mobile */}
+              <div className="lg:hidden mt-4">
+                <DeliveryAreaMap height="150px" className="border-2 border-white/20" />
               </div>
             </CardContent>
           </Card>
