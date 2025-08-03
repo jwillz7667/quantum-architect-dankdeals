@@ -51,7 +51,7 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <SEOHead
         title={post.title}
         description={post.excerpt}
@@ -64,7 +64,7 @@ export default function BlogPost() {
       <DesktopHeader />
       <MobileHeader title="Blog" />
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-24">
         <Link to="/blog">
           <Button variant="ghost" className="mb-6">
             <ChevronLeft className="mr-2 h-4 w-4" />

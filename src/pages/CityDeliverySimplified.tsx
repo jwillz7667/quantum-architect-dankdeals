@@ -63,7 +63,7 @@ export default function CityDeliverySimplified() {
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title={`Delivery to ${city.name}`} />
 

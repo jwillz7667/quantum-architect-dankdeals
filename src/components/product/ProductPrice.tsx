@@ -67,6 +67,7 @@ interface ProductPriceRangeProps {
   maxPrice: number;
   currency?: string;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 /**
@@ -77,17 +78,24 @@ export function ProductPriceRange({
   maxPrice,
   currency = '$',
   className,
+  size = 'md',
 }: ProductPriceRangeProps) {
-  const formatPrice = (value: number) => value.toFixed(2);
+  const formatPrice = (value: number) => value.toFixed(0);
+
+  const sizeClasses = {
+    sm: 'text-sm',
+    md: 'text-lg md:text-xl',
+    lg: 'text-xl md:text-2xl',
+  };
 
   if (minPrice === maxPrice) {
-    return <ProductPrice price={minPrice} currency={currency} className={className} />;
+    return <ProductPrice price={minPrice} currency={currency} className={className} size={size} />;
   }
 
   return (
-    <div className={cn('text-lg font-bold text-primary', className)}>
+    <div className={cn('font-bold text-primary', sizeClasses[size], className)}>
       {currency}
-      {formatPrice(minPrice)} - {currency}
+      {formatPrice(minPrice)}-{currency}
       {formatPrice(maxPrice)}
     </div>
   );

@@ -65,7 +65,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <SEOHead
         title="DankDeals - Premium Cannabis Delivery in Minnesota | Same-Day Delivery"
         description="Minnesota's premier cannabis delivery service. Shop premium flower, edibles, concentrates & more. Same-day delivery across Minneapolis, St. Paul & surrounding areas. Age 21+ only."
@@ -78,7 +78,7 @@ const Index = () => {
       <MobileHeader />
 
       {/* Main Content */}
-      <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8">
+      <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8 pb-20">
         {/* Welcome message for new falses */}
         {/* Search Bar */}
         <SearchBar onFilter={() => console.log('Open filters')} />

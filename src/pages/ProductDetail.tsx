@@ -155,7 +155,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Loading..." />
 
@@ -163,7 +163,7 @@ export default function ProductDetail() {
           <Skeleton className="w-full h-full" />
         </div>
 
-        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-24 space-y-6">
           <div>
             <Skeleton className="h-8 w-3/4 mb-2" />
             <Skeleton className="h-6 w-1/2" />
@@ -181,11 +181,11 @@ export default function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Error" />
 
-        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 py-6 text-center">
+        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-24 text-center">
           <p className="text-muted-foreground">{error || 'Product not found'}</p>
           <Button onClick={() => navigate('/categories')} className="mt-4">
             Back to Products
@@ -235,14 +235,14 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
+    <div className="min-h-screen bg-background pb-32 md:pb-0 animate-fade-in">
       <SEOHead
         title={`${product.name} - Premium ${product.category} | DankDeals MN`}
         description={
           product.description ||
-          `Buy ${product.name} online - Premium ${product.category} with ${product.thc_content ? `${product.thc_content}% THC` : ''} ${product.cbd_content ? `${product.cbd_content}% CBD` : ''}. Same-day cannabis delivery in Minneapolis & St. Paul. Lab-tested for quality and potency.`
+          `Buy ${product.name} online - Premium ${product.category}. Same-day cannabis delivery in Minneapolis & St. Paul. Lab-tested for quality and potency.`
         }
-        keywords={`${product.name}, ${product.category}, cannabis delivery Minnesota, ${product.thc_content ? 'THC' : ''} ${product.cbd_content ? 'CBD' : ''}, ${product.strain_type || ''}, ${(product.effects || []).join(', ')}, ${(product.flavors || []).join(', ')}, Minneapolis dispensary, St Paul cannabis`}
+        keywords={`${product.name}, ${product.category}, cannabis delivery Minnesota, ${product.strain_type || ''}, ${(product.effects || []).join(', ')}, ${(product.flavors || []).join(', ')}, Minneapolis dispensary, St Paul cannabis`}
         url={canonicalUrl}
         image={images[0]}
         type="product"
@@ -297,7 +297,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Product Info */}
-      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-24 space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {product?.name || 'Cannabis Product'}
@@ -346,28 +346,6 @@ export default function ProductDetail() {
               </p>
             </div>
           </div>
-          {product?.thc_content && (
-            <div className="flex items-center gap-2">
-              <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">THC</span>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">THC</p>
-                <p className="font-semibold">{product.thc_content}%</p>
-              </div>
-            </div>
-          )}
-          {product?.cbd_content && product.cbd_content > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">CBD</span>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">CBD</p>
-                <p className="font-semibold">{product.cbd_content}%</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Effects and Flavors */}

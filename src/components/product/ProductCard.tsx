@@ -2,8 +2,7 @@ import { memo, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ProductImage } from './ProductImage';
-import { ProductPrice } from './ProductPrice';
-import { THCBadge } from './ProductBadge';
+import { ProductPriceRange } from './ProductPrice';
 
 export interface ProductCardProps {
   id: string;
@@ -11,7 +10,6 @@ export interface ProductCardProps {
   price: number;
   imageUrl?: string | null;
   category?: string;
-  thcContent?: number;
   className?: string;
   priority?: boolean;
 }
@@ -25,7 +23,7 @@ export interface ProductCardProps {
  */
 export const ProductCard = memo(
   forwardRef<HTMLElement, ProductCardProps>(
-    ({ id, name, price, imageUrl, category, thcContent, className, priority = false }, ref) => {
+    ({ id, name, imageUrl, category, className, priority = false }, ref) => {
       const navigate = useNavigate();
 
       const handleClick = () => {
@@ -72,10 +70,9 @@ export const ProductCard = memo(
               {name}
             </h3>
 
-            {/* Price and THC */}
-            <div className="space-y-1">
-              <ProductPrice price={price} size="sm" />
-              {thcContent && <THCBadge percentage={thcContent} />}
+            {/* Price Range */}
+            <div className="mt-2">
+              <ProductPriceRange minPrice={40} maxPrice={250} size="sm" />
             </div>
           </div>
 
@@ -120,40 +117,37 @@ export function ProductCardSkeleton({ className }: { className?: string }) {
  * Horizontal product card variant
  */
 export const ProductCardHorizontal = memo(
-  forwardRef<HTMLElement, ProductCardProps>(
-    ({ id, name, price, imageUrl, category, thcContent, className }, ref) => {
-      const navigate = useNavigate();
+  forwardRef<HTMLElement, ProductCardProps>(({ id, name, imageUrl, category, className }, ref) => {
+    const navigate = useNavigate();
 
-      return (
-        <article
-          ref={ref}
-          className={cn(
-            'group flex gap-4 p-4 bg-card rounded-lg border border-border transition-all duration-200',
-            'hover:shadow-md hover:border-primary/20',
-            className
-          )}
-          onClick={() => navigate(`/product/${id}`)}
-          role="button"
-          tabIndex={0}
-        >
-          {/* Image */}
-          <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-            <ProductImage src={imageUrl} alt={name} size="thumbnail" className="w-full h-full" />
-          </div>
+    return (
+      <article
+        ref={ref}
+        className={cn(
+          'group flex gap-4 p-4 bg-card rounded-lg border border-border transition-all duration-200',
+          'hover:shadow-md hover:border-primary/20',
+          className
+        )}
+        onClick={() => navigate(`/product/${id}`)}
+        role="button"
+        tabIndex={0}
+      >
+        {/* Image */}
+        <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-md bg-muted">
+          <ProductImage src={imageUrl} alt={name} size="thumbnail" className="w-full h-full" />
+        </div>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-sm line-clamp-2 mb-1">{name}</h3>
-            {category && <p className="text-xs text-muted-foreground mb-2">{category}</p>}
-            <div className="flex items-center gap-2">
-              <ProductPrice price={price} size="sm" />
-              {thcContent && <THCBadge percentage={thcContent} />}
-            </div>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-sm line-clamp-2 mb-1">{name}</h3>
+          {category && <p className="text-xs text-muted-foreground mb-2">{category}</p>}
+          <div>
+            <ProductPriceRange minPrice={40} maxPrice={250} size="sm" />
           </div>
-        </article>
-      );
-    }
-  )
+        </div>
+      </article>
+    );
+  })
 );
 
 ProductCardHorizontal.displayName = 'ProductCardHorizontal';

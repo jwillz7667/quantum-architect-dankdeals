@@ -82,7 +82,7 @@ export default function FAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <SEOHead
         title="Frequently Asked Questions"
         description="Find answers to common questions about DankDeals cannabis delivery service in Minneapolis. Learn about ordering, delivery, payment, and more."
@@ -92,7 +92,7 @@ export default function FAQ() {
       <DesktopHeader />
       <MobileHeader title="FAQ" />
 
-      <div className="max-w-md mx-auto px-4 py-6">
+      <div className="max-w-md mx-auto px-4 pt-6 pb-24">
         <h2 className="text-xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
 
         <Accordion type="single" collapsible className="space-y-4">

@@ -130,6 +130,7 @@ body {
     @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50;
     padding-bottom: env(safe-area-inset-bottom);
     box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    height: 80px; /* Increased height for the bottom nav */
   }
 
   .search-bar {

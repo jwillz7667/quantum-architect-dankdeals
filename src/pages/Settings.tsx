@@ -42,11 +42,11 @@ export default function Settings() {
         url="https://dankdealsmn.com/settings"
       />
 
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Account Settings" />
 
-        <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto px-4 pt-8 pb-24">
           {/* Back Button */}
           <Button variant="ghost" onClick={() => navigate('/profile')} className="mb-6 -ml-2">
             <ArrowLeft className="mr-2 h-4 w-4" />

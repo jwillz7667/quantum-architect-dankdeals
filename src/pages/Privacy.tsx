@@ -4,11 +4,11 @@ import { BottomNav } from '@/components/BottomNav';
 
 export default function Privacy() {
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <DesktopHeader />
       <MobileHeader title="Privacy Policy" />
 
-      <div className="max-w-md mx-auto px-4 py-6">
+      <div className="max-w-md mx-auto px-4 pt-6 pb-24">
         <div className="prose prose-sm max-w-none">
           <h2 className="text-xl font-bold text-foreground mb-6">Privacy Policy</h2>
 

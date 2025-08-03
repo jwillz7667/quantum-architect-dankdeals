@@ -74,7 +74,7 @@ export default function Categories() {
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0 animate-fade-in">
+    <div className="min-h-screen bg-background pb-32 md:pb-0 animate-fade-in">
       <SEOHead
         title={pageTitle}
         description={pageDescription}

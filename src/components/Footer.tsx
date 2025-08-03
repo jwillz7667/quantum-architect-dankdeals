@@ -1,11 +1,11 @@
-import { Phone, MapPin, Clock, ShieldCheck } from 'lucide-react';
+import { Phone, MapPin, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
-    <footer className="mt-auto bg-gradient-to-b from-[#4caf50] to-[#388e3c] relative overflow-hidden">
+    <footer className="mt-auto bg-[#4caf50] relative overflow-hidden">
       {/* Decorative background pattern */}
-      <div className="absolute inset-0 opacity-5">
+      <div className="absolute inset-0 opacity-[0.02]">
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-white rounded-full blur-3xl" />
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white rounded-full blur-3xl" />
       </div>
@@ -29,7 +29,7 @@ export function Footer() {
               {/* Primary CTA - Large touch target */}
               <a
                 href="tel:763-247-5378"
-                className="flex items-center justify-center gap-3 bg-white text-[#4caf50] rounded-xl px-6 py-4 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 group"
+                className="flex items-center justify-center gap-3 bg-white text-black rounded-xl px-6 py-4 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 group"
                 aria-label="Call or text us at 763-247-5378"
               >
                 <Phone className="h-5 w-5 group-hover:animate-pulse" />
@@ -38,11 +38,11 @@ export function Footer() {
 
               {/* Quick info pills */}
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 text-white/90">
+                <div className="flex items-center justify-center gap-2 bg-white rounded-lg px-3 py-2 text-black shadow-sm">
                   <Clock className="h-4 w-4 flex-shrink-0" />
                   <span className="text-xs">Daily 10am-8pm</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 text-white/90">
+                <div className="flex items-center justify-center gap-2 bg-white rounded-lg px-3 py-2 text-black shadow-sm">
                   <MapPin className="h-4 w-4 flex-shrink-0" />
                   <span className="text-xs">Minneapolis Area</span>
                 </div>
@@ -64,7 +64,7 @@ export function Footer() {
                   <Link
                     key={to}
                     to={to}
-                    className="bg-white/10 backdrop-blur-sm text-white/90 hover:text-white hover:bg-white/20 rounded-lg px-4 py-3 text-center transition-all duration-200 font-medium min-h-[44px] flex items-center justify-center"
+                    className="bg-white text-black hover:bg-gray-100 rounded-lg px-4 py-3 text-center transition-all duration-200 font-medium min-h-[44px] flex items-center justify-center shadow-sm hover:shadow-md"
                     aria-label={`Go to ${label} page`}
                   >
                     {label}
@@ -73,12 +73,8 @@ export function Footer() {
               </div>
             </nav>
 
-            {/* Legal notice with trust indicator */}
-            <div className="border-t border-white/20 pt-6 space-y-3">
-              <div className="flex items-center justify-center gap-2 text-white/80">
-                <ShieldCheck className="h-4 w-4" />
-                <p className="text-xs text-center">Licensed Minnesota Cannabis Retailer</p>
-              </div>
+            {/* Legal notice */}
+            <div className="border-t border-white/20 pt-6">
               <p className="text-xs text-white/60 text-center">
                 Must be 21+ • Cash on Delivery • ID Required
               </p>

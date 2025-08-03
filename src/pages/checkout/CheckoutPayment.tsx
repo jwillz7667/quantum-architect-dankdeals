@@ -101,7 +101,7 @@ export default function CheckoutPayment() {
 
   if (!deliveryInfo) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Payment" />
         <div className="flex items-center justify-center py-12">
@@ -113,11 +113,11 @@ export default function CheckoutPayment() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <DesktopHeader />
       <MobileHeader title="Payment" />
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-md mx-auto px-4 pt-6 pb-24 space-y-6">
         {/* Progress Indicator */}
         <div className="flex items-center justify-center space-x-2 mb-6">
           <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">

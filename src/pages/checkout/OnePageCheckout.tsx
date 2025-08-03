@@ -182,7 +182,7 @@ export default function OnePageCheckout() {
       <DesktopHeader />
       <MobileHeader title="Checkout" />
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 pt-8 pb-24">
         {/* Back to Cart */}
         <Button variant="ghost" onClick={() => navigate('/cart')} className="mb-6 -ml-2">
           <ArrowLeft className="mr-2 h-4 w-4" />

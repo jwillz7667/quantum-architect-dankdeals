@@ -118,7 +118,7 @@ export default function DeliveryArea() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <DesktopHeader />
       <MobileHeader title="Delivery Areas" />
 
@@ -141,7 +141,7 @@ export default function DeliveryArea() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 pt-8 md:pt-12 pb-24">
         {/* Delivery Benefits */}
         <section className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">

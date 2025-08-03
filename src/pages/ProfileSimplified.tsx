@@ -57,11 +57,11 @@ export default function Profile() {
         url="https://dankdealsmn.com/profile"
       />
 
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Account" />
 
-        <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <div className="max-w-2xl mx-auto px-4 pt-8 pb-24 space-y-6">
           {/* User Info Card */}
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-6">

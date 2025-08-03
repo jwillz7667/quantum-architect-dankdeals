@@ -63,10 +63,10 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Profile" />
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-6">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 pb-24">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-1/3"></div>
             <div className="h-32 bg-muted rounded"></div>
@@ -123,11 +123,11 @@ export default function Profile() {
         url="https://dankdealsmn.com/profile"
       />
 
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="My Profile" />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-24">
           {/* Welcome Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">

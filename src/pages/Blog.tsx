@@ -10,7 +10,7 @@ import { blogPosts } from '@/data/blogPosts';
 
 export default function Blog() {
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-32 md:pb-0">
       <SEOHead
         title="Blog - Cannabis Education & Industry News"
         description="Stay informed about cannabis culture, laws, and strains. Educational articles from Minnesota's premier cannabis dispensary."
@@ -19,7 +19,7 @@ export default function Blog() {
       <DesktopHeader />
       <MobileHeader title="Blog" />
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 pt-6 pb-24">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Cannabis Education & News
