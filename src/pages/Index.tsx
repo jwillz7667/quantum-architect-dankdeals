@@ -101,7 +101,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-xl md:text-2xl font-bold text-foreground">Hot Right Now</h2>
             {
-              <Button size="sm" onClick={() => navigate('/categories')}>
+              <Button size="sm" variant="primary-inverted" onClick={() => navigate('/categories')}>
                 View All
               </Button>
             }

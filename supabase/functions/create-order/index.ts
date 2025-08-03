@@ -14,6 +14,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   name: string;
+  weight?: number; // Weight in grams
 }
 
 interface DeliveryAddress {
@@ -246,8 +247,10 @@ serve(async (req: Request) => {
         quantity: item.quantity,
         unit_price: item.price,
         total_price: item.price * item.quantity,
-        // Product snapshot data
+        // Product snapshot data - include all required fields
         product_name: item.name || product?.name || 'Unknown Product',
+        product_price: item.price, // Add product_price field
+        product_weight_grams: item.weight || 3.5, // Use provided weight or default to 3.5g
         product_description: product?.description || null,
         product_category: product?.category || null,
         product_strain_type: product?.strain_type || null,
