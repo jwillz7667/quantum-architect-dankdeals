@@ -1,47 +1,82 @@
 # Supabase Edge Functions
 
-This directory contains Supabase Edge Functions that run on Deno runtime.
+## Overview
+
+These are Deno-based edge functions that handle server-side operations for DankDeals.
+
+## Functions
+
+### create-order
+
+Handles order creation with complete product snapshot data.
+
+**Recent Fix**: Added proper TypeScript types and product data capture to prevent email generation failures.
+
+### send-order-emails
+
+Sends order confirmation emails to customers and admins.
+
+### process-email-queue
+
+Processes queued emails asynchronously.
+
+### test-admin-email
+
+Testing function for admin email functionality.
+
+### resend-webhook
+
+Handles webhooks from Resend email service.
 
 ## TypeScript Configuration
 
-These functions use Deno runtime, not Node.js. If you're seeing TypeScript errors in VS Code:
+The functions use a custom `tsconfig.json` that:
 
-1. **Install Deno extension** for VS Code (if you want proper Deno support)
-2. The functions include `@ts-ignore` comments for Deno-specific imports
-3. TypeScript configuration is separate from the main project
+- Allows importing `.ts` files directly
+- Includes Deno type definitions
+- Enables strict type checking
 
-## Available Functions
+## Type Definitions
 
-### send-order-emails
-Sends order confirmation emails to customers and admin notifications.
+Key interfaces used across functions:
 
-### process-email-queue
-Processes queued emails with retry logic for reliability.
+```typescript
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  strain_type?: string;
+  thc_content?: number;
+  cbd_content?: number;
+}
+
+interface OrderItem {
+  product_id: string;
+  quantity: number;
+  price: number;
+  name: string;
+}
+```
 
 ## Deployment
 
-```bash
-# Deploy all functions
-supabase functions deploy
+Deploy functions using Supabase CLI:
 
-# Deploy specific function
-supabase functions deploy send-order-emails
+```bash
+npx supabase functions deploy <function-name> --no-verify-jwt
 ```
 
 ## Environment Variables
 
-Set these in your Supabase dashboard:
+Required environment variables (automatically injected by Supabase):
 
-- `RESEND_API_KEY`: Your Resend API key for sending emails
-- `ADMIN_EMAIL`: Email address for admin notifications
-- `FROM_EMAIL`: Sender email address
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_ANON_KEY`
 
-## Testing
+Additional secrets to set:
 
-```bash
-# Test locally
-supabase functions serve send-order-emails
-
-# Invoke remotely
-supabase functions invoke send-order-emails --body '{"orderId":"YOUR_ORDER_ID"}'
-``` 
+- `RESEND_API_KEY`
+- `ADMIN_EMAIL`
+- `FROM_EMAIL`

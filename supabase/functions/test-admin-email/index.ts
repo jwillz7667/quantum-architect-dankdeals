@@ -1,6 +1,13 @@
 // @ts-ignore - Deno types
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
+// Type definitions for Deno
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'jwillz7667@gmail.com';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'orders@dankdealsmn.com';

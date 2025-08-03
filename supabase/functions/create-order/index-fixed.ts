@@ -2,6 +2,13 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 import { corsHeaders } from '../_shared/cors.ts';
 
+// Type definitions for Deno
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
 interface OrderItem {
   product_id: string;
   quantity: number;
@@ -16,6 +23,16 @@ interface DeliveryAddress {
   state: string;
   zipcode: string;
   instructions?: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  strain_type?: string;
+  thc_content?: number;
+  cbd_content?: number;
 }
 
 interface CreateOrderRequest {
@@ -34,7 +51,7 @@ interface CreateOrderRequest {
   user_id?: string | null;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -217,7 +234,7 @@ serve(async (req) => {
     }
 
     // Create a map of product details
-    const productMap = new Map(products?.map((p) => [p.id, p]) || []);
+    const productMap = new Map<string, Product>(products?.map((p: Product) => [p.id, p]) || []);
 
     // Create order items with product snapshot data
     const orderItems = orderData.items.map((item) => {

@@ -1,5 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
+import { corsHeaders } from '../_shared/cors.ts';
+
+// Type definitions for Deno
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 // Environment variables are automatically injected by Supabase
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
@@ -8,13 +16,11 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@dankdealsmn.com';
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'orders@dankdealsmn.com';
 
-import { corsHeaders } from '../_shared/cors.ts';
-
 interface OrderEmailPayload {
   orderId: string;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
