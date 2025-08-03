@@ -16,13 +16,19 @@ DO UPDATE SET
   file_size_limit = 5242880,
   allowed_mime_types = ARRAY['image/webp', 'image/jpeg', 'image/png', 'image/jpg', 'image/svg+xml'];
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Admin Upload" ON storage.objects;
+DROP POLICY IF EXISTS "Admin Update" ON storage.objects;
+DROP POLICY IF EXISTS "Admin Delete" ON storage.objects;
+
 -- Create policy to allow public read access
-CREATE POLICY IF NOT EXISTS "Public Access" ON storage.objects
+CREATE POLICY "Public Access" ON storage.objects
   FOR SELECT TO public
   USING (bucket_id = 'logos');
 
 -- Create policy to allow authenticated users to upload/update logos (admin only)
-CREATE POLICY IF NOT EXISTS "Admin Upload" ON storage.objects
+CREATE POLICY "Admin Upload" ON storage.objects
   FOR INSERT TO authenticated
   USING (
     bucket_id = 'logos' 
@@ -34,7 +40,7 @@ CREATE POLICY IF NOT EXISTS "Admin Upload" ON storage.objects
   );
 
 -- Create policy to allow authenticated admins to update logos
-CREATE POLICY IF NOT EXISTS "Admin Update" ON storage.objects
+CREATE POLICY "Admin Update" ON storage.objects
   FOR UPDATE TO authenticated
   USING (
     bucket_id = 'logos' 
@@ -46,7 +52,7 @@ CREATE POLICY IF NOT EXISTS "Admin Update" ON storage.objects
   );
 
 -- Create policy to allow authenticated admins to delete logos
-CREATE POLICY IF NOT EXISTS "Admin Delete" ON storage.objects
+CREATE POLICY "Admin Delete" ON storage.objects
   FOR DELETE TO authenticated
   USING (
     bucket_id = 'logos' 
