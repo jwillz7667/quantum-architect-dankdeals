@@ -103,7 +103,6 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
 
     if (!apiKey) {
       console.info('Google Maps API key not configured');
-      setHasError(true);
       setIsLoading(false);
       return;
     }
@@ -166,15 +165,24 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
     };
   }, []);
 
-  if (hasError) {
+  if (hasError || !apiKey) {
     return (
       <div
         className={`w-full rounded-lg bg-muted flex items-center justify-center ${className}`}
         style={{ height }}
       >
-        <div className="text-center text-muted-foreground">
-          <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">Map unavailable</p>
+        <div className="text-center p-6">
+          <MapPin className="h-12 w-12 text-primary mx-auto mb-3" />
+          <h3 className="text-base font-semibold mb-2">Delivery Coverage Area</h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            We deliver throughout Minneapolis, St. Paul, and surrounding metro areas
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 text-xs">
+            <span className="bg-background px-2 py-1 rounded">Minneapolis</span>
+            <span className="bg-background px-2 py-1 rounded">St. Paul</span>
+            <span className="bg-background px-2 py-1 rounded">Bloomington</span>
+            <span className="bg-background px-2 py-1 rounded">Edina</span>
+          </div>
         </div>
       </div>
     );
