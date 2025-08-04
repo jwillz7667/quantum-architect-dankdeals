@@ -192,11 +192,22 @@ export class EmailService {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
+    // Map internal email types to database email types
+    const emailTypeMap: Record<string, string> = {
+      ORDER_CONFIRMATION: 'order_confirmation',
+      ORDER_UPDATE: 'order_update',
+      ADMIN_NOTIFICATION: 'delivery_notification',
+    };
+
     const { error } = await supabase.from('email_queue').insert({
-      ...job,
+      email_type: emailTypeMap[job.type] || job.type.toLowerCase(),
+      to_email: job.to,
+      subject: job.subject,
+      data: job.data,
+      priority: job.priority || 'normal',
       status: 'pending',
       attempts: 0,
-      scheduled_at: new Date().toISOString(),
+      scheduled_at: job.scheduled_at || new Date().toISOString(),
     });
 
     if (error) {

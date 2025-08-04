@@ -122,8 +122,10 @@ export class EmailQueueProcessor {
 
       // Send email based on type
       let success = false;
-      switch (job.type) {
+      const emailType = (job as any).email_type || job.type;
+      switch (emailType) {
         case 'ORDER_CONFIRMATION':
+        case 'order_confirmation':
           const results = await this.emailService.sendOrderConfirmation(order);
           success = results.some((r) => r.success);
           break;
@@ -230,7 +232,7 @@ export class EmailQueueProcessor {
     const { error } = await this.supabase
       .from('email_queue')
       .update({
-        status: 'completed',
+        status: 'sent',
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -309,7 +311,7 @@ export class EmailQueueProcessor {
     const { error } = await this.supabase
       .from('email_queue')
       .delete()
-      .in('status', ['completed', 'failed'])
+      .in('status', ['sent', 'failed'])
       .lt('created_at', cutoffDate.toISOString());
 
     if (error) {
