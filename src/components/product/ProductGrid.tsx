@@ -44,7 +44,7 @@ export const ProductGrid = memo(function ProductGrid({
   maxItems,
   emptyMessage = 'No products available.',
   title,
-  priorityCount = 4,
+  priorityCount = 1,
 }: ProductGridProps) {
   // Calculate minimum price for products with variants
   const productsWithPrice = useMemo(() => {
@@ -153,7 +153,7 @@ export function FeaturedProductsGrid({ className }: FeaturedProductsGridProps) {
       }}
       title="Featured Products"
       emptyMessage="No featured products available."
-      priorityCount={4}
+      priorityCount={1}
     />
   );
 }

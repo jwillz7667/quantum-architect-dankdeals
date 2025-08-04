@@ -1,55 +1,38 @@
 import { forwardRef } from 'react';
-import { AspectRatioImage, ProgressiveImage } from '@/components/ui/image';
+import { OptimizedProductImage } from '@/components/OptimizedProductImage';
 import { cn } from '@/lib/utils';
-import { getOptimizedImageProps } from '@/lib/supabase-image';
+import type { PRODUCT_IMAGE_SIZES } from '@/lib/supabase-image';
 
 interface ProductImageProps {
   src?: string | null;
   alt: string;
   className?: string;
   priority?: boolean;
-  size?: 'thumbnail' | 'card' | 'detail' | 'gallery';
+  size?: keyof typeof PRODUCT_IMAGE_SIZES;
   onLoad?: () => void;
   onError?: (error: Error) => void;
 }
 
-// Size configurations for future use with image optimization services
-// const SIZE_CONFIG = {
-//   thumbnail: { width: 64, height: 64, quality: 85 },
-//   card: { width: 320, height: 320, quality: 85 },
-//   detail: { width: 800, height: 800, quality: 90 },
-//   gallery: { width: 1200, height: 1200, quality: 90 },
-// } as const;
-
 /**
- * Optimized product image component
- * - Responsive sizing
- * - Supabase integration ready
- * - Progressive loading
- * - Consistent aspect ratios
+ * Product image component with modern optimization
+ * - Lazy loading with intersection observer
+ * - Responsive srcset for all screen sizes
+ * - WebP format optimization
+ * - Mobile-first loading strategy
+ * - Proper aspect ratio handling
  */
 export const ProductImage = forwardRef<HTMLImageElement, ProductImageProps>(
   ({ src, alt, className, priority = false, size = 'card', onLoad, onError }, ref) => {
-    // Get optimized image props with srcset for responsive loading
-    const { src: optimizedSrc, srcSet, sizes } = getOptimizedImageProps(src, size);
-
     return (
-      <AspectRatioImage
+      <OptimizedProductImage
         ref={ref}
-        src={optimizedSrc}
-        srcSet={srcSet}
+        src={src}
         alt={alt}
-        aspectRatio={1}
-        objectFit="cover"
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
-        decoding="async"
-        sizes={sizes}
-        onLoadingComplete={onLoad}
+        className={className}
+        priority={priority}
+        size={size}
+        onLoad={onLoad}
         onError={onError}
-        className={cn(className)}
-        // Add structured data for SEO
-        itemProp="image"
       />
     );
   }
@@ -73,13 +56,13 @@ export const ProductImageGallery = forwardRef<HTMLDivElement, ProductImageGaller
     return (
       <div ref={ref} className={cn('space-y-4', className)}>
         {/* Main image */}
-        <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-          <ProgressiveImage
+        <div className="rounded-lg overflow-hidden">
+          <OptimizedProductImage
             src={primaryImage}
             alt={alt}
-            className="w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
+            size="detail"
+            priority={true}
+            className="w-full"
           />
         </div>
 

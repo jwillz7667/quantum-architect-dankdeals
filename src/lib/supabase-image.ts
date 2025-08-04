@@ -87,24 +87,24 @@ export function generateSrcSet(
  */
 export const PRODUCT_IMAGE_SIZES = {
   thumbnail: {
-    widths: [64, 128, 192],
+    widths: [64, 128],
     sizes: '64px',
-    quality: 80,
+    quality: 75,
   },
   card: {
-    widths: [160, 240, 320, 480],
-    sizes: '(max-width: 640px) 160px, (max-width: 768px) 240px, (max-width: 1024px) 320px, 240px',
-    quality: 85,
+    widths: [160, 240, 320],
+    sizes: '(max-width: 640px) 160px, (max-width: 768px) 240px, 320px',
+    quality: 80,
   },
   detail: {
-    widths: [640, 768, 1024, 1536],
-    sizes: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px',
-    quality: 90,
+    widths: [480, 640, 800],
+    sizes: '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 640px',
+    quality: 85,
   },
   gallery: {
-    widths: [800, 1200, 1600, 2400],
-    sizes: '(max-width: 768px) 100vw, 1200px',
-    quality: 90,
+    widths: [640, 800, 1024],
+    sizes: '(max-width: 768px) 100vw, 800px',
+    quality: 85,
   },
 } as const;
 
@@ -125,8 +125,8 @@ export function getOptimizedImageProps(
 
   const config = PRODUCT_IMAGE_SIZES[size];
 
-  // For mobile, use smaller default image
-  const defaultWidth = size === 'card' ? 240 : config.widths[0];
+  // For mobile-first loading, use smallest appropriate size
+  const defaultWidth = size === 'card' ? 160 : config.widths[0];
   const optimizedSrc = getTransformedImageUrl(src, {
     width: defaultWidth,
     quality: config.quality,

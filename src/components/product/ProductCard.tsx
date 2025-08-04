@@ -12,6 +12,7 @@ export interface ProductCardProps {
   category?: string;
   className?: string;
   priority?: boolean;
+  thcContent?: number;
 }
 
 /**
