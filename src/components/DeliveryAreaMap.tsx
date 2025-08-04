@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { MapPin } from 'lucide-react';
 
 interface DeliveryAreaMapProps {
   className?: string;
@@ -165,13 +166,16 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
     };
   }, []);
 
-  if (hasError || !apiKey) {
+  if (hasError) {
     return (
       <div
-        className={`w-full rounded-lg bg-primary/10 flex items-center justify-center ${className}`}
+        className={`w-full rounded-lg bg-muted flex items-center justify-center ${className}`}
         style={{ height }}
       >
-        <p className="text-sm font-medium text-primary">Minneapolis & St. Paul Metro Delivery</p>
+        <div className="text-center text-muted-foreground">
+          <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">Map unavailable</p>
+        </div>
       </div>
     );
   }
@@ -183,7 +187,7 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
           className={`absolute inset-0 w-full rounded-lg bg-muted animate-pulse flex items-center justify-center ${className}`}
           style={{ height }}
         >
-          <div className="text-sm text-muted-foreground">Loading map...</div>
+          <MapPin className="h-8 w-8 text-muted-foreground animate-bounce" />
         </div>
       )}
       <div
