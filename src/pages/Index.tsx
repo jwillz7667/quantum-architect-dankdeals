@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { SEOHead } from '@/components/SEOHead';
 import { Suspense, lazy } from 'react';
 import { Footer } from '@/components/Footer';
-import { DeliveryAreaMap } from '@/components/DeliveryAreaMap';
 
 // Lazy load non-critical components to reduce initial bundle size
 const CategoryRail = lazy(() =>
@@ -24,6 +23,9 @@ const FeaturedProductsGrid = lazy(() =>
 );
 const BottomNav = lazy(() =>
   import('@/components/BottomNav').then((module) => ({ default: module.BottomNav }))
+);
+const DeliveryAreaMap = lazy(() =>
+  import('@/components/DeliveryAreaMap').then((module) => ({ default: module.DeliveryAreaMap }))
 );
 
 const Index = () => {
@@ -153,12 +155,20 @@ const Index = () => {
                 </div>
                 {/* Map on desktop */}
                 <div className="hidden lg:block w-full lg:w-96">
-                  <DeliveryAreaMap height="200px" className="border-2 border-white/20" />
+                  <Suspense
+                    fallback={<div className="h-[200px] bg-gray-100 rounded-lg animate-pulse" />}
+                  >
+                    <DeliveryAreaMap height="200px" className="border-2 border-white/20" />
+                  </Suspense>
                 </div>
               </div>
               {/* Map on mobile */}
               <div className="lg:hidden mt-4">
-                <DeliveryAreaMap height="150px" className="border-2 border-white/20" />
+                <Suspense
+                  fallback={<div className="h-[150px] bg-gray-100 rounded-lg animate-pulse" />}
+                >
+                  <DeliveryAreaMap height="150px" className="border-2 border-white/20" />
+                </Suspense>
               </div>
             </CardContent>
           </Card>

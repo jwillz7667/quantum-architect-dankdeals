@@ -92,8 +92,8 @@ export const PRODUCT_IMAGE_SIZES = {
     quality: 80,
   },
   card: {
-    widths: [320, 480, 640, 768],
-    sizes: '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px',
+    widths: [160, 240, 320, 480],
+    sizes: '(max-width: 640px) 160px, (max-width: 768px) 240px, (max-width: 1024px) 320px, 240px',
     quality: 85,
   },
   detail: {
@@ -126,7 +126,7 @@ export function getOptimizedImageProps(
   const config = PRODUCT_IMAGE_SIZES[size];
 
   // For mobile, use smaller default image
-  const defaultWidth = size === 'card' ? 320 : config.widths[0];
+  const defaultWidth = size === 'card' ? 240 : config.widths[0];
   const optimizedSrc = getTransformedImageUrl(src, {
     width: defaultWidth,
     quality: config.quality,

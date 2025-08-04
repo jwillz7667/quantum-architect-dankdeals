@@ -138,7 +138,24 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
   }, [initializeMap]);
 
   useEffect(() => {
-    loadGoogleMaps();
+    // Delay loading Google Maps until component is in viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadGoogleMaps();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (mapRef.current) {
+      observer.observe(mapRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
   }, [loadGoogleMaps]);
 
   useEffect(() => {
