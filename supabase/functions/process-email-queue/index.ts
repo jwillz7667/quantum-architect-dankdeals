@@ -1,157 +1,171 @@
-// @ts-ignore - Deno types
-/// <reference types="https://deno.land/x/types/index.d.ts" />
+// Email queue processor edge function
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { corsHeaders } from '../_shared/cors.ts';
+import { EmailQueueProcessor } from '../_shared/email-queue-processor.ts';
+import { logger } from '../_shared/logger.ts';
 
-// @ts-ignore - Deno module
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-// @ts-ignore - Deno module
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0"
-
-declare const Deno: any;
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface EmailQueueItem {
-  id: string;
-  order_id: string;
-  email_type: string;
-  status: string;
-  attempts: number;
-  last_attempt_at?: string | null;
-  sent_at?: string | null;
-  error_message?: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface ProcessResult {
-  id: string;
-  status: string;
-  error?: string;
-}
+// Type definitions for Deno
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 serve(async (req: Request) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
+
+  const startTime = Date.now();
+  const correlationId = crypto.randomUUID();
+  logger.setContext({ correlationId });
 
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    
-    // Get pending emails from queue
-    const { data: pendingEmails, error: queueError } = await supabase
-      .from('email_queue')
-      .select('*')
-      .eq('status', 'pending')
-      .lt('attempts', 3)
-      .order('created_at', { ascending: true })
-      .limit(10)
+    logger.info('Email queue processor triggered', {
+      method: req.method,
+      url: req.url,
+    });
 
-    if (queueError) {
-      throw new Error(`Failed to fetch email queue: ${queueError.message}`)
-    }
+    // Verify this is an authorized request
+    // In production, you might want to check for a secret token or use Supabase auth
+    const authToken = req.headers.get('Authorization');
+    const expectedToken = Deno.env.get('QUEUE_PROCESSOR_TOKEN');
 
-    if (!pendingEmails || pendingEmails.length === 0) {
+    if (expectedToken && authToken !== `Bearer ${expectedToken}`) {
+      logger.warn('Unauthorized queue processor request');
       return new Response(
-        JSON.stringify({ success: true, message: 'No pending emails' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const results: ProcessResult[] = []
-
-    for (const emailJob of pendingEmails as EmailQueueItem[]) {
-      try {
-        // Update status to processing
-        await supabase
-          .from('email_queue')
-          .update({ 
-            status: 'processing',
-            attempts: emailJob.attempts + 1,
-            last_attempt_at: new Date().toISOString()
-          })
-          .eq('id', emailJob.id)
-
-        // Call the send-order-emails function
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/send-order-emails`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
-          },
-          body: JSON.stringify({ orderId: emailJob.order_id })
-        })
-
-        if (response.ok) {
-          // Mark as sent
-          await supabase
-            .from('email_queue')
-            .update({ 
-              status: 'sent',
-              sent_at: new Date().toISOString()
-            })
-            .eq('id', emailJob.id)
-
-          results.push({ id: emailJob.id, status: 'sent' })
-        } else {
-          const error = await response.text()
-          
-          // Mark as failed if max attempts reached
-          const status = emailJob.attempts >= 2 ? 'failed' : 'pending'
-          
-          await supabase
-            .from('email_queue')
-            .update({ 
-              status,
-              error_message: error
-            })
-            .eq('id', emailJob.id)
-
-          results.push({ id: emailJob.id, status, error })
+        JSON.stringify({
+          success: false,
+          error: 'Unauthorized',
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
         }
-      } catch (error) {
-        // Handle individual email errors
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        
-        await supabase
-          .from('email_queue')
-          .update({ 
-            status: emailJob.attempts >= 2 ? 'failed' : 'pending',
-            error_message: errorMessage
-          })
-          .eq('id', emailJob.id)
+      );
+    }
 
-        results.push({ id: emailJob.id, status: 'error', error: errorMessage })
+    // Verify environment configuration
+    const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'RESEND_API_KEY'];
+
+    for (const envVar of requiredEnvVars) {
+      if (!Deno.env.get(envVar)) {
+        logger.error(`Missing environment variable: ${envVar}`);
+        throw new Error('Server configuration error');
       }
     }
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        processed: results.length,
-        results 
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    )
+    // Parse optional parameters
+    const url = new URL(req.url);
+    const action = url.searchParams.get('action') || 'process';
+
+    const processor = new EmailQueueProcessor();
+
+    switch (action) {
+      case 'process':
+        // Process pending emails
+        await processor.processQueue();
+
+        const processDuration = Date.now() - startTime;
+        logger.info('Queue processing completed', {
+          duration: processDuration,
+          correlationId,
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: 'Email queue processed',
+            duration: processDuration,
+            correlationId,
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        );
+
+      case 'cleanup':
+        // Clean up old completed/failed jobs
+        const daysToKeep = parseInt(url.searchParams.get('days') || '30');
+        await processor.cleanupOldJobs(daysToKeep);
+
+        const cleanupDuration = Date.now() - startTime;
+        logger.info('Queue cleanup completed', {
+          duration: cleanupDuration,
+          daysToKeep,
+          correlationId,
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            message: `Cleaned up jobs older than ${daysToKeep} days`,
+            duration: cleanupDuration,
+            correlationId,
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        );
+
+      default:
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: `Unknown action: ${action}`,
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+          }
+        );
+    }
   } catch (error) {
-    console.error('Error processing email queue:', error)
+    const duration = Date.now() - startTime;
+    logger.error('Email queue processor error', error, {
+      duration,
+      correlationId,
+    });
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error'
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'Processing failed',
+        correlationId,
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        status: 500,
       }
-    )
+    );
   }
-}) 
+});
+
+// This function can be called periodically via:
+// 1. Supabase pg_cron (database triggers)
+// 2. External cron service (e.g., cron-job.org)
+// 3. GitHub Actions on a schedule
+// 4. Vercel/Netlify scheduled functions
+
+// Example pg_cron setup:
+// SELECT cron.schedule(
+//   'process-email-queue',
+//   '*/5 * * * *', -- Every 5 minutes
+//   $$
+//     SELECT
+//       net.http_post(
+//         url := 'https://your-project.supabase.co/functions/v1/process-email-queue',
+//         headers := jsonb_build_object(
+//           'Authorization', 'Bearer ' || current_setting('app.settings.queue_processor_token'),
+//           'Content-Type', 'application/json'
+//         ),
+//         body := jsonb_build_object('action', 'process')
+//       );
+//   $$
+// );

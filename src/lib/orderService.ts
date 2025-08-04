@@ -249,7 +249,7 @@ export class OrderService {
             },
           };
 
-          await EmailService.sendOrderConfirmationEmail(emailData);
+          EmailService.sendOrderConfirmationEmail(emailData);
           logger.info('Order confirmation email sent', {
             context: { orderNumber: order.order_number, email: orderData.email },
           });

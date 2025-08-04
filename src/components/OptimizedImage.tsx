@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, ImgHTMLAttributes } from 'react';
+import { useState, useEffect, useRef, type ImgHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface OptimizedImageProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -131,14 +131,9 @@ export function OptimizedImage({
 }
 
 // Optimized product image with Supabase CDN support
-export function OptimizedProductImage({
-  src,
-  alt,
-  className,
-  ...props
-}: OptimizedImageProps) {
+export function OptimizedProductImage({ src, alt, className, ...props }: OptimizedImageProps) {
   // Add Supabase image transformation parameters
-  const optimizedSrc = src.includes('supabase.co') 
+  const optimizedSrc = src.includes('supabase.co')
     ? `${src}?quality=${props.quality || 75}&format=webp`
     : src;
 

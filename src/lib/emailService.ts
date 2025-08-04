@@ -226,33 +226,13 @@ export class EmailService {
   /**
    * Send order confirmation email via Supabase Edge Function
    */
-  static async sendOrderConfirmationEmail(orderData: OrderEmailData): Promise<boolean> {
-    try {
-      // Use orderId if available, otherwise fall back to orderNumber
-      const idToUse = orderData.orderId || orderData.orderNumber;
-
-      // Call the Supabase edge function to send emails
-      const response = await supabase.functions.invoke('send-order-emails', {
-        body: { orderId: idToUse },
-      });
-
-      if (response.error) {
-        console.error('Email service error:', response.error);
-        return false;
-      }
-
-      const data = response.data as { success?: boolean; error?: string } | null;
-      if (!data?.success) {
-        console.error('Email service failed:', data?.error || 'Unknown error');
-        return false;
-      }
-
-      console.log(`Order confirmation emails sent for order ${orderData.orderNumber}`);
-      return true;
-    } catch (error) {
-      console.error('Failed to send order confirmation email:', error);
-      return false;
-    }
+  static sendOrderConfirmationEmail(orderData: OrderEmailData): boolean {
+    // Order emails are now automatically sent by process-order function
+    // This method is kept for backward compatibility but returns true
+    console.log(
+      `Order confirmation emails are handled by process-order for ${orderData.orderNumber}`
+    );
+    return true;
   }
 
   /**
