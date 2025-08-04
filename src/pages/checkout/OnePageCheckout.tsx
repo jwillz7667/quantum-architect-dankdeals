@@ -103,10 +103,11 @@ export default function OnePageCheckout() {
         total: finalTotal,
         payment_method: paymentMethod,
         items: items.map((item) => ({
-          product_id: item.id,
+          product_id: item.productId,
           quantity: item.quantity,
           price: item.price,
           name: item.name,
+          weight: item.variant?.weight_grams || 3.5,
         })),
         user_id: user?.id || null,
       };
@@ -123,7 +124,7 @@ export default function OnePageCheckout() {
         };
       };
 
-      const response = await supabase.functions.invoke<CreateOrderResponse>('create-order', {
+      const response = await supabase.functions.invoke<CreateOrderResponse>('process-order', {
         body: orderData,
       });
 
@@ -141,15 +142,8 @@ export default function OnePageCheckout() {
         throw new Error(data?.error || 'Order creation failed');
       }
 
-      // Send confirmation email
-      try {
-        await supabase.functions.invoke('send-order-emails', {
-          body: { orderId: data.order.id },
-        });
-      } catch (emailError) {
-        console.warn('Email notification failed:', emailError);
-        // Don't fail the order if email fails
-      }
+      // Email is now automatically sent by process-order function
+      // No need for separate email function call
 
       // Clear cart and redirect to success page
       clearCart();
