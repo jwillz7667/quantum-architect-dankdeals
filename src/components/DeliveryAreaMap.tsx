@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { MapPin } from 'lucide-react';
 
 interface DeliveryAreaMapProps {
   className?: string;
@@ -183,7 +182,7 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
           className={`absolute inset-0 w-full rounded-lg bg-muted animate-pulse flex items-center justify-center ${className}`}
           style={{ height }}
         >
-          <MapPin className="h-8 w-8 text-muted-foreground animate-bounce" />
+          <div className="text-sm text-muted-foreground">Loading map...</div>
         </div>
       )}
       <div
