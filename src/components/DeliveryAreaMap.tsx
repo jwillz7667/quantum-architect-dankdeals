@@ -102,6 +102,7 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
 
     if (!apiKey) {
       console.info('Google Maps API key not configured');
+      setHasError(true);
       setIsLoading(false);
       return;
     }
