@@ -154,6 +154,14 @@ export default defineConfig({
           if (id.includes('react-hook-form')) return 'forms';
           if (id.includes('@hookform')) return 'forms';
 
+          // Admin panel dependencies (code-split)
+          if (id.includes('react-admin')) return 'admin-core';
+          if (id.includes('ra-supabase')) return 'admin-data';
+          if (id.includes('ra-input-rich-text')) return 'admin-rich-text';
+          if (id.includes('@mui/material')) return 'admin-mui';
+          if (id.includes('@mui/icons-material')) return 'admin-mui-icons';
+          if (id.includes('@emotion')) return 'admin-emotion';
+
           // Other UI/DOM related
           if (id.includes('react-helmet-async')) return 'seo';
           if (id.includes('sonner')) return 'notifications';

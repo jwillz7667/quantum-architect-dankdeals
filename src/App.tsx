@@ -14,6 +14,7 @@ import { AgeGate } from '@/components/AgeGate';
 import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminRoute } from '@/components/admin/AdminRoute';
 import { MobileMenuProvider } from '@/context/MobileMenuContext';
 import { GTMTracker } from '@/components/GTMTracker';
 
@@ -48,6 +49,9 @@ const AuthCallback = lazyWithPrefetch(() => import('./pages/auth/AuthCallback'))
 const Profile = lazyWithPrefetch(() => import('./pages/ProfileSimplified'));
 const Orders = lazyWithPrefetch(() => import('./pages/Orders'));
 const Settings = lazyWithPrefetch(() => import('./pages/Settings'));
+
+// Lazy load admin panel with extra code splitting
+const AdminLoader = lazyWithPrefetch(() => import('./pages/admin/AdminLoader'));
 
 // Critical routes to prefetch after initial load
 const criticalRoutes = [Categories, ProductDetail, Cart];
@@ -122,6 +126,16 @@ const App = () => {
                               <ProtectedRoute>
                                 <Settings />
                               </ProtectedRoute>
+                            }
+                          />
+
+                          {/* Admin routes */}
+                          <Route
+                            path="/admin/*"
+                            element={
+                              <AdminRoute>
+                                <AdminLoader />
+                              </AdminRoute>
                             }
                           />
 
