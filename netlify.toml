@@ -6,7 +6,7 @@
   
 [build.environment]
   NODE_VERSION = "20"
-  NODE_ENV = "production"
+  # Don't set NODE_ENV here - let the build script handle it
 
 [[redirects]]
   from = "/*"
@@ -48,13 +48,13 @@
     Cache-Control = "no-cache, no-store, must-revalidate"
 
 [context.production]
-  environment = { NODE_ENV = "production" }
-
+  # NODE_ENV will be set during build process
+  
 [context.deploy-preview]
-  environment = { NODE_ENV = "staging" }
-
+  # NODE_ENV will be set during build process
+  
 [context.branch-deploy]
-  environment = { NODE_ENV = "staging" }
+  # NODE_ENV will be set during build process
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
