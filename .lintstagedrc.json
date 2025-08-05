@@ -1,9 +1,10 @@
 {
   "*.{js,jsx,ts,tsx}": [
     "prettier --write",
-    "eslint --fix"
+    "eslint --fix --cache --cache-location .cache/eslint",
+    "bash -c 'tsc --noEmit'"
   ],
-  "*.{json,css,md,html}": [
-    "prettier --write"
-  ]
+  "*.{css,scss}": ["prettier --write", "stylelint --fix --cache --cache-location .cache/stylelint"],
+  "*.{json,md,html}": ["prettier --write"],
+  "package.json": ["bash -c 'npm run deps:clean || true'"]
 }

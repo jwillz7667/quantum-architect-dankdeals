@@ -4,16 +4,7 @@
     "composite": false,
     "noEmit": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
-    "vite.config.ts",
-    "tailwind.config.ts",
-    "vitest.config.ts",
-    "vitest.integration.config.ts",
-    "playwright.config.ts",
-    "tests/**/*.ts"
-  ],
-  "exclude": ["node_modules", "dist", "supabase/functions/**/*"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
+  "exclude": ["node_modules", "dist", "supabase/functions/**/*"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -40,9 +40,56 @@ playwright/.cache
 .vite-bundle-visualizer
 stats.html
 
+# Cache directories
+.cache/
+.eslintcache
+.stylelintcache
+
 # Environment files
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.example
+.env.staging.local
+
+# Keep example files
+!.env.example
+!.env.production
+
+# Additional security and build artifacts
+*.pem
+*.key
+*.cert
+*.crt
+.npmrc
+.yarnrc
+lighthouse-results/
+.lighthouse/
+.vite/
+.turbo/
+.parcel-cache/
+.next/
+.nuxt/
+.vercel/
+.netlify/
+
+# OS files
+Thumbs.db
+*.swp
+.*.swp
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# IDE
+.vscode-test/
+*.code-workspace
+.history/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp

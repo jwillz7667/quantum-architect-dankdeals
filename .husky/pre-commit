@@ -1,1 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged
 npx lint-staged
+# npm run env:validate || true
+
+# Validate environment if actual .env files changed (not examples)
+if git diff --cached --name-only | grep -qE "^\.env$|^\.env\.local$"; then
+  npm run env:validate
+fi
+
+# Run security audit on dependency changes
+if git diff --cached --name-only | grep -q "package-lock.json"; then
+  npm run security || echo "⚠️  Security vulnerabilities found. Consider running 'npm run security:fix'"
+fi

@@ -1,56 +1,70 @@
-# Netlify Configuration
+# Netlify Configuration for Production Deployment
 
 [build]
-  command = "npm run build"
+  command = "npm run build:production"
   publish = "dist"
+  environment = { NODE_VERSION = "20" }
 
 [build.environment]
-  NODE_VERSION = "18"
-  NPM_FLAGS = "--legacy-peer-deps"
-  NETLIFY_USE_YARN = "false"
-  NETLIFY_USE_PNPM = "false"
-  # Prevent Google Maps API key from being exposed in build
-  VITE_GOOGLE_MAPS_API_KEY = "DISABLED_FOR_SECURITY"
-  # Supabase configuration (these should be set in Netlify UI for security)
-  # VITE_SUPABASE_URL = "set in Netlify UI"
-  # VITE_SUPABASE_ANON_KEY = "set in Netlify UI"
+  NODE_ENV = "production"
 
-# Note: Problematic plugins have been removed from Netlify UI
-# The following plugins were breaking ES modules:
-# - netlify-plugin-inline-source
-# - netlify-plugin-inline-critical-css  
-# - netlify-plugin-minify-html
-# These should be disabled in Netlify dashboard under Site settings > Build & deploy > Post processing
-
-# SPA routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Basic security headers
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Allow images from Supabase Storage
-    Content-Security-Policy = "default-src 'self'; img-src 'self' https://ralbzuvkyexortqngvxs.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://maps.googleapis.com https://maps.gstatic.com data: blob:; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://maps.googleapis.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; connect-src 'self' https://ralbzuvkyexortqngvxs.supabase.co https://plausible.io https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; frame-src https://www.googletagmanager.com; object-src 'none';"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Asset caching
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# JavaScript MIME types
 [[headers]]
-  for = "/assets/*.js"
+  for = "/*.js"
   [headers.values]
-    Content-Type = "text/javascript"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/assets/*.mjs"
+  for = "/*.css"
   [headers.values]
-    Content-Type = "text/javascript"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[context.production]
+  environment = { NODE_ENV = "production" }
+
+[context.deploy-preview]
+  environment = { NODE_ENV = "staging" }
+
+[context.branch-deploy]
+  environment = { NODE_ENV = "staging" }
+
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+  
+  [plugins.inputs]
+    output_path = "reports/lighthouse.html"
+    
+  [plugins.inputs.thresholds]
+    performance = 0.9
+    accessibility = 0.9
+    best-practices = 0.9
+    seo = 0.9
+    pwa = 0.9

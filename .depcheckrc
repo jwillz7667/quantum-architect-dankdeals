@@ -1,0 +1,19 @@
+{
+  "ignores": [
+    "@types/*",
+    "eslint-*",
+    "prettier-*",
+    "@vitejs/*",
+    "@vitest/*",
+    "@playwright/*",
+    "husky",
+    "lint-staged",
+    "typescript",
+    "vite",
+    "vitest",
+    "postcss",
+    "tailwindcss",
+    "autoprefixer"
+  ],
+  "skip-missing": false
+}
