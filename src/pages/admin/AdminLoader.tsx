@@ -6,7 +6,7 @@ const AdminPanel = lazy(
   () => import(/* webpackChunkName: "admin", webpackPrefetch: true */ '@/admin')
 );
 
-export function AdminLoader() {
+function AdminLoader() {
   return (
     <Suspense
       fallback={
@@ -19,3 +19,5 @@ export function AdminLoader() {
     </Suspense>
   );
 }
+
+export default AdminLoader;

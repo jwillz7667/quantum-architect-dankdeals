@@ -59,7 +59,7 @@ export const OrderList = () => (
         <TextField source="full_name" />
       </ReferenceField>
       <DateField source="created_at" showTime />
-      <StatusField label="Status" />
+      <StatusField />
       <NumberField
         source="total"
         options={{

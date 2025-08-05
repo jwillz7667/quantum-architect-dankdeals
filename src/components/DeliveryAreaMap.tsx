@@ -141,7 +141,7 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
     // Delay loading Google Maps until component is in viewport
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0]?.isIntersecting) {
           loadGoogleMaps();
           observer.disconnect();
         }

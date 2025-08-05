@@ -4,11 +4,7 @@ import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 // Removed Vercel Analytics specific code since we're deploying on Netlify
 // This prevents CSP violations and unnecessary dependencies
 
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
+// Global types are declared in google-analytics.ts
 
 function sendToAnalytics(metric: Metric) {
   // Log to console in development

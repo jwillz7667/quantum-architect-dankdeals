@@ -11,13 +11,17 @@ import { adminTheme } from './theme';
 import { Package, Tag, ShoppingCart, Users } from 'lucide-react';
 
 // Configure data provider
-const dataProvider = supabaseDataProvider(supabase);
+const dataProvider = supabaseDataProvider({
+  instanceUrl: import.meta.env['VITE_SUPABASE_URL'] as string,
+  apiKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] as string,
+  supabaseClient: supabase,
+});
 
 // Configure auth provider
 const authProvider = supabaseAuthProvider(supabase);
 
 // Custom layout to integrate with our theme
-const layout = () => <AdminLayout />;
+const layout = AdminLayout;
 
 function AdminApp() {
   return (

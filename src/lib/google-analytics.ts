@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
+const GA_MEASUREMENT_ID = import.meta.env['VITE_GA_MEASUREMENT_ID'] as string | undefined;
 
 /**
  * Initialize Google Analytics 4

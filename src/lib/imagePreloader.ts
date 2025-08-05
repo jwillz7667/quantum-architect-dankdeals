@@ -70,7 +70,7 @@ export function preloadCriticalImages(imageUrls: string[], maxPreload = 1): void
  * Smart preloading based on user behavior
  * Preloads images when user is likely to navigate to them
  */
-export function preloadImageOnHover(element: HTMLElement, imageUrl: string): void {
+export function preloadImageOnHover(element: HTMLElement, imageUrl: string): () => void {
   let preloaded = false;
 
   const handleMouseEnter = () => {
@@ -104,9 +104,12 @@ export function preloadNearbyImages(
 
   for (let i = start; i < end; i++) {
     if (i !== currentIndex && imageUrls[i]) {
-      preloadImage(imageUrls[i], { fetchPriority: 'low' }).catch(() => {
-        // Silent failure for speculative preloads
-      });
+      const imageUrl = imageUrls[i];
+      if (imageUrl) {
+        preloadImage(imageUrl, { fetchPriority: 'low' }).catch(() => {
+          // Silent failure for speculative preloads
+        });
+      }
     }
   }
 }

@@ -58,7 +58,7 @@ const ProductImage = ({ record }: { record?: { image_url?: string; name?: string
 };
 
 const StockField = ({ record }: { record?: { quantity?: number } }) => {
-  const inStock = record?.quantity > 0;
+  const inStock = (record?.quantity ?? 0) > 0;
   return (
     <Chip
       label={inStock ? 'In Stock' : 'Out of Stock'}
@@ -83,7 +83,7 @@ export const ProductList = () => (
         },
       }}
     >
-      <ProductImage label="Image" />
+      <ProductImage />
       <TextField source="name" />
       <TextField source="category.name" label="Category" />
       <NumberField
@@ -94,7 +94,7 @@ export const ProductList = () => (
         }}
       />
       <NumberField source="quantity" label="Stock" />
-      <StockField label="Status" />
+      <StockField />
       <DateField source="created_at" label="Created" showTime />
       <EditButton />
       <DeleteButton mutationMode="pessimistic" />

@@ -10,11 +10,13 @@ interface UseIntersectionObserverOptions {
  * Custom hook for intersection observer
  * Optimized for image lazy loading
  */
-export function useIntersectionObserver(options: UseIntersectionObserverOptions = {}) {
+export function useIntersectionObserver<T extends HTMLElement = HTMLElement>(
+  options: UseIntersectionObserverOptions = {}
+) {
   const { threshold = 0.1, rootMargin = '50px', triggerOnce = true } = options;
 
   const [isIntersecting, setIsIntersecting] = useState(false);
-  const elementRef = useRef<HTMLElement>(null);
+  const elementRef = useRef<T>(null);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -22,7 +24,7 @@ export function useIntersectionObserver(options: UseIntersectionObserverOptions 
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsIntersecting(true);
           if (triggerOnce) {
             observer.disconnect();

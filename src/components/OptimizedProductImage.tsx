@@ -27,7 +27,7 @@ export const OptimizedProductImage = forwardRef<HTMLImageElement, OptimizedProdu
   ({ src, alt, className, priority = false, size = 'card', onLoad, onError }, ref) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const { elementRef, isIntersecting } = useIntersectionObserver({
+    const { elementRef, isIntersecting } = useIntersectionObserver<HTMLDivElement>({
       threshold: 0.1,
       rootMargin: '100px',
       triggerOnce: true,

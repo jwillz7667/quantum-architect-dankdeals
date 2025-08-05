@@ -217,9 +217,4 @@ export const GTMEvents = {
   },
 };
 
-// Type declaration for window.dataLayer
-declare global {
-  interface Window {
-    dataLayer: any[];
-  }
-}
+// Type declaration extends the one in google-analytics.ts
