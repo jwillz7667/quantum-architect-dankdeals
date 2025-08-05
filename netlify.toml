@@ -15,21 +15,12 @@
   # VITE_SUPABASE_URL = "set in Netlify UI"
   # VITE_SUPABASE_ANON_KEY = "set in Netlify UI"
 
-# Disable problematic plugins that break ES modules
-[[plugins]]
-  package = "netlify-plugin-inline-source"
-  [plugins.inputs]
-    enabled = false
-
-[[plugins]]
-  package = "netlify-plugin-inline-critical-css"
-  [plugins.inputs]
-    enabled = false
-
-[[plugins]]
-  package = "netlify-plugin-minify-html"
-  [plugins.inputs]
-    enabled = false
+# Note: Problematic plugins have been removed from Netlify UI
+# The following plugins were breaking ES modules:
+# - netlify-plugin-inline-source
+# - netlify-plugin-inline-critical-css  
+# - netlify-plugin-minify-html
+# These should be disabled in Netlify dashboard under Site settings > Build & deploy > Post processing
 
 # SPA routing
 [[redirects]]
