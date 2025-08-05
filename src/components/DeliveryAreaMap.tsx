@@ -101,7 +101,7 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
   const loadGoogleMaps = useCallback(() => {
     const apiKey = import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string | undefined;
 
-    if (!apiKey) {
+    if (!apiKey || apiKey === 'your_google_maps_api_key') {
       console.info('Google Maps API key not configured');
       setHasError(true);
       setIsLoading(false);

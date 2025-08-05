@@ -13,7 +13,7 @@
     "// Build": "",
     "prebuild": "",
     "build": "npm run build:prod",
-    "build:prod": "cross-env NODE_ENV=production vite build && npm run sitemap:prod",
+    "build:prod": "cross-env NODE_ENV=production node scripts/check-api-keys.js && vite build && npm run sitemap:prod",
     "build:dev": "cross-env NODE_ENV=development vite build --mode development",
     "build:staging": "cross-env NODE_ENV=staging vite build --mode staging",
     "build:production": "node scripts/build-production.js",
