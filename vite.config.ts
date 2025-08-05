@@ -4,6 +4,7 @@ import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
+import { createManualChunks, chunkingPresets, buildPresets } from './vite-chunking';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -113,8 +114,8 @@ export default defineConfig({
     minify: 'terser',
     // Best practice: Use browserslist or explicit browser versions
     target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
-    // Best practice: 500KB is more realistic for modern apps
-    chunkSizeWarningLimit: 500,
+    // Use balanced build preset
+    ...buildPresets.balanced,
     // Suppress node module externalization warnings (expected for Supabase)
     commonjsOptions: {
       transformMixedEsModules: true,
@@ -181,243 +182,9 @@ export default defineConfig({
           }
           return `assets/[name]-[hash][extname]`;
         },
-        manualChunks: (id) => {
-          // Bundle React and ReactDOM together to avoid loading issues
-          if (id.includes('node_modules/react-dom/') || id.includes('node_modules/react/')) {
-            return 'react-bundle';
-          }
-          if (id.includes('node_modules/react-router-dom/')) return 'react-router';
-
-          // UI libraries
-          if (id.includes('@radix-ui')) return 'radix-ui';
-          if (id.includes('lucide-react')) return 'icons';
-
-          // Data & API
-          if (id.includes('@supabase')) return 'supabase';
-          if (id.includes('@tanstack/react-query')) return 'react-query';
-
-          // Utilities
-          if (
-            id.includes('clsx') ||
-            id.includes('tailwind-merge') ||
-            id.includes('class-variance-authority')
-          )
-            return 'utils';
-
-          // Only create date-fns chunk if it's actually used
-          // Remove this to prevent empty chunks
-          // if (id.includes('date-fns')) return 'date-fns';
-
-          // Form libraries
-          if (id.includes('react-hook-form')) return 'forms';
-          if (id.includes('@hookform')) return 'forms';
-          if (id.includes('zod')) return 'forms'; // Add zod to forms chunk
-
-          // Admin panel dependencies (code-split)
-          if (id.includes('react-admin')) return 'admin-core';
-          if (id.includes('ra-supabase')) return 'admin-data';
-          if (id.includes('ra-input-rich-text')) return 'admin-rich-text';
-          if (id.includes('@mui/material')) return 'admin-mui';
-          if (id.includes('@mui/icons-material')) return 'admin-mui-icons';
-          if (id.includes('@emotion')) return 'admin-emotion';
-
-          // Other UI/DOM related
-          if (id.includes('react-helmet-async')) return 'seo';
-          if (id.includes('sonner')) return 'notifications';
-          if (id.includes('next-themes')) return 'themes';
-
-          // Split vendor chunk by package size and type
-          if (id.includes('node_modules')) {
-            // Extract package name
-            const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
-            if (!match) return 'vendor-misc';
-
-            const packageName = match[1];
-
-            // Already handled packages
-            const handledPackages = [
-              'react',
-              'react-dom',
-              'react-router-dom',
-              '@radix-ui',
-              '@supabase',
-              '@tanstack',
-              'lucide-react',
-              'react-hook-form',
-              '@hookform',
-              'clsx',
-              'tailwind-merge',
-              'class-variance-authority',
-              'react-helmet-async',
-              'sonner',
-              'next-themes',
-              'zod',
-              'react-admin',
-              'ra-supabase',
-              'ra-input-rich-text',
-              '@mui/material',
-              '@mui/icons-material',
-              '@emotion',
-            ];
-
-            if (handledPackages.some((pkg) => packageName?.startsWith(pkg))) {
-              return undefined; // Let other rules handle it
-            }
-
-            // Group remaining packages by type
-            // Specific large packages that should have their own chunks
-            if (packageName === 'dompurify') return 'vendor-sanitization';
-            if (packageName === 'dotenv') return 'vendor-env';
-            if (packageName === 'web-vitals') return 'vendor-monitoring';
-            if (packageName?.includes('@axe-core')) return 'vendor-accessibility';
-            if (packageName?.includes('@vercel/analytics')) return 'vendor-analytics';
-
-            // Best practice: Handle @babel/runtime specifically
-            if (packageName === '@babel/runtime' || packageName === '@babel/runtime-corejs3') {
-              return 'vendor-babel-runtime';
-            }
-
-            // RxJS (large dependency from react-admin)
-            if (packageName?.includes('rxjs') || packageName === 'rxjs') {
-              return 'vendor-rxjs';
-            }
-
-            // Error tracking and monitoring
-            if (packageName?.includes('@sentry') || packageName?.includes('sentry')) {
-              return 'vendor-error-tracking';
-            }
-
-            // Polyfills and ES shims
-            if (
-              packageName?.includes('es-abstract') ||
-              packageName?.includes('es-shim') ||
-              packageName?.includes('es5-shim') ||
-              packageName?.includes('es6-shim')
-            ) {
-              return 'vendor-es-shims';
-            }
-
-            // Lodash and utility libraries
-            if (
-              packageName?.includes('lodash') ||
-              packageName === 'underscore' ||
-              packageName === 'ramda'
-            ) {
-              return 'vendor-utilities';
-            }
-
-            // Tailwind should not be in runtime bundles at all
-            // If it's here, something is importing it incorrectly
-            if (packageName?.includes('tailwindcss')) {
-              console.warn(
-                `WARNING: tailwindcss is being bundled into runtime! Package: ${packageName}`
-              );
-              return 'vendor-css-framework';
-            }
-
-            // Crypto/Security packages
-            if (
-              packageName?.includes('crypto') ||
-              packageName?.includes('uuid') ||
-              packageName?.includes('jwt') ||
-              packageName?.includes('jose')
-            ) {
-              return 'vendor-crypto';
-            }
-
-            // HTTP/Network packages
-            if (
-              packageName?.includes('axios') ||
-              packageName?.includes('fetch') ||
-              packageName?.includes('http') ||
-              packageName?.includes('cross-fetch')
-            ) {
-              return 'vendor-network';
-            }
-
-            // Polyfills and runtime helpers
-            if (
-              packageName?.includes('polyfill') ||
-              packageName?.includes('core-js') ||
-              packageName?.includes('regenerator') ||
-              packageName?.includes('tslib') ||
-              packageName === 'object-assign'
-            ) {
-              return 'vendor-polyfills';
-            }
-
-            // Date/Time libraries
-            if (
-              packageName?.includes('date-fns') ||
-              packageName?.includes('dayjs') ||
-              packageName?.includes('moment')
-            ) {
-              return 'vendor-datetime';
-            }
-
-            // State management
-            if (
-              packageName?.includes('redux') ||
-              packageName?.includes('recoil') ||
-              packageName?.includes('zustand') ||
-              packageName?.includes('valtio') ||
-              packageName?.includes('jotai')
-            ) {
-              return 'vendor-state';
-            }
-
-            // Parsing/Validation
-            if (
-              packageName?.includes('yup') ||
-              packageName?.includes('joi') ||
-              packageName?.includes('ajv') ||
-              packageName?.includes('superstruct')
-            ) {
-              return 'vendor-validation';
-            }
-
-            // DOM/Browser utilities (including DOMPurify)
-            if (
-              packageName?.includes('dom') ||
-              packageName?.includes('browser') ||
-              packageName?.includes('scroll') ||
-              packageName?.includes('resize') ||
-              packageName?.includes('purify')
-            ) {
-              return 'vendor-dom';
-            }
-
-            // Animation libraries (including tailwindcss-animate)
-            if (
-              packageName?.includes('framer') ||
-              packageName?.includes('spring') ||
-              packageName?.includes('motion') ||
-              packageName?.includes('animate')
-            ) {
-              return 'vendor-animation';
-            }
-
-            // Build tool dependencies that shouldn't be in runtime
-            if (
-              packageName?.includes('webpack') ||
-              packageName?.includes('rollup') ||
-              packageName?.includes('vite') ||
-              packageName?.includes('esbuild') ||
-              packageName?.includes('babel') ||
-              packageName?.includes('typescript') ||
-              packageName?.includes('postcss') ||
-              packageName?.includes('autoprefixer')
-            ) {
-              console.warn(`WARNING: Build tool in runtime bundle: ${packageName}`);
-              return 'vendor-build-tools';
-            }
-
-            // Everything else in vendor-misc
-            return 'vendor-misc';
-          }
-        },
-        // Best practice: Prevent too many small chunks
-        experimentalMinChunkSize: 20000, // 20KB minimum
+        manualChunks: createManualChunks(),
+        // Use balanced chunking preset
+        ...chunkingPresets.balanced,
       },
       // Tree shaking optimizations
       treeshake: {
