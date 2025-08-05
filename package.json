@@ -24,7 +24,9 @@
     "test:smoke": "playwright test --grep @smoke",
     "lighthouse:ci": "lhci autorun",
     "lighthouse:local": "node scripts/lighthouse-server.js & sleep 5 && lhci autorun --collect.startServerCommand='' --collect.url='http://localhost:5000' && kill %1",
-    "analyze": "npx vite-bundle-visualizer",
+    "analyze": "ANALYZE=true vite build",
+    "analyze:visualizer": "npx vite-bundle-visualizer",
+    "build:report": "vite build --mode production && echo 'Build complete. Check dist/ for output.'",
     "clean": "rm -rf dist coverage test-results playwright-report",
     "prepare": "node -e \"try { require.resolve('husky'); require('child_process').execSync('husky', {stdio: 'inherit'}); } catch (e) {}\""
   },

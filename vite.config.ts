@@ -95,33 +95,59 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: false,
+    sourcemap: false, // Disable for production, enable for debugging
     minify: 'terser',
-    target: 'es2020', // Updated to more modern target
-    chunkSizeWarningLimit: 300, // Reduced to encourage smaller chunks
+    target: 'es2020', // Modern browsers support
+    chunkSizeWarningLimit: 200, // Strict limit for better performance
+    // Optimize CSS
+    cssMinify: 'lightningcss',
+    // Better tree shaking
+    treeShaking: true,
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true,
         passes: 2,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-        // Additional optimizations
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+        // Advanced optimizations
         dead_code: true,
         evaluate: true,
         loops: true,
         module: true,
+        toplevel: true,
+        unsafe: true,
+        unsafe_comps: true,
+        unsafe_math: true,
+        unsafe_methods: true,
+        unsafe_proto: true,
+        unsafe_regexp: true,
+        unused: true,
       },
       format: {
         comments: false,
+        ascii_only: true, // Better compatibility
       },
       mangle: {
         safari10: true,
+        toplevel: true,
+        properties: {
+          regex: /^_/, // Mangle properties starting with _
+        },
       },
     },
     rollupOptions: {
       output: {
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
+        // Optimize module format
+        generatedCode: {
+          preset: 'es2015',
+          arrowFunctions: true,
+          constBindings: true,
+          objectShorthand: true,
+        },
+        // Better chunk imports
+        hoistTransitiveImports: true,
         assetFileNames: (assetInfo) => {
           const extType = assetInfo.name?.split('.').pop() || '';
           if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(extType)) {
@@ -220,7 +246,12 @@ export default defineConfig({
 
             // Group remaining packages by type
             // Crypto/Security packages
-            if (packageName.includes('crypto') || packageName.includes('uuid')) {
+            if (
+              packageName.includes('crypto') ||
+              packageName.includes('uuid') ||
+              packageName.includes('jwt') ||
+              packageName.includes('jose')
+            ) {
               return 'vendor-crypto';
             }
 
@@ -228,7 +259,8 @@ export default defineConfig({
             if (
               packageName.includes('axios') ||
               packageName.includes('fetch') ||
-              packageName.includes('http')
+              packageName.includes('http') ||
+              packageName.includes('cross-fetch')
             ) {
               return 'vendor-network';
             }
@@ -238,15 +270,75 @@ export default defineConfig({
               packageName.includes('polyfill') ||
               packageName.includes('core-js') ||
               packageName.includes('regenerator') ||
-              packageName.includes('tslib')
+              packageName.includes('tslib') ||
+              packageName === 'object-assign'
             ) {
               return 'vendor-polyfills';
+            }
+
+            // Date/Time libraries
+            if (
+              packageName.includes('date-fns') ||
+              packageName.includes('dayjs') ||
+              packageName.includes('moment')
+            ) {
+              return 'vendor-datetime';
+            }
+
+            // State management
+            if (
+              packageName.includes('redux') ||
+              packageName.includes('recoil') ||
+              packageName.includes('zustand') ||
+              packageName.includes('valtio') ||
+              packageName.includes('jotai')
+            ) {
+              return 'vendor-state';
+            }
+
+            // Parsing/Validation
+            if (
+              packageName.includes('yup') ||
+              packageName.includes('joi') ||
+              packageName.includes('ajv') ||
+              packageName.includes('superstruct')
+            ) {
+              return 'vendor-validation';
+            }
+
+            // DOM/Browser utilities
+            if (
+              packageName.includes('dom') ||
+              packageName.includes('browser') ||
+              packageName.includes('scroll') ||
+              packageName.includes('resize')
+            ) {
+              return 'vendor-dom';
+            }
+
+            // Animation libraries
+            if (
+              packageName.includes('framer') ||
+              packageName.includes('spring') ||
+              packageName.includes('motion') ||
+              packageName.includes('animate')
+            ) {
+              return 'vendor-animation';
             }
 
             // Everything else in vendor-misc
             return 'vendor-misc';
           }
         },
+        // Performance hint: merge small chunks
+        experimentalMinChunkSize: 10000, // 10KB minimum
+      },
+      // Tree shaking optimizations
+      treeshake: {
+        preset: 'recommended',
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
       },
     },
     // Modern optimizations
