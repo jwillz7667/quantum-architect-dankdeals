@@ -136,9 +136,10 @@ export default defineConfig({
           return `assets/[name]-[hash][extname]`;
         },
         manualChunks: (id) => {
-          // Core React dependencies - must be handled first and separately
-          if (id.includes('node_modules/react-dom/')) return 'react-dom';
-          if (id.includes('node_modules/react/')) return 'react';
+          // Bundle React and ReactDOM together to avoid loading issues
+          if (id.includes('node_modules/react-dom/') || id.includes('node_modules/react/')) {
+            return 'react-bundle';
+          }
           if (id.includes('node_modules/react-router-dom/')) return 'react-router';
 
           // UI libraries
@@ -271,6 +272,8 @@ export default defineConfig({
     // Force optimization of CJS dependencies
     esbuildOptions: {
       target: 'es2020',
+      // Ensure proper bundling of React
+      keepNames: true,
     },
   },
 });
