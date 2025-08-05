@@ -7,9 +7,18 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Best practice: Define env prefix for security
+  envPrefix: 'VITE_',
   server: {
     host: '::',
     port: 8080,
+    // Vite 5 best practice: enable HMR with WebSocket
+    hmr: {
+      overlay: true,
+    },
+    // Better error handling in dev
+    strictPort: false,
+    open: false,
   },
   plugins: [
     react({
@@ -92,15 +101,24 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // Best practice: Prefer module over jsnext:main or browser
+    mainFields: ['module', 'jsnext:main', 'jsnext', 'main'],
+    // Best practice: Optimize extension resolution
+    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
   },
   build: {
     outDir: 'dist',
-    sourcemap: false, // Disable for production, enable for debugging
+    // Best practice: Generate sourcemaps for production debugging
+    sourcemap: 'hidden', // Hidden sourcemaps for production
     minify: 'terser',
-    target: 'es2020', // Modern browsers support
-    chunkSizeWarningLimit: 200, // Strict limit for better performance
-    // Optimize CSS
+    // Best practice: Use browserslist or explicit browser versions
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    // Best practice: 500KB is more realistic for modern apps
+    chunkSizeWarningLimit: 500,
+    // Best practice: Use lightningcss for better CSS optimization
     cssMinify: 'lightningcss',
+    // Enable CSS code splitting
+    cssCodeSplit: true,
     terserOptions: {
       compress: {
         drop_console: true,
@@ -147,7 +165,7 @@ export default defineConfig({
         // Better chunk imports
         hoistTransitiveImports: true,
         assetFileNames: (assetInfo) => {
-          const extType = assetInfo.name?.split('.').pop() || '';
+          const extType = (assetInfo.names?.[0] || assetInfo.name)?.split('.').pop() || '';
           if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(extType)) {
             return `assets/img/[name]-[hash][extname]`;
           }
@@ -249,6 +267,11 @@ export default defineConfig({
             if (packageName === 'web-vitals') return 'vendor-monitoring';
             if (packageName?.includes('@axe-core')) return 'vendor-accessibility';
             if (packageName?.includes('@vercel/analytics')) return 'vendor-analytics';
+
+            // Best practice: Handle @babel/runtime specifically
+            if (packageName === '@babel/runtime' || packageName === '@babel/runtime-corejs3') {
+              return 'vendor-babel-runtime';
+            }
 
             // RxJS (large dependency from react-admin)
             if (packageName?.includes('rxjs') || packageName === 'rxjs') {
@@ -355,7 +378,7 @@ export default defineConfig({
               packageName?.includes('browser') ||
               packageName?.includes('scroll') ||
               packageName?.includes('resize') ||
-              packageName.includes('purify')
+              packageName?.includes('purify')
             ) {
               return 'vendor-dom';
             }
@@ -389,8 +412,8 @@ export default defineConfig({
             return 'vendor-misc';
           }
         },
-        // Performance hint: merge small chunks
-        experimentalMinChunkSize: 10000, // 10KB minimum
+        // Best practice: Prevent too many small chunks
+        experimentalMinChunkSize: 20000, // 20KB minimum
       },
       // Tree shaking optimizations
       treeshake: {
@@ -400,13 +423,18 @@ export default defineConfig({
         tryCatchDeoptimization: false,
       },
     },
-    // Modern optimizations
-    cssCodeSplit: true,
+    // Best practice: Optimize asset handling
     assetsInlineLimit: 4096, // Inline assets < 4kb
-    reportCompressedSize: false, // Faster builds
+    // Best practice: Skip compressed size reporting for faster builds
+    reportCompressedSize: false,
+    // Best practice: Write manifest for asset tracking
+    manifest: true,
+    // Best practice: Consistent output file naming
+    emptyOutDir: true,
   },
-  // Performance optimizations
+  // Best practice: Optimize dependencies
   optimizeDeps: {
+    // Include commonly used dependencies
     include: [
       'react',
       'react-dom',
@@ -418,13 +446,27 @@ export default defineConfig({
       'zod',
       'clsx',
       'tailwind-merge',
+      // Add dependencies that cause issues if not pre-bundled
+      'react-helmet-async',
+      'sonner',
     ],
     exclude: ['@vite/client', '@vite/env'],
-    // Force optimization of CJS dependencies
+    // Best practice: Optimize esbuild for better compatibility
     esbuildOptions: {
       target: 'es2020',
-      // Ensure proper bundling of React
+      // Ensure proper bundling
       keepNames: true,
+      // Best practice: Support JSX in .js files
+      loader: {
+        '.js': 'jsx',
+      },
     },
+  },
+  // Best practice: Preview server configuration
+  preview: {
+    port: 5000,
+    strictPort: false,
+    host: true,
+    cors: true,
   },
 });
