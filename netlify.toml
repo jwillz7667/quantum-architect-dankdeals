@@ -15,6 +15,22 @@
   # VITE_SUPABASE_URL = "set in Netlify UI"
   # VITE_SUPABASE_ANON_KEY = "set in Netlify UI"
 
+# Disable problematic plugins that break ES modules
+[[plugins]]
+  package = "netlify-plugin-inline-source"
+  [plugins.inputs]
+    enabled = false
+
+[[plugins]]
+  package = "netlify-plugin-inline-critical-css"
+  [plugins.inputs]
+    enabled = false
+
+[[plugins]]
+  package = "netlify-plugin-minify-html"
+  [plugins.inputs]
+    enabled = false
+
 # SPA routing
 [[redirects]]
   from = "/*"
