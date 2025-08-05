@@ -4,6 +4,7 @@ import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
+import { createManualChunks, outputOptions } from './vite-chunking';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -112,86 +113,15 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          const extType = assetInfo.name?.split('.').pop() || '';
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(extType)) {
-            return `assets/img/[name]-[hash][extname]`;
-          }
-          if (/css/i.test(extType)) {
-            return `assets/css/[name]-[hash][extname]`;
-          }
-          if (/woff2?|ttf|otf|eot/i.test(extType)) {
-            return `assets/fonts/[name]-[hash][extname]`;
-          }
-          return `assets/[name]-[hash][extname]`;
-        },
-        manualChunks: (id) => {
-          // Core React dependencies - must be handled first and separately
-          if (id.includes('node_modules/react-dom/')) return 'react-dom';
-          if (id.includes('node_modules/react/')) return 'react';
-          if (id.includes('node_modules/react-router-dom/')) return 'react-router';
-
-          // UI libraries
-          if (id.includes('@radix-ui')) return 'radix-ui';
-          if (id.includes('lucide-react')) return 'icons';
-
-          // Data & API
-          if (id.includes('@supabase')) return 'supabase';
-          if (id.includes('@tanstack/react-query')) return 'react-query';
-
-          // Utilities
-          if (
-            id.includes('clsx') ||
-            id.includes('tailwind-merge') ||
-            id.includes('class-variance-authority')
-          )
-            return 'utils';
-          if (id.includes('date-fns')) return 'date-fns';
-
-          // Form libraries
-          if (id.includes('react-hook-form')) return 'forms';
-          if (id.includes('@hookform')) return 'forms';
-
-          // Other UI/DOM related
-          if (id.includes('react-helmet-async')) return 'seo';
-          if (id.includes('sonner')) return 'notifications';
-          if (id.includes('next-themes')) return 'themes';
-
-          // Large libraries and remaining node_modules
-          if (id.includes('node_modules')) {
-            const directories = id.split('/');
-            const nodeModulesIndex = directories.indexOf('node_modules');
-            if (nodeModulesIndex !== -1 && nodeModulesIndex < directories.length - 1) {
-              const packageName = directories[nodeModulesIndex + 1];
-              // Group small packages together, excluding already handled packages
-              if (
-                packageName &&
-                ![
-                  'react',
-                  'react-dom',
-                  'react-router-dom',
-                  '@radix-ui',
-                  '@supabase',
-                  '@tanstack',
-                  'lucide-react',
-                  'react-hook-form',
-                  '@hookform',
-                  'clsx',
-                  'tailwind-merge',
-                  'class-variance-authority',
-                  'date-fns',
-                  'react-helmet-async',
-                  'sonner',
-                  'next-themes',
-                ].some((name) => packageName.includes(name))
-              ) {
-                return 'vendor';
-              }
-            }
-          }
-        },
+        ...outputOptions,
+        manualChunks: createManualChunks,
+      },
+      // Tree shaking optimizations
+      treeshake: {
+        preset: 'recommended',
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
       },
     },
     // Modern optimizations
