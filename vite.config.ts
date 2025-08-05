@@ -101,8 +101,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 200, // Strict limit for better performance
     // Optimize CSS
     cssMinify: 'lightningcss',
-    // Better tree shaking
-    treeShaking: true,
     terserOptions: {
       compress: {
         drop_console: true,
@@ -240,37 +238,82 @@ export default defineConfig({
               '@emotion',
             ];
 
-            if (handledPackages.some((pkg) => packageName.startsWith(pkg))) {
+            if (handledPackages.some((pkg) => packageName?.startsWith(pkg))) {
               return undefined; // Let other rules handle it
             }
 
             // Group remaining packages by type
+            // Specific large packages that should have their own chunks
+            if (packageName === 'dompurify') return 'vendor-sanitization';
+            if (packageName === 'dotenv') return 'vendor-env';
+            if (packageName === 'web-vitals') return 'vendor-monitoring';
+            if (packageName?.includes('@axe-core')) return 'vendor-accessibility';
+            if (packageName?.includes('@vercel/analytics')) return 'vendor-analytics';
+
+            // RxJS (large dependency from react-admin)
+            if (packageName?.includes('rxjs') || packageName === 'rxjs') {
+              return 'vendor-rxjs';
+            }
+
+            // Error tracking and monitoring
+            if (packageName?.includes('@sentry') || packageName?.includes('sentry')) {
+              return 'vendor-error-tracking';
+            }
+
+            // Polyfills and ES shims
+            if (
+              packageName?.includes('es-abstract') ||
+              packageName?.includes('es-shim') ||
+              packageName?.includes('es5-shim') ||
+              packageName?.includes('es6-shim')
+            ) {
+              return 'vendor-es-shims';
+            }
+
+            // Lodash and utility libraries
+            if (
+              packageName?.includes('lodash') ||
+              packageName === 'underscore' ||
+              packageName === 'ramda'
+            ) {
+              return 'vendor-utilities';
+            }
+
+            // Tailwind should not be in runtime bundles at all
+            // If it's here, something is importing it incorrectly
+            if (packageName?.includes('tailwindcss')) {
+              console.warn(
+                `WARNING: tailwindcss is being bundled into runtime! Package: ${packageName}`
+              );
+              return 'vendor-css-framework';
+            }
+
             // Crypto/Security packages
             if (
-              packageName.includes('crypto') ||
-              packageName.includes('uuid') ||
-              packageName.includes('jwt') ||
-              packageName.includes('jose')
+              packageName?.includes('crypto') ||
+              packageName?.includes('uuid') ||
+              packageName?.includes('jwt') ||
+              packageName?.includes('jose')
             ) {
               return 'vendor-crypto';
             }
 
             // HTTP/Network packages
             if (
-              packageName.includes('axios') ||
-              packageName.includes('fetch') ||
-              packageName.includes('http') ||
-              packageName.includes('cross-fetch')
+              packageName?.includes('axios') ||
+              packageName?.includes('fetch') ||
+              packageName?.includes('http') ||
+              packageName?.includes('cross-fetch')
             ) {
               return 'vendor-network';
             }
 
             // Polyfills and runtime helpers
             if (
-              packageName.includes('polyfill') ||
-              packageName.includes('core-js') ||
-              packageName.includes('regenerator') ||
-              packageName.includes('tslib') ||
+              packageName?.includes('polyfill') ||
+              packageName?.includes('core-js') ||
+              packageName?.includes('regenerator') ||
+              packageName?.includes('tslib') ||
               packageName === 'object-assign'
             ) {
               return 'vendor-polyfills';
@@ -278,52 +321,68 @@ export default defineConfig({
 
             // Date/Time libraries
             if (
-              packageName.includes('date-fns') ||
-              packageName.includes('dayjs') ||
-              packageName.includes('moment')
+              packageName?.includes('date-fns') ||
+              packageName?.includes('dayjs') ||
+              packageName?.includes('moment')
             ) {
               return 'vendor-datetime';
             }
 
             // State management
             if (
-              packageName.includes('redux') ||
-              packageName.includes('recoil') ||
-              packageName.includes('zustand') ||
-              packageName.includes('valtio') ||
-              packageName.includes('jotai')
+              packageName?.includes('redux') ||
+              packageName?.includes('recoil') ||
+              packageName?.includes('zustand') ||
+              packageName?.includes('valtio') ||
+              packageName?.includes('jotai')
             ) {
               return 'vendor-state';
             }
 
             // Parsing/Validation
             if (
-              packageName.includes('yup') ||
-              packageName.includes('joi') ||
-              packageName.includes('ajv') ||
-              packageName.includes('superstruct')
+              packageName?.includes('yup') ||
+              packageName?.includes('joi') ||
+              packageName?.includes('ajv') ||
+              packageName?.includes('superstruct')
             ) {
               return 'vendor-validation';
             }
 
-            // DOM/Browser utilities
+            // DOM/Browser utilities (including DOMPurify)
             if (
-              packageName.includes('dom') ||
-              packageName.includes('browser') ||
-              packageName.includes('scroll') ||
-              packageName.includes('resize')
+              packageName?.includes('dom') ||
+              packageName?.includes('browser') ||
+              packageName?.includes('scroll') ||
+              packageName?.includes('resize') ||
+              packageName.includes('purify')
             ) {
               return 'vendor-dom';
             }
 
-            // Animation libraries
+            // Animation libraries (including tailwindcss-animate)
             if (
-              packageName.includes('framer') ||
-              packageName.includes('spring') ||
-              packageName.includes('motion') ||
-              packageName.includes('animate')
+              packageName?.includes('framer') ||
+              packageName?.includes('spring') ||
+              packageName?.includes('motion') ||
+              packageName?.includes('animate')
             ) {
               return 'vendor-animation';
+            }
+
+            // Build tool dependencies that shouldn't be in runtime
+            if (
+              packageName?.includes('webpack') ||
+              packageName?.includes('rollup') ||
+              packageName?.includes('vite') ||
+              packageName?.includes('esbuild') ||
+              packageName?.includes('babel') ||
+              packageName?.includes('typescript') ||
+              packageName?.includes('postcss') ||
+              packageName?.includes('autoprefixer')
+            ) {
+              console.warn(`WARNING: Build tool in runtime bundle: ${packageName}`);
+              return 'vendor-build-tools';
             }
 
             // Everything else in vendor-misc
