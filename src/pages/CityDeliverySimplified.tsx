@@ -5,7 +5,6 @@ import { getCityBySlug } from '@/lib/cities';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { DeliveryMap } from '@/components/DeliveryMap';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { MobileHeader } from '@/components/MobileHeader';
 import { BottomNav } from '@/components/BottomNav';
@@ -69,15 +68,8 @@ export default function CityDeliverySimplified() {
 
         {/* Hero Section with Map */}
         <section className="relative">
-          {/* Map Background */}
-          <div className="absolute inset-0 h-[400px] md:h-[500px] opacity-30">
-            <DeliveryMap
-              center={city.coordinates}
-              zoom={13}
-              className="h-full"
-              showCoverage={false}
-            />
-          </div>
+          {/* Background Pattern */}
+          <div className="absolute inset-0 h-[400px] md:h-[500px] bg-gradient-to-br from-primary/5 to-primary/10" />
 
           {/* Content Overlay */}
           <div className="relative bg-gradient-to-b from-background/90 via-background/95 to-background pt-8 pb-16">

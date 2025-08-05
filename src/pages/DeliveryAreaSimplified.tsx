@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { MobileHeader } from '@/components/MobileHeader';
 import { BottomNav } from '@/components/BottomNav';
-import { DeliveryMap } from '@/components/DeliveryMap';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Truck, Phone } from 'lucide-react';
@@ -79,9 +78,15 @@ export default function DeliveryAreaSimplified() {
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8">Our Delivery Coverage</h2>
 
-          {/* Map */}
-          <div className="rounded-xl overflow-hidden shadow-lg mb-8 bg-card">
-            <DeliveryMap className="h-[400px] md:h-[500px]" showCoverage />
+          {/* Map Placeholder */}
+          <div className="rounded-xl overflow-hidden shadow-lg mb-8 bg-card h-[400px] md:h-[500px] flex items-center justify-center bg-gradient-to-b from-primary/5 to-primary/10">
+            <div className="text-center">
+              <MapPin className="h-16 w-16 text-primary mx-auto mb-4" />
+              <p className="text-lg font-semibold text-foreground">Delivery Coverage Area</p>
+              <p className="text-muted-foreground mt-2">
+                We deliver to Minneapolis, St. Paul & surrounding areas
+              </p>
+            </div>
           </div>
 
           {/* Zone Legend */}

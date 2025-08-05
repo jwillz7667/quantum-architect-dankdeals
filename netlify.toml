@@ -7,8 +7,6 @@
 [build.environment]
   NODE_VERSION = "20"
   # Don't set NODE_ENV here - let the build script handle it
-  # Disable secrets scanning for Google Maps API key pattern
-  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIza*"
 
 [[redirects]]
   from = "/*"
