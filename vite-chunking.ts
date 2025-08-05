@@ -109,14 +109,14 @@ export function createManualChunks() {
       return 'lib-forms';
     }
 
-    // 7. CSS-in-JS and styling
-    if (
-      packageName.includes('emotion') ||
-      packageName.includes('styled-components') ||
-      packageName === 'clsx' ||
-      packageName === 'tailwind-merge'
-    ) {
+    // 7. CSS-in-JS and styling - but NOT clsx or tailwind-merge as they're used in utils
+    if (packageName.includes('emotion') || packageName.includes('styled-components')) {
       return 'lib-styles';
+    }
+
+    // Put clsx and tailwind-merge in utils chunk since they're used by the cn() utility
+    if (packageName === 'clsx' || packageName === 'tailwind-merge') {
+      return 'lib-utils';
     }
 
     // 8. Large utility libraries

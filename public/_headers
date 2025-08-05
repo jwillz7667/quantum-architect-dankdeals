@@ -44,5 +44,9 @@
   Cache-Control: no-cache, no-store, must-revalidate
   
 /manifest.json
-  # PWA manifest can be cached for a short time
-  Cache-Control: public, max-age=3600
+  # PWA manifest should not be cached
+  Cache-Control: no-cache, no-store, must-revalidate
+  
+/manifest.webmanifest
+  # PWA manifest should not be cached
+  Cache-Control: no-cache, no-store, must-revalidate
