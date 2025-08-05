@@ -174,7 +174,9 @@ export default defineConfig({
         // Better chunk imports
         hoistTransitiveImports: true,
         assetFileNames: (assetInfo) => {
-          const extType = (assetInfo.names?.[0] || assetInfo.name)?.split('.').pop() || '';
+          // Use names array instead of deprecated name property
+          const fileName = assetInfo.names?.[0] || 'asset';
+          const extType = fileName.split('.').pop() || '';
           if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp|avif/i.test(extType)) {
             return `assets/img/[name]-[hash][extname]`;
           }
@@ -187,8 +189,10 @@ export default defineConfig({
           return `assets/[name]-[hash][extname]`;
         },
         manualChunks: createManualChunks(),
-        // Use balanced chunking preset
+        // Use balanced chunking preset with aggressive merging
         ...chunkingPresets.balanced,
+        // Experimental: Aggressively merge small chunks
+        experimentalMinChunkSize: 100000, // 100KB minimum chunk size
       },
       // Tree shaking optimizations
       treeshake: {
