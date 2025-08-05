@@ -101,6 +101,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Fix for Supabase Node.js dependencies in browser
+      'node-fetch': 'cross-fetch',
+      '@supabase/node-fetch': 'cross-fetch',
     },
     // Best practice: Prefer module over jsnext:main or browser
     mainFields: ['module', 'jsnext:main', 'jsnext', 'main'],
@@ -120,16 +123,17 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    // Polyfill Node.js built-ins for browser
     // Best practice: Use lightningcss for better CSS optimization (fallback to default if not available)
     cssMinify: true,
     // Enable CSS code splitting
     cssCodeSplit: true,
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false, // Keep console statements for error handling
         drop_debugger: true,
         passes: 2,
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'],
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.trace'], // Remove only these, keep console.error and console.warn
         // Advanced optimizations
         dead_code: true,
         evaluate: true,
@@ -239,5 +243,15 @@ export default defineConfig({
     strictPort: false,
     host: true,
     cors: true,
+  },
+  // Fix SSR compatibility issues
+  ssr: {
+    noExternal: ['@supabase/supabase-js'],
+  },
+  define: {
+    // Define global for browser compatibility
+    global: 'globalThis',
+    // Stub out Node.js globals
+    'process.env': {},
   },
 });
