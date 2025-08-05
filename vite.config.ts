@@ -104,6 +104,13 @@ export default defineConfig({
       // Fix for Supabase Node.js dependencies in browser
       'node-fetch': 'cross-fetch',
       '@supabase/node-fetch': 'cross-fetch',
+      // Provide empty modules for Node.js built-ins that some deps try to use
+      util: 'rollup-plugin-node-polyfills/polyfills/util',
+      stream: 'rollup-plugin-node-polyfills/polyfills/stream',
+      http: 'rollup-plugin-node-polyfills/polyfills/http',
+      https: 'rollup-plugin-node-polyfills/polyfills/http',
+      url: 'rollup-plugin-node-polyfills/polyfills/url',
+      zlib: 'rollup-plugin-node-polyfills/polyfills/zlib',
     },
     // Best practice: Prefer module over jsnext:main or browser
     mainFields: ['module', 'jsnext:main', 'jsnext', 'main'],

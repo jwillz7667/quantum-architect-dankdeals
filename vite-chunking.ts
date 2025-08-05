@@ -4,8 +4,8 @@
 interface ModuleInfo {
   isEntry?: boolean;
   isDynamicEntry?: boolean;
-  importers?: string[];
-  code?: string;
+  importers?: readonly string[];
+  code?: string | null;
 }
 
 // Match Rollup's ManualChunkMeta interface
