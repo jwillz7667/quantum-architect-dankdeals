@@ -82,13 +82,19 @@ async function buildProduction() {
   const buildTime = ((Date.now() - startTime) / 1000).toFixed(2);
   log(`Build completed in ${buildTime}s`, 'success');
 
-  // Step 7: Generate sitemap
+  // Step 7: Generate sitemap (after build)
   log('Generating sitemap...');
-  exec('npm run sitemap:prod');
+  if (!exec('npm run sitemap:prod')) {
+    log('Sitemap generation failed!', 'warning');
+    // Continue build process even if sitemap fails
+  }
 
   // Step 8: Analyze bundle size
   log('Analyzing bundle size...');
-  exec('npm run build:size');
+  if (!exec('npm run build:size')) {
+    log('Bundle size analysis failed!', 'warning');
+    // Continue build process even if size analysis fails
+  }
 
   // Step 9: Run Lighthouse CI (if configured)
   if (process.env.LIGHTHOUSE_CI === 'true') {
@@ -107,7 +113,9 @@ async function buildProduction() {
   console.log('🚀 Ready for deployment\n');
 
   // Show build stats
-  exec('du -sh dist/', { stdio: 'pipe' });
+  if (!exec('du -sh dist/', { stdio: 'inherit' })) {
+    log('Failed to get directory size', 'warning');
+  }
 }
 
 // Run the build

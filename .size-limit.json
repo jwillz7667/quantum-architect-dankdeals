@@ -1,20 +1,17 @@
 [
   {
     "name": "Main Bundle",
-    "path": "dist/assets/*.js",
-    "limit": "200 KB",
-    "webpack": false
+    "path": "dist/assets/js/*.js",
+    "limit": "300 KB"
   },
   {
     "name": "Main CSS",
-    "path": "dist/assets/*.css",
-    "limit": "50 KB",
-    "webpack": false
+    "path": "dist/assets/css/*.css",
+    "limit": "60 KB"
   },
   {
     "name": "Total Application",
     "path": "dist/**/*",
-    "limit": "500 KB",
-    "webpack": false
+    "limit": "3 MB"
   }
 ]

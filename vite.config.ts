@@ -115,6 +115,10 @@ export default defineConfig({
     target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     // Best practice: 500KB is more realistic for modern apps
     chunkSizeWarningLimit: 500,
+    // Suppress node module externalization warnings (expected for Supabase)
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
     // Best practice: Use lightningcss for better CSS optimization (fallback to default if not available)
     cssMinify: true,
     // Enable CSS code splitting
