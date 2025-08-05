@@ -2,10 +2,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { config } from 'dotenv';
 
-// Load environment variables
-config();
+// Only load dotenv in development
+if (process.env.NODE_ENV !== 'production') {
+  const { config } = await import('dotenv');
+  config();
+}
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
 const supabaseKey =
