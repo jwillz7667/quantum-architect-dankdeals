@@ -97,17 +97,25 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'terser',
-    target: 'es2018',
-    chunkSizeWarningLimit: 500,
+    target: 'es2020', // Updated to more modern target
+    chunkSizeWarningLimit: 300, // Reduced to encourage smaller chunks
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true,
         passes: 2,
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        // Additional optimizations
+        dead_code: true,
+        evaluate: true,
+        loops: true,
+        module: true,
       },
       format: {
         comments: false,
+      },
+      mangle: {
+        safari10: true,
       },
     },
     rollupOptions: {
@@ -148,11 +156,15 @@ export default defineConfig({
             id.includes('class-variance-authority')
           )
             return 'utils';
-          if (id.includes('date-fns')) return 'date-fns';
+
+          // Only create date-fns chunk if it's actually used
+          // Remove this to prevent empty chunks
+          // if (id.includes('date-fns')) return 'date-fns';
 
           // Form libraries
           if (id.includes('react-hook-form')) return 'forms';
           if (id.includes('@hookform')) return 'forms';
+          if (id.includes('zod')) return 'forms'; // Add zod to forms chunk
 
           // Admin panel dependencies (code-split)
           if (id.includes('react-admin')) return 'admin-core';
@@ -167,37 +179,71 @@ export default defineConfig({
           if (id.includes('sonner')) return 'notifications';
           if (id.includes('next-themes')) return 'themes';
 
-          // Large libraries and remaining node_modules
+          // Split vendor chunk by package size and type
           if (id.includes('node_modules')) {
-            const directories = id.split('/');
-            const nodeModulesIndex = directories.indexOf('node_modules');
-            if (nodeModulesIndex !== -1 && nodeModulesIndex < directories.length - 1) {
-              const packageName = directories[nodeModulesIndex + 1];
-              // Group small packages together, excluding already handled packages
-              if (
-                packageName &&
-                ![
-                  'react',
-                  'react-dom',
-                  'react-router-dom',
-                  '@radix-ui',
-                  '@supabase',
-                  '@tanstack',
-                  'lucide-react',
-                  'react-hook-form',
-                  '@hookform',
-                  'clsx',
-                  'tailwind-merge',
-                  'class-variance-authority',
-                  'date-fns',
-                  'react-helmet-async',
-                  'sonner',
-                  'next-themes',
-                ].some((name) => packageName.includes(name))
-              ) {
-                return 'vendor';
-              }
+            // Extract package name
+            const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
+            if (!match) return 'vendor-misc';
+
+            const packageName = match[1];
+
+            // Already handled packages
+            const handledPackages = [
+              'react',
+              'react-dom',
+              'react-router-dom',
+              '@radix-ui',
+              '@supabase',
+              '@tanstack',
+              'lucide-react',
+              'react-hook-form',
+              '@hookform',
+              'clsx',
+              'tailwind-merge',
+              'class-variance-authority',
+              'react-helmet-async',
+              'sonner',
+              'next-themes',
+              'zod',
+              'react-admin',
+              'ra-supabase',
+              'ra-input-rich-text',
+              '@mui/material',
+              '@mui/icons-material',
+              '@emotion',
+            ];
+
+            if (handledPackages.some((pkg) => packageName.startsWith(pkg))) {
+              return undefined; // Let other rules handle it
             }
+
+            // Group remaining packages by type
+            // Crypto/Security packages
+            if (packageName.includes('crypto') || packageName.includes('uuid')) {
+              return 'vendor-crypto';
+            }
+
+            // HTTP/Network packages
+            if (
+              packageName.includes('axios') ||
+              packageName.includes('fetch') ||
+              packageName.includes('http')
+            ) {
+              return 'vendor-network';
+            }
+
+            // Polyfills and runtime helpers
+            if (
+              packageName.includes('polyfill') ||
+              packageName.includes('core-js') ||
+              packageName.includes('regenerator') ||
+              packageName.includes('tslib')
+            ) {
+              return 'vendor-polyfills';
+            }
+
+            // Everything else in vendor-misc
+            return 'vendor-misc';
           }
         },
       },
@@ -209,7 +255,22 @@ export default defineConfig({
   },
   // Performance optimizations
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@supabase/supabase-js',
+      '@tanstack/react-query',
+      'lucide-react',
+      'react-hook-form',
+      'zod',
+      'clsx',
+      'tailwind-merge',
+    ],
     exclude: ['@vite/client', '@vite/env'],
+    // Force optimization of CJS dependencies
+    esbuildOptions: {
+      target: 'es2020',
+    },
   },
 });
