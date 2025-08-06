@@ -1,14 +1,7 @@
 // Google Analytics 4 implementation
 // Only use this if you're NOT using Google Tag Manager for GA4
 
-declare global {
-  interface Window {
-    gtag: (...args: unknown[]) => void;
-    dataLayer: unknown[];
-  }
-}
-
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
+const GA_MEASUREMENT_ID = import.meta.env['VITE_GA_MEASUREMENT_ID'] as string | undefined;
 
 /**
  * Initialize Google Analytics 4
@@ -29,7 +22,7 @@ export function initializeGA(): void {
   // Initialize gtag
   window.dataLayer = window.dataLayer || [];
   window.gtag = function (...args: unknown[]) {
-    window.dataLayer.push(args);
+    window.dataLayer?.push(args);
   };
   window.gtag('js', new Date());
   window.gtag('config', GA_MEASUREMENT_ID, {

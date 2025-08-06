@@ -4,12 +4,6 @@ import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 // Removed Vercel Analytics specific code since we're deploying on Netlify
 // This prevents CSP violations and unnecessary dependencies
 
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
-
 function sendToAnalytics(metric: Metric) {
   // Log to console in development
   if (import.meta.env.DEV) {

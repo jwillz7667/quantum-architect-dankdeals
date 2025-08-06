@@ -1,4 +1,3 @@
-/// <reference types="@types/google.maps" />
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';

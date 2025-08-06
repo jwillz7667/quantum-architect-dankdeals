@@ -51,7 +51,7 @@ export const OptimizedProductImage = forwardRef<HTMLImageElement, OptimizedProdu
 
     return (
       <div
-        ref={elementRef}
+        ref={elementRef as React.RefObject<HTMLDivElement>}
         className={cn(
           'relative overflow-hidden bg-gray-100',
           'aspect-square', // Maintain 1:1 aspect ratio

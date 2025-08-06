@@ -6,13 +6,6 @@ interface DeliveryAreaMapProps {
   height?: string;
 }
 
-declare global {
-  interface Window {
-    google?: typeof google;
-    initDeliveryAreaMap?: () => void;
-  }
-}
-
 export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAreaMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
@@ -141,7 +134,7 @@ export const DeliveryAreaMap = ({ className = '', height = '200px' }: DeliveryAr
     // Delay loading Google Maps until component is in viewport
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0] && entries[0].isIntersecting) {
           loadGoogleMaps();
           observer.disconnect();
         }

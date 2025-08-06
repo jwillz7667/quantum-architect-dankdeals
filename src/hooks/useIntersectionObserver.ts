@@ -22,12 +22,12 @@ export function useIntersectionObserver(options: UseIntersectionObserverOptions 
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry && entry.isIntersecting) {
           setIsIntersecting(true);
           if (triggerOnce) {
             observer.disconnect();
           }
-        } else if (!triggerOnce) {
+        } else if (!triggerOnce && entry) {
           setIsIntersecting(false);
         }
       },

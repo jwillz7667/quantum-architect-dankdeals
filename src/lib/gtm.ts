@@ -2,7 +2,7 @@
 
 interface GTMEvent {
   event: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -217,9 +217,4 @@ export const GTMEvents = {
   },
 };
 
-// Type declaration for window.dataLayer
-declare global {
-  interface Window {
-    dataLayer: any[];
-  }
-}
+// Type declaration for window.dataLayer is now in src/types/global.d.ts

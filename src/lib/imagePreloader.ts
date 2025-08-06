@@ -84,10 +84,10 @@ export function preloadImageOnHover(element: HTMLElement, imageUrl: string): voi
 
   element.addEventListener('mouseenter', handleMouseEnter, { once: true });
 
-  // Cleanup function
-  return () => {
+  // Return cleanup function
+  return (() => {
     element.removeEventListener('mouseenter', handleMouseEnter);
-  };
+  }) as unknown as void;
 }
 
 /**
@@ -103,8 +103,9 @@ export function preloadNearbyImages(
   const end = Math.min(imageUrls.length, currentIndex + bufferSize + 1);
 
   for (let i = start; i < end; i++) {
-    if (i !== currentIndex && imageUrls[i]) {
-      preloadImage(imageUrls[i], { fetchPriority: 'low' }).catch(() => {
+    const imageUrl = imageUrls[i];
+    if (i !== currentIndex && imageUrl) {
+      preloadImage(imageUrl, { fetchPriority: 'low' }).catch(() => {
         // Silent failure for speculative preloads
       });
     }
