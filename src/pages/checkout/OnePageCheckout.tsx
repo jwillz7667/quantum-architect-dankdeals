@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/context/AuthContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,13 +29,14 @@ export default function OnePageCheckout() {
   const navigate = useNavigate();
   const { items, subtotal: cartSubtotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { trackBeginCheckout, trackPurchase } = useAnalytics();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [address, setAddress] = useState<DeliveryAddress>({
     street: '',
     apartment: '',
-    city: 'Minneapolis',
+    city: '',
     state: 'MN',
     zipcode: '',
     instructions: '',
@@ -54,8 +56,11 @@ export default function OnePageCheckout() {
   useEffect(() => {
     if (items.length === 0) {
       navigate('/cart');
+    } else {
+      // Track checkout begin when user lands on checkout page
+      trackBeginCheckout(items, finalTotal);
     }
-  }, [items, navigate]);
+  }, [items, navigate, trackBeginCheckout, finalTotal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +146,9 @@ export default function OnePageCheckout() {
       if (!data?.success || !data?.order) {
         throw new Error(data?.error || 'Order creation failed');
       }
+
+      // Track successful purchase
+      trackPurchase(data.order.order_number, items, data.order.total, tax, deliveryFee);
 
       // Email is now automatically sent by process-order function
       // No need for separate email function call

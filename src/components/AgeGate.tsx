@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Shield } from '@/lib/icons';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { setCookie, getCookie } from '@/lib/cookies';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const AGE_GATE_KEY = 'dankdeals_age_verified';
 const AGE_GATE_EXPIRY_DAYS = 30;
@@ -11,6 +12,7 @@ const AGE_GATE_EXPIRY_DAYS = 30;
 export function AgeGate() {
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(true);
+  const { trackAgeVerification } = useAnalytics();
 
   useEffect(() => {
     // Check if user has already verified age
@@ -35,6 +37,9 @@ export function AgeGate() {
   }, []);
 
   const handleVerification = (isOfAge: boolean) => {
+    // Track age verification attempt
+    trackAgeVerification(isOfAge);
+
     if (isOfAge) {
       // Set secure cookie with proper flags
       setCookie(AGE_GATE_KEY, 'true', AGE_GATE_EXPIRY_DAYS, {

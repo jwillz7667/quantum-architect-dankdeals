@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { Product, ProductVariant } from '@/hooks/useProducts';
 import { BottomNav } from '@/components/BottomNav';
 import { MobileHeader } from '@/components/MobileHeader';
@@ -32,6 +33,7 @@ export default function ProductDetail() {
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addItem } = useCart();
+  const { trackProductView, trackAddToCart } = useAnalytics();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -88,6 +90,10 @@ export default function ProductDetail() {
 
         const productData = data as ExtendedProduct;
         setProduct(productData);
+
+        // Track product view
+        trackProductView(productData as Product);
+
         // Set the first available variant as default
         if (productData.variants && productData.variants.length > 0) {
           const firstVariant = productData.variants[0];
@@ -104,7 +110,7 @@ export default function ProductDetail() {
     };
 
     void fetchProduct();
-  }, [id]);
+  }, [id, trackProductView]);
 
   const handleQuantityChange = (delta: number) => {
     setQuantity(Math.max(1, quantity + delta));
@@ -114,6 +120,9 @@ export default function ProductDetail() {
     if (!product || !selectedVariant) {
       return;
     }
+
+    // Track add to cart event
+    trackAddToCart(product as Product, quantity);
 
     // Add item to cart
     addItem(product, selectedVariant, quantity);

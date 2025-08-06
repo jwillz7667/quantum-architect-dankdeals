@@ -15,6 +15,7 @@ import { SEOProvider } from '@/components/SEOEnhanced';
 import { AuthProvider } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { MobileMenuProvider } from '@/context/MobileMenuContext';
+import { GTMProvider } from '@/components/analytics/GTMProvider';
 
 import { lazyWithPrefetch, prefetchCriticalRoutes } from '@/lib/lazyWithPrefetch';
 
@@ -62,76 +63,78 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <SEOProvider>
-            <TooltipProvider>
-              <MobileMenuProvider>
-                <AgeGate />
-                <Toaster />
-                <Sonner />
-                <RealTimeProvider>
-                  <CartProvider>
-                    <ProductsFilterProvider>
-                      <Suspense fallback={<PageLoader />}>
-                        <Routes>
-                          {/* Public routes */}
-                          <Route path="/" element={<Index />} />
-                          <Route path="/product/:id" element={<ProductDetail />} />
-                          <Route path="/categories" element={<Categories />} />
-                          <Route path="/delivery-area" element={<DeliveryArea />} />
-                          <Route path="/delivery-areas" element={<DeliveryArea />} />
-                          <Route path="/delivery/:city" element={<CityDelivery />} />
-                          <Route path="/faq" element={<FAQ />} />
-                          <Route path="/blog" element={<Blog />} />
-                          <Route path="/blog/:slug" element={<BlogPost />} />
-                          <Route path="/privacy" element={<Privacy />} />
-                          <Route path="/terms" element={<Terms />} />
-                          <Route path="/legal" element={<Legal />} />
+            <GTMProvider>
+              <TooltipProvider>
+                <MobileMenuProvider>
+                  <AgeGate />
+                  <Toaster />
+                  <Sonner />
+                  <RealTimeProvider>
+                    <CartProvider>
+                      <ProductsFilterProvider>
+                        <Suspense fallback={<PageLoader />}>
+                          <Routes>
+                            {/* Public routes */}
+                            <Route path="/" element={<Index />} />
+                            <Route path="/product/:id" element={<ProductDetail />} />
+                            <Route path="/categories" element={<Categories />} />
+                            <Route path="/delivery-area" element={<DeliveryArea />} />
+                            <Route path="/delivery-areas" element={<DeliveryArea />} />
+                            <Route path="/delivery/:city" element={<CityDelivery />} />
+                            <Route path="/faq" element={<FAQ />} />
+                            <Route path="/blog" element={<Blog />} />
+                            <Route path="/blog/:slug" element={<BlogPost />} />
+                            <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/terms" element={<Terms />} />
+                            <Route path="/legal" element={<Legal />} />
 
-                          {/* Auth routes */}
-                          <Route path="/auth/login" element={<Login />} />
-                          <Route path="/auth/register" element={<Register />} />
-                          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-                          <Route path="/auth/callback" element={<AuthCallback />} />
+                            {/* Auth routes */}
+                            <Route path="/auth/login" element={<Login />} />
+                            <Route path="/auth/register" element={<Register />} />
+                            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                            <Route path="/auth/callback" element={<AuthCallback />} />
 
-                          {/* Cart and checkout - require age verification but not authentication */}
-                          <Route path="/cart" element={<Cart />} />
-                          <Route path="/checkout" element={<OnePageCheckout />} />
-                          <Route path="/checkout/complete" element={<CheckoutComplete />} />
+                            {/* Cart and checkout - require age verification but not authentication */}
+                            <Route path="/cart" element={<Cart />} />
+                            <Route path="/checkout" element={<OnePageCheckout />} />
+                            <Route path="/checkout/complete" element={<CheckoutComplete />} />
 
-                          {/* Protected routes */}
-                          <Route
-                            path="/profile"
-                            element={
-                              <ProtectedRoute>
-                                <Profile />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/orders"
-                            element={
-                              <ProtectedRoute>
-                                <Orders />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/settings"
-                            element={
-                              <ProtectedRoute>
-                                <Settings />
-                              </ProtectedRoute>
-                            }
-                          />
+                            {/* Protected routes */}
+                            <Route
+                              path="/profile"
+                              element={
+                                <ProtectedRoute>
+                                  <Profile />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="/orders"
+                              element={
+                                <ProtectedRoute>
+                                  <Orders />
+                                </ProtectedRoute>
+                              }
+                            />
+                            <Route
+                              path="/settings"
+                              element={
+                                <ProtectedRoute>
+                                  <Settings />
+                                </ProtectedRoute>
+                              }
+                            />
 
-                          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </Suspense>
-                    </ProductsFilterProvider>
-                  </CartProvider>
-                </RealTimeProvider>
-              </MobileMenuProvider>
-            </TooltipProvider>
+                            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </Suspense>
+                      </ProductsFilterProvider>
+                    </CartProvider>
+                  </RealTimeProvider>
+                </MobileMenuProvider>
+              </TooltipProvider>
+            </GTMProvider>
           </SEOProvider>
         </AuthProvider>
       </QueryClientProvider>
