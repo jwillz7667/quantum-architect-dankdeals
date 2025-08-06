@@ -15,6 +15,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
+import { formatPhoneNumber, isValidPhoneNumber } from '@/utils/phoneFormatter';
 
 interface DeliveryAddress {
   street: string;
@@ -78,9 +79,8 @@ export default function OnePageCheckout() {
     }
 
     // Validate phone
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      toast.error('Please enter a valid phone number');
+    if (!isValidPhoneNumber(phone)) {
+      toast.error('Please enter a valid 10-digit phone number');
       return;
     }
 
@@ -201,20 +201,24 @@ export default function OnePageCheckout() {
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input
                     id="firstName"
+                    name="firstName"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="John"
                     required
+                    autoComplete="given-name"
                   />
                 </div>
                 <div>
                   <Label htmlFor="lastName">Last Name *</Label>
                   <Input
                     id="lastName"
+                    name="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Doe"
                     required
+                    autoComplete="family-name"
                   />
                 </div>
               </div>
@@ -223,11 +227,13 @@ export default function OnePageCheckout() {
                   <Label htmlFor="email">Email *</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="john@example.com"
                     required
+                    autoComplete="email"
                   />
                 </div>
                 <div>
@@ -236,10 +242,20 @@ export default function OnePageCheckout() {
                     id="phone"
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="(555) 123-4567"
+                    onChange={(e) => {
+                      const formatted = formatPhoneNumber(e.target.value);
+                      setPhone(formatted);
+                    }}
+                    placeholder="555-123-4567"
+                    maxLength={12}
                     required
+                    autoComplete="tel"
                   />
+                  {phone && !isValidPhoneNumber(phone) && (
+                    <p className="text-sm text-red-500 mt-1">
+                      Please enter a valid 10-digit phone number
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -253,19 +269,23 @@ export default function OnePageCheckout() {
                 <Label htmlFor="street">Street Address *</Label>
                 <Input
                   id="street"
+                  name="street"
                   value={address.street}
                   onChange={(e) => setAddress({ ...address, street: e.target.value })}
                   placeholder="123 Main St"
                   required
+                  autoComplete="street-address"
                 />
               </div>
               <div>
                 <Label htmlFor="apartment">Apartment/Suite (optional)</Label>
                 <Input
                   id="apartment"
+                  name="apartment"
                   value={address.apartment}
                   onChange={(e) => setAddress({ ...address, apartment: e.target.value })}
                   placeholder="Apt 4B"
+                  autoComplete="address-line2"
                 />
               </div>
               <div className="grid md:grid-cols-3 gap-4">
@@ -273,25 +293,35 @@ export default function OnePageCheckout() {
                   <Label htmlFor="city">City *</Label>
                   <Input
                     id="city"
+                    name="city"
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
                     placeholder="Enter your city"
                     required
+                    autoComplete="address-level2"
                   />
                 </div>
                 <div>
                   <Label htmlFor="state">State</Label>
-                  <Input id="state" value={address.state} readOnly />
+                  <Input
+                    id="state"
+                    name="state"
+                    value={address.state}
+                    readOnly
+                    autoComplete="address-level1"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="zipcode">ZIP Code *</Label>
                   <Input
                     id="zipcode"
+                    name="zipcode"
                     value={address.zipcode}
                     onChange={(e) => setAddress({ ...address, zipcode: e.target.value })}
                     placeholder="55401"
                     maxLength={5}
                     required
+                    autoComplete="postal-code"
                   />
                 </div>
               </div>

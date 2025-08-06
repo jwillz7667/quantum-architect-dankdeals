@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facebook Auth Test - DankDeals</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 30px;
+      }
+      .status {
+        padding: 15px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .status.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      button {
+        background: #1877f2;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      button:hover {
+        background: #166fe5;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      .user-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+      .user-info h3 {
+        margin-top: 0;
+        color: #495057;
+      }
+      .user-info pre {
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+      }
+      .checklist {
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .checklist h3 {
+        margin-top: 0;
+        color: #856404;
+      }
+      .checklist ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .checklist li {
+        margin: 8px 0;
+        color: #856404;
+      }
+      .checklist code {
+        background: #fff;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 Facebook Authentication Test</h1>
+
+      <div class="checklist">
+        <h3>⚙️ Setup Checklist</h3>
+        <p>Before testing, ensure you have completed:</p>
+        <ul>
+          <li>
+            ✅ Created Facebook App at
+            <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a>
+          </li>
+          <li>
+            ✅ Added redirect URL:
+            <code>https://ralbzuvkyexortqngvxs.supabase.co/auth/v1/callback</code>
+          </li>
+          <li>✅ Configured Facebook OAuth in Supabase Dashboard</li>
+          <li>✅ App is in "Live" mode (for production) or "Development" mode (for testing)</li>
+        </ul>
+      </div>
+
+      <div id="status" class="status info">Loading Supabase client...</div>
+
+      <button id="testBtn" onclick="testFacebookAuth()" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+          <path
+            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+          />
+        </svg>
+        Test Facebook Login
+      </button>
+
+      <button id="signOutBtn" onclick="signOut()" style="display: none; background: #dc3545">
+        Sign Out
+      </button>
+
+      <button onclick="checkSession()">Check Current Session</button>
+
+      <div id="userInfo" style="display: none"></div>
+    </div>
+
+    <script type="module">
+      import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+      // Initialize Supabase client
+      const supabaseUrl = 'https://ralbzuvkyexortqngvxs.supabase.co';
+      const supabaseAnonKey =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbGJ6dXZreWV4b3J0cW5ndnhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzOTk3NzEsImV4cCI6MjA2Njk3NTc3MX0.QRWwsrZGHY4HLFOlRpygtJDDd1DAJ2rBwDOt1e1m-sA';
+
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      // Make functions available globally
+      window.supabase = supabase;
+
+      window.testFacebookAuth = async function () {
+        const statusEl = document.getElementById('status');
+        const testBtn = document.getElementById('testBtn');
+
+        try {
+          testBtn.disabled = true;
+          statusEl.className = 'status info';
+          statusEl.innerHTML = '🔄 Redirecting to Facebook login...';
+
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'facebook',
+            options: {
+              redirectTo: window.location.href,
+              scopes: 'email',
+            },
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          // If we get here, browser should redirect to Facebook
+          statusEl.innerHTML =
+            '✅ Redirecting to Facebook... If nothing happens, check your popup blocker.';
+        } catch (error) {
+          console.error('Facebook auth error:', error);
+          statusEl.className = 'status error';
+          statusEl.innerHTML = `❌ Error: ${error.message}<br><br>
+                    <strong>Common issues:</strong><br>
+                    • Facebook App not configured in Supabase<br>
+                    • Invalid App ID or Secret<br>
+                    • Redirect URL not added in Facebook App<br>
+                    • App still in Development mode`;
+          testBtn.disabled = false;
+        }
+      };
+
+      window.signOut = async function () {
+        const statusEl = document.getElementById('status');
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+
+          statusEl.className = 'status success';
+          statusEl.innerHTML = '✅ Signed out successfully';
+
+          document.getElementById('userInfo').style.display = 'none';
+          document.getElementById('signOutBtn').style.display = 'none';
+          document.getElementById('testBtn').disabled = false;
+        } catch (error) {
+          statusEl.className = 'status error';
+          statusEl.innerHTML = `❌ Sign out error: ${error.message}`;
+        }
+      };
+
+      window.checkSession = async function () {
+        const statusEl = document.getElementById('status');
+        const userInfoEl = document.getElementById('userInfo');
+
+        try {
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+
+          if (error) throw error;
+
+          if (session) {
+            statusEl.className = 'status success';
+            statusEl.innerHTML = '✅ Active session found!';
+
+            userInfoEl.style.display = 'block';
+            userInfoEl.className = 'user-info';
+            userInfoEl.innerHTML = `
+                        <h3>User Information</h3>
+                        <p><strong>Provider:</strong> ${session.user.app_metadata.provider || 'email'}</p>
+                        <p><strong>Email:</strong> ${session.user.email || 'Not provided'}</p>
+                        <p><strong>User ID:</strong> ${session.user.id}</p>
+                        <p><strong>Created:</strong> ${new Date(session.user.created_at).toLocaleString()}</p>
+                        <h4>Facebook Metadata:</h4>
+                        <pre>${JSON.stringify(session.user.user_metadata, null, 2)}</pre>
+                        <h4>Session Details:</h4>
+                        <pre>${JSON.stringify(
+                          {
+                            expires_at: new Date(session.expires_at * 1000).toLocaleString(),
+                            provider_token: session.provider_token ? 'Present' : 'Not available',
+                            provider_refresh_token: session.provider_refresh_token
+                              ? 'Present'
+                              : 'Not available',
+                          },
+                          null,
+                          2
+                        )}</pre>
+                    `;
+
+            document.getElementById('signOutBtn').style.display = 'inline-flex';
+            document.getElementById('testBtn').disabled = true;
+          } else {
+            statusEl.className = 'status info';
+            statusEl.innerHTML = 'ℹ️ No active session. Click "Test Facebook Login" to sign in.';
+            userInfoEl.style.display = 'none';
+            document.getElementById('signOutBtn').style.display = 'none';
+            document.getElementById('testBtn').disabled = false;
+          }
+        } catch (error) {
+          statusEl.className = 'status error';
+          statusEl.innerHTML = `❌ Error checking session: ${error.message}`;
+        }
+      };
+
+      // Check for auth callback
+      async function handleAuthCallback() {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const searchParams = new URLSearchParams(window.location.search);
+
+        if (hashParams.get('access_token') || searchParams.get('code')) {
+          const statusEl = document.getElementById('status');
+          statusEl.className = 'status info';
+          statusEl.innerHTML = '🔄 Processing authentication...';
+
+          // Give Supabase time to process the auth
+          setTimeout(() => {
+            checkSession();
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }, 1000);
+        }
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', async () => {
+        const statusEl = document.getElementById('status');
+        const testBtn = document.getElementById('testBtn');
+
+        try {
+          // Check if we're handling an auth callback
+          await handleAuthCallback();
+
+          // Check current session
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session) {
+            statusEl.className = 'status success';
+            statusEl.innerHTML = '✅ Supabase client ready - User is signed in';
+            checkSession();
+          } else {
+            statusEl.className = 'status success';
+            statusEl.innerHTML = '✅ Supabase client ready - Click "Test Facebook Login" to begin';
+            testBtn.disabled = false;
+          }
+        } catch (error) {
+          statusEl.className = 'status error';
+          statusEl.innerHTML = `❌ Failed to initialize: ${error.message}`;
+        }
+      });
+
+      // Listen for auth state changes
+      supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event, session);
+        if (event === 'SIGNED_IN') {
+          checkSession();
+        }
+      });
+    </script>
+  </body>
+</html>
