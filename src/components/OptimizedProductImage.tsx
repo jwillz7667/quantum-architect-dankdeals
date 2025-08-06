@@ -97,7 +97,7 @@ export const OptimizedProductImage = forwardRef<HTMLImageElement, OptimizedProdu
             )}
             loading={priority ? 'eager' : 'lazy'}
             decoding="async"
-            fetchPriority={priority ? 'high' : 'auto'}
+            fetchpriority={priority ? 'high' : 'auto'}
             onLoad={handleLoad}
             onError={handleError}
             // Prevent right-click save for product images

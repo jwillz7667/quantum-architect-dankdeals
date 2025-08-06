@@ -49,6 +49,9 @@ const Profile = lazyWithPrefetch(() => import('./pages/ProfileSimplified'));
 const Orders = lazyWithPrefetch(() => import('./pages/Orders'));
 const Settings = lazyWithPrefetch(() => import('./pages/Settings'));
 
+// Analytics test page (development only)
+const AnalyticsTest = lazyWithPrefetch(() => import('./pages/AnalyticsTest'));
+
 // Critical routes to prefetch after initial load
 const criticalRoutes = [Categories, ProductDetail, Cart];
 
@@ -124,6 +127,9 @@ const App = () => {
                                 </ProtectedRoute>
                               }
                             />
+
+                            {/* Analytics test route (development) */}
+                            <Route path="/analytics-test" element={<AnalyticsTest />} />
 
                             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                             <Route path="*" element={<NotFound />} />
