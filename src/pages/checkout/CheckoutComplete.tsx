@@ -138,7 +138,9 @@ export default function CheckoutComplete() {
             <h3 className="font-medium mb-2">Important Reminders:</h3>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• You must be 21+ with valid ID for delivery</li>
-              <li>• Payment is cash only upon delivery</li>
+              <li>
+                • Payment is cash upon delivery unless you completed Aeropay/Stronghold checkout
+              </li>
               <li>• Please have exact change ready</li>
               <li>• Delivery is available in Minneapolis area only</li>
             </ul>

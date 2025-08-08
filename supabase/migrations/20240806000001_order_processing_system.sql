@@ -54,3 +54,11 @@ CREATE INDEX IF NOT EXISTS idx_email_queue_priority_scheduled ON public.email_qu
 -- Grant permissions
 GRANT ALL ON public.order_processing_logs TO service_role;
 GRANT SELECT ON public.order_processing_logs TO authenticated;
+
+-- Payment provider fields on orders
+ALTER TABLE public.orders
+  ADD COLUMN IF NOT EXISTS payment_provider TEXT,
+  ADD COLUMN IF NOT EXISTS payment_reference TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_orders_payment_provider ON public.orders(payment_provider);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_reference ON public.orders(payment_reference);

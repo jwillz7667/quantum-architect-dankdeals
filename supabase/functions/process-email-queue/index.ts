@@ -47,7 +47,12 @@ serve(async (req: Request) => {
     }
 
     // Verify environment configuration
-    const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'RESEND_API_KEY'];
+    const requiredEnvVars = [
+      'SUPABASE_URL',
+      'SUPABASE_SERVICE_ROLE_KEY',
+      'RESEND_API_KEY',
+      'FROM_EMAIL',
+    ];
 
     for (const envVar of requiredEnvVars) {
       if (!Deno.env.get(envVar)) {
