@@ -12,6 +12,8 @@ serve(async (req: Request) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const STRONGHOLD_API_KEY = Deno.env.get('STRONGHOLD_API_KEY');
+    const STRONGHOLD_API_BASE =
+      Deno.env.get('STRONGHOLD_API_BASE') || 'https://api.strongholdpay.com';
     const STRONGHOLD_RETURN_URL = Deno.env.get('STRONGHOLD_RETURN_URL');
 
     if (!STRONGHOLD_API_KEY || !STRONGHOLD_RETURN_URL) {
@@ -43,11 +45,12 @@ serve(async (req: Request) => {
     }
 
     // Create Stronghold checkout session (placeholder API call)
-    const response = await fetch('https://api.strongholdpay.com/v1/checkout/sessions', {
+    const response = await fetch(`${STRONGHOLD_API_BASE}/v1/checkout/sessions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${STRONGHOLD_API_KEY}`,
+        'Idempotency-Key': order.id,
       },
       body: JSON.stringify({
         amount: Math.round(order.total_amount * 100),

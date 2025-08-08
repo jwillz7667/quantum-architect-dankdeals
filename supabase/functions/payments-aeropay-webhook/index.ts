@@ -13,23 +13,57 @@ serve(async (req: Request) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const WEBHOOK_SECRET = Deno.env.get('AEROPAY_WEBHOOK_SECRET');
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Optional: verify signature
-    const signature = req.headers.get('aeropay-signature');
-    if (WEBHOOK_SECRET && !signature) {
-      return new Response('unauthorized', { status: 401, headers: corsHeaders });
+    // Read raw body for signature verification
+    const rawBody = await req.text();
+    const signature = req.headers.get('aeropay-signature') || '';
+    if (WEBHOOK_SECRET) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(WEBHOOK_SECRET),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+      const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody));
+      const computed = Array.from(new Uint8Array(sigBuf))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      if (!signature || signature !== computed) {
+        return new Response('unauthorized', { status: 401, headers: corsHeaders });
+      }
     }
 
-    const payload = await req.json();
+    const payload = JSON.parse(rawBody);
     const eventType = payload?.type;
-    const orderId = payload?.data?.metadata?.order_id;
-    const providerPaymentId = payload?.data?.id;
+    const orderId = payload?.data?.metadata?.order_id as string | undefined;
+    const providerPaymentId = payload?.data?.id as string | undefined;
 
     if (!orderId) {
       return new Response('ok', { status: 200, headers: corsHeaders });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // Idempotency: record event, skip if seen
+    if (providerPaymentId) {
+      const { data: existing } = await supabase
+        .from('payment_events')
+        .select('id')
+        .eq('provider', 'aeropay')
+        .eq('event_id', providerPaymentId)
+        .maybeSingle();
+      if (existing) {
+        return new Response('ok', { status: 200, headers: corsHeaders });
+      }
+      await supabase.from('payment_events').insert({
+        provider: 'aeropay',
+        event_id: providerPaymentId,
+        event_type: eventType || 'unknown',
+        order_id: orderId,
+        payload,
+      });
+    }
 
     if (eventType === 'payment.succeeded') {
       const { data: order, error } = await supabase
@@ -73,6 +107,7 @@ serve(async (req: Request) => {
 
     return new Response('ok', { status: 200, headers: corsHeaders });
   } catch (e) {
+    logger.error('Aeropay webhook handler error', e);
     return new Response('ok', { status: 200, headers: corsHeaders });
   }
 });
