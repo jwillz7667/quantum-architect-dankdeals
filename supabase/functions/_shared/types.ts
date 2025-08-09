@@ -127,7 +127,7 @@ export interface EmailJob {
 }
 
 export type EmailType = 'ORDER_CONFIRMATION' | 'ORDER_UPDATE' | 'ADMIN_NOTIFICATION';
-export type EmailStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type EmailStatus = 'pending' | 'processing' | 'sent' | 'failed';
 
 // Processing Results
 export interface OrderResult {

@@ -132,7 +132,17 @@ jobs:
       - name: Deploy Edge Functions
         run: |
           supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
-          supabase functions deploy --verify-jwt
+          # Publicly callable or webhook endpoints should NOT verify JWT
+          supabase functions deploy process-order --no-verify-jwt
+          supabase functions deploy process-email-queue --no-verify-jwt
+          supabase functions deploy payments-aeropay-create-session --no-verify-jwt
+          supabase functions deploy payments-aeropay-webhook --no-verify-jwt
+          supabase functions deploy payments-stronghold-create-session --no-verify-jwt
+          supabase functions deploy payments-stronghold-webhook --no-verify-jwt
+          supabase functions deploy persona-create-inquiry --no-verify-jwt
+          supabase functions deploy persona-webhook --no-verify-jwt
+          supabase functions deploy resend-webhook --no-verify-jwt
+          supabase functions deploy health-check --no-verify-jwt
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
