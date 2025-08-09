@@ -151,7 +151,7 @@ export default function OnePageCheckout() {
       if (paymentMethod === 'cash') {
         trackPurchase(data.order.order_number, items, data.order.total, tax, deliveryFee);
         clearCart();
-        navigate('/checkout/complete', {
+        navigate(`/checkout/complete?order=${encodeURIComponent(data.order.order_number)}`, {
           state: {
             orderId: data.order.id,
             orderNumber: data.order.order_number,

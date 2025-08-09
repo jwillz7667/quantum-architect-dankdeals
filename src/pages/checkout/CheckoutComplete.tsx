@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,15 +10,16 @@ import { CheckCircle, Clock, Home, Phone } from '@/lib/icons';
 
 export default function CheckoutComplete() {
   const navigate = useNavigate();
+  const location = useLocation() as { state?: { orderNumber?: string } };
   const [searchParams] = useSearchParams();
-  const orderNumber = searchParams.get('order');
+  const orderNumber = searchParams.get('order') || location.state?.orderNumber || '';
 
   useEffect(() => {
-    // If no order number, redirect to home
     if (!orderNumber) {
-      navigate('/');
+      // If we somehow don't have an order number, stay on page but show a generic message
+      // to avoid a confusing redirect after cart clear.
     }
-  }, [orderNumber, navigate]);
+  }, [orderNumber]);
 
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-0">
