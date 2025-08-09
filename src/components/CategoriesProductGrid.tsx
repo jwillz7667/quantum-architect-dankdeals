@@ -70,18 +70,18 @@ export function CategoriesProductGrid() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map((product) => {
-          // Get the lowest price from available variants
-          const basePrice =
-            product.variants && product.variants.length > 0
-              ? Math.min(...product.variants.filter((v) => v.is_active).map((v) => v.price))
-              : 25; // fallback price
+          const activeVariants = product.variants?.filter((v) => v.is_active) || [];
+          const prices = activeVariants.map((v) => v.price);
+          const minPrice = prices.length ? Math.min(...prices) : undefined;
+          const maxPrice = prices.length ? Math.max(...prices) : undefined;
 
           return (
             <ProductCard
               key={product.id}
               id={product.id}
               name={product.name}
-              price={basePrice}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
               category={product.category}
               imageUrl={product.image_url || undefined}
               thcContent={product.thc_content || undefined}

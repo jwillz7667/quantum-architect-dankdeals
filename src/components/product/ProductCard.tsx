@@ -7,7 +7,8 @@ import { ProductPriceRange } from './ProductPrice';
 export interface ProductCardProps {
   id: string;
   name: string;
-  price: number;
+  minPrice?: number;
+  maxPrice?: number;
   imageUrl?: string | null;
   category?: string;
   className?: string;
@@ -24,7 +25,7 @@ export interface ProductCardProps {
  */
 export const ProductCard = memo(
   forwardRef<HTMLElement, ProductCardProps>(
-    ({ id, name, imageUrl, category, className, priority = false }, ref) => {
+    ({ id, name, imageUrl, category, className, priority = false, minPrice, maxPrice }, ref) => {
       const navigate = useNavigate();
 
       const handleClick = () => {
@@ -71,9 +72,11 @@ export const ProductCard = memo(
               {name}
             </h3>
 
-            {/* Price Range */}
+            {/* Price / Price Range */}
             <div className="mt-2">
-              <ProductPriceRange minPrice={40} maxPrice={250} size="sm" />
+              {typeof minPrice === 'number' && typeof maxPrice === 'number' ? (
+                <ProductPriceRange minPrice={minPrice} maxPrice={maxPrice} size="sm" />
+              ) : null}
             </div>
           </div>
 

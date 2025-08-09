@@ -121,19 +121,31 @@ serve(async (req: Request) => {
     const result = await processor.processOrder(validatedData, {
       onSuccess: async (order) => {
         try {
-          // Queue emails asynchronously
-          await emailService.queueEmail({
-            type: 'ORDER_CONFIRMATION',
-            to: order.customer_email,
-            subject: `Order Confirmed - ${order.order_number}`,
-            data: { orderId: order.id },
-            priority: 'high',
-          });
+          // Only auto-send confirmation for cash orders. Card providers (Aeropay/Stronghold)
+          // will trigger confirmation via their webhook after payment is captured.
+          if ((order.payment_method || 'cash').toLowerCase() === 'cash') {
+            await emailService.queueEmail({
+              type: 'ORDER_CONFIRMATION',
+              to: order.customer_email,
+              subject: `Order Confirmed - ${order.order_number}`,
+              data: { orderId: order.id },
+              priority: 'high',
+            });
 
-          logger.info('Order confirmation email queued', {
-            orderId: order.id,
-            orderNumber: order.order_number,
-          });
+            logger.info('Order confirmation email queued', {
+              orderId: order.id,
+              orderNumber: order.order_number,
+            });
+          } else {
+            logger.info(
+              'Skipping confirmation email queue until payment is confirmed via webhook',
+              {
+                orderId: order.id,
+                orderNumber: order.order_number,
+                payment_method: order.payment_method,
+              }
+            );
+          }
         } catch (error) {
           // Don't fail the order if email queueing fails
           logger.error('Failed to queue confirmation email', error, {

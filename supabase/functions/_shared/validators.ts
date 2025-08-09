@@ -43,7 +43,7 @@ export const CreateOrderSchema = z.object({
   tax: z.number().nonnegative('Tax cannot be negative'),
   delivery_fee: z.number().nonnegative('Delivery fee cannot be negative'),
   total: z.number().positive('Total must be positive'),
-  payment_method: z.enum(['cash', 'card']).default('cash'),
+  payment_method: z.enum(['cash', 'aeropay', 'stronghold']).default('cash'),
   user_id: z.string().uuid().nullable().optional(),
 });
 

@@ -48,12 +48,15 @@ export const ProductGrid = memo(function ProductGrid({
 }: ProductGridProps) {
   // Calculate minimum price for products with variants
   const productsWithPrice = useMemo(() => {
-    return products.map((product) => ({
-      ...product,
-      displayPrice: product.variants?.length
-        ? Math.min(...product.variants.map((v) => v.price))
-        : 0,
-    }));
+    return products.map((product) => {
+      const prices = product.variants?.map((v) => v.price) || [];
+      const minPrice = prices.length ? Math.min(...prices) : 0;
+      const maxPrice = prices.length ? Math.max(...prices) : 0;
+      return { ...product, minPrice, maxPrice } as Product & {
+        minPrice: number;
+        maxPrice: number;
+      };
+    });
   }, [products]);
 
   // Limit items if maxItems is specified
@@ -110,7 +113,8 @@ export const ProductGrid = memo(function ProductGrid({
             key={product.id}
             id={product.id}
             name={product.name}
-            price={product.displayPrice}
+            minPrice={(product as Product & { minPrice?: number }).minPrice}
+            maxPrice={(product as Product & { maxPrice?: number }).maxPrice}
             imageUrl={product.image_url}
             category={product.category}
             thcContent={product.thc_content ?? undefined}

@@ -43,7 +43,7 @@ export default function OnePageCheckout() {
     instructions: '',
   });
 
-  const [paymentMethod] = useState('cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'aeropay' | 'stronghold'>('cash');
   const [phone, setPhone] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -147,21 +147,42 @@ export default function OnePageCheckout() {
         throw new Error(data?.error || 'Order creation failed');
       }
 
-      // Track successful purchase
-      trackPurchase(data.order.order_number, items, data.order.total, tax, deliveryFee);
-
-      // Email is now automatically sent by process-order function
-      // No need for separate email function call
-
-      // Clear cart and redirect to success page
-      clearCart();
-      navigate('/checkout/complete', {
-        state: {
-          orderId: data.order.id,
-          orderNumber: data.order.order_number,
-          total: data.order.total,
-        },
-      });
+      // If paying with cash, finish locally. If Aeropay/Stronghold, redirect to provider checkout
+      if (paymentMethod === 'cash') {
+        trackPurchase(data.order.order_number, items, data.order.total, tax, deliveryFee);
+        clearCart();
+        navigate('/checkout/complete', {
+          state: {
+            orderId: data.order.id,
+            orderNumber: data.order.order_number,
+            total: data.order.total,
+          },
+        });
+      } else if (paymentMethod === 'aeropay') {
+        const aero = await supabase.functions.invoke<{ url?: string; error?: string }>(
+          'payments-aeropay-create-session',
+          {
+            body: { order_id: data.order.id },
+          }
+        );
+        if (aero.error || !aero.data?.url) {
+          const message = aero.data?.error ?? 'Failed to init Aeropay';
+          throw new Error(message);
+        }
+        window.location.href = aero.data.url;
+      } else if (paymentMethod === 'stronghold') {
+        const sh = await supabase.functions.invoke<{ url?: string; error?: string }>(
+          'payments-stronghold-create-session',
+          {
+            body: { order_id: data.order.id },
+          }
+        );
+        if (sh.error || !sh.data?.url) {
+          const message = sh.data?.error ?? 'Failed to init Stronghold';
+          throw new Error(message);
+        }
+        window.location.href = sh.data.url;
+      }
 
       toast.success('Order placed successfully!');
     } catch (error) {
@@ -340,17 +361,44 @@ export default function OnePageCheckout() {
           {/* Payment Method */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-            <RadioGroup value={paymentMethod} disabled>
-              <div className="flex items-center space-x-2 p-4 border rounded-lg bg-secondary/50">
-                <RadioGroupItem value="cash" id="cash" />
-                <Label htmlFor="cash" className="flex-1 cursor-pointer">
-                  <div>
-                    <p className="font-medium">Cash on Delivery</p>
-                    <p className="text-sm text-muted-foreground">
-                      Pay your delivery driver in cash
-                    </p>
-                  </div>
-                </Label>
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={(v: string) =>
+                setPaymentMethod(v as 'cash' | 'aeropay' | 'stronghold')
+              }
+            >
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center space-x-2 p-4 border rounded-lg bg-secondary/50">
+                  <RadioGroupItem value="cash" id="cash" />
+                  <Label htmlFor="cash" className="flex-1 cursor-pointer">
+                    <div>
+                      <p className="font-medium">Cash on Delivery</p>
+                      <p className="text-sm text-muted-foreground">
+                        Pay your delivery driver in cash
+                      </p>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg opacity-90">
+                  <RadioGroupItem value="aeropay" id="aeropay" />
+                  <Label htmlFor="aeropay" className="flex-1 cursor-pointer">
+                    <div>
+                      <p className="font-medium">Aeropay (Bank Transfer)</p>
+                      <p className="text-sm text-muted-foreground">
+                        Secure bank payment via Aeropay
+                      </p>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg opacity-90">
+                  <RadioGroupItem value="stronghold" id="stronghold" />
+                  <Label htmlFor="stronghold" className="flex-1 cursor-pointer">
+                    <div>
+                      <p className="font-medium">Stronghold (ACH)</p>
+                      <p className="text-sm text-muted-foreground">Pay via Stronghold ACH</p>
+                    </div>
+                  </Label>
+                </div>
               </div>
             </RadioGroup>
           </Card>
