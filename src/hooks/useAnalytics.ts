@@ -1,7 +1,43 @@
 import { useCallback } from 'react';
 import { analytics } from '@/services/analytics';
-import type { Product } from '@/integrations/supabase/types';
+import type { Product as SupabaseProduct } from '@/integrations/supabase/types';
+import type { Product as AppProduct } from '@/hooks/useProducts';
 import type { CartItem } from '@/hooks/useCart';
+
+/**
+ * Convert AppProduct to SupabaseProduct format for analytics
+ */
+function convertToSupabaseProduct(product: AppProduct): SupabaseProduct {
+  // Get the first variant's price if available, otherwise default to 0
+  const price =
+    product.variants && product.variants.length > 0 && product.variants[0]
+      ? product.variants[0].price
+      : 0;
+
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+    description: product.description,
+    category_id: null, // We don't have category_id in AppProduct
+    price: price,
+    thc_percentage: product.thc_content,
+    cbd_percentage: product.cbd_content,
+    strain_type: null,
+    effects: null,
+    flavors: null,
+    image_url: product.image_url,
+    gallery_urls: null,
+    stock_quantity: 0,
+    is_featured: false,
+    is_active: product.is_active,
+    weight_grams: null,
+    lab_tested: false,
+    lab_results_url: null,
+    created_at: product.created_at,
+    updated_at: product.updated_at,
+  };
+}
 
 /**
  * Custom hook for analytics tracking
@@ -9,21 +45,27 @@ import type { CartItem } from '@/hooks/useCart';
  */
 export function useAnalytics() {
   // Product tracking
-  const trackProductView = useCallback((product: Product) => {
-    analytics.trackProductView(product);
+  const trackProductView = useCallback((product: AppProduct) => {
+    const supabaseProduct = convertToSupabaseProduct(product);
+    analytics.trackProductView(supabaseProduct);
   }, []);
 
-  const trackAddToCart = useCallback((product: Product, quantity: number) => {
-    analytics.trackAddToCart(product, quantity);
+  const trackAddToCart = useCallback((product: AppProduct, quantity: number) => {
+    const supabaseProduct = convertToSupabaseProduct(product);
+    analytics.trackAddToCart(supabaseProduct, quantity);
   }, []);
 
   const trackRemoveFromCart = useCallback((item: CartItem) => {
     analytics.trackRemoveFromCart(item);
   }, []);
 
-  const trackProductClick = useCallback((product: Product, listName: string, position: number) => {
-    analytics.trackProductClick(product, listName, position);
-  }, []);
+  const trackProductClick = useCallback(
+    (product: AppProduct, listName: string, position: number) => {
+      const supabaseProduct = convertToSupabaseProduct(product);
+      analytics.trackProductClick(supabaseProduct, listName, position);
+    },
+    []
+  );
 
   // Checkout tracking
   const trackBeginCheckout = useCallback((items: CartItem[], total: number) => {

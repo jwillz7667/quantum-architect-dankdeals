@@ -1,6 +1,6 @@
 // lib/productSchema.ts
 import type { Product, ProductVariant } from '@/hooks/useProducts';
-import type { Product as SupabaseProduct, Category } from '@/integrations/supabase/types';
+import type { Category } from '@/integrations/supabase/types';
 
 interface ProductSchema {
   '@context': string;
@@ -97,8 +97,16 @@ interface ProductSchema {
   }>;
 }
 
+// Extended product interface to support additional fields
+interface ExtendedProductForSchema extends Omit<Product, 'variants'> {
+  variants?: ProductVariant[];
+  strain_type?: string;
+  lab_tested?: boolean;
+  lab_results_url?: string;
+}
+
 export const generateProductSchema = (
-  product: Product & { variants?: ProductVariant[] } & Partial<SupabaseProduct>,
+  product: ExtendedProductForSchema,
   selectedVariant?: ProductVariant,
   category?: Category
 ): ProductSchema => {
@@ -157,21 +165,21 @@ export const generateProductSchema = (
       },
     ],
     additionalProperty: [
-      ...(product.thc_content || product.thc_percentage
+      ...(product.thc_content
         ? [
             {
               '@type': 'PropertyValue',
               name: 'THC Content',
-              value: `${product.thc_content || product.thc_percentage}%`,
+              value: `${product.thc_content}%`,
             },
           ]
         : []),
-      ...(product.cbd_content || product.cbd_percentage
+      ...(product.cbd_content
         ? [
             {
               '@type': 'PropertyValue',
               name: 'CBD Content',
-              value: `${product.cbd_content || product.cbd_percentage}%`,
+              value: `${product.cbd_content}%`,
             },
           ]
         : []),

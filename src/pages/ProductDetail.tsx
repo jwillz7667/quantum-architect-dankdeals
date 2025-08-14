@@ -22,7 +22,11 @@ interface ExtendedProduct extends Product {
   flavors?: string[];
   strain_type?: string;
   lab_tested?: boolean;
+  lab_results_url?: string;
   slug?: string;
+  imageUrl?: string | null; // Alias for image_url
+  thcContent?: number | null; // Alias for thc_content
+  cbdContent?: number | null; // Alias for cbd_content
 }
 
 export default function ProductDetail() {
@@ -91,8 +95,21 @@ export default function ProductDetail() {
         const productData = data as ExtendedProduct;
         setProduct(productData);
 
-        // Track product view
-        trackProductView(productData as Product);
+        // Track product view - convert ExtendedProduct to Product format
+        const productForTracking: Product = {
+          id: productData.id,
+          name: productData.name,
+          description: productData.description,
+          image_url: productData.image_url || null,
+          category: productData.category,
+          thc_content: productData.thc_content || null,
+          cbd_content: productData.cbd_content || null,
+          is_active: productData.is_active !== undefined ? productData.is_active : true,
+          created_at: productData.created_at || new Date().toISOString(),
+          updated_at: productData.updated_at || new Date().toISOString(),
+          variants: productData.variants || [],
+        };
+        trackProductView(productForTracking);
 
         // Set the first available variant as default
         if (productData.variants && productData.variants.length > 0) {
@@ -121,8 +138,21 @@ export default function ProductDetail() {
       return;
     }
 
-    // Track add to cart event
-    trackAddToCart(product as Product, quantity);
+    // Track add to cart event - convert ExtendedProduct to Product format
+    const productForTracking: Product = {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      image_url: product.image_url || null,
+      category: product.category,
+      thc_content: product.thc_content || null,
+      cbd_content: product.cbd_content || null,
+      is_active: product.is_active !== undefined ? product.is_active : true,
+      created_at: product.created_at || new Date().toISOString(),
+      updated_at: product.updated_at || new Date().toISOString(),
+      variants: product.variants || [],
+    };
+    trackAddToCart(productForTracking, quantity);
 
     // Add item to cart
     addItem(product, selectedVariant, quantity);
@@ -224,10 +254,29 @@ export default function ProductDetail() {
     { name: product.name || 'Product', url: canonicalUrl },
   ];
 
-  const productSchema = generateProductSchema(
-    product as Product & { variants?: ProductVariant[] },
-    selectedVariant || undefined
-  );
+  // Convert ExtendedProduct to format expected by generateProductSchema
+  const productForSchema = product
+    ? {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        image_url: product.image_url || null,
+        category: product.category,
+        thc_content: product.thc_content || null,
+        cbd_content: product.cbd_content || null,
+        is_active: product.is_active !== undefined ? product.is_active : true,
+        created_at: product.created_at || new Date().toISOString(),
+        updated_at: product.updated_at || new Date().toISOString(),
+        variants: product.variants || [],
+        strain_type: product.strain_type,
+        lab_tested: product.lab_tested,
+        lab_results_url: product.lab_results_url,
+      }
+    : null;
+
+  const productSchema = productForSchema
+    ? generateProductSchema(productForSchema, selectedVariant || undefined)
+    : null;
 
   // Generate product review schema for SEO
   const reviewSchema = {
