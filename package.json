@@ -60,7 +60,7 @@
     "react-router-dom": "^6.24.1",
     "sonner": "^1.5.0",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "^4.1.12",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^5.1.0",
     "zod": "^3.25.76"
@@ -89,7 +89,7 @@
     "@types/react-window": "^1.8.8",
     "@typescript-eslint/eslint-plugin": "^8.13.0",
     "@typescript-eslint/parser": "^8.13.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^5.0.1",
     "@vitest/coverage-v8": "^2.1.8",
     "@vitest/ui": "^2.1.8",
     "autoprefixer": "^10.4.20",
@@ -111,18 +111,18 @@
     "lint-staged": "^15.2.10",
     "postcss": "^8.4.44",
     "postcss-import": "^16.1.0",
-    "postcss-preset-env": "^10.1.1",
+    "postcss-preset-env": "^10.3.0",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "rollup-plugin-visualizer": "^6.0.3",
-    "typescript": "^5.5.3",
+    "typescript": "^5.9.2",
     "typescript-eslint": "^8.37.0",
     "vite": "^5.3.3",
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.2",
-    "vite-plugin-pwa": "^0.20.5",
-    "vitest": "^2.1.8"
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^3.2.4"
   },
   "husky": {
     "hooks": {
