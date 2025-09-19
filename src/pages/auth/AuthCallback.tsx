@@ -18,17 +18,20 @@ export default function AuthCallback() {
         console.log('AuthCallback: URL params:', window.location.search);
         console.log('AuthCallback: URL hash:', window.location.hash);
 
-        // First, try to exchange the auth code for a session
-        const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(window.location.search);
-        console.log('AuthCallback: exchangeCodeForSession result:', { 
-          hasSession: !!sessionData?.session, 
-          hasUser: !!sessionData?.user,
-          error: sessionError?.message 
+        // Wait a moment for Supabase to process the OAuth callback automatically
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Check if we now have a session
+        const { data, error } = await supabase.auth.getSession();
+        console.log('AuthCallback: getSession result:', { 
+          hasSession: !!data?.session, 
+          hasUser: !!data?.session?.user,
+          error: error?.message 
         });
 
-        if (sessionError) {
-          console.log('AuthCallback: exchangeCodeForSession error:', sessionError);
-          logger.error('Auth callback error', sessionError);
+        if (error) {
+          console.log('AuthCallback: getSession error:', error);
+          logger.error('Auth callback error', error);
           toast({
             variant: 'destructive',
             title: 'Authentication failed',
@@ -38,48 +41,47 @@ export default function AuthCallback() {
           return;
         }
 
-        if (sessionData?.session) {
-          console.log('AuthCallback: Session established successfully');
+        if (data?.session) {
+          console.log('AuthCallback: Session found, user logged in successfully');
           logger.info('OAuth sign in successful', {
-            userId: sessionData.session.user.id,
-            provider: sessionData.session.user.app_metadata.provider,
+            userId: data.session.user.id,
+            provider: data.session.user.app_metadata.provider,
           });
 
-          // Small delay to ensure auth context updates
-          setTimeout(() => {
-            // Check if user needs age verification
-            const needsAgeVerification = !sessionData.session?.user.user_metadata?.['age_verified'];
-            
-            // Get redirect destination
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectTo = urlParams.get('redirect_to') || '/';
-            
-            if (needsAgeVerification && !redirectTo.includes('age-gate')) {
-              navigate('/age-gate', { replace: true, state: { redirectTo } });
-            } else {
-              navigate(redirectTo, { replace: true });
-            }
-          }, 100);
+          // Check if user needs age verification
+          const needsAgeVerification = !data.session.user.user_metadata?.['age_verified'];
           
+          // Get redirect destination
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectTo = urlParams.get('redirect_to') || '/';
+          
+          if (needsAgeVerification && !redirectTo.includes('age-gate')) {
+            navigate('/age-gate', { replace: true, state: { redirectTo } });
+          } else {
+            navigate(redirectTo, { replace: true });
+          }
           return;
         }
 
-        // Fallback: Try getting existing session
-        const { data, error } = await supabase.auth.getSession();
-        console.log('AuthCallback: getSession fallback result:', { 
-          hasSession: !!data?.session, 
-          error: error?.message 
+        // If still no session, wait a bit longer and try once more
+        console.log('AuthCallback: No session yet, waiting longer...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const { data: finalData, error: finalError } = await supabase.auth.getSession();
+        console.log('AuthCallback: Final session check:', { 
+          hasSession: !!finalData?.session, 
+          error: finalError?.message 
         });
 
-        if (data?.session) {
-          console.log('AuthCallback: Found existing session');
+        if (finalData?.session) {
+          console.log('AuthCallback: Session found on retry');
           const redirectTo = new URLSearchParams(window.location.search).get('redirect_to') || '/';
           navigate(redirectTo, { replace: true });
           return;
         }
 
-        // If no session found anywhere, redirect to login
-        console.log('AuthCallback: No session found, redirecting to login');
+        // No session found after waiting, redirect to login
+        console.log('AuthCallback: No session found after retries, redirecting to login');
         logger.warn('No session found after OAuth callback');
         toast({
           variant: 'destructive',
