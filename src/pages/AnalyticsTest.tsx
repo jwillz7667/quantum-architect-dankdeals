@@ -30,26 +30,58 @@ export default function AnalyticsTest() {
   };
 
   const testProductView = () => {
-    const mockProduct = {
+    const mockProduct: Product = {
       id: 'test-123',
       name: 'Test Product',
+      slug: 'test-product',
+      description: 'A test product for analytics',
+      category: 'flower',
       price: 29.99,
-      category_id: 'flower',
+      thc_content: 20,
+      cbd_content: 1,
       strain_type: 'hybrid',
-    } as Product;
+      effects: ['relaxed', 'happy'],
+      flavors: ['sweet', 'earthy'],
+      image_url: null,
+      gallery_urls: null,
+      stock_quantity: 10,
+      is_featured: false,
+      is_active: true,
+      weight_grams: 3.5,
+      lab_tested: true,
+      lab_results_url: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
     analytics.trackProductView(mockProduct);
     addEvent('Product View');
   };
 
   const testAddToCart = () => {
-    const mockProduct = {
+    const mockProduct: Product = {
       id: 'test-123',
       name: 'Test Product',
+      slug: 'test-product',
+      description: 'A test product for analytics',
+      category: 'flower',
       price: 29.99,
-      category_id: 'flower',
+      thc_content: 20,
+      cbd_content: 1,
       strain_type: 'hybrid',
-    } as Product;
+      effects: ['relaxed', 'happy'],
+      flavors: ['sweet', 'earthy'],
+      image_url: null,
+      gallery_urls: null,
+      stock_quantity: 10,
+      is_featured: false,
+      is_active: true,
+      weight_grams: 3.5,
+      lab_tested: true,
+      lab_results_url: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
     analytics.trackAddToCart(mockProduct, 2);
     addEvent('Add to Cart');

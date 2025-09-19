@@ -1,6 +1,9 @@
 // Database types that mirror the Supabase schema
 // This file provides type definitions for database entities
 
+// Database types that mirror the Supabase schema
+// This file provides type definitions for database entities
+
 export interface Product {
   id: string;
   name: string;
@@ -17,7 +20,7 @@ export interface Product {
   gallery_urls: string[] | null;
   stock_quantity: number | null;
   is_featured: boolean | null;
-  is_active: boolean;
+  is_active: boolean | null;
   weight_grams: number | null;
   lab_tested: boolean | null;
   lab_results_url: string | null;

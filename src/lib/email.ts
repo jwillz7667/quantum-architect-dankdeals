@@ -80,7 +80,7 @@ export const sendOrderConfirmationEmail = async (emailData: EmailData): Promise<
         }
       }
     } catch (notificationError) {
-      logger.warn('Could not store notification - user not authenticated', notificationError as Error);
+      logger.warn('Could not store notification - user not authenticated', { error: notificationError });
     }
 
     logger.info('Order confirmation email queued', {

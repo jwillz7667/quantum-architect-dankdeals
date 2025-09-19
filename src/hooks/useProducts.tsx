@@ -10,8 +10,8 @@ export interface Product {
   thc_content: number | null;
   cbd_content: number | null;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
   variants: ProductVariant[];
 }
 
@@ -21,7 +21,7 @@ export interface ProductVariant {
   price: number;
   weight_grams: number;
   inventory_count: number | null;
-  is_active: boolean;
+  is_active: boolean | null;
 }
 
 // Mock data for when database is unavailable
@@ -37,8 +37,8 @@ const MOCK_PRODUCTS: Product[] = [
     thc_content: 22.5,
     cbd_content: 0.8,
     is_active: true,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
+    created_at: '2024-01-01T00:00:00Z' as string | null,
+    updated_at: '2024-01-01T00:00:00Z' as string | null,
     variants: [
       {
         id: 'var-pf-1',
@@ -46,7 +46,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 35.0,
         weight_grams: 3.5,
         inventory_count: 10,
-        is_active: true,
+        is_active: true as boolean | null,
       },
       {
         id: 'var-pf-2',
@@ -54,7 +54,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 65.0,
         weight_grams: 7.0,
         inventory_count: 5,
-        is_active: true,
+        is_active: true as boolean | null,
       },
     ],
   },
@@ -68,8 +68,8 @@ const MOCK_PRODUCTS: Product[] = [
     thc_content: 24.8,
     cbd_content: 0.5,
     is_active: true,
-    created_at: '2024-01-02T00:00:00Z',
-    updated_at: '2024-01-02T00:00:00Z',
+    created_at: '2024-01-02T00:00:00Z' as string | null,
+    updated_at: '2024-01-02T00:00:00Z' as string | null,
     variants: [
       {
         id: 'var-rs-1',
@@ -77,7 +77,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 40.0,
         weight_grams: 3.5,
         inventory_count: 8,
-        is_active: true,
+        is_active: true as boolean | null,
       },
       {
         id: 'var-rs-2',
@@ -85,7 +85,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 75.0,
         weight_grams: 7.0,
         inventory_count: 3,
-        is_active: true,
+        is_active: true as boolean | null,
       },
     ],
   },
@@ -99,8 +99,8 @@ const MOCK_PRODUCTS: Product[] = [
     thc_content: 26.2,
     cbd_content: 0.3,
     is_active: true,
-    created_at: '2024-01-03T00:00:00Z',
-    updated_at: '2024-01-03T00:00:00Z',
+    created_at: '2024-01-03T00:00:00Z' as string | null,
+    updated_at: '2024-01-03T00:00:00Z' as string | null,
     variants: [
       {
         id: 'var-runtz-1',
@@ -108,7 +108,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 45.0,
         weight_grams: 3.5,
         inventory_count: 6,
-        is_active: true,
+        is_active: true as boolean | null,
       },
       {
         id: 'var-runtz-2',
@@ -116,7 +116,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 85.0,
         weight_grams: 7.0,
         inventory_count: 2,
-        is_active: true,
+        is_active: true as boolean | null,
       },
     ],
   },
@@ -131,8 +131,8 @@ const MOCK_PRODUCTS: Product[] = [
     thc_content: 23.7,
     cbd_content: 0.6,
     is_active: true,
-    created_at: '2024-01-04T00:00:00Z',
-    updated_at: '2024-01-04T00:00:00Z',
+    created_at: '2024-01-04T00:00:00Z' as string | null,
+    updated_at: '2024-01-04T00:00:00Z' as string | null,
     variants: [
       {
         id: 'var-wc-1',
@@ -140,7 +140,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 38.0,
         weight_grams: 3.5,
         inventory_count: 12,
-        is_active: true,
+        is_active: true as boolean | null,
       },
       {
         id: 'var-wc-2',
@@ -148,7 +148,7 @@ const MOCK_PRODUCTS: Product[] = [
         price: 70.0,
         weight_grams: 7.0,
         inventory_count: 7,
-        is_active: true,
+        is_active: true as boolean | null,
       },
     ],
   },
@@ -193,7 +193,10 @@ export function useProducts() {
         throw fetchError;
       }
 
-      setProducts(data || []);
+      setProducts((data || []).map(product => ({
+        ...product,
+        is_active: product.is_active ?? true
+      })));
     } catch (err) {
       console.error('Error fetching products:', err);
       // Fallback to mock data on any error
