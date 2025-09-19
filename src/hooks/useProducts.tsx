@@ -33,7 +33,7 @@ const MOCK_PRODUCTS: Product[] = [
       'A tropical-flavored hybrid strain with sweet pineapple notes and balanced effects.',
     image_url:
       'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/11111111-1111-1111-1111-111111111111/pineapple-fruz-1.webp',
-    category: 'Flower',
+    category: 'flower',
     thc_content: 22.5,
     cbd_content: 0.8,
     is_active: true,
@@ -64,7 +64,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: 'A fruity indica-dominant hybrid with colorful buds and sweet berry flavors.',
     image_url:
       'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/22222222-2222-2222-2222-222222222222/rainbow-sherbert11-1.webp',
-    category: 'Flower',
+    category: 'flower',
     thc_content: 24.8,
     cbd_content: 0.5,
     is_active: true,
@@ -95,7 +95,7 @@ const MOCK_PRODUCTS: Product[] = [
     description: 'A popular hybrid strain known for its candy-like flavor and balanced effects.',
     image_url:
       'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/33333333-3333-3333-3333-333333333333/runtz-1.webp',
-    category: 'Flower',
+    category: 'flower',
     thc_content: 26.2,
     cbd_content: 0.3,
     is_active: true,
@@ -127,7 +127,7 @@ const MOCK_PRODUCTS: Product[] = [
       'An indica-dominant hybrid with vanilla and earthy flavors, perfect for relaxation.',
     image_url:
       'https://ralbzuvkyexortqngvxs.supabase.co/storage/v1/object/public/products/44444444-4444-4444-4444-444444444444/wedding-cake-1.webp',
-    category: 'Flower',
+    category: 'flower',
     thc_content: 23.7,
     cbd_content: 0.6,
     is_active: true,
@@ -162,6 +162,7 @@ export function useProducts() {
 
   const fetchProducts = async () => {
     try {
+      console.log('fetchProducts: Starting fetch');
       setLoading(true);
       setError(null);
       setUsingMockData(false);
@@ -176,6 +177,8 @@ export function useProducts() {
         )
         .eq('is_active', true)
         .order('created_at', { ascending: false });
+
+      console.log('fetchProducts: Supabase response:', { data: data?.length, error: fetchError });
 
       if (fetchError) {
         // Check if it's a permissions error (RLS issue)
@@ -193,10 +196,13 @@ export function useProducts() {
         throw fetchError;
       }
 
-      setProducts((data || []).map(product => ({
+      const processedProducts = (data || []).map(product => ({
         ...product,
         is_active: product.is_active ?? true
-      })));
+      }));
+
+      console.log('fetchProducts: Setting products:', processedProducts.length);
+      setProducts(processedProducts);
     } catch (err) {
       console.error('Error fetching products:', err);
       // Fallback to mock data on any error
@@ -206,10 +212,12 @@ export function useProducts() {
       setError('Using demo data - connection issue');
     } finally {
       setLoading(false);
+      console.log('fetchProducts: Completed');
     }
   };
 
   useEffect(() => {
+    console.log('useProducts: Starting fetch');
     void fetchProducts();
   }, []);
 
