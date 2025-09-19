@@ -59,21 +59,28 @@ export const sendOrderConfirmationEmail = async (emailData: EmailData): Promise<
       <p>Questions? Contact us at support@dankdealsmn.com or 763-247-5378</p>
     `;
 
-    // Store notification in database
-    const { error } = await supabase.from('notifications').insert({
-      user_email: emailData.to,
-      type: 'order_confirmation',
-      subject: `Order Confirmation - ${emailData.orderNumber}`,
-      content: emailContent,
-      metadata: {
-        orderNumber: emailData.orderNumber,
-        totalAmount: emailData.totalAmount,
-      },
-    });
+    // Store notification in database (if user is authenticated)
+    // For guest orders, we skip storing notifications
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase.from('notifications').insert({
+          user_id: user.id,
+          type: 'order_confirmation',
+          title: `Order Confirmation - ${emailData.orderNumber}`,
+          message: emailContent,
+          data: {
+            orderNumber: emailData.orderNumber,
+            totalAmount: emailData.totalAmount,
+          },
+        });
 
-    if (error) {
-      logger.error('Failed to store email notification', error);
-      return false;
+        if (error) {
+          logger.error('Failed to store email notification', error);
+        }
+      }
+    } catch (notificationError) {
+      logger.warn('Could not store notification - user not authenticated', notificationError as Error);
     }
 
     logger.info('Order confirmation email queued', {

@@ -8,7 +8,7 @@ import { MobileHeader } from '@/components/MobileHeader';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CartItem } from '@/hooks/useCart';
-import type { Product } from '@/integrations/supabase/types';
+import type { Product } from '@/types/database';
 
 /**
  * Analytics Test Page

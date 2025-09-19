@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { analytics } from '@/services/analytics';
-import type { Product as SupabaseProduct } from '@/integrations/supabase/types';
+import type { Product as SupabaseProduct } from '@/types/database';
 import type { Product as AppProduct } from '@/hooks/useProducts';
 import type { CartItem } from '@/hooks/useCart';
 
@@ -19,10 +19,10 @@ function convertToSupabaseProduct(product: AppProduct): SupabaseProduct {
     name: product.name,
     slug: product.name.toLowerCase().replace(/\s+/g, '-'),
     description: product.description,
-    category_id: null, // We don't have category_id in AppProduct
+    category: product.category,
     price: price,
-    thc_percentage: product.thc_content,
-    cbd_percentage: product.cbd_content,
+    thc_content: product.thc_content,
+    cbd_content: product.cbd_content,
     strain_type: null,
     effects: null,
     flavors: null,

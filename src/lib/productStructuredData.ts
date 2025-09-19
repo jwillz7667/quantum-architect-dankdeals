@@ -1,4 +1,4 @@
-import type { Product, Category } from '@/integrations/supabase/types';
+import type { Product, Category } from '@/types/database';
 
 interface ProductSchemaOptions {
   product: Product;

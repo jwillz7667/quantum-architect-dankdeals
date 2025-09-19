@@ -1,4 +1,4 @@
-import type { Product } from '@/integrations/supabase/types';
+import type { Product } from '@/types/database';
 import type { CartItem } from '@/hooks/useCart';
 
 /**
