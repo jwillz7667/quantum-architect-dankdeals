@@ -100,6 +100,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
             setHasShownWelcomeToast(true);
           }
+          
+          // Ensure profile exists for new OAuth users
+          if (session?.user) {
+            setTimeout(async () => {
+              try {
+                const { data: profileCheck } = await supabase
+                  .from('profiles')
+                  .select('id')
+                  .eq('id', session.user.id)
+                  .single();
+                
+                if (!profileCheck) {
+                  // Trigger profile creation
+                  await supabase.auth.updateUser({
+                    data: { profile_check: true }
+                  });
+                }
+              } catch (error) {
+                // Profile creation will be handled by the trigger
+                logger.info('Profile check completed', { userId: session.user.id });
+              }
+            }, 100);
+          }
           break;
         case 'SIGNED_OUT':
           // Reset the welcome toast flag on sign out
@@ -201,6 +224,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 

@@ -930,6 +930,24 @@ export type Database = {
           total_amount: number
         }[]
       }
+      get_user_profile_data: {
+        Args: { user_uuid?: string }
+        Returns: {
+          addresses: Json
+          age_verified: boolean
+          age_verified_at: string
+          date_of_birth: string
+          email: string
+          first_name: string
+          last_name: string
+          marketing_consent: boolean
+          phone: string
+          preferences: Json
+          profile_id: string
+          role: string
+          terms_accepted_at: string
+        }[]
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
