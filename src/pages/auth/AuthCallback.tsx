@@ -13,10 +13,17 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        console.log('AuthCallback: Starting auth callback handling');
+        console.log('AuthCallback: Current URL:', window.location.href);
+        console.log('AuthCallback: URL params:', window.location.search);
+        console.log('AuthCallback: URL hash:', window.location.hash);
+
         // Handle the OAuth callback by exchanging the code for a session
         const { data, error } = await supabase.auth.getSession();
+        console.log('AuthCallback: getSession result:', { data: data?.session ? 'session exists' : 'no session', error });
 
         if (error) {
+          console.log('AuthCallback: getSession error:', error);
           logger.error('Auth callback error', error);
           toast({
             variant: 'destructive',
@@ -28,6 +35,7 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
+          console.log('AuthCallback: Session found, user logged in successfully');
           logger.info('OAuth sign in successful', {
             userId: data.session.user.id,
             provider: data.session.user.app_metadata.provider,

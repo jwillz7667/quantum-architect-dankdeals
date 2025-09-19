@@ -70,6 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('AuthContext: Auth state changed', { event, userId: session?.user?.id, hasSession: !!session });
       logger.info('Auth state changed', { event, userId: session?.user?.id });
       setSession(session);
       setUser(session?.user ?? null);
@@ -217,6 +218,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     try {
+      console.log('AuthContext: Starting Google OAuth');
       // Reset the toast flag before sign in to ensure it shows
       setHasShownWelcomeToast(false);
 
@@ -230,6 +232,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           },
         },
       });
+      console.log('AuthContext: OAuth redirect result:', { error: error?.message });
 
       if (error) {
         logger.error('Google sign in error', error);
@@ -243,6 +246,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       return { error: null };
     } catch (error) {
+      console.log('AuthContext: OAuth exception:', error);
       logger.error('Unexpected Google sign in error', error as Error);
       return { error: error as AuthError };
     }
