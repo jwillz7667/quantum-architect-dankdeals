@@ -696,6 +696,7 @@ export type Database = {
           lab_tested: boolean | null
           name: string
           price: number
+          search_vector: unknown | null
           slug: string
           stock_quantity: number | null
           strain_type: string | null
@@ -719,6 +720,7 @@ export type Database = {
           lab_tested?: boolean | null
           name: string
           price: number
+          search_vector?: unknown | null
           slug: string
           stock_quantity?: number | null
           strain_type?: string | null
@@ -742,6 +744,7 @@ export type Database = {
           lab_tested?: boolean | null
           name?: string
           price?: number
+          search_vector?: unknown | null
           slug?: string
           stock_quantity?: number | null
           strain_type?: string | null
