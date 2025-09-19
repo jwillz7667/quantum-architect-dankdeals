@@ -946,6 +946,33 @@ export type Database = {
         Args: { agent?: string; birth_date: string; ip?: string }
         Returns: undefined
       }
+      search_products: {
+        Args: {
+          category_filter?: string
+          limit_count?: number
+          offset_count?: number
+          search_query: string
+        }
+        Returns: {
+          category: string
+          cbd_content: number
+          created_at: string
+          description: string
+          effects: string[]
+          flavors: string[]
+          id: string
+          image_url: string
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          price: number
+          search_rank: number
+          slug: string
+          stock_quantity: number
+          strain_type: string
+          thc_content: number
+        }[]
+      }
       update_order_status: {
         Args: { new_status: string; order_id: string }
         Returns: boolean
