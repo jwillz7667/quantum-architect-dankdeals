@@ -66,8 +66,10 @@ export default function Login() {
   };
 
   const handleGoogleSignIn = async () => {
+    console.log('Login: Starting Google OAuth sign in');
     setIsOAuthLoading('google');
     const { error } = await signInWithGoogle();
+    console.log('Login: Google OAuth result:', { error: error?.message });
     if (error) {
       setError('root', {
         type: 'manual',

@@ -70,6 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('AuthContext: Auth state changed', { event, userId: session?.user?.id, hasSession: !!session });
       logger.info('Auth state changed', { event, userId: session?.user?.id });
       setSession(session);
       setUser(session?.user ?? null);
@@ -99,6 +100,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               description: 'You have successfully signed in.',
             });
             setHasShownWelcomeToast(true);
+          }
+          
+          // Ensure profile exists for new OAuth users
+          if (session?.user) {
+            setTimeout(async () => {
+              try {
+                const { data: profileCheck } = await supabase
+                  .from('profiles')
+                  .select('id')
+                  .eq('id', session.user.id)
+                  .single();
+                
+                if (!profileCheck) {
+                  // Trigger profile creation
+                  await supabase.auth.updateUser({
+                    data: { profile_check: true }
+                  });
+                }
+              } catch (error) {
+                // Profile creation will be handled by the trigger
+                logger.info('Profile check completed', { userId: session.user.id });
+              }
+            }, 100);
           }
           break;
         case 'SIGNED_OUT':
@@ -194,6 +218,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     try {
+      console.log('AuthContext: Starting Google OAuth');
       // Reset the toast flag before sign in to ensure it shows
       setHasShownWelcomeToast(false);
 
@@ -201,8 +226,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
+      console.log('AuthContext: OAuth redirect result:', { error: error?.message });
 
       if (error) {
         logger.error('Google sign in error', error);
@@ -216,6 +246,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       return { error: null };
     } catch (error) {
+      console.log('AuthContext: OAuth exception:', error);
       logger.error('Unexpected Google sign in error', error as Error);
       return { error: error as AuthError };
     }

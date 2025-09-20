@@ -5,9 +5,10 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
 import { createManualChunks, outputOptions } from './vite-chunking';
+import { componentTagger } from 'lovable-tagger';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     host: '::',
     port: 8080,
@@ -35,6 +36,7 @@ export default defineConfig({
         plugins: [['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]],
       },
     }),
+    mode === 'development' && componentTagger(),
     // Gzip compression
     viteCompression({
       algorithm: 'gzip',
@@ -149,4 +151,4 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
     exclude: ['@vite/client', '@vite/env'],
   },
-});
+}));

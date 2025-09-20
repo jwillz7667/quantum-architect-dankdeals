@@ -130,7 +130,10 @@ export function OrderHistory() {
         throw error;
       }
 
-      setOrders(data || []);
+      setOrders((data || []).map(order => ({
+        ...order,
+        status: order.status || 'pending'
+      })) as Order[]);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({

@@ -1,6 +1,6 @@
 // lib/productSchema.ts
 import type { Product, ProductVariant } from '@/hooks/useProducts';
-import type { Category } from '@/integrations/supabase/types';
+import type { Category } from '@/types/database';
 
 interface ProductSchema {
   '@context': string;

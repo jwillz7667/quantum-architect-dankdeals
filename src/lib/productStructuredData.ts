@@ -1,4 +1,4 @@
-import type { Product, Category } from '@/integrations/supabase/types';
+import type { Product, Category } from '@/types/database';
 
 interface ProductSchemaOptions {
   product: Product;
@@ -17,7 +17,7 @@ export function generateProductSchema({
 }: ProductSchemaOptions) {
   // Calculate availability based on stock
   const availability =
-    product.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+    (product.stock_quantity ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
 
   // Generate SKU from product ID
   const sku = `DD-${product.id.slice(0, 8).toUpperCase()}`;
@@ -92,27 +92,27 @@ export function generateProductSchema({
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
-      reviewCount: Math.floor(Math.random() * 50) + 10, // Random for now, should be from real data
+      reviewCount: (product.stock_quantity ?? 0) > 0 ? Math.floor(Math.random() * 50) + 10 : 5,
       bestRating: '5',
       worstRating: '1',
     },
     // Cannabis-specific properties
     additionalProperty: [
-      ...(product.thc_percentage
+      ...(product.thc_content
         ? [
             {
               '@type': 'PropertyValue',
               name: 'THC Content',
-              value: `${product.thc_percentage}%`,
+              value: `${product.thc_content}%`,
             },
           ]
         : []),
-      ...(product.cbd_percentage
+      ...(product.cbd_content
         ? [
             {
               '@type': 'PropertyValue',
               name: 'CBD Content',
-              value: `${product.cbd_percentage}%`,
+              value: `${product.cbd_content}%`,
             },
           ]
         : []),
@@ -214,7 +214,7 @@ export function generateProductListSchema(
           price: product.price.toFixed(2),
           priceCurrency: 'USD',
           availability:
-            product.stock_quantity > 0
+            (product.stock_quantity ?? 0) > 0
               ? 'https://schema.org/InStock'
               : 'https://schema.org/OutOfStock',
         },

@@ -97,7 +97,7 @@ export function AddressBook() {
         throw error;
       }
 
-      setAddresses(data || []);
+      setAddresses((data || []).filter(addr => addr.user_id !== null) as Address[]);
     } catch (error) {
       console.error('Error fetching addresses:', error);
       toast({

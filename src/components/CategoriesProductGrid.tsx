@@ -9,6 +9,13 @@ export function CategoriesProductGrid() {
   const { products, loading, error } = useProducts();
   const { searchQuery, selectedCategory } = useProductsFilter();
 
+  console.log('CategoriesProductGrid:', { 
+    totalProducts: products.length, 
+    searchQuery, 
+    selectedCategory,
+    productCategories: products.map(p => p.category)
+  });
+
   // Filter products based on search and category
   const filteredProducts: Product[] = products.filter((product) => {
     const matchesSearch =
@@ -21,6 +28,8 @@ export function CategoriesProductGrid() {
 
     return matchesSearch && matchesCategory;
   });
+
+  console.log('Filtered products:', filteredProducts.length);
 
   if (loading) {
     return (

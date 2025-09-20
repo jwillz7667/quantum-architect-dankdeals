@@ -1,4 +1,4 @@
-import type { Product } from '@/integrations/supabase/types';
+import type { Product } from '@/types/database';
 import type { CartItem } from '@/hooks/useCart';
 
 /**
@@ -69,7 +69,7 @@ class AnalyticsService {
     return {
       item_id: product.id,
       item_name: product.name,
-      item_category: product.category_id || 'uncategorized',
+      item_category: product.category || 'uncategorized',
       item_category2: undefined,
       item_category3: undefined,
       item_variant: product.strain_type || undefined,

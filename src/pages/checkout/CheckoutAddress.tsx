@@ -108,19 +108,6 @@ export default function CheckoutAddress() {
         dateOfBirth: profile.date_of_birth || '',
       });
 
-      // If profile has a delivery address, pre-populate that too
-      if (profile.delivery_address && typeof profile.delivery_address === 'object') {
-        const savedAddr = profile.delivery_address as DeliveryAddress;
-        setAddress({
-          street: savedAddr.street || '',
-          apartment: savedAddr.apartment || '',
-          city: savedAddr.city || '',
-          state: 'MN',
-          zipCode: savedAddr.zipCode || '',
-          deliveryInstructions: savedAddr.deliveryInstructions || '',
-        });
-      }
-
       setProfileDataLoaded(true);
     } catch (error) {
       console.error('Error loading user profile:', error);
