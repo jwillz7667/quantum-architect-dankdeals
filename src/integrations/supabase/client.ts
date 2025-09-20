@@ -17,11 +17,12 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.error('VITE_SUPABASE_ANON_KEY:', SUPABASE_PUBLISHABLE_KEY ? 'Set' : 'Missing');
 }
 
-const supabase = createClient<Database>(url, key, {
+export const supabase = createClient<Database>(url, key, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
   },
 });
 
-export { supabase };
+// Re-export types for convenience
+export type { Database, Tables, Inserts, Updates } from './types';

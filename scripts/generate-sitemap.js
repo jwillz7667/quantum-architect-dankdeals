@@ -150,15 +150,9 @@ async function generateMainSitemap() {
     }
   });
 
-  // Add city-specific delivery pages
+  // Add city-specific delivery pages (without images since they don't exist)
   cityPages.forEach((city) => {
-    const entry = generateUrlEntry(`/delivery/${city}`, CURRENT_DATE, 'weekly', 0.8, [
-      {
-        url: `${BASE_URL}/cannabis-delivery-${city}.jpg`,
-        caption: `Cannabis delivery service in ${city.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,
-        title: `${city.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} Cannabis Delivery`,
-      },
-    ]);
+    const entry = generateUrlEntry(`/delivery/${city}`, CURRENT_DATE, 'weekly', 0.8);
     if (entry) {
       sitemap += entry;
       totalUrls++;
