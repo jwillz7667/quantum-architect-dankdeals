@@ -246,6 +246,10 @@ async function generateProductSitemap() {
     return totalUrls;
   } catch (error) {
     console.warn('⚠️ Product sitemap generation failed:', error.message);
+    // Write an empty but valid products sitemap to keep references intact
+    const empty = `${generateSitemapHeader()}\n</urlset>`;
+    writeFileSync(resolve(process.cwd(), 'public', 'sitemap-products.xml'), empty, 'utf8');
+    console.log('ℹ️ Wrote empty sitemap-products.xml due to error');
     return 0;
   }
 }
