@@ -358,31 +358,32 @@ async function generateBlogSitemap() {
   }
 }
 
-async function generateSitemapIndex(totalUrls) {
+async function generateSitemapIndex({ main, products, blog }) {
   console.log('📑 Generating sitemap index...');
 
-  const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${BASE_URL}/sitemap.xml</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${BASE_URL}/sitemap-products.xml</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${BASE_URL}/sitemap-blog.xml</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${BASE_URL}/sitemap-images.xml</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
-  </sitemap>
-</sitemapindex>`;
+  const entries = [
+    { loc: `${BASE_URL}/sitemap.xml`, include: main > 0 },
+    { loc: `${BASE_URL}/sitemap-products.xml`, include: products > 0 },
+    { loc: `${BASE_URL}/sitemap-blog.xml`, include: blog > 0 },
+  ].filter((entry) => entry.include);
+
+  if (entries.length === 0) {
+    console.warn('⚠️ No sitemap entries available for index. Skipping sitemap-index.xml');
+    return 0;
+  }
+
+  let sitemapIndex =
+    '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+  entries.forEach((entry) => {
+    sitemapIndex += `\n  <sitemap>\n    <loc>${entry.loc}</loc>\n    <lastmod>${CURRENT_DATE}</lastmod>\n  </sitemap>`;
+  });
+
+  sitemapIndex += '\n</sitemapindex>';
 
   writeFileSync(resolve(process.cwd(), 'public', 'sitemap-index.xml'), sitemapIndex, 'utf8');
-  console.log('✅ Sitemap index created');
+  console.log(`✅ Sitemap index created with ${entries.length} entries`);
+  return entries.length;
 }
 
 async function generateAllSitemaps() {
@@ -395,11 +396,11 @@ async function generateAllSitemaps() {
     const productUrls = await generateProductSitemap();
     const blogUrls = await generateBlogSitemap();
     const totalUrls = mainUrls + productUrls + blogUrls;
-
-    // Generate sitemap index for better organization
-    if (totalUrls > 50) {
-      await generateSitemapIndex(totalUrls);
-    }
+    await generateSitemapIndex({
+      main: mainUrls,
+      products: productUrls,
+      blog: blogUrls,
+    });
 
     console.log('');
     console.log('✅ All sitemaps generated successfully!');
