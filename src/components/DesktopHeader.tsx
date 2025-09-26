@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 export function DesktopHeader() {
   const location = useLocation();
   const { user } = useAuth();
+  const isAdmin = Boolean(user?.user_metadata?.['is_admin']);
 
   return (
     <header className="hidden md:block bg-background border-b border-border sticky top-0 z-40">
@@ -32,6 +33,15 @@ export function DesktopHeader() {
               <ShoppingCart className="h-5 w-5" aria-hidden="true" />
               <span>Cart</span>
             </Link>
+            {isAdmin && (
+              <Button
+                asChild
+                size="sm"
+                variant={location.pathname.startsWith('/admin') ? 'default' : 'outline'}
+              >
+                <Link to="/admin">Admin Dashboard</Link>
+              </Button>
+            )}
             {user ? (
               <Link
                 to="/profile"

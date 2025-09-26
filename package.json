@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run sitemap:prod && vite build",
+    "prebuild": "node scripts/ensure-rollup-binary.cjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

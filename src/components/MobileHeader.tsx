@@ -1,12 +1,17 @@
 import { Phone } from '@/lib/icons';
 import { Link } from 'react-router-dom';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
 interface MobileHeaderProps {
   title?: string;
 }
 
 export function MobileHeader({ title }: MobileHeaderProps) {
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.user_metadata?.['is_admin']);
+
   return (
     <header className="md:hidden sticky top-0 z-40 bg-background border-b border-border">
       {/* Simplified header with phone number */}
@@ -31,6 +36,14 @@ export function MobileHeader({ title }: MobileHeaderProps) {
           </Link>
         )}
       </div>
+
+      {isAdmin && (
+        <div className="bg-background border-t border-border px-4 py-3">
+          <Button asChild size="sm" className="w-full">
+            <Link to="/admin">Admin Dashboard</Link>
+          </Button>
+        </div>
+      )}
     </header>
   );
 }
