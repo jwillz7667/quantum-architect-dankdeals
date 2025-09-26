@@ -1,7 +1,7 @@
 # Netlify Configuration
 
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 [build.environment]
@@ -14,6 +14,22 @@
   # Supabase configuration (these should be set in Netlify UI for security)
   # VITE_SUPABASE_URL = "set in Netlify UI"
   # VITE_SUPABASE_ANON_KEY = "set in Netlify UI"
+
+# Ensure XML and robots are served directly (not caught by SPA)
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap-:splat"
+  to = "/sitemap-:splat"
+  status = 200
 
 # SPA routing
 [[redirects]]
@@ -58,3 +74,22 @@
   for = "/assets/*.mjs"
   [headers.values]
     Content-Type = "text/javascript"
+
+# Correct content types and caching for SEO artifacts
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/sitemap-*.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
