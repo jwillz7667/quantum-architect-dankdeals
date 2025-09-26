@@ -25,7 +25,7 @@ const staticPages = [
   { url: '/delivery-areas', changefreq: 'weekly', priority: 0.8 },
   { url: '/blog', changefreq: 'weekly', priority: 0.8 },
   { url: '/faq', changefreq: 'monthly', priority: 0.7 },
-  { url: '/cart', changefreq: 'never', priority: 0.3 },
+  // Exclude /cart because robots.txt disallows it
   { url: '/legal', changefreq: 'yearly', priority: 0.4 },
   { url: '/privacy', changefreq: 'yearly', priority: 0.4 },
   { url: '/terms', changefreq: 'yearly', priority: 0.4 },
@@ -184,7 +184,13 @@ async function generateProductSitemap() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    if (!products?.length) return 0;
+    if (!products?.length) {
+      // Still write an empty but valid file so the index references a real file
+      const empty = `${generateSitemapHeader()}\n</urlset>`;
+      writeFileSync(resolve(process.cwd(), 'public', 'sitemap-products.xml'), empty, 'utf8');
+      console.log('ℹ️ No active products; wrote empty sitemap-products.xml');
+      return 0;
+    }
 
     let sitemap = generateSitemapHeader();
     let totalUrls = 0;
@@ -375,10 +381,6 @@ async function generateSitemapIndex(totalUrls) {
     <loc>${BASE_URL}/sitemap-blog.xml</loc>
     <lastmod>${CURRENT_DATE}</lastmod>
   </sitemap>
-  <sitemap>
-    <loc>${BASE_URL}/sitemap-images.xml</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
-  </sitemap>
 </sitemapindex>`;
 
   writeFileSync(resolve(process.cwd(), 'public', 'sitemap-index.xml'), sitemapIndex, 'utf8');
@@ -396,10 +398,8 @@ async function generateAllSitemaps() {
     const blogUrls = await generateBlogSitemap();
     const totalUrls = mainUrls + productUrls + blogUrls;
 
-    // Generate sitemap index for better organization
-    if (totalUrls > 50) {
-      await generateSitemapIndex(totalUrls);
-    }
+    // Always create sitemap index so robots.txt reference is valid
+    await generateSitemapIndex(totalUrls);
 
     console.log('');
     console.log('✅ All sitemaps generated successfully!');
