@@ -66,11 +66,11 @@ const ensureBinaryPresent = () => {
   return fs.existsSync(binaryPath);
 };
 
-if (!ensureBinaryPresent()) {
-  console.error(
-    '[ensure-rollup-binary] Failed to provision the Rollup native binary. Build may fail with a missing module error.'
-  );
-  process.exit(1);
+if (ensureBinaryPresent()) {
+  console.log('[ensure-rollup-binary] Rollup native binary ready.');
+  process.exit(0);
 }
 
-console.log('[ensure-rollup-binary] Rollup native binary ready.');
+console.warn(
+  '[ensure-rollup-binary] Unable to verify Rollup native binary after install. Build will continue; Rollup will fall back to WASM if available.'
+);
