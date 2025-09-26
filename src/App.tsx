@@ -52,6 +52,12 @@ const Settings = lazyWithPrefetch(() => import('./pages/Settings'));
 // Analytics test page (development only)
 const AnalyticsTest = lazyWithPrefetch(() => import('./pages/AnalyticsTest'));
 
+// Admin pages
+const AdminLayout = lazyWithPrefetch(() => import('./pages/admin/AdminLayout'));
+const AdminDashboard = lazyWithPrefetch(() => import('./pages/admin/AdminDashboard'));
+const AdminProducts = lazyWithPrefetch(() => import('./pages/admin/AdminProducts'));
+const AdminProductEditor = lazyWithPrefetch(() => import('./pages/admin/AdminProductEditor'));
+
 // Critical routes to prefetch after initial load
 const criticalRoutes = [Categories, ProductDetail, Cart];
 
@@ -127,6 +133,21 @@ const App = () => {
                                 </ProtectedRoute>
                               }
                             />
+
+                            {/* Admin routes */}
+                            <Route
+                              path="/admin"
+                              element={
+                                <ProtectedRoute requireAdmin>
+                                  <AdminLayout />
+                                </ProtectedRoute>
+                              }
+                            >
+                              <Route index element={<AdminDashboard />} />
+                              <Route path="products" element={<AdminProducts />} />
+                              <Route path="products/new" element={<AdminProductEditor />} />
+                              <Route path="products/:id" element={<AdminProductEditor />} />
+                            </Route>
 
                             {/* Analytics test route (development) */}
                             <Route path="/analytics-test" element={<AnalyticsTest />} />

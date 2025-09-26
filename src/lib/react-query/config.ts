@@ -101,6 +101,18 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.products.details(), id] as const,
   },
 
+  admin: {
+    all: () => [...queryKeys.all, 'admin'] as const,
+    products: {
+      all: () => [...queryKeys.admin.all(), 'products'] as const,
+      lists: () => [...queryKeys.admin.products.all(), 'list'] as const,
+      list: (filters?: Record<string, unknown>) =>
+        [...queryKeys.admin.products.lists(), filters] as const,
+      details: () => [...queryKeys.admin.products.all(), 'detail'] as const,
+      detail: (id: string) => [...queryKeys.admin.products.details(), id] as const,
+    },
+  },
+
   // Orders
   orders: {
     all: () => [...queryKeys.all, 'orders'] as const,

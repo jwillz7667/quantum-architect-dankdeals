@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+
 export type Json =
   | string
   | number
@@ -844,125 +846,23 @@ export type Database = {
         }
         Relationships: []
       }
-      user_preferences: {
-        Row: {
-          id: string
-          user_id: string
-          dark_mode: boolean
-          two_factor_enabled: boolean
-          email_notifications: boolean
-          sms_notifications: boolean
-          push_notifications: boolean
-          marketing_emails: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          dark_mode?: boolean
-          two_factor_enabled?: boolean
-          email_notifications?: boolean
-          sms_notifications?: boolean
-          push_notifications?: boolean
-          marketing_emails?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          dark_mode?: boolean
-          two_factor_enabled?: boolean
-          email_notifications?: boolean
-          sms_notifications?: boolean
-          push_notifications?: boolean
-          marketing_emails?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      notifications: {
-        Row: {
-          id: string
-          user_id: string | null
-          user_email: string | null
-          type: string
-          subject: string
-          content: string
-          metadata: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          user_email?: string | null
-          type: string
-          subject: string
-          content: string
-          metadata?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          user_email?: string | null
-          type?: string
-          subject?: string
-          content?: string
-          metadata?: Json | null
-          created_at?: string
-        }
-      }
-      email_queue: {
-        Row: {
-          id: string
-          recipient_email: string
-          sender_email: string
-          sender_name: string
-          subject: string
-          html_content: string
-          email_type: string
-          status: string
-          metadata: Json | null
-          created_at: string
-          processed_at: string | null
-          error_message: string | null
-        }
-        Insert: {
-          id?: string
-          recipient_email: string
-          sender_email: string
-          sender_name: string
-          subject: string
-          html_content: string
-          email_type: string
-          status?: string
-          metadata?: Json | null
-          created_at?: string
-          processed_at?: string | null
-          error_message?: string | null
-        }
-        Update: {
-          id?: string
-          recipient_email?: string
-          sender_email?: string
-          sender_name?: string
-          subject?: string
-          html_content?: string
-          email_type?: string
-          status?: string
-          metadata?: Json | null
-          created_at?: string
-          processed_at?: string | null
-          error_message?: string | null
-        }
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_product: {
+        Args: { hard_delete?: boolean; target_product_id: string }
+        Returns: undefined
+      }
+      admin_upsert_product: {
+        Args: {
+          product_data: Json
+          replace_variants?: boolean
+          variant_data?: Json
+        }
+        Returns: Database['public']['Tables']['products']['Row']
+      }
       check_user_is_admin: {
         Args: { user_id: string }
         Returns: boolean

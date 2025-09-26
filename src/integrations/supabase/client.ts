@@ -25,4 +25,4 @@ export const supabase = createClient<Database>(url, key, {
 });
 
 // Re-export types for convenience
-export type { Database, Tables, Inserts, Updates } from './types';
+export type { Database, Tables } from './types';
