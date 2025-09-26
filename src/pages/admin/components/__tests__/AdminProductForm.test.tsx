@@ -56,12 +56,13 @@ describe('AdminProductForm', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
 
-    const [firstCall] = onSubmit.mock.calls as [UpsertAdminProductInput[]];
-    if (!firstCall) {
+    const firstCall = onSubmit.mock.calls[0];
+    if (!firstCall || firstCall.length === 0) {
       throw new Error('Expected submit handler to be invoked.');
     }
 
-    const payload = firstCall[0];
+    const [payload] = firstCall as [UpsertAdminProductInput];
+
     expect(payload.product).toMatchObject({
       name: 'Sunset Sherbet',
       category: 'flower',
