@@ -2,15 +2,14 @@ import { Phone } from '@/lib/icons';
 import { Link } from 'react-router-dom';
 import { OptimizedLogo } from '@/components/OptimizedLogo';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 interface MobileHeaderProps {
   title?: string;
 }
 
 export function MobileHeader({ title }: MobileHeaderProps) {
-  const { user } = useAuth();
-  const isAdmin = Boolean(user?.user_metadata?.['is_admin']);
+  const { isAdmin } = useIsAdmin();
 
   return (
     <header className="md:hidden sticky top-0 z-40 bg-background border-b border-border">

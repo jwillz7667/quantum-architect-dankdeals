@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { PageLoader } from '@/components/PageLoader';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,11 +15,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/auth/login',
 }) => {
   const { user, loading } = useAuth();
+  const { isAdmin, isLoading: isCheckingAdmin } = useIsAdmin();
   const location = useLocation();
 
-  console.log('ProtectedRoute: Auth check', { user: !!user, loading, currentPath: location.pathname });
+  console.log('ProtectedRoute: Auth check', {
+    user: !!user,
+    loading,
+    currentPath: location.pathname,
+  });
 
-  if (loading) {
+  if (loading || (requireAdmin && isCheckingAdmin)) {
     console.log('ProtectedRoute: Still loading, showing loader');
     return <PageLoader />;
   }
@@ -29,7 +35,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && !user.user_metadata?.['is_admin']) {
+  if (requireAdmin && !isAdmin) {
     console.log('ProtectedRoute: User not admin, redirecting to home');
     return <Navigate to="/" replace />;
   }
