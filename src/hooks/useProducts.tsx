@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Product {
@@ -154,31 +154,65 @@ const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
-export function useProducts() {
+export interface UseProductsOptions {
+  pageSize?: number;
+  page?: number;
+  enablePagination?: boolean;
+}
+
+/**
+ * Legacy hook for fetching products
+ * Maintains backward compatibility while supporting pagination
+ *
+ * @deprecated Use usePaginatedProducts for new features
+ */
+export function useProducts(options: UseProductsOptions = {}) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usingMockData, setUsingMockData] = useState(false);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [hasMore, setHasMore] = useState(false);
 
-  const fetchProducts = async () => {
+  const {
+    pageSize = 100, // Default to 100 for backward compatibility
+    page = 0,
+    enablePagination = false,
+  } = options;
+
+  const fetchProducts = useCallback(async () => {
     try {
-      console.log('fetchProducts: Starting fetch');
+      console.log('fetchProducts: Starting fetch', { pageSize, page, enablePagination });
       setLoading(true);
       setError(null);
       setUsingMockData(false);
 
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('products')
         .select(
           `
           *,
           variants:product_variants(*)
-        `
+        `,
+          { count: 'exact' }
         )
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      console.log('fetchProducts: Supabase response:', { data: data?.length, error: fetchError });
+      // Apply pagination if enabled
+      if (enablePagination) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+        query = query.range(from, to);
+      }
+
+      const { data, error: fetchError, count } = await query;
+
+      console.log('fetchProducts: Supabase response:', {
+        dataLength: data?.length,
+        totalCount: count,
+        error: fetchError,
+      });
 
       if (fetchError) {
         // Check if it's a permissions error (RLS issue)
@@ -188,7 +222,21 @@ export function useProducts() {
           fetchError.code === 'PGRST116'
         ) {
           console.warn('Database access denied, using mock data:', fetchError.message);
-          setProducts(MOCK_PRODUCTS);
+
+          // Apply pagination to mock data if enabled
+          if (enablePagination) {
+            const from = page * pageSize;
+            const to = Math.min(from + pageSize, MOCK_PRODUCTS.length);
+            const paginatedMock = MOCK_PRODUCTS.slice(from, to);
+            setProducts(paginatedMock);
+            setTotalCount(MOCK_PRODUCTS.length);
+            setHasMore(to < MOCK_PRODUCTS.length);
+          } else {
+            setProducts(MOCK_PRODUCTS);
+            setTotalCount(MOCK_PRODUCTS.length);
+            setHasMore(false);
+          }
+
           setUsingMockData(true);
           setError('Using demo data - database connection limited');
           return;
@@ -196,30 +244,51 @@ export function useProducts() {
         throw fetchError;
       }
 
-      const processedProducts = (data || []).map(product => ({
+      const processedProducts = (data || []).map((product) => ({
         ...product,
-        is_active: product.is_active ?? true
+        is_active: product.is_active ?? true,
       }));
 
       console.log('fetchProducts: Setting products:', processedProducts.length);
       setProducts(processedProducts);
+      setTotalCount(count || 0);
+
+      if (enablePagination) {
+        const currentTo = (page + 1) * pageSize;
+        setHasMore(currentTo < (count || 0));
+      } else {
+        setHasMore(false);
+      }
     } catch (err) {
       console.error('Error fetching products:', err);
       // Fallback to mock data on any error
       console.warn('Falling back to mock data due to error');
-      setProducts(MOCK_PRODUCTS);
+
+      if (enablePagination) {
+        const from = page * pageSize;
+        const to = Math.min(from + pageSize, MOCK_PRODUCTS.length);
+        const paginatedMock = MOCK_PRODUCTS.slice(from, to);
+        setProducts(paginatedMock);
+        setTotalCount(MOCK_PRODUCTS.length);
+        setHasMore(to < MOCK_PRODUCTS.length);
+      } else {
+        setProducts(MOCK_PRODUCTS);
+        setTotalCount(MOCK_PRODUCTS.length);
+        setHasMore(false);
+      }
+
       setUsingMockData(true);
       setError('Using demo data - connection issue');
     } finally {
       setLoading(false);
       console.log('fetchProducts: Completed');
     }
-  };
+  }, [page, pageSize, enablePagination]);
 
   useEffect(() => {
     console.log('useProducts: Starting fetch');
     void fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   const filterProducts = (searchQuery: string, category: string | null) => {
     if (!searchQuery && !category) return products;
@@ -242,6 +311,8 @@ export function useProducts() {
     loading,
     error,
     usingMockData,
+    totalCount,
+    hasMore,
     refetch: fetchProducts,
     filterProducts,
   };

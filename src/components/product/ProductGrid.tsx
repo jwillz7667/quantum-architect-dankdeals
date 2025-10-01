@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, lazy, Suspense } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ProductCard, ProductCardSkeleton } from './ProductCard';
 import { cn } from '@/lib/utils';
@@ -166,16 +166,68 @@ interface FilteredProductGridProps {
   searchQuery?: string;
   selectedCategory?: string;
   className?: string;
+  usePagination?: boolean;
+  pageSize?: number;
 }
 
 /**
  * Filtered product grid with search and category
+ * Can optionally use pagination for better performance
  */
 export function FilteredProductGrid({
   searchQuery,
   selectedCategory,
   className,
+  usePagination = false,
+  pageSize = 12,
 }: FilteredProductGridProps) {
+  // Dynamic import for code splitting
+  const PaginatedProductGrid = lazy(() =>
+    import('./PaginatedProductGrid').then((module) => ({
+      default: module.PaginatedProductGrid,
+    }))
+  );
+
+  // If pagination is enabled, use the PaginatedProductGrid
+  if (usePagination) {
+    return (
+      <Suspense
+        fallback={
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+            {Array.from({ length: pageSize }).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        }
+      >
+        <PaginatedProductGrid
+          searchQuery={searchQuery}
+          selectedCategory={selectedCategory}
+          className={className}
+          pageSize={pageSize}
+          title={searchQuery || selectedCategory ? 'Search Results' : 'All Products'}
+          emptyMessage="No products found matching your criteria."
+        />
+      </Suspense>
+    );
+  }
+
+  // Non-paginated version for backward compatibility
+  return (
+    <FilteredProductGridLegacy
+      searchQuery={searchQuery}
+      selectedCategory={selectedCategory}
+      className={className}
+    />
+  );
+}
+
+// Separate component for non-paginated version to avoid hooks rules violation
+function FilteredProductGridLegacy({
+  searchQuery,
+  selectedCategory,
+  className,
+}: Omit<FilteredProductGridProps, 'usePagination' | 'pageSize'>) {
   const { products, loading, error } = useProducts();
 
   // Filter products based on search and category

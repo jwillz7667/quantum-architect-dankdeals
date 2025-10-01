@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchBar } from '@/components/SearchBar';
 import { BottomNav } from '@/components/BottomNav';
-import { CategoriesProductGrid } from '@/components/CategoriesProductGrid';
 import { CategoryRail } from '@/components/CategoryRail';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
@@ -10,6 +9,14 @@ import { SEOHead } from '@/components/SEOHead';
 import { useProductsFilter } from '@/hooks/useProductsFilterContext';
 import { useProducts } from '@/hooks/useProducts';
 import { generateProductListingSchema, generateBreadcrumbSchema } from '@/lib/seo';
+import { ProductCardSkeleton } from '@/components/product/ProductCard';
+
+// Lazy load the paginated grid for better initial page load
+const CategoriesProductGridPaginated = lazy(() =>
+  import('@/components/CategoriesProductGridPaginated').then((module) => ({
+    default: module.CategoriesProductGridPaginated,
+  }))
+);
 
 export default function Categories() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -99,8 +106,18 @@ export default function Categories() {
           <CategoryRail />
         </div>
 
-        {/* Products */}
-        <CategoriesProductGrid />
+        {/* Products - Use paginated version for better performance */}
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+              {Array.from({ length: 12 }).map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
+            </div>
+          }
+        >
+          <CategoriesProductGridPaginated />
+        </Suspense>
       </main>
 
       {/* Bottom Navigation */}
