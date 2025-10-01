@@ -59,6 +59,9 @@ const AdminLayout = () => {
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span className="hidden sm:inline">{user?.email}</span>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+                  View Site
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"

@@ -122,26 +122,30 @@ const AdminProducts = () => {
               ))}
             </div>
           ) : products.length > 0 ? (
-            <table className="w-full min-w-[720px] table-fixed text-sm">
+            <table className="w-full text-sm">
               <thead className="border-b text-left text-muted-foreground">
                 <tr>
-                  <th className="py-2">Name</th>
-                  <th className="py-2">Category</th>
-                  <th className="py-2">Variants</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Updated</th>
-                  <th className="py-2 text-right">Actions</th>
+                  <th className="w-[30%] py-2">Name</th>
+                  <th className="w-[12%] py-2">Category</th>
+                  <th className="w-[10%] py-2">Variants</th>
+                  <th className="w-[10%] py-2">Status</th>
+                  <th className="w-[15%] py-2">Updated</th>
+                  <th className="w-[23%] py-2 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
                   <tr key={product.id} className="border-b last:border-0">
                     <td className="py-3 font-medium">
-                      <div className="flex flex-col">
-                        <span>{product.name}</span>
+                      <div className="flex items-center gap-3">
                         {product.image_url && (
-                          <span className="text-xs text-muted-foreground">{product.image_url}</span>
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="h-10 w-10 rounded object-cover"
+                          />
                         )}
+                        <span className="truncate">{product.name}</span>
                       </div>
                     </td>
                     <td className="py-3 capitalize">{product.category}</td>

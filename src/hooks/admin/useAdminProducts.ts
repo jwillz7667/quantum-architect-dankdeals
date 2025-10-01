@@ -54,13 +54,20 @@ export const useAdminProductMutations = () => {
   const upsert = useMutation({
     mutationKey: ['admin-upsert-product'],
     mutationFn: (input: UpsertAdminProductInput) => upsertAdminProduct(input),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       invalidateProducts();
-      toast.success('Product saved successfully');
+      const productName = variables.product.name;
+      const variantCount = variables.variants?.length ?? 0;
+      toast.success('✅ Product Updated Successfully', {
+        description: `${productName} has been saved with ${variantCount} variant${variantCount !== 1 ? 's' : ''}.`,
+        duration: 5000,
+      });
     },
     onError: (error) => {
-      toast.error('Unable to save product', {
-        description: error instanceof Error ? error.message : 'Unknown error',
+      toast.error('❌ Failed to Save Product', {
+        description:
+          error instanceof Error ? error.message : 'An unknown error occurred. Please try again.',
+        duration: 7000,
       });
     },
   });
@@ -69,13 +76,19 @@ export const useAdminProductMutations = () => {
     mutationKey: ['admin-delete-product'],
     mutationFn: (variables: { id: string; hardDelete?: boolean }) =>
       deleteAdminProduct(variables.id, { hardDelete: variables.hardDelete }),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       invalidateProducts();
-      toast.success('Product deleted');
+      const action = variables.hardDelete ? 'permanently deleted' : 'archived';
+      toast.success(`✅ Product ${action}`, {
+        description: 'The product has been removed from the storefront.',
+        duration: 4000,
+      });
     },
     onError: (error) => {
-      toast.error('Unable to delete product', {
-        description: error instanceof Error ? error.message : 'Unknown error',
+      toast.error('❌ Failed to Delete Product', {
+        description:
+          error instanceof Error ? error.message : 'An unknown error occurred. Please try again.',
+        duration: 7000,
       });
     },
   });
@@ -92,13 +105,20 @@ export const useAdminProductMutations = () => {
         },
       });
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       invalidateProducts();
-      toast.success('Product status updated');
+      const newStatus = !(variables.is_active ?? true);
+      const statusText = newStatus ? 'activated' : 'deactivated';
+      toast.success(`✅ Product ${statusText}`, {
+        description: `${variables.name} is now ${newStatus ? 'visible' : 'hidden'} on the storefront.`,
+        duration: 4000,
+      });
     },
     onError: (error) => {
-      toast.error('Unable to update product status', {
-        description: error instanceof Error ? error.message : 'Unknown error',
+      toast.error('❌ Failed to Update Status', {
+        description:
+          error instanceof Error ? error.message : 'An unknown error occurred. Please try again.',
+        duration: 7000,
       });
     },
   });
