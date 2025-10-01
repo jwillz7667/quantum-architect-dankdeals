@@ -57,11 +57,11 @@ describe('AdminProductForm', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
 
     const firstCall = onSubmit.mock.calls[0];
-    if (!firstCall || firstCall.length === 0) {
+    if (!firstCall) {
       throw new Error('Expected submit handler to be invoked.');
     }
 
-    const [payload] = firstCall as [UpsertAdminProductInput];
+    const [payload] = firstCall;
 
     expect(payload.product).toMatchObject({
       name: 'Sunset Sherbet',
@@ -74,6 +74,10 @@ describe('AdminProductForm', () => {
       flavors: ['Orange'],
       is_active: true,
     });
+
+    if (!payload.variants) {
+      throw new Error('Expected variants to be defined.');
+    }
 
     expect(payload.variants).toHaveLength(1);
     expect(payload.variants[0]).toMatchObject({
