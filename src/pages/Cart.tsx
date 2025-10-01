@@ -67,7 +67,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0 animate-fade-in">
+    <div className="min-h-screen bg-background pb-44 md:pb-0 animate-fade-in">
       <SEOHead
         title="Shopping Cart"
         description="Review your cannabis products and proceed to checkout. Same-day delivery in Minneapolis & St. Paul."
@@ -221,9 +221,9 @@ export default function Cart() {
         )}
       </div>
 
-      {/* Checkout Button - Fixed at Bottom */}
+      {/* Checkout Button - Fixed at Bottom (above BottomNav on mobile) */}
       {cartItems.length > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 p-4 bg-background border-t border-border md:bottom-0">
+        <div className="fixed bottom-20 left-0 right-0 p-4 bg-background border-t border-border md:bottom-0 md:relative md:mt-6">
           <div className="max-w-md mx-auto">
             <Button
               onClick={handleCheckout}
