@@ -200,6 +200,7 @@ export class EmailService {
     };
 
     const { error } = await supabase.from('email_queue').insert({
+      order_id: job.data.orderId || null,
       email_type: emailTypeMap[job.type] || job.type.toLowerCase(),
       to_email: job.to,
       subject: job.subject,
