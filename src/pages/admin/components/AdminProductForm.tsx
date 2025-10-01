@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
 import { z } from 'zod';
@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ProductImageUpload from '@/components/admin/ProductImageUpload';
 import { cn } from '@/lib/utils';
 import type { AdminProduct, UpsertAdminProductInput } from '@/lib/admin/products';
 
@@ -137,6 +139,10 @@ const AdminProductForm = ({
   isSubmitting = false,
   submitLabel = 'Save product',
 }: AdminProductFormProps) => {
+  const [uploadedMainImage, setUploadedMainImage] = useState<string | null>(null);
+  const [uploadedGalleryImages, setUploadedGalleryImages] = useState<string[]>([]);
+  const [imageUploadMode, setImageUploadMode] = useState<'upload' | 'url'>('upload');
+
   const form = useForm<AdminProductFormValues>({
     resolver: zodResolver(adminProductFormSchema) as Resolver<AdminProductFormValues>,
     defaultValues: mapProductToFormValues(initialProduct),
@@ -145,6 +151,13 @@ const AdminProductForm = ({
 
   useEffect(() => {
     form.reset(mapProductToFormValues(initialProduct));
+    // Initialize uploaded images from initial product
+    if (initialProduct?.image_url) {
+      setUploadedMainImage(initialProduct.image_url);
+    }
+    if (initialProduct?.gallery_urls?.length) {
+      setUploadedGalleryImages(initialProduct.gallery_urls);
+    }
   }, [initialProduct, form]);
 
   const {
@@ -174,7 +187,18 @@ const AdminProductForm = ({
 
     const effects = parseList(values.effects_input);
     const flavors = parseList(values.flavors_input);
-    const gallery = parseList(values.gallery_input);
+
+    // Use uploaded images if in upload mode, otherwise parse from text input
+    let imageUrl: string | null = null;
+    let galleryUrls: string[] = [];
+
+    if (imageUploadMode === 'upload') {
+      imageUrl = uploadedMainImage;
+      galleryUrls = uploadedGalleryImages;
+    } else {
+      imageUrl = values.image_url ?? null;
+      galleryUrls = parseList(values.gallery_input);
+    }
 
     const productPayload: UpsertAdminProductInput['product'] = {
       id: values.id,
@@ -182,8 +206,8 @@ const AdminProductForm = ({
       description: values.description ?? null,
       category: values.category,
       price: values.price,
-      image_url: values.image_url ?? null,
-      gallery_urls: gallery,
+      image_url: imageUrl,
+      gallery_urls: galleryUrls,
       thc_content: values.thc_content,
       cbd_content: values.cbd_content,
       strain_type: values.strain_type ?? null,
@@ -257,21 +281,12 @@ const AdminProductForm = ({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="price">Base price</Label>
-              <Input id="price" type="number" step="0.01" min="0" {...register('price')} />
-              {errors.price && (
-                <p className="mt-1 text-xs text-destructive">{errors.price.message}</p>
-              )}
-            </div>
-            <div>
-              <Label htmlFor="image_url">Primary image URL</Label>
-              <Input id="image_url" placeholder="https://" {...register('image_url')} />
-              {errors.image_url && (
-                <p className="mt-1 text-xs text-destructive">{errors.image_url.message}</p>
-              )}
-            </div>
+          <div>
+            <Label htmlFor="price">Base price</Label>
+            <Input id="price" type="number" step="0.01" min="0" {...register('price')} />
+            {errors.price && (
+              <p className="mt-1 text-xs text-destructive">{errors.price.message}</p>
+            )}
           </div>
 
           <div>
@@ -387,27 +402,12 @@ const AdminProductForm = ({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="lab_results_url">Lab results URL</Label>
-              <Input id="lab_results_url" placeholder="https://" {...register('lab_results_url')} />
-              {errors.lab_results_url && (
-                <p className="mt-1 text-xs text-destructive">{errors.lab_results_url.message}</p>
-              )}
-            </div>
-            <div>
-              <Label htmlFor="gallery_input">Gallery image URLs</Label>
-              <Textarea
-                id="gallery_input"
-                rows={3}
-                placeholder={[
-                  'https://cdn.example.com/photo-1.webp',
-                  'https://cdn.example.com/photo-2.webp',
-                ].join('\n')}
-                {...register('gallery_input')}
-              />
-              <p className="mt-1 text-xs text-muted-foreground">Enter one URL per line.</p>
-            </div>
+          <div>
+            <Label htmlFor="lab_results_url">Lab results URL</Label>
+            <Input id="lab_results_url" placeholder="https://" {...register('lab_results_url')} />
+            {errors.lab_results_url && (
+              <p className="mt-1 text-xs text-destructive">{errors.lab_results_url.message}</p>
+            )}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -436,6 +436,88 @@ const AdminProductForm = ({
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Images</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={imageUploadMode} onValueChange={(v) => setImageUploadMode(v as 'upload' | 'url')}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="upload">Upload Images</TabsTrigger>
+              <TabsTrigger value="url">Enter URLs</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="space-y-6">
+              <ProductImageUpload
+                productId={initialProduct?.id}
+                variant="main"
+                value={uploadedMainImage}
+                onChange={(value) => {
+                  if (typeof value === 'string' || value === null) {
+                    setUploadedMainImage(value);
+                  }
+                }}
+                multiple={false}
+                maxFiles={1}
+                label="Main Product Image"
+                helperText="This image will be displayed as the primary product image"
+              />
+
+              <ProductImageUpload
+                productId={initialProduct?.id}
+                variant="gallery"
+                value={uploadedGalleryImages}
+                onChange={(value) => {
+                  if (Array.isArray(value)) {
+                    setUploadedGalleryImages(value);
+                  } else if (value === null) {
+                    setUploadedGalleryImages([]);
+                  }
+                }}
+                multiple={true}
+                maxFiles={10}
+                label="Gallery Images"
+                helperText="Additional images for the product gallery (max 10)"
+              />
+            </TabsContent>
+
+            <TabsContent value="url" className="space-y-4">
+              <div>
+                <Label htmlFor="image_url">Primary image URL</Label>
+                <Input
+                  id="image_url"
+                  placeholder="https://example.com/image.jpg"
+                  {...register('image_url')}
+                />
+                {errors.image_url && (
+                  <p className="mt-1 text-xs text-destructive">{errors.image_url.message}</p>
+                )}
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Enter the URL of the main product image
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="gallery_input">Gallery image URLs</Label>
+                <Textarea
+                  id="gallery_input"
+                  rows={4}
+                  placeholder={[
+                    'https://example.com/image1.jpg',
+                    'https://example.com/image2.jpg',
+                    'https://example.com/image3.jpg',
+                  ].join('\n')}
+                  {...register('gallery_input')}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Enter one URL per line for gallery images
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
