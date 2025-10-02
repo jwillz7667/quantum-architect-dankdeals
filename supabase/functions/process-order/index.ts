@@ -116,42 +116,16 @@ serve(async (req: Request) => {
 
     // Process the order
     const processor = new OrderProcessor();
-    const emailService = new EmailService();
 
+    // Email queueing is now handled automatically by database trigger (queue_order_email_v3)
+    // This eliminates duplicate queueing and ensures emails are sent for ALL payment methods
     const result = await processor.processOrder(validatedData, {
       onSuccess: async (order) => {
-        try {
-          // Only auto-send confirmation for cash orders. Card providers (Aeropay/Stronghold)
-          // will trigger confirmation via their webhook after payment is captured.
-          if ((order.payment_method || 'cash').toLowerCase() === 'cash') {
-            await emailService.queueEmail({
-              type: 'ORDER_CONFIRMATION',
-              to: order.customer_email,
-              subject: `Order Confirmed - ${order.order_number}`,
-              data: { orderId: order.id },
-              priority: 'high',
-            });
-
-            logger.info('Order confirmation email queued', {
-              orderId: order.id,
-              orderNumber: order.order_number,
-            });
-          } else {
-            logger.info(
-              'Skipping confirmation email queue until payment is confirmed via webhook',
-              {
-                orderId: order.id,
-                orderNumber: order.order_number,
-                payment_method: order.payment_method,
-              }
-            );
-          }
-        } catch (error) {
-          // Don't fail the order if email queueing fails
-          logger.error('Failed to queue confirmation email', error, {
-            orderId: order.id,
-          });
-        }
+        logger.info('Order created successfully - email will be queued by database trigger', {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          customerEmail: order.customer_email,
+        });
       },
     });
 
