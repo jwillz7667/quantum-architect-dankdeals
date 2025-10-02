@@ -123,7 +123,16 @@ export async function upsertAdminProduct({
   });
 
   if (error) {
-    throw error;
+    console.error('Admin product upsert failed:', {
+      error,
+      payload: { product: payload, variants: variantPayload },
+      message: error.message,
+      code: error.code,
+      details: error.details,
+    });
+    throw new Error(
+      `Failed to save product: ${error.message}${error.details ? ` - ${error.details}` : ''}`
+    );
   }
 
   return data;
