@@ -56,20 +56,67 @@ serve(async (req: Request) => {
       },
     });
 
-    // Verify webhook signature for security
-    const signature = req.headers.get('resend-signature');
+    // Verify webhook signature for security (Resend uses Svix for webhooks)
+    const svixId = req.headers.get('svix-id');
+    const svixTimestamp = req.headers.get('svix-timestamp');
+    const svixSignature = req.headers.get('svix-signature');
     const webhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET');
 
-    if (webhookSecret && signature) {
-      // TODO: Implement proper webhook signature verification
-      console.log('Webhook signature present, verification recommended');
+    // Get raw body for signature verification
+    const rawBody = await req.text();
+
+    if (webhookSecret && svixId && svixTimestamp && svixSignature) {
+      // Verify signature using Svix's verification algorithm
+      // Format: whsec_... secret
+      try {
+        // Svix uses HMAC SHA256 with format: v1,<signature>
+        const encoder = new TextEncoder();
+        const signedPayload = `${svixId}.${svixTimestamp}.${rawBody}`;
+
+        // Extract secret (remove whsec_ prefix)
+        const secretBytes = encoder.encode(webhookSecret.replace('whsec_', ''));
+        const key = await crypto.subtle.importKey(
+          'raw',
+          secretBytes,
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+
+        const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(signedPayload));
+
+        const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+
+        // Svix sends multiple signatures in format: v1,sig1 v1,sig2
+        const signatures = svixSignature.split(' ').map((s) => s.split(',')[1]);
+
+        if (!signatures.includes(expectedSignature)) {
+          console.error('Invalid webhook signature');
+          return new Response(JSON.stringify({ success: false, error: 'Invalid signature' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401,
+          });
+        }
+
+        console.log('Webhook signature verified successfully');
+      } catch (error) {
+        console.error('Signature verification failed:', error);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Signature verification failed' }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 401,
+          }
+        );
+      }
+    } else if (webhookSecret) {
+      console.warn('Webhook secret configured but signature headers missing');
     }
 
-    // Parse webhook payload
+    // Parse webhook payload (rawBody already read above for signature verification)
     let event: ResendWebhookEvent;
     try {
-      const body = await req.text();
-      event = JSON.parse(body);
+      event = JSON.parse(rawBody);
     } catch (error) {
       console.error('Invalid webhook payload:', error);
       return new Response(JSON.stringify({ success: false, error: 'Invalid payload' }), {
