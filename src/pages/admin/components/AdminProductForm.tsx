@@ -48,7 +48,7 @@ const toNullableString = (value: unknown) => {
 };
 
 const variantSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().optional(), // TEXT in DB - supports custom IDs like "pv_productname_size"
   name: z.string().min(1, 'Variant name is required'),
   price: z.preprocess(parseRequiredNumber, z.number().nonnegative()),
   weight_grams: z.preprocess(parseNullableNumber, z.number().positive().nullable()).optional(),
@@ -444,7 +444,10 @@ const AdminProductForm = ({
           <CardTitle>Product Images</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={imageUploadMode} onValueChange={(v) => setImageUploadMode(v as 'upload' | 'url')}>
+          <Tabs
+            value={imageUploadMode}
+            onValueChange={(v) => setImageUploadMode(v as 'upload' | 'url')}
+          >
             <TabsList className="mb-4">
               <TabsTrigger value="upload">Upload Images</TabsTrigger>
               <TabsTrigger value="url">Enter URLs</TabsTrigger>
