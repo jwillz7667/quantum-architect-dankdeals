@@ -19,14 +19,14 @@ export default function AuthCallback() {
         console.log('AuthCallback: URL hash:', window.location.hash);
 
         // Wait a moment for Supabase to process the OAuth callback automatically
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Check if we now have a session
         const { data, error } = await supabase.auth.getSession();
-        console.log('AuthCallback: getSession result:', { 
-          hasSession: !!data?.session, 
+        console.log('AuthCallback: getSession result:', {
+          hasSession: !!data?.session,
           hasUser: !!data?.session?.user,
-          error: error?.message 
+          error: error?.message,
         });
 
         if (error) {
@@ -50,33 +50,34 @@ export default function AuthCallback() {
 
           // Check if user needs age verification
           const needsAgeVerification = !data.session.user.user_metadata?.['age_verified'];
-          
+
           // Get redirect destination
           const urlParams = new URLSearchParams(window.location.search);
           const redirectTo = urlParams.get('redirect_to') || '/';
-          
+
           if (needsAgeVerification && !redirectTo.includes('age-gate')) {
             navigate('/age-gate', { replace: true, state: { redirectTo } });
           } else {
-            navigate(redirectTo, { replace: true });
+            // Redirect to welcome page, which will then redirect to the final destination
+            navigate('/welcome', { replace: true, state: { redirectTo } });
           }
           return;
         }
 
         // If still no session, wait a bit longer and try once more
         console.log('AuthCallback: No session yet, waiting longer...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         const { data: finalData, error: finalError } = await supabase.auth.getSession();
-        console.log('AuthCallback: Final session check:', { 
-          hasSession: !!finalData?.session, 
-          error: finalError?.message 
+        console.log('AuthCallback: Final session check:', {
+          hasSession: !!finalData?.session,
+          error: finalError?.message,
         });
 
         if (finalData?.session) {
           console.log('AuthCallback: Session found on retry');
           const redirectTo = new URLSearchParams(window.location.search).get('redirect_to') || '/';
-          navigate(redirectTo, { replace: true });
+          navigate('/welcome', { replace: true, state: { redirectTo } });
           return;
         }
 
@@ -89,7 +90,6 @@ export default function AuthCallback() {
           description: 'Please try signing in again.',
         });
         navigate('/auth/login', { replace: true });
-
       } catch (error) {
         console.log('AuthCallback: Unexpected error:', error);
         logger.error('Unexpected auth callback error', error as Error);
@@ -105,7 +105,9 @@ export default function AuthCallback() {
     };
 
     // Small delay to ensure DOM is ready
-    const timer = setTimeout(handleAuthCallback, 100);
+    const timer = setTimeout(() => {
+      void handleAuthCallback();
+    }, 100);
     return () => clearTimeout(timer);
   }, [navigate, toast]);
 

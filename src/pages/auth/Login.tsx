@@ -61,8 +61,8 @@ export default function Login() {
       return;
     }
 
-    // Redirect to the page they tried to visit or home
-    navigate(from, { replace: true });
+    // Redirect to welcome page with the intended destination
+    navigate('/welcome', { replace: true, state: { redirectTo: from } });
   };
 
   const handleGoogleSignIn = async () => {

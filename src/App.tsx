@@ -43,6 +43,7 @@ const Login = lazyWithPrefetch(() => import('./pages/auth/Login'));
 const Register = lazyWithPrefetch(() => import('./pages/auth/Register'));
 const ForgotPassword = lazyWithPrefetch(() => import('./pages/auth/ForgotPassword'));
 const AuthCallback = lazyWithPrefetch(() => import('./pages/auth/AuthCallback'));
+const Welcome = lazyWithPrefetch(() => import('./pages/Welcome'));
 
 // Lazy load profile page
 const Profile = lazyWithPrefetch(() => import('./pages/ProfileSimplified'));
@@ -102,6 +103,14 @@ const App = () => {
                             <Route path="/auth/register" element={<Register />} />
                             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
                             <Route path="/auth/callback" element={<AuthCallback />} />
+                            <Route
+                              path="/welcome"
+                              element={
+                                <ProtectedRoute>
+                                  <Welcome />
+                                </ProtectedRoute>
+                              }
+                            />
 
                             {/* Cart and checkout - require age verification but not authentication */}
                             <Route path="/cart" element={<Cart />} />
