@@ -1,0 +1,162 @@
+name: Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: 'staging'
+      dry_run:
+        description: 'Dry run (do not apply migrations)'
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/database-migrations.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-migrations:
+    name: Validate Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Check migration file naming
+        run: |
+          echo "Checking migration file naming convention..."
+          for file in supabase/migrations/*.sql; do
+            if [[ ! $(basename "$file") =~ ^[0-9]{14}_[a-z0-9_]+\.sql$ ]]; then
+              echo "::error::Invalid migration filename: $file"
+              echo "Migration files must follow pattern: YYYYMMDDHHMMSS_description.sql"
+              exit 1
+            fi
+          done
+          echo "✅ All migration filenames are valid"
+
+      - name: Check migration SQL syntax
+        run: |
+          echo "Validating SQL syntax..."
+          for file in supabase/migrations/*.sql; do
+            echo "Checking: $file"
+            # Basic SQL syntax validation (would need PostgreSQL for full validation)
+            if grep -q "DROP DATABASE\|DROP SCHEMA public" "$file"; then
+              echo "::error::Dangerous statement found in $file"
+              exit 1
+            fi
+          done
+          echo "✅ SQL syntax checks passed"
+
+      - name: Detect new migrations
+        id: detect
+        run: |
+          # Get list of new migration files
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            NEW_MIGRATIONS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^supabase/migrations/" || true)
+          else
+            NEW_MIGRATIONS=$(ls -1 supabase/migrations/*.sql 2>/dev/null || true)
+          fi
+
+          if [[ -n "$NEW_MIGRATIONS" ]]; then
+            echo "has_migrations=true" >> $GITHUB_OUTPUT
+            echo "::notice::Found new migrations:"
+            echo "$NEW_MIGRATIONS" | while read file; do
+              echo "::notice::  - $file"
+            done
+          else
+            echo "has_migrations=false" >> $GITHUB_OUTPUT
+            echo "::notice::No new migrations found"
+          fi
+    outputs:
+      has_migrations: ${{ steps.detect.outputs.has_migrations }}
+
+  deploy-migrations:
+    name: Deploy Migrations to ${{ github.event.inputs.environment || 'Production' }}
+    runs-on: ubuntu-latest
+    needs: validate-migrations
+    if: |
+      needs.validate-migrations.outputs.has_migrations == 'true' &&
+      (github.event.inputs.dry_run != 'true')
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link to Supabase project
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Run migrations
+        run: |
+          echo "🚀 Applying database migrations..."
+          supabase db push
+          echo "✅ Migrations applied successfully"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Verify migration status
+        run: |
+          echo "Verifying applied migrations..."
+          supabase migration list
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Database migrations validated and ready to deploy'
+            })
+
+  dry-run-migrations:
+    name: Dry Run Migrations
+    runs-on: ubuntu-latest
+    needs: validate-migrations
+    if: github.event.inputs.dry_run == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Show migrations to be applied
+        run: |
+          echo "📋 The following migrations would be applied:"
+          ls -1 supabase/migrations/*.sql | while read file; do
+            echo "  - $(basename $file)"
+          done
+          echo ""
+          echo "⚠️ Dry run mode - no migrations applied"

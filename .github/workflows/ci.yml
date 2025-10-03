@@ -191,16 +191,11 @@ jobs:
         run: npm ci --prefer-offline --no-audit
       
       - name: Build application
-        shell: bash
+        run: npm run build
         env:
-          VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL || '' }}
-          VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY || '' }}
-        run: |
-          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-https://example.supabase.co}"
-          export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-example-anon-key}"
-          export VITE_ADMIN_EMAIL="admin@example.com"
-          export VITE_ENV="production"
-          npm run build
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ENV: test
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -249,14 +244,11 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
       
       - name: Run E2E tests
-        shell: bash
+        run: npm run test:e2e -- --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
         env:
-          VITE_SUPABASE_URL_SECRET: ${{ secrets.VITE_SUPABASE_URL || '' }}
-          VITE_SUPABASE_ANON_KEY_SECRET: ${{ secrets.VITE_SUPABASE_ANON_KEY || '' }}
-        run: |
-          export VITE_SUPABASE_URL="${VITE_SUPABASE_URL_SECRET:-https://example.supabase.co}"
-          export VITE_SUPABASE_ANON_KEY="${VITE_SUPABASE_ANON_KEY_SECRET:-example-anon-key}"
-          npm run test:e2e -- --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ENV: test
       
       - name: Upload test results
         if: always()
