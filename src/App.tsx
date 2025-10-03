@@ -47,7 +47,7 @@ const AuthCallback = lazyWithPrefetch(() => import('./pages/auth/AuthCallback'))
 // Lazy load profile page
 const Profile = lazyWithPrefetch(() => import('./pages/ProfileSimplified'));
 const Orders = lazyWithPrefetch(() => import('./pages/Orders'));
-const Settings = lazyWithPrefetch(() => import('./pages/Settings'));
+const UserSettings = lazyWithPrefetch(() => import('./pages/UserSettings'));
 
 // Analytics test page (development only)
 const AnalyticsTest = lazyWithPrefetch(() => import('./pages/AnalyticsTest'));
@@ -129,7 +129,7 @@ const App = () => {
                               path="/settings"
                               element={
                                 <ProtectedRoute>
-                                  <Settings />
+                                  <UserSettings />
                                 </ProtectedRoute>
                               }
                             />
