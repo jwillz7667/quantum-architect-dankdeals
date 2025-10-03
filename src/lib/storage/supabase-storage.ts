@@ -46,12 +46,10 @@ export async function uploadToStorage({
   contentType,
 }: StorageUploadOptions): Promise<UploadResult> {
   try {
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, {
-        upsert,
-        contentType: contentType || file.type,
-      });
+    const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+      upsert,
+      contentType: contentType || file.type,
+    });
 
     if (error) {
       console.error('Storage upload error:', error);
@@ -92,9 +90,7 @@ export async function deleteFromStorage({
       return {};
     }
 
-    const { error } = await supabase.storage
-      .from(bucket)
-      .remove(paths);
+    const { error } = await supabase.storage.from(bucket).remove(paths);
 
     if (error) {
       console.error('Storage delete error:', error);
@@ -132,9 +128,7 @@ export function extractStoragePath(publicUrl: string, bucket: string): string | 
 export async function ensureBucketExists(bucketName: string): Promise<{ error?: string }> {
   try {
     // Try to list files in the bucket - if it doesn't exist, we'll get an error
-    const { error: listError } = await supabase.storage
-      .from(bucketName)
-      .list('', { limit: 1 });
+    const { error: listError } = await supabase.storage.from(bucketName).list('', { limit: 1 });
 
     if (listError?.message?.includes('not found')) {
       // Bucket doesn't exist - this would need admin API to create
@@ -220,7 +214,7 @@ export function validateFile(
 }
 
 /**
- * Product-specific upload helper
+ * Product-specific upload helper with automatic image optimization
  */
 export async function uploadProductImage(
   file: File,
@@ -228,17 +222,44 @@ export async function uploadProductImage(
   variant: 'main' | 'gallery' = 'main'
 ): Promise<UploadResult> {
   const bucket = 'products';
-  const filename = generateUniqueFilename(file.name);
-  const path = productId
-    ? `${productId}/${variant}/${filename}`
-    : `temp/${variant}/${filename}`;
 
-  return uploadToStorage({
-    bucket,
-    path,
-    file,
-    upsert: false,
-  });
+  try {
+    // Import image optimizer dynamically
+    const { optimizeImage, validateImageFile } = await import('./image-optimizer');
+
+    // Validate image
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      return {
+        error: validation.error || 'Invalid image file',
+      };
+    }
+
+    // Optimize image before upload (compress + convert to WebP)
+    const optimizedFile = await optimizeImage(file, {
+      maxSizeMB: 1,
+      maxWidthOrHeight: variant === 'main' ? 1200 : 2048,
+      quality: variant === 'main' ? 0.85 : 0.8,
+      convertToWebP: true,
+      useWebWorker: true,
+    });
+
+    // Generate filename (will have .webp extension after optimization)
+    const filename = generateUniqueFilename(optimizedFile.name);
+    const path = productId ? `${productId}/${variant}/${filename}` : `temp/${variant}/${filename}`;
+
+    return uploadToStorage({
+      bucket,
+      path,
+      file: optimizedFile,
+      upsert: false,
+    });
+  } catch (error) {
+    console.error('Error in uploadProductImage:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Upload failed',
+    };
+  }
 }
 
 /**
@@ -254,7 +275,7 @@ export async function deleteProductImages(
 
   const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
   const paths = urls
-    .map(url => extractStoragePath(url, bucket))
+    .map((url) => extractStoragePath(url, bucket))
     .filter((path): path is string => path !== null);
 
   if (paths.length === 0) {

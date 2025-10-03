@@ -179,12 +179,6 @@ export class EmailQueueProcessor {
             cbd_content,
             strain_type
           )
-        ),
-        profiles (
-          email,
-          first_name,
-          last_name,
-          phone
         )
       `
       )
@@ -254,7 +248,7 @@ export class EmailQueueProcessor {
         .update({
           status: 'failed',
           attempts,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error_message: error instanceof Error ? error.message : 'Unknown error',
           updated_at: new Date().toISOString(),
         })
         .eq('id', job.id);
@@ -279,7 +273,7 @@ export class EmailQueueProcessor {
           status: 'pending',
           attempts,
           scheduled_at: nextAttempt.toISOString(),
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error_message: error instanceof Error ? error.message : 'Unknown error',
           updated_at: new Date().toISOString(),
         })
         .eq('id', job.id);

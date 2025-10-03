@@ -9,21 +9,26 @@ declare const Deno: {
   };
 };
 
+interface ResendBounceData {
+  type?: 'Transient' | 'Permanent';
+  subType?: string;
+  message?: string;
+}
+
 interface ResendWebhookEvent {
   type: string;
   created_at: string;
   data: {
     email_id?: string;
     from?: string;
-    to?: string[];
+    to?: string | string[];
     subject?: string;
     created_at?: string;
     // Delivery events
     delivered_at?: string;
-    // Bounce events
+    // Bounce events (FIXED: nested object)
+    bounce?: ResendBounceData;
     bounced_at?: string;
-    bounce_type?: 'hard' | 'soft';
-    bounce_reason?: string;
     // Click/Open events
     clicked_at?: string;
     opened_at?: string;
@@ -131,13 +136,17 @@ serve(async (req: Request) => {
       timestamp: event.created_at,
     });
 
+    // Normalize to_email to array
+    const toEmails = Array.isArray(event.data.to) ? event.data.to : [event.data.to || ''];
+    const primaryEmail = toEmails[0] || '';
+
     // Log the event to your email_logs table
     const { error: logError } = await supabase.from('email_logs').insert({
       email_id: event.data.email_id,
       event_type: event.type,
       event_data: event.data,
       created_at: event.created_at,
-      to_email: Array.isArray(event.data.to) ? event.data.to[0] : event.data.to,
+      to_email: primaryEmail,
       from_email: event.data.from,
       subject: event.data.subject,
     });
@@ -162,25 +171,74 @@ serve(async (req: Request) => {
         break;
 
       case 'email.bounced':
+        // FIXED: Handle nested bounce object structure
+        const bounce = event.data.bounce || {};
+        const bounceType = bounce.type || 'Unknown';
+        const bounceSubType = bounce.subType || '';
+        const bounceMessage = bounce.message || 'No details provided';
+
         console.log(
-          `Email bounced: ${event.data.email_id}, type: ${event.data.bounce_type}, reason: ${event.data.bounce_reason}`
+          `Email bounced: ${event.data.email_id}, type: ${bounceType}, subType: ${bounceSubType}, reason: ${bounceMessage}`
         );
 
-        // If it's a hard bounce, you might want to mark the email as invalid
-        if (event.data.bounce_type === 'hard') {
-          // Update user profile or add to bounce list
-          await supabase.from('email_bounces').upsert({
-            email: Array.isArray(event.data.to) ? event.data.to[0] : event.data.to,
-            bounce_type: event.data.bounce_type,
-            bounce_reason: event.data.bounce_reason,
-            bounced_at: event.data.bounced_at,
-          });
+        // Track bounce in database
+        try {
+          const { error: bounceError } = await supabase.from('email_bounces').upsert(
+            {
+              email: primaryEmail,
+              bounce_type: bounceType,
+              bounce_reason: `${bounceSubType}: ${bounceMessage}`,
+              last_bounced_at: new Date(event.created_at).toISOString(),
+              // Don't set first_bounced_at on update, only on insert
+            },
+            {
+              onConflict: 'email',
+              ignoreDuplicates: false,
+            }
+          );
+
+          if (bounceError) {
+            console.error('Failed to track bounce:', bounceError);
+          } else {
+            // Increment bounce count
+            await supabase.rpc('increment_bounce_count', { email_address: primaryEmail });
+
+            // Mark as suppressed if permanent bounce
+            if (bounceType === 'Permanent') {
+              await supabase
+                .from('email_bounces')
+                .update({ is_suppressed: true })
+                .eq('email', primaryEmail);
+
+              console.log(`Email ${primaryEmail} suppressed due to permanent bounce`);
+            }
+          }
+        } catch (error) {
+          console.error('Error handling bounce:', error);
         }
         break;
 
       case 'email.complained':
         console.log(`Email complained: ${event.data.email_id}`);
-        // Handle spam complaints
+
+        // Mark email as suppressed for spam complaints
+        try {
+          await supabase.from('email_bounces').upsert(
+            {
+              email: primaryEmail,
+              bounce_type: 'Complaint',
+              bounce_reason: 'User marked email as spam',
+              is_suppressed: true,
+              last_bounced_at: new Date(event.created_at).toISOString(),
+            },
+            {
+              onConflict: 'email',
+            }
+          );
+          console.log(`Email ${primaryEmail} suppressed due to spam complaint`);
+        } catch (error) {
+          console.error('Error handling complaint:', error);
+        }
         break;
 
       case 'email.opened':
