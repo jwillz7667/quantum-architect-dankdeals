@@ -4,16 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { SEOHead } from '@/components/SEOHead';
-import { User, Package, LogOut, ChevronRight } from '@/lib/icons';
+import { User, Package, LogOut, ChevronRight, Shield } from '@/lib/icons';
 import { toast } from 'sonner';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,12 +42,22 @@ export default function Profile() {
       label: 'Order History',
       description: 'View your past orders',
       href: '/orders',
+      showForAll: true,
     },
     {
       icon: User,
       label: 'Account Settings',
       description: 'Update your profile information',
       href: '/settings',
+      showForAll: true,
+    },
+    {
+      icon: Shield,
+      label: 'Admin Dashboard',
+      description: 'Manage products, orders, and users',
+      href: '/admin',
+      showForAll: false, // Only shown to admins
+      adminOnly: true,
     },
   ];
 
@@ -91,26 +103,43 @@ export default function Profile() {
 
           {/* Menu Options */}
           <div className="space-y-3">
-            {menuItems.map((item) => (
-              <Card
-                key={item.href}
-                className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate(item.href)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
+            {menuItems
+              .filter((item) => item.showForAll || (item.adminOnly && isAdmin))
+              .map((item) => (
+                <Card
+                  key={item.href}
+                  className={`p-4 cursor-pointer hover:shadow-md transition-shadow ${
+                    item.adminOnly ? 'border-primary bg-primary/5' : ''
+                  }`}
+                  onClick={() => navigate(item.href)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-10 w-10 rounded-md flex items-center justify-center ${
+                          item.adminOnly ? 'bg-primary/20' : 'bg-primary/10'
+                        }`}
+                      >
+                        <item.icon
+                          className={`h-5 w-5 ${item.adminOnly ? 'text-primary' : 'text-primary'}`}
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">
+                          {item.label}
+                          {item.adminOnly && (
+                            <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                              Admin
+                            </span>
+                          )}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium">{item.label}</h3>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
           </div>
 
           {/* Contact Info */}
