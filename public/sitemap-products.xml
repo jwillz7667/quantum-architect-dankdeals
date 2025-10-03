@@ -4,6 +4,13 @@
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
         xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0">
   <url>
+    <loc>https://dankdealsmn.com/product/f1c48cc1-aa58-4a58-8736-aed5d4b7ff2e</loc>
+    <lastmod>2025-10-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <mobile:mobile/>
+  </url>
+  <url>
     <loc>https://dankdealsmn.com/product/33333333-3333-3333-3333-333333333333</loc>
     <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -53,7 +60,7 @@
   </url>
   <url>
     <loc>https://dankdealsmn.com/categories?category=flower</loc>
-    <lastmod>2025-09-26</lastmod>
+    <lastmod>2025-10-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <mobile:mobile/>
