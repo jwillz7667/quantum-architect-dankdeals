@@ -111,6 +111,54 @@ export const queryKeys = {
       details: () => [...queryKeys.admin.products.all(), 'detail'] as const,
       detail: (id: string) => [...queryKeys.admin.products.details(), id] as const,
     },
+    dashboard: {
+      all: () => [...queryKeys.admin.all(), 'dashboard'] as const,
+      metrics: () => [...queryKeys.admin.dashboard.all(), 'metrics'] as const,
+      lowInventory: (threshold?: number) =>
+        [...queryKeys.admin.dashboard.all(), 'low-inventory', threshold] as const,
+    },
+    orders: {
+      all: () => [...queryKeys.admin.all(), 'orders'] as const,
+      lists: () => [...queryKeys.admin.orders.all(), 'list'] as const,
+      list: (filters?: Record<string, unknown>) =>
+        [...queryKeys.admin.orders.lists(), filters] as const,
+      details: () => [...queryKeys.admin.orders.all(), 'detail'] as const,
+      detail: (id: string) => [...queryKeys.admin.orders.details(), id] as const,
+    },
+    users: {
+      all: () => [...queryKeys.admin.all(), 'users'] as const,
+      lists: () => [...queryKeys.admin.users.all(), 'list'] as const,
+      list: (filters?: Record<string, unknown>) =>
+        [...queryKeys.admin.users.lists(), filters] as const,
+      details: () => [...queryKeys.admin.users.all(), 'detail'] as const,
+      detail: (id: string) => [...queryKeys.admin.users.details(), id] as const,
+    },
+    analytics: {
+      all: () => [...queryKeys.admin.all(), 'analytics'] as const,
+      sales: (startDate?: string, endDate?: string, period?: string) =>
+        [...queryKeys.admin.analytics.all(), 'sales', { startDate, endDate, period }] as const,
+      topProducts: (startDate?: string, endDate?: string, limit?: number) =>
+        [
+          ...queryKeys.admin.analytics.all(),
+          'top-products',
+          { startDate, endDate, limit },
+        ] as const,
+      categories: (startDate?: string, endDate?: string) =>
+        [...queryKeys.admin.analytics.all(), 'categories', { startDate, endDate }] as const,
+    },
+    inventory: {
+      all: () => [...queryKeys.admin.all(), 'inventory'] as const,
+      history: (params?: Record<string, unknown>) =>
+        [...queryKeys.admin.inventory.all(), 'history', params] as const,
+    },
+    settings: {
+      all: () => [...queryKeys.admin.all(), 'settings'] as const,
+    },
+    logs: {
+      all: () => [...queryKeys.admin.all(), 'logs'] as const,
+      actions: (params?: Record<string, unknown>) =>
+        [...queryKeys.admin.logs.all(), 'actions', params] as const,
+    },
   },
 
   // Orders

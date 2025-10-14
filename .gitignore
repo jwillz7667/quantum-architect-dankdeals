@@ -46,3 +46,26 @@ stats.html
 .env.test.local
 .env.production.local
 .env.example
+
+# Documentation files (may contain sensitive information)
+*.md
+!README.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!CHANGELOG.md
+!LICENSE.md
+
+# Incomplete/WIP service implementations (need linter fixes)
+src/services/analytics/
+src/services/auth/
+src/services/cache/
+src/services/database/
+src/services/events/
+src/services/inventory/
+src/services/monitoring/
+src/services/pricing/
+src/services/recommendations/
+
+# Infrastructure configurations (environment-specific)
+infrastructure/
+.env.production
