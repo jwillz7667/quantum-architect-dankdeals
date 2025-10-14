@@ -96,6 +96,13 @@ const ProductImageUpload = ({
           finalUrls = [...uploadedUrls, ...newUrls];
         }
 
+        console.log(`ProductImageUpload: Upload complete`, {
+          variant,
+          uploadedCount: newUrls.length,
+          finalUrls,
+          productId
+        });
+
         setUploadedUrls(finalUrls);
 
         // Update parent component
@@ -107,7 +114,7 @@ const ProductImageUpload = ({
           onUploadComplete?.(finalUrls);
         }
 
-        toast.success(`Successfully uploaded ${newUrls.length} image${newUrls.length > 1 ? 's' : ''}`);
+        toast.success(`Successfully uploaded ${newUrls.length} image${newUrls.length > 1 ? 's' : ''} - URLs saved to form`);
       }
 
       // Show errors if any

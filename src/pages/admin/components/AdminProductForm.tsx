@@ -200,6 +200,15 @@ const AdminProductForm = ({
       galleryUrls = parseList(values.gallery_input);
     }
 
+    console.log('AdminProductForm: Submitting product with images', {
+      imageUploadMode,
+      imageUrl,
+      galleryUrlsCount: galleryUrls.length,
+      galleryUrls,
+      uploadedMainImage,
+      uploadedGalleryImages,
+    });
+
     const productPayload: UpsertAdminProductInput['product'] = {
       id: values.id,
       name: values.name,
