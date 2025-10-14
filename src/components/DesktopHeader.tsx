@@ -75,7 +75,11 @@ export function DesktopHeader() {
             {/* Centered Logo */}
             <Link to="/" className="transition-transform hover:scale-105">
               <OptimizedLogo
-                className="h-16 w-auto drop-shadow-lg"
+                className="h-16 w-auto"
+                style={{
+                  filter:
+                    'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+                }}
                 alt="DankDeals"
                 priority={true}
               />

@@ -33,7 +33,15 @@ export function MobileHeader({ title }: MobileHeaderProps) {
           </h1>
         ) : (
           <Link to="/" className="flex justify-center">
-            <OptimizedLogo className="h-12 w-auto drop-shadow-lg" alt="DankDeals" priority={true} />
+            <OptimizedLogo
+              className="h-12 w-auto"
+              style={{
+                filter:
+                  'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+              }}
+              alt="DankDeals"
+              priority={true}
+            />
           </Link>
         )}
       </div>
