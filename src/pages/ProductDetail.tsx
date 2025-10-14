@@ -194,7 +194,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-32 md:pb-0">
+      <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Loading..." />
 
@@ -220,7 +220,7 @@ export default function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-background pb-32 md:pb-0">
+      <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Error" />
 
@@ -311,7 +311,7 @@ export default function ProductDetail() {
       <MobileHeader title="Product Details" />
 
       {/* Product Image Gallery */}
-      <div className="aspect-[4/3] overflow-hidden relative group bg-gray-100">
+      <div className="aspect-[4/3] overflow-hidden relative group bg-muted/30">
         <ProductImage
           src={images[currentImageIndex] || ''}
           alt={`${product.name} - Premium ${product.category} cannabis strain, image ${currentImageIndex + 1} of ${images.length}`}

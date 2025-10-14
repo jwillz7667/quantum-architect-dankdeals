@@ -43,9 +43,9 @@ export const ProductCard = memo(
         <article
           ref={ref}
           className={cn(
-            'group relative flex flex-col h-full bg-card rounded-lg border border-border overflow-hidden transition-all duration-200',
-            'hover:shadow-lg hover:border-primary/20 hover:-translate-y-0.5',
-            'focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2',
+            'group relative flex flex-col h-full bg-card rounded-xl border border-border/30 overflow-hidden transition-all duration-300',
+            'hover:shadow-elevated hover:border-primary/40 hover:-translate-y-1',
+            'focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background',
             className
           )}
           onClick={handleClick}
@@ -55,13 +55,13 @@ export const ProductCard = memo(
           aria-label={`View ${name} details`}
         >
           {/* Image Container */}
-          <div className="aspect-square overflow-hidden bg-muted">
+          <div className="aspect-square overflow-hidden bg-muted/50 backdrop-blur-sm">
             <ProductImage
               src={imageUrl}
               alt={name}
               size="card"
               priority={priority}
-              className="transition-transform duration-300 group-hover:scale-105"
+              className="transition-transform duration-300 group-hover:scale-110"
             />
           </div>
 

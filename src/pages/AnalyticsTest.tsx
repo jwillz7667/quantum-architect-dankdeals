@@ -178,7 +178,7 @@ export default function AnalyticsTest() {
   const gtmStatus = checkGTMStatus();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-dark">
       <DesktopHeader />
       <MobileHeader title="Analytics Test" />
 

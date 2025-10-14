@@ -11,47 +11,53 @@ body {
 
 @layer base {
   :root {
-    /* Simplified color palette - matching Dank District's minimalist approach */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 13%;
+    /* Dark gradient background - matching logo (#2C2C2E to #3A3A3C) */
+    --background: 216 6% 18%; /* #2C2C2E base */
+    --background-gradient-start: 216 6% 18%; /* #2C2C2E */
+    --background-gradient-end: 216 5% 23%; /* #3A3A3C */
+    --foreground: 0 0% 95%; /* Light text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    /* Card backgrounds - elevated from main bg */
+    --card: 216 5% 23%; /* #3A3A3C */
+    --card-foreground: 0 0% 95%; /* Light text */
+    --card-elevated: 216 5% 28%; /* Lighter for nested cards */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
+    --popover: 216 5% 23%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Primary Green - Similar to Dank District's #4caf50 */
-    --primary: 122 39% 49%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 122 39% 44%;
-    --primary-light: 122 39% 95%;
+    /* Vibrant brand green from logo */
+    --primary: 95 100% 44%; /* #6DD400 */
+    --primary-foreground: 216 6% 18%; /* Dark text on green */
+    --primary-hover: 95 100% 38%; /* Darker green for hover */
+    --primary-light: 95 100% 95%; /* Very light green */
 
-    /* Simplified secondary colors */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 13%;
+    /* Secondary/muted colors */
+    --secondary: 216 5% 28%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 216 5% 26%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 122 39% 49%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent (green) */
+    --accent: 95 100% 44%;
+    --accent-foreground: 216 6% 18%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Simplified borders and inputs */
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 122 39% 49%;
+    /* UI element colors */
+    --border: 0 0% 30%; /* Subtle borders */
+    --input: 216 5% 28%; /* Input backgrounds */
+    --ring: 95 100% 44%; /* Focus rings - green */
 
     --radius: 0.5rem;
 
-    /* Simplified shadows for cleaner look */
-    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.05);
-    --shadow-elevated: 0 4px 12px hsl(0 0% 0% / 0.08);
+    /* Enhanced shadows for depth */
+    --shadow-card: 0 4px 12px rgb(0 0 0 / 0.25);
+    --shadow-elevated: 0 8px 24px rgb(0 0 0 / 0.35);
+    --shadow-glow: 0 0 20px rgb(109 212 0 / 0.15);
 
-    /* Simplified animations */
+    /* Smooth transitions */
     --transition-smooth: all 0.2s ease;
 
     /* Spacing scale for consistent whitespace */
@@ -62,36 +68,32 @@ body {
     --space-xl: 3rem;
   }
 
-  .dark {
-    /* Simplified dark mode - less colors, more contrast */
-    --background: 0 0% 9%;
-    --foreground: 0 0% 95%;
-
-    --card: 0 0% 13%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 0 0% 13%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 122 39% 49%;
+  /* Optional light mode */
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 216 6% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 216 6% 18%;
+    --card-elevated: 0 0% 100%;
+    --primary: 95 100% 44%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 122 39% 44%;
-
-    --secondary: 0 0% 17%;
-    --secondary-foreground: 0 0% 95%;
-
-    --muted: 0 0% 17%;
-    --muted-foreground: 0 0% 60%;
-
-    --accent: 122 39% 49%;
+    --primary-hover: 95 100% 38%;
+    --border: 0 0% 89%;
+    --input: 0 0% 96%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 216 6% 18%;
+    --accent: 95 100% 44%;
     --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 63% 50%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 6% 18%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 122 39% 49%;
+    --ring: 95 100% 44%;
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.05);
+    --shadow-elevated: 0 4px 12px hsl(0 0% 0% / 0.08);
+    --shadow-glow: 0 0 20px rgb(109 212 0 / 0.1);
   }
 }
 
@@ -110,50 +112,74 @@ body {
   html {
     scroll-behavior: smooth;
     /* Set custom overscroll background to match brand */
-    background-color: #4caf50; /* Primary green for overscroll area */
+    background-color: #2c2c2e; /* Dark gradient base for overscroll area */
     overscroll-behavior: contain;
     overscroll-behavior-y: contain;
   }
 }
 
 @layer components {
-  /* Simplified component styles with more whitespace */
+  /* Dark gradient background - main app background */
+  .bg-gradient-dark {
+    background: linear-gradient(to top, #2c2c2e 0%, #3a3a3c 100%);
+  }
+
+  /* Elevated card with subtle backdrop */
+  .card-elevated {
+    background: hsl(var(--card-elevated));
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Green glow effect for interactive elements */
+  .glow-green {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Premium button with green accent */
+  .btn-premium {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold 
+           transition-all duration-200 hover:shadow-glow hover:scale-105 
+           active:scale-95 disabled:opacity-50;
+  }
+
+  /* Dark theme component styles */
   .category-card {
-    @apply w-24 h-24 flex flex-col items-center justify-center rounded-md bg-secondary text-foreground gap-2 transition-all duration-200 hover:bg-primary hover:text-primary-foreground;
+    @apply w-24 h-24 flex flex-col items-center justify-center rounded-xl bg-card/80 backdrop-blur-sm text-foreground gap-2 border border-border/30 transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:shadow-glow hover:scale-105;
   }
 
   .product-card {
-    @apply bg-card rounded-xl overflow-hidden border border-border/50 transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5;
+    @apply bg-card rounded-xl overflow-hidden border border-border/30 transition-all duration-300 hover:shadow-elevated hover:border-primary/40 hover:-translate-y-1;
   }
 
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50;
+    @apply fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border/30 z-50;
     padding-bottom: env(safe-area-inset-bottom);
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
-    height: 80px; /* Increased height for the bottom nav */
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+    height: 80px;
   }
 
   .search-bar {
-    @apply flex items-center gap-3 bg-secondary rounded-md px-4 py-3 transition-colors duration-200 focus-within:ring-2 focus-within:ring-primary/20;
+    @apply flex items-center gap-3 bg-card/80 backdrop-blur-md rounded-xl px-4 py-3 border border-border/30 transition-all duration-200 focus-within:ring-2 focus-within:ring-primary focus-within:shadow-glow;
   }
 
-  /* Simplified button styles */
+  /* Enhanced button styles */
   .btn-primary {
-    @apply bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium transition-all duration-200 hover:bg-primary-hover active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-glow hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-md font-medium transition-all duration-200 hover:bg-muted active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-secondary/80 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* Clean card layout */
+  /* Premium card layout */
   .content-card {
-    @apply bg-card p-6 rounded-md border border-border;
+    @apply bg-card/80 backdrop-blur-md p-6 rounded-xl border border-border/30 shadow-card;
   }
 
-  /* Simplified loading state */
+  /* Dark theme loading state */
   .shimmer {
-    @apply bg-muted animate-pulse rounded-md;
+    @apply bg-muted/50 animate-pulse rounded-xl;
   }
 }
 
@@ -232,7 +258,7 @@ body {
 
     /* Better tap highlight */
     * {
-      -webkit-tap-highlight-color: rgba(76, 175, 80, 0.1);
+      -webkit-tap-highlight-color: rgba(109, 212, 0, 0.15);
     }
 
     /* Prevent text selection on UI elements */
@@ -278,11 +304,11 @@ body {
   html {
     /* iOS Safari specific fix */
     -webkit-overflow-scrolling: touch;
-    background: #4caf50 !important;
+    background: #2c2c2e !important;
   }
 
   body {
-    /* Prevent bounce scroll that shows purple background */
+    /* Prevent bounce scroll that shows wrong background */
     position: fixed;
     overflow: hidden;
     width: 100%;
@@ -296,7 +322,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    background: hsl(var(--background));
+    background: linear-gradient(to top, #2c2c2e 0%, #3a3a3c 100%);
   }
 }
 
@@ -312,7 +338,7 @@ body {
   /* Chrome on Android */
   html {
     overscroll-behavior-y: none;
-    background: #4caf50 !important;
+    background: #2c2c2e !important;
   }
 
   /* PWA viewport fixes */
@@ -357,7 +383,7 @@ img {
 
 /* Prevent layout shift for images */
 img[loading='lazy'] {
-  background-color: #f3f4f6;
+  background-color: hsl(var(--muted));
 }
 
 /* Optimize image rendering */

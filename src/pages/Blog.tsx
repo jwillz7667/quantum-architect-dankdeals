@@ -10,7 +10,7 @@ import { blogPosts } from '@/data/blogPosts';
 
 export default function Blog() {
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <SEOHead
         title="Blog - Cannabis Education & Industry News"
         description="Stay informed about cannabis culture, laws, and strains. Educational articles from Minnesota's premier cannabis dispensary."

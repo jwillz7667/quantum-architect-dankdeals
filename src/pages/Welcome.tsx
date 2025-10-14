@@ -54,12 +54,12 @@ export default function Welcome() {
         url="https://dankdealsmn.com/welcome"
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 text-center space-y-6 animate-in fade-in zoom-in duration-500">
           {/* Success Icon */}
           <div className="flex justify-center">
-            <div className="rounded-full bg-green-100 p-3 animate-in zoom-in duration-300 delay-100">
-              <CheckCircle className="h-12 w-12 text-green-600" />
+            <div className="rounded-full bg-primary/20 p-3 animate-in zoom-in duration-300 delay-100">
+              <CheckCircle className="h-12 w-12 text-primary" />
             </div>
           </div>
 

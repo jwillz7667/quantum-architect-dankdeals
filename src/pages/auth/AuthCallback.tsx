@@ -117,7 +117,7 @@ export default function AuthCallback() {
 
   // This should rarely be seen since we navigate away immediately
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-dark">
       <div className="text-center">
         <h2 className="text-lg font-semibold mb-2">Completing sign in...</h2>
         <p className="text-muted-foreground">Please wait while we redirect you.</p>

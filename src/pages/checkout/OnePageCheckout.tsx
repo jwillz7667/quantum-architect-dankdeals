@@ -196,7 +196,7 @@ export default function OnePageCheckout() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-dark">
       <SEOHead
         title="Checkout - DankDeals MN"
         description="Complete your cannabis order for same-day delivery in Minneapolis"

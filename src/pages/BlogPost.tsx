@@ -51,7 +51,7 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <SEOHead
         title={post.title}
         description={post.excerpt}

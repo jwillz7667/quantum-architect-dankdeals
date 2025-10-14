@@ -58,11 +58,19 @@ export default {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
+          elevated: 'hsl(var(--card-elevated))',
         },
+        'brand-green': '#6DD400',
+        'dark-base': '#2C2C2E',
+        'dark-elevated': '#3A3A3C',
       },
       backgroundImage: {
+        'gradient-dark': 'linear-gradient(to top, #2C2C2E 0%, #3A3A3C 100%)',
+        'gradient-dark-reverse': 'linear-gradient(to bottom, #2C2C2E 0%, #3A3A3C 100%)',
+        'gradient-card':
+          'linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card-elevated)) 100%)',
+        'gradient-green': 'linear-gradient(135deg, #6DD400 0%, #5BC000 100%)',
         'gradient-hero': 'var(--gradient-hero)',
-        'gradient-card': 'var(--gradient-card)',
         'gradient-overlay': 'var(--gradient-overlay)',
         'gradient-mobile-header': 'var(--gradient-mobile-header)',
       },

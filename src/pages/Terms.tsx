@@ -4,7 +4,7 @@ import { BottomNav } from '@/components/BottomNav';
 
 export default function Terms() {
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <DesktopHeader />
       <MobileHeader title="Terms of Service" />
 

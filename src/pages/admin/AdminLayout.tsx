@@ -17,7 +17,7 @@ const AdminLayout = () => {
   const items = useMemo(() => NAV_ITEMS, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-dark">
       <div className="flex min-h-screen">
         <aside className="hidden w-64 border-r bg-muted/40 lg:block">
           <div className="flex h-16 items-center border-b px-6 text-lg font-semibold">

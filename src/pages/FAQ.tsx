@@ -82,7 +82,7 @@ export default function FAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <SEOHead
         title="Frequently Asked Questions"
         description="Find answers to common questions about DankDeals cannabis delivery service in Minneapolis. Learn about ordering, delivery, payment, and more."
