@@ -27,6 +27,9 @@ const BottomNav = lazy(() =>
 const DeliveryAreaMap = lazy(() =>
   import('@/components/DeliveryAreaMap').then((module) => ({ default: module.DeliveryAreaMap }))
 );
+const PromoBanner = lazy(() =>
+  import('@/components/PromoBanner').then((module) => ({ default: module.PromoBanner }))
+);
 
 const Index = () => {
   const navigate = useNavigate();
@@ -83,6 +86,11 @@ const Index = () => {
       <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8 pb-20">
         {/* Search Bar */}
         <SearchBar onFilter={() => console.log('Open filters')} />
+
+        {/* Promotional Banner Carousel */}
+        <Suspense fallback={<div className="h-32 md:h-40 bg-muted/30 rounded-xl animate-pulse" />}>
+          <PromoBanner />
+        </Suspense>
 
         {/* Categories Section */}
         <div className="space-y-4">
