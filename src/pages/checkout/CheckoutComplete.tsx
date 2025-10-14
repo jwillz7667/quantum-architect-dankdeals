@@ -22,7 +22,7 @@ export default function CheckoutComplete() {
   }, [orderNumber]);
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <DesktopHeader />
       <MobileHeader title="Order Complete" />
 
@@ -102,8 +102,8 @@ export default function CheckoutComplete() {
             <p className="font-medium mb-1">Questions about your order?</p>
             <p className="text-sm">
               Call us at{' '}
-              <a href="tel:763-247-5378" className="text-primary font-medium hover:underline">
-                763-247-5378
+              <a href="tel:612-930-1390" className="text-primary font-medium hover:underline">
+                612-930-1390
               </a>
             </p>
           </AlertDescription>

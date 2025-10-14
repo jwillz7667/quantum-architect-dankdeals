@@ -45,7 +45,7 @@ const Index = () => {
       name: 'DankDeals',
       description: 'Premium cannabis delivery service in Minnesota',
       url: 'https://dankdealsmn.com',
-      telephone: '+1-763-247-5378',
+      telephone: '+1-612-930-1390',
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Minneapolis',
@@ -67,7 +67,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <SEOHead
         title="DankDeals - Premium Cannabis Delivery in Minnesota | Same-Day Delivery"
         description="Minnesota's premier cannabis delivery service. Shop premium flower, edibles, concentrates & more. Same-day delivery across Minneapolis, St. Paul & surrounding areas. Age 21+ only."
@@ -81,20 +81,19 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8 pb-20">
-        {/* Welcome message for new falses */}
         {/* Search Bar */}
         <SearchBar onFilter={() => console.log('Open filters')} />
 
         {/* Categories Section */}
         <div className="space-y-4">
           <h2 className="text-xl md:text-2xl font-bold text-foreground text-center">Categories</h2>
-          <Suspense fallback={<div className="h-24 bg-gray-100 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="h-24 bg-muted/30 rounded-xl animate-pulse" />}>
             <CategoryRail />
           </Suspense>
         </div>
 
         {/* Hero Section */}
-        <Suspense fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse" />}>
+        <Suspense fallback={<div className="h-64 bg-muted/30 rounded-2xl animate-pulse" />}>
           <HeroSection />
         </Suspense>
 
@@ -103,7 +102,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-xl md:text-2xl font-bold text-foreground">Hot Right Now</h2>
             {
-              <Button size="sm" variant="primary-inverted" onClick={() => navigate('/categories')}>
+              <Button size="sm" variant="outline" onClick={() => navigate('/categories')}>
                 View All
               </Button>
             }
@@ -111,10 +110,10 @@ const Index = () => {
           <Suspense
             fallback={
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
-                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
-                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
-                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+                <div className="h-64 bg-muted/30 rounded-xl animate-pulse" />
+                <div className="h-64 bg-muted/30 rounded-xl animate-pulse" />
+                <div className="h-64 bg-muted/30 rounded-xl animate-pulse" />
+                <div className="h-64 bg-muted/30 rounded-xl animate-pulse" />
               </div>
             }
           >
@@ -124,50 +123,52 @@ const Index = () => {
 
         {/* Delivery Area Section */}
         <div className="space-y-4">
-          <Card className="bg-gradient-hero text-white overflow-hidden">
-            <CardContent className="p-6">
+          <Card className="bg-card/80 backdrop-blur-xl border-primary/20 overflow-hidden shadow-elevated">
+            <CardContent className="p-6 lg:p-8">
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Truck size={24} />
-                    <h3 className="text-xl font-bold">Fast Cannabis Delivery</h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Truck size={24} className="text-primary" />
+                    <h3 className="text-2xl font-bold text-foreground">Fast Cannabis Delivery</h3>
                   </div>
-                  <p className="text-white/90 mb-4">
+                  <p className="text-muted-foreground mb-6">
                     Same-day delivery across Minneapolis, St. Paul & surrounding areas
                   </p>
-                  <div className="flex items-center gap-4 text-sm text-white/80 mb-4">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                     <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
+                      <MapPin className="h-4 w-4 text-primary" />
                       <span>40+ Areas</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <ShoppingCart className="h-4 w-4" />
+                      <ShoppingCart className="h-4 w-4 text-primary" />
                       <span>$50+ Orders</span>
                     </div>
                   </div>
-                  <Button
-                    variant="secondary"
-                    onClick={() => navigate('/delivery-area')}
-                    className="bg-white text-primary hover:bg-white/90"
-                  >
+                  <Button variant="premium" onClick={() => navigate('/delivery-area')}>
                     View Delivery Areas
                   </Button>
                 </div>
                 {/* Map on desktop */}
                 <div className="hidden lg:block w-full lg:w-96">
                   <Suspense
-                    fallback={<div className="h-[200px] bg-gray-100 rounded-lg animate-pulse" />}
+                    fallback={<div className="h-[200px] bg-muted/30 rounded-xl animate-pulse" />}
                   >
-                    <DeliveryAreaMap height="200px" className="border-2 border-white/20" />
+                    <DeliveryAreaMap
+                      height="200px"
+                      className="border-2 border-border/30 rounded-xl"
+                    />
                   </Suspense>
                 </div>
               </div>
               {/* Map on mobile */}
               <div className="lg:hidden mt-4">
                 <Suspense
-                  fallback={<div className="h-[150px] bg-gray-100 rounded-lg animate-pulse" />}
+                  fallback={<div className="h-[150px] bg-muted/30 rounded-xl animate-pulse" />}
                 >
-                  <DeliveryAreaMap height="150px" className="border-2 border-white/20" />
+                  <DeliveryAreaMap
+                    height="150px"
+                    className="border-2 border-border/30 rounded-xl"
+                  />
                 </Suspense>
               </div>
             </CardContent>
@@ -179,7 +180,7 @@ const Index = () => {
       </main>
 
       {/* Bottom Navigation */}
-      <Suspense fallback={<div className="h-16 bg-gray-100" />}>
+      <Suspense fallback={<div className="h-16 bg-muted/30" />}>
         <BottomNav />
       </Suspense>
     </div>

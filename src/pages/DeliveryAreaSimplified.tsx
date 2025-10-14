@@ -37,7 +37,7 @@ export default function DeliveryAreaSimplified() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-0">
+    <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
       <DesktopHeader />
       <MobileHeader title="Delivery Areas" />
 
@@ -145,7 +145,7 @@ export default function DeliveryAreaSimplified() {
               <Link to="/categories">Shop Now</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8" asChild>
-              <a href="tel:763-247-5378" className="flex items-center gap-2">
+              <a href="tel:612-930-1390" className="flex items-center gap-2">
                 <Phone className="h-5 w-5" />
                 Call to Order
               </a>

@@ -42,7 +42,7 @@ export default function Cart() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-32 md:pb-0">
+      <div className="min-h-screen bg-gradient-dark pb-32 md:pb-0">
         <DesktopHeader />
         <MobileHeader title="Shopping Cart" />
         <div className="flex items-center justify-center py-12">
@@ -208,11 +208,11 @@ export default function Cart() {
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Prefer to order by phone?</p>
                   <a
-                    href="tel:763-247-5378"
+                    href="tel:612-930-1390"
                     className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
                   >
                     <Phone className="h-4 w-4" />
-                    763-247-5378
+                    612-930-1390
                   </a>
                 </div>
               </CardContent>

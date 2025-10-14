@@ -209,7 +209,7 @@ export class EmailService {
 
     <div class="contact-info">
       <h3>📞 Need Help?</h3>
-      <p><strong>Call or Text:</strong> <a href="tel:763-247-5378">(763) 247-5378</a></p>
+      <p><strong>Call or Text:</strong> <a href="tel:612-930-1390">(612) 930-1390</a></p>
       <p><strong>Email:</strong> <a href="mailto:support@dankdealsmn.com">support@dankdealsmn.com</a></p>
     </div>
 

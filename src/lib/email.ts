@@ -56,13 +56,15 @@ export const sendOrderConfirmationEmail = async (emailData: EmailData): Promise<
         <li>Have your ID and cash ready</li>
       </ol>
       
-      <p>Questions? Contact us at support@dankdealsmn.com or 763-247-5378</p>
+      <p>Questions? Contact us at support@dankdealsmn.com or 612-930-1390</p>
     `;
 
     // Store notification in database (if user is authenticated)
     // For guest orders, we skip storing notifications
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { error } = await supabase.from('notifications').insert({
           user_id: user.id,
@@ -80,7 +82,9 @@ export const sendOrderConfirmationEmail = async (emailData: EmailData): Promise<
         }
       }
     } catch (notificationError) {
-      logger.warn('Could not store notification - user not authenticated', { error: notificationError });
+      logger.warn('Could not store notification - user not authenticated', {
+        error: notificationError,
+      });
     }
 
     logger.info('Order confirmation email queued', {

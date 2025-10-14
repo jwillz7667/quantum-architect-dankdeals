@@ -290,7 +290,7 @@ export function generateLocalBusinessSchema() {
     url: 'https://dankdealsmn.com',
     logo: 'https://dankdealsmn.com/apple-touch-icon.png',
     image: 'https://dankdealsmn.com/og-image.png',
-    telephone: '+1-763-247-5378',
+    telephone: '+1-612-930-1390',
     email: 'info@dankdealsmn.com',
     priceRange: '$$',
     currenciesAccepted: 'USD',
