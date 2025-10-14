@@ -13,9 +13,6 @@ import { Footer } from '@/components/Footer';
 const CategoryRail = lazy(() =>
   import('@/components/CategoryRail').then((module) => ({ default: module.CategoryRail }))
 );
-const HeroSection = lazy(() =>
-  import('@/components/HeroSection').then((module) => ({ default: module.HeroSection }))
-);
 const FeaturedProductsGrid = lazy(() =>
   import('@/components/FeaturedProductsGrid').then((module) => ({
     default: module.FeaturedProductsGrid,
@@ -99,11 +96,6 @@ const Index = () => {
             <CategoryRail />
           </Suspense>
         </div>
-
-        {/* Hero Section */}
-        <Suspense fallback={<div className="h-64 bg-muted/30 rounded-2xl animate-pulse" />}>
-          <HeroSection />
-        </Suspense>
 
         {/* Hot Products */}
         <div className="space-y-4">
