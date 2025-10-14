@@ -57,7 +57,7 @@ export function useAddresses() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        throw new Error('Not authenticated');
+        return []; // Return empty array for guests instead of throwing
       }
 
       const { data, error } = await supabase

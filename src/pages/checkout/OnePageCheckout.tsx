@@ -9,13 +9,14 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Check } from '@/lib/icons';
+import { ArrowLeft, Check, MapPin } from '@/lib/icons';
 import { toast } from 'sonner';
 import { MobileHeader } from '@/components/MobileHeader';
 import { DesktopHeader } from '@/components/DesktopHeader';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPhoneNumber, isValidPhoneNumber } from '@/utils/phoneFormatter';
+import { useAddresses } from '@/hooks/useAddresses';
 
 interface DeliveryAddress {
   street: string;
@@ -32,6 +33,11 @@ export default function OnePageCheckout() {
   const { user } = useAuth();
   const { trackBeginCheckout, trackPurchase } = useAnalytics();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch saved addresses for signed-in users
+  const { data: savedAddresses } = useAddresses();
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [useNewAddress, setUseNewAddress] = useState(false);
 
   // Form state
   const [address, setAddress] = useState<DeliveryAddress>({
@@ -53,6 +59,47 @@ export default function OnePageCheckout() {
   const deliveryFee = 5.0;
   const tax = subtotal * 0.0875; // Minnesota tax rate
   const finalTotal = subtotal + deliveryFee + tax;
+
+  // Pre-select default address for signed-in users
+  useEffect(() => {
+    if (savedAddresses && savedAddresses.length > 0 && !useNewAddress) {
+      const defaultAddress = savedAddresses.find((addr) => addr.is_default) || savedAddresses[0];
+      if (defaultAddress && !selectedAddressId) {
+        setSelectedAddressId(defaultAddress.id);
+        // Pre-fill form with selected address
+        setAddress({
+          street: defaultAddress.street_address,
+          apartment: defaultAddress.apartment || '',
+          city: defaultAddress.city,
+          state: defaultAddress.state,
+          zipcode: defaultAddress.zip_code,
+          instructions: defaultAddress.delivery_instructions || '',
+        });
+        setFirstName(defaultAddress.first_name);
+        setLastName(defaultAddress.last_name);
+        setPhone(defaultAddress.phone || '');
+      }
+    }
+  }, [savedAddresses, useNewAddress, selectedAddressId]);
+
+  // Handle address selection
+  const handleAddressSelect = (addressId: string) => {
+    const selected = savedAddresses?.find((addr) => addr.id === addressId);
+    if (selected) {
+      setSelectedAddressId(addressId);
+      setAddress({
+        street: selected.street_address,
+        apartment: selected.apartment || '',
+        city: selected.city,
+        state: selected.state,
+        zipcode: selected.zip_code,
+        instructions: selected.delivery_instructions || '',
+      });
+      setFirstName(selected.first_name);
+      setLastName(selected.last_name);
+      setPhone(selected.phone || '');
+    }
+  };
 
   useEffect(() => {
     if (items.length === 0) {
@@ -282,81 +329,188 @@ export default function OnePageCheckout() {
             </div>
           </Card>
 
-          {/* Delivery Address */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="street">Street Address *</Label>
-                <Input
-                  id="street"
-                  name="street"
-                  value={address.street}
-                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                  placeholder="123 Main St"
-                  required
-                  autoComplete="street-address"
-                />
+          {/* Saved Addresses - Only for signed-in users */}
+          {user && savedAddresses && savedAddresses.length > 0 && (
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Saved Addresses</h2>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setUseNewAddress(!useNewAddress);
+                    if (!useNewAddress) {
+                      // Clear selection when switching to new address
+                      setSelectedAddressId(null);
+                      setAddress({
+                        street: '',
+                        apartment: '',
+                        city: '',
+                        state: 'MN',
+                        zipcode: '',
+                        instructions: '',
+                      });
+                      setFirstName('');
+                      setLastName('');
+                      setPhone('');
+                    } else {
+                      // Re-select default address
+                      const defaultAddress =
+                        savedAddresses.find((addr) => addr.is_default) || savedAddresses[0];
+                      if (defaultAddress) {
+                        handleAddressSelect(defaultAddress.id);
+                      }
+                    }
+                  }}
+                >
+                  {useNewAddress ? 'Use Saved Address' : 'Use New Address'}
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="apartment">Apartment/Suite (optional)</Label>
-                <Input
-                  id="apartment"
-                  name="apartment"
-                  value={address.apartment}
-                  onChange={(e) => setAddress({ ...address, apartment: e.target.value })}
-                  placeholder="Apt 4B"
-                  autoComplete="address-line2"
-                />
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
+
+              {!useNewAddress && (
+                <RadioGroup
+                  value={selectedAddressId || ''}
+                  onValueChange={handleAddressSelect}
+                  className="space-y-3"
+                >
+                  {savedAddresses.map((addr) => (
+                    <div
+                      key={addr.id}
+                      className={`flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-colors ${
+                        selectedAddressId === addr.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => handleAddressSelect(addr.id)}
+                    >
+                      <RadioGroupItem value={addr.id} id={addr.id} className="mt-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Label htmlFor={addr.id} className="font-semibold cursor-pointer">
+                            {addr.label || 'Delivery Address'}
+                          </Label>
+                          {addr.is_default && (
+                            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground space-y-0.5">
+                          <p>
+                            {addr.first_name} {addr.last_name}
+                          </p>
+                          <p>{addr.street_address}</p>
+                          {addr.apartment && <p>Apt/Unit: {addr.apartment}</p>}
+                          <p>
+                            {addr.city}, {addr.state} {addr.zip_code}
+                          </p>
+                          {addr.phone && <p>Phone: {addr.phone}</p>}
+                          {addr.delivery_instructions && (
+                            <p className="text-xs italic mt-1">
+                              Instructions: {addr.delivery_instructions}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {selectedAddressId === addr.id && (
+                        <Check className="h-5 w-5 text-primary mt-1" />
+                      )}
+                    </div>
+                  ))}
+                </RadioGroup>
+              )}
+
+              {!useNewAddress && savedAddresses.length > 0 && (
+                <p className="text-sm text-muted-foreground mt-4">
+                  <MapPin className="inline h-4 w-4 mr-1" />
+                  Selected address will be used for delivery
+                </p>
+              )}
+            </Card>
+          )}
+
+          {/* Delivery Address - Only show when using new address or no saved addresses */}
+          {(useNewAddress || !user || !savedAddresses || savedAddresses.length === 0) && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">
+                {user && savedAddresses && savedAddresses.length > 0
+                  ? 'New Delivery Address'
+                  : 'Delivery Address'}
+              </h2>
+              <div className="grid gap-4">
                 <div>
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="street">Street Address *</Label>
                   <Input
-                    id="city"
-                    name="city"
-                    value={address.city}
-                    onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    placeholder="Enter your city"
+                    id="street"
+                    name="street"
+                    value={address.street}
+                    onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                    placeholder="123 Main St"
                     required
-                    autoComplete="address-level2"
+                    autoComplete="street-address"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state">State</Label>
+                  <Label htmlFor="apartment">Apartment/Suite (optional)</Label>
                   <Input
-                    id="state"
-                    name="state"
-                    value={address.state}
-                    readOnly
-                    autoComplete="address-level1"
+                    id="apartment"
+                    name="apartment"
+                    value={address.apartment}
+                    onChange={(e) => setAddress({ ...address, apartment: e.target.value })}
+                    placeholder="Apt 4B"
+                    autoComplete="address-line2"
                   />
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      value={address.city}
+                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                      placeholder="Enter your city"
+                      required
+                      autoComplete="address-level2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      name="state"
+                      value={address.state}
+                      readOnly
+                      autoComplete="address-level1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zipcode">ZIP Code *</Label>
+                    <Input
+                      id="zipcode"
+                      name="zipcode"
+                      value={address.zipcode}
+                      onChange={(e) => setAddress({ ...address, zipcode: e.target.value })}
+                      placeholder="55401"
+                      maxLength={5}
+                      required
+                      autoComplete="postal-code"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <Label htmlFor="zipcode">ZIP Code *</Label>
+                  <Label htmlFor="instructions">Delivery Instructions (optional)</Label>
                   <Input
-                    id="zipcode"
-                    name="zipcode"
-                    value={address.zipcode}
-                    onChange={(e) => setAddress({ ...address, zipcode: e.target.value })}
-                    placeholder="55401"
-                    maxLength={5}
-                    required
-                    autoComplete="postal-code"
+                    id="instructions"
+                    value={address.instructions}
+                    onChange={(e) => setAddress({ ...address, instructions: e.target.value })}
+                    placeholder="Leave at door, ring doorbell"
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="instructions">Delivery Instructions (optional)</Label>
-                <Input
-                  id="instructions"
-                  value={address.instructions}
-                  onChange={(e) => setAddress({ ...address, instructions: e.target.value })}
-                  placeholder="Leave at door, ring doorbell"
-                />
-              </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Payment Method */}
           <Card className="p-6">
