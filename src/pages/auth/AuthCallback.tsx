@@ -48,19 +48,27 @@ export default function AuthCallback() {
             provider: data.session.user.app_metadata.provider,
           });
 
-          // Check if user needs age verification
-          const needsAgeVerification = !data.session.user.user_metadata?.['age_verified'];
-
-          // Get redirect destination
+          // Get redirect destination from URL params or hash
           const urlParams = new URLSearchParams(window.location.search);
-          const redirectTo = urlParams.get('redirect_to') || '/';
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const redirectTo =
+            urlParams.get('redirect_to') ||
+            urlParams.get('redirectTo') ||
+            hashParams.get('redirect_to') ||
+            hashParams.get('redirectTo') ||
+            '/';
 
-          if (needsAgeVerification && !redirectTo.includes('age-gate')) {
-            navigate('/age-gate', { replace: true, state: { redirectTo } });
-          } else {
-            // Redirect to welcome page, which will then redirect to the final destination
-            navigate('/welcome', { replace: true, state: { redirectTo } });
-          }
+          // For OAuth sign-ins, redirect directly to destination (skip welcome page)
+          // Welcome page is protected and can cause issues with OAuth flow
+          console.log('AuthCallback: Redirecting to:', redirectTo);
+          navigate(redirectTo, { replace: true });
+
+          // Show success toast
+          toast({
+            title: 'Welcome back!',
+            description: `Successfully signed in with ${data.session.user.app_metadata.provider || 'OAuth'}`,
+          });
+
           return;
         }
 
@@ -76,8 +84,23 @@ export default function AuthCallback() {
 
         if (finalData?.session) {
           console.log('AuthCallback: Session found on retry');
-          const redirectTo = new URLSearchParams(window.location.search).get('redirect_to') || '/';
-          navigate('/welcome', { replace: true, state: { redirectTo } });
+          const urlParams = new URLSearchParams(window.location.search);
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const redirectTo =
+            urlParams.get('redirect_to') ||
+            urlParams.get('redirectTo') ||
+            hashParams.get('redirect_to') ||
+            hashParams.get('redirectTo') ||
+            '/';
+
+          console.log('AuthCallback: Redirecting to:', redirectTo);
+          navigate(redirectTo, { replace: true });
+
+          toast({
+            title: 'Welcome!',
+            description: 'Successfully signed in',
+          });
+
           return;
         }
 
