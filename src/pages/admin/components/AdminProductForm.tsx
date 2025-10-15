@@ -451,6 +451,11 @@ const AdminProductForm = ({
       <Card>
         <CardHeader>
           <CardTitle>Product Images</CardTitle>
+          {!initialProduct?.id && (
+            <p className="text-sm text-muted-foreground mt-2 bg-yellow-50 border border-yellow-200 rounded-md p-3">
+              ⚠️ <strong>Note:</strong> Save the product first before uploading images. Images need a product ID to be stored correctly in Supabase.
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <Tabs
@@ -458,12 +463,20 @@ const AdminProductForm = ({
             onValueChange={(v) => setImageUploadMode(v as 'upload' | 'url')}
           >
             <TabsList className="mb-4">
-              <TabsTrigger value="upload">Upload Images</TabsTrigger>
+              <TabsTrigger value="upload" disabled={!initialProduct?.id}>
+                Upload Images {!initialProduct?.id && '(Save product first)'}
+              </TabsTrigger>
               <TabsTrigger value="url">Enter URLs</TabsTrigger>
             </TabsList>
 
             <TabsContent value="upload" className="space-y-6">
-              <ProductImageUpload
+              {!initialProduct?.id ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Save this product first to enable image uploads.</p>
+                  <p className="text-sm mt-2">Images require a product ID to be stored in Supabase storage.</p>
+                </div>
+              ) : (
+                <ProductImageUpload
                 productId={initialProduct?.id}
                 variant="main"
                 value={uploadedMainImage}
@@ -494,6 +507,7 @@ const AdminProductForm = ({
                 label="Gallery Images"
                 helperText="Additional images for the product gallery (max 10)"
               />
+              )}
             </TabsContent>
 
             <TabsContent value="url" className="space-y-4">

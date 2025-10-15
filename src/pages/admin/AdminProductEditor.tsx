@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,11 +10,25 @@ import { useAdminProduct, useAdminProductMutations } from '@/hooks/admin/useAdmi
 
 const AdminProductEditor = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id);
 
   const { data: product, isLoading, error } = useAdminProduct(id, isEditing);
   const { upsert } = useAdminProductMutations();
+
+  useEffect(() => {
+    // Show message if redirected after creating product
+    const state = location.state as { message?: string } | null;
+    if (state?.message) {
+      toast.info(state.message, {
+        description: 'You can now upload product images with the proper product ID.',
+        duration: 6000,
+      });
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -26,7 +41,25 @@ const AdminProductEditor = () => {
   }, [error, isEditing, navigate]);
 
   const handleSubmit = async (payload: Parameters<typeof upsert.mutateAsync>[0]) => {
-    await upsert.mutateAsync(payload);
+    const result = await upsert.mutateAsync(payload);
+    
+    // If creating a new product, redirect to edit page so images can be uploaded with proper product ID
+    if (!isEditing && result) {
+      // Extract product ID from result
+      const productId = typeof result === 'object' && result && 'id' in result 
+        ? result.id 
+        : payload.product.id;
+      
+      if (productId) {
+        console.log('New product created, redirecting to edit for image upload', { productId });
+        navigate(`/admin/products/${productId}`, { 
+          replace: true,
+          state: { message: 'Product created! Now you can upload images.' }
+        });
+        return;
+      }
+    }
+    
     navigate('/admin/products');
   };
 

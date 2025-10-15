@@ -60,10 +60,18 @@ const ProductImageUpload = ({
           // Update progress
           pendingUploads?.updateProgress(fileInfo.id, 10);
 
+          // Require product ID for upload
+          if (!productId) {
+            const errorMsg = 'Product must be saved before uploading images. Please save the product first, then upload images.';
+            errors.push(errorMsg);
+            pendingUploads?.markUploadFailed(fileInfo.id, errorMsg);
+            continue;
+          }
+
           // Upload to Supabase Storage
           const result = await uploadProductImage(
             fileInfo.file,
-            productId || 'temp',
+            productId,
             variant
           );
 
