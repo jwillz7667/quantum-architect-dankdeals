@@ -216,18 +216,13 @@ const ImageUpload = ({
         setImageFiles(updatedFiles);
       }
 
-      // Notify parent component with preview URLs (will trigger upload in ProductImageUpload)
-      const previewUrls = updatedFiles.map(img => img.preview);
-      if (multiple) {
-        onChange(previewUrls.length > 0 ? previewUrls : null);
-      } else {
-        onChange(previewUrls[0] || null);
-      }
+      // DON'T notify parent with blob preview URLs - only notify after actual upload
+      // The parent will be notified via __pendingImageUploads mechanism
       
-      console.log('ImageUpload: Files processed, notifying parent', {
+      console.log('ImageUpload: Files processed, ready for upload', {
         fileCount: newImageFiles.length,
-        previewUrls,
-        pendingUploads: (window as any).__pendingImageUploads
+        hasPreview: updatedFiles.every(f => f.preview),
+        pendingForUpload: updatedFiles.filter(f => !f.uploadedUrl).length
       });
     }
 
