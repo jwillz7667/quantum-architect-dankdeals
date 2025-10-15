@@ -476,37 +476,39 @@ const AdminProductForm = ({
                   <p className="text-sm mt-2">Images require a product ID to be stored in Supabase storage.</p>
                 </div>
               ) : (
-                <ProductImageUpload
-                productId={initialProduct?.id}
-                variant="main"
-                value={uploadedMainImage}
-                onChange={(value) => {
-                  if (typeof value === 'string' || value === null) {
-                    setUploadedMainImage(value);
-                  }
-                }}
-                multiple={false}
-                maxFiles={1}
-                label="Main Product Image"
-                helperText="This image will be displayed as the primary product image"
-              />
+                <>
+                  <ProductImageUpload
+                    productId={initialProduct?.id}
+                    variant="main"
+                    value={uploadedMainImage}
+                    onChange={(value) => {
+                      if (typeof value === 'string' || value === null) {
+                        setUploadedMainImage(value);
+                      }
+                    }}
+                    multiple={false}
+                    maxFiles={1}
+                    label="Main Product Image"
+                    helperText="This image will be displayed as the primary product image"
+                  />
 
-              <ProductImageUpload
-                productId={initialProduct?.id}
-                variant="gallery"
-                value={uploadedGalleryImages}
-                onChange={(value) => {
-                  if (Array.isArray(value)) {
-                    setUploadedGalleryImages(value);
-                  } else if (value === null) {
-                    setUploadedGalleryImages([]);
-                  }
-                }}
-                multiple={true}
-                maxFiles={10}
-                label="Gallery Images"
-                helperText="Additional images for the product gallery (max 10)"
-              />
+                  <ProductImageUpload
+                    productId={initialProduct?.id}
+                    variant="gallery"
+                    value={uploadedGalleryImages}
+                    onChange={(value) => {
+                      if (Array.isArray(value)) {
+                        setUploadedGalleryImages(value);
+                      } else if (value === null) {
+                        setUploadedGalleryImages([]);
+                      }
+                    }}
+                    multiple={true}
+                    maxFiles={10}
+                    label="Gallery Images"
+                    helperText="Additional images for the product gallery (max 10)"
+                  />
+                </>
               )}
             </TabsContent>
 
