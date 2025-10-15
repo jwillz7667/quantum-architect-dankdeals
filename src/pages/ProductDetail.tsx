@@ -202,7 +202,7 @@ export default function ProductDetail() {
           <Skeleton className="w-full h-full" />
         </div>
 
-        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-24 space-y-6">
+        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-28 md:pb-12 space-y-6">
           <div>
             <Skeleton className="h-8 w-3/4 mb-2" />
             <Skeleton className="h-6 w-1/2" />
@@ -224,7 +224,7 @@ export default function ProductDetail() {
         <DesktopHeader />
         <MobileHeader title="Error" />
 
-        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-24 text-center">
+        <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-28 md:pb-12 text-center">
           <p className="text-muted-foreground">{error || 'Product not found'}</p>
           <Button onClick={() => navigate('/categories')} className="mt-4">
             Back to Products
@@ -355,7 +355,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Product Info */}
-      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-24 space-y-6">
+      <div className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-28 md:pb-12 space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {product?.name || 'Cannabis Product'}

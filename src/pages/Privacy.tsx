@@ -8,7 +8,7 @@ export default function Privacy() {
       <DesktopHeader />
       <MobileHeader title="Privacy Policy" />
 
-      <div className="max-w-md mx-auto px-4 pt-6 pb-24">
+      <div className="max-w-md mx-auto px-4 pt-6 pb-28 md:pb-12">
         <div className="prose prose-sm max-w-none">
           <h2 className="text-xl font-bold text-foreground mb-6">Privacy Policy</h2>
 

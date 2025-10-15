@@ -67,7 +67,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-44 md:pb-0 animate-fade-in">
+    <div className="min-h-screen bg-background pb-28 md:pb-8 animate-fade-in">
       <SEOHead
         title="Shopping Cart"
         description="Review your cannabis products and proceed to checkout. Same-day delivery in Minneapolis & St. Paul."

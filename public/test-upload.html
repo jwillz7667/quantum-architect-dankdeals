@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Supabase Image Upload Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
+    button { padding: 10px 20px; margin: 10px 0; cursor: pointer; }
+    #log { background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap; font-family: monospace; font-size: 12px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>🧪 DankDeals Image Upload Test</h1>
+  
+  <div>
+    <h2>Step 1: Check Admin Status</h2>
+    <button onclick="checkAdmin()">Check If I'm Admin</button>
+  </div>
+
+  <div>
+    <h2>Step 2: Test Upload</h2>
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="testUpload()">Upload to Supabase</button>
+  </div>
+
+  <h3>Log Output:</h3>
+  <div id="log"></div>
+
+  <script>
+    // Initialize Supabase (get these from your .env.local)
+    const SUPABASE_URL = 'https://ralbzuvkyexortqngvxs.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // Replace with actual key from .env.local
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+      logDiv.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+    }
+
+    async function checkAdmin() {
+      try {
+        log('Checking authentication...');
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          log('❌ Not logged in!', 'error');
+          log('Please log in to the main app first, then come back here');
+          return;
+        }
+        
+        log(`✅ Logged in as: ${user.email}`, 'success');
+        
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role, is_admin')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileError) {
+          log(`❌ Error fetching profile: ${profileError.message}`, 'error');
+          return;
+        }
+        
+        log(`Role: ${profile.role}, Is Admin: ${profile.is_admin}`, profile.is_admin ? 'success' : 'error');
+        
+        if (!profile.is_admin) {
+          log('❌ You are not an admin! Upload will fail.', 'error');
+        } else {
+          log('✅ You have admin access! Upload should work.', 'success');
+        }
+      } catch (err) {
+        log(`❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testUpload() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        log('❌ Please select a file first!', 'error');
+        return;
+      }
+      
+      try {
+        log(`Starting upload: ${file.name} (${(file.size/1024).toFixed(2)}KB)`);
+        
+        const filename = `test-${Date.now()}.${file.name.split('.').pop()}`;
+        const path = `test-uploads/${filename}`;
+        
+        log(`Uploading to: products bucket at ${path}`);
+        
+        const { data, error } = await supabase.storage
+          .from('products')
+          .upload(path, file);
+        
+        if (error) {
+          log(`❌ Upload failed: ${error.message}`, 'error');
+          log(`Error details: ${JSON.stringify(error, null, 2)}`, 'error');
+          
+          if (error.message.includes('policy')) {
+            log('🔒 This is a permissions error. You need admin access.', 'error');
+          }
+          return;
+        }
+        
+        log(`✅ Upload successful!`, 'success');
+        log(`Storage path: ${data.path}`, 'success');
+        
+        const { data: urlData } = supabase.storage
+          .from('products')
+          .getPublicUrl(data.path);
+        
+        log(`📷 Public URL: ${urlData.publicUrl}`, 'success');
+        log('✅ IMAGE UPLOADED TO SUPABASE SUCCESSFULLY!', 'success');
+        log('You can use this URL in your product form.');
+        
+      } catch (err) {
+        log(`❌ Exception: ${err.message}`, 'error');
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
+

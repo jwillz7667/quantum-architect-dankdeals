@@ -73,7 +73,7 @@ export default function Profile() {
         <DesktopHeader />
         <MobileHeader title="Account" />
 
-        <div className="max-w-2xl mx-auto px-4 pt-8 pb-24 space-y-6">
+        <div className="max-w-2xl mx-auto px-4 pt-8 pb-28 md:pb-12 space-y-6">
           {/* User Info Card */}
           <Card className="p-6">
             <div className="flex items-center gap-4 mb-6">

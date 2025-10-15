@@ -19,7 +19,7 @@ export default function Blog() {
       <DesktopHeader />
       <MobileHeader title="Blog" />
 
-      <div className="max-w-6xl mx-auto px-4 pt-6 pb-24">
+      <div className="max-w-6xl mx-auto px-4 pt-6 pb-28 md:pb-12">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Cannabis Education & News

@@ -80,7 +80,7 @@ const Index = () => {
       <MobileHeader />
 
       {/* Main Content */}
-      <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8 pb-20">
+      <main className="max-w-md md:max-w-7xl mx-auto px-4 md:px-6 space-y-8 md:space-y-10 pt-6 md:pt-8 pb-28 md:pb-12">
         {/* Search Bar */}
         <SearchBar onFilter={() => console.log('Open filters')} />
 

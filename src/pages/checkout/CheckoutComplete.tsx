@@ -26,7 +26,7 @@ export default function CheckoutComplete() {
       <DesktopHeader />
       <MobileHeader title="Order Complete" />
 
-      <div className="max-w-md mx-auto px-4 pt-8 pb-24 space-y-6">
+      <div className="max-w-md mx-auto px-4 pt-8 pb-28 md:pb-12 space-y-6">
         {/* Success Message */}
         <div className="text-center space-y-4">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">

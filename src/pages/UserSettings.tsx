@@ -37,7 +37,7 @@ export default function UserSettings() {
         <DesktopHeader />
         <MobileHeader title="Settings" />
 
-        <div className="max-w-4xl mx-auto px-4 pt-8 pb-24">
+        <div className="max-w-4xl mx-auto px-4 pt-8 pb-28 md:pb-12">
           {/* Back Button */}
           <Button variant="ghost" onClick={() => navigate('/profile')} className="mb-6 -ml-2">
             <ArrowLeft className="mr-2 h-4 w-4" />

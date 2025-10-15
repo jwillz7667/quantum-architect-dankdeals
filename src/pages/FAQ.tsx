@@ -92,7 +92,7 @@ export default function FAQ() {
       <DesktopHeader />
       <MobileHeader title="FAQ" />
 
-      <div className="max-w-md mx-auto px-4 pt-6 pb-24">
+      <div className="max-w-md mx-auto px-4 pt-6 pb-28 md:pb-12">
         <h2 className="text-xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
 
         <Accordion type="single" collapsible className="space-y-4">
