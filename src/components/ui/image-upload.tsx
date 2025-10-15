@@ -202,15 +202,33 @@ const ImageUpload = ({
     }
 
     if (newImageFiles.length > 0) {
+      let updatedFiles: ImageFile[];
+      
       if (multiple) {
-        setImageFiles((prev) => [...prev, ...newImageFiles]);
+        updatedFiles = [...imageFiles, ...newImageFiles];
+        setImageFiles(updatedFiles);
       } else {
         // Clean up old preview
         if (imageFiles[0]?.preview && !imageFiles[0].uploadedUrl) {
           URL.revokeObjectURL(imageFiles[0].preview);
         }
-        setImageFiles(newImageFiles);
+        updatedFiles = newImageFiles;
+        setImageFiles(updatedFiles);
       }
+
+      // Notify parent component with preview URLs (will trigger upload in ProductImageUpload)
+      const previewUrls = updatedFiles.map(img => img.preview);
+      if (multiple) {
+        onChange(previewUrls.length > 0 ? previewUrls : null);
+      } else {
+        onChange(previewUrls[0] || null);
+      }
+      
+      console.log('ImageUpload: Files processed, notifying parent', {
+        fileCount: newImageFiles.length,
+        previewUrls,
+        pendingUploads: (window as any).__pendingImageUploads
+      });
     }
 
     setIsProcessing(false);

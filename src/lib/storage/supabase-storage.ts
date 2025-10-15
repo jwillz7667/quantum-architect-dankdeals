@@ -46,6 +46,14 @@ export async function uploadToStorage({
   contentType,
 }: StorageUploadOptions): Promise<UploadResult> {
   try {
+    console.log('uploadToStorage: Starting upload to Supabase', {
+      bucket,
+      path,
+      fileName: file.name,
+      fileSize: `${(file.size / 1024).toFixed(2)}KB`,
+      contentType: contentType || file.type,
+    });
+
     const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
       upsert,
       contentType: contentType || file.type,
@@ -59,12 +67,19 @@ export async function uploadToStorage({
     }
 
     if (!data?.path) {
+      console.error('Storage upload: No path returned', { data });
       return {
         error: 'Upload succeeded but no path returned',
       };
     }
 
     const publicUrl = getPublicUrl(bucket, data.path);
+
+    console.log('uploadToStorage: Upload successful', {
+      storagePath: data.path,
+      publicUrl,
+      bucket,
+    });
 
     return {
       url: publicUrl,
@@ -224,18 +239,27 @@ export async function uploadProductImage(
   const bucket = 'products';
 
   try {
+    console.log('uploadProductImage: Starting', {
+      fileName: file.name,
+      productId,
+      variant,
+      bucket,
+    });
+
     // Import image optimizer dynamically
     const { optimizeImage, validateImageFile } = await import('./image-optimizer');
 
     // Validate image
     const validation = validateImageFile(file);
     if (!validation.valid) {
+      console.error('uploadProductImage: Validation failed', validation.error);
       return {
         error: validation.error || 'Invalid image file',
       };
     }
 
     // Optimize image before upload (compress + convert to WebP)
+    console.log('uploadProductImage: Optimizing image...');
     const optimizedFile = await optimizeImage(file, {
       maxSizeMB: 1,
       maxWidthOrHeight: variant === 'main' ? 1200 : 2048,
@@ -248,12 +272,26 @@ export async function uploadProductImage(
     const filename = generateUniqueFilename(optimizedFile.name);
     const path = productId ? `${productId}/${variant}/${filename}` : `temp/${variant}/${filename}`;
 
-    return uploadToStorage({
+    console.log('uploadProductImage: Uploading to Supabase storage', {
+      bucket,
+      path,
+      optimizedSize: `${(optimizedFile.size / 1024).toFixed(2)}KB`,
+    });
+
+    const result = await uploadToStorage({
       bucket,
       path,
       file: optimizedFile,
       upsert: false,
     });
+
+    if (result.error) {
+      console.error('uploadProductImage: Upload failed', result.error);
+    } else {
+      console.log('uploadProductImage: Success! Image uploaded to Supabase', result);
+    }
+
+    return result;
   } catch (error) {
     console.error('Error in uploadProductImage:', error);
     return {

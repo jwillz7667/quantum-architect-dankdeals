@@ -135,14 +135,27 @@ const ProductImageUpload = ({
 
   // Custom onChange handler that integrates with upload
   const handleChange = useCallback((newValue: string | string[] | null) => {
+    console.log('ProductImageUpload.handleChange called', { 
+      newValue, 
+      isArray: Array.isArray(newValue),
+      hasPending: !!(window as any).__pendingImageUploads
+    });
+    
     // Check if there are new files to upload
     const pendingUploads = (window as any).__pendingImageUploads;
 
     if (pendingUploads?.files?.length > 0) {
-      // Trigger upload for new files
+      console.log('ProductImageUpload: Detected pending uploads, triggering Supabase upload', {
+        fileCount: pendingUploads.files.length,
+        variant,
+        productId
+      });
+      
+      // Trigger upload for new files to Supabase
       void handleUpload(pendingUploads.files);
     } else {
-      // Handle removal or other changes
+      // Handle removal or other changes (no upload needed)
+      console.log('ProductImageUpload: No pending uploads, updating state', { newValue });
       onChange(newValue);
 
       // Update local state
@@ -153,7 +166,7 @@ const ProductImageUpload = ({
         setUploadedUrls([]);
       }
     }
-  }, [onChange, handleUpload]);
+  }, [onChange, handleUpload, variant, productId]);
 
   return (
     <ImageUpload
