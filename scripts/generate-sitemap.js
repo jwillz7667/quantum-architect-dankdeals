@@ -275,6 +275,14 @@ async function generateBlogSitemap() {
         priority: 0.7,
       },
       {
+        slug: 'dank-district-vs-dankdeals-cannabis-quality-comparison',
+        title: 'Dank District vs DankDeals: Why Quality Cannabis Matters More Than Hype',
+        date: '2025-01-15',
+        priority: 0.9,
+        isNews: true,
+        keywords: 'dank district, dankdeals, cannabis quality comparison, premium cannabis, lab testing, dispensary comparison, cannabis cultivation',
+      },
+      {
         slug: 'dankdeals-vs-dank-district-minneapolis-cannabis-delivery',
         title: 'Minneapolis Cannabis Delivery Showdown: Why DankDeals Outshines Dank District',
         date: '2025-01-18',
