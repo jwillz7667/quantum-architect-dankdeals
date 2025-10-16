@@ -3,6 +3,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import type { Resolver } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -200,6 +201,25 @@ const AdminProductForm = ({
       galleryUrls = parseList(values.gallery_input);
     }
 
+    // Validation: Prevent blob URLs from being saved (they won't work after page reload)
+    if (imageUrl && imageUrl.startsWith('blob:')) {
+      toast.error('Cannot save product with temporary image URL', {
+        description: 'Please wait for image upload to complete, or remove the image and try again.',
+        duration: 8000,
+      });
+      throw new Error('Image upload not complete - blob URL detected');
+    }
+
+    // Validation: Check for blob URLs in gallery
+    const invalidGalleryUrls = galleryUrls.filter(url => url.startsWith('blob:'));
+    if (invalidGalleryUrls.length > 0) {
+      toast.error(`Cannot save product with ${invalidGalleryUrls.length} temporary gallery image(s)`, {
+        description: 'Please wait for all uploads to complete, or remove the images and try again.',
+        duration: 8000,
+      });
+      throw new Error('Gallery upload not complete - blob URLs detected');
+    }
+
     console.log('AdminProductForm: Submitting product with images', {
       imageUploadMode,
       imageUrl,
@@ -207,6 +227,7 @@ const AdminProductForm = ({
       galleryUrls,
       uploadedMainImage,
       uploadedGalleryImages,
+      validation: imageUrl?.startsWith('blob:') ? '❌ BLOB URL!' : '✅ Valid URL',
     });
 
     const productPayload: UpsertAdminProductInput['product'] = {

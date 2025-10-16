@@ -81,6 +81,7 @@ const ProductImageUpload = ({
           } else if (result.url) {
             newUrls.push(result.url);
             pendingUploads?.markUploadComplete(fileInfo.id, result.url);
+            console.log(`✅ Upload successful - Supabase URL: ${result.url}`);
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Upload failed';
@@ -104,7 +105,7 @@ const ProductImageUpload = ({
           finalUrls = [...uploadedUrls, ...newUrls];
         }
 
-        console.log(`ProductImageUpload: Upload complete`, {
+        console.log(`✅ ProductImageUpload: Setting Supabase URLs to form`, {
           variant,
           uploadedCount: newUrls.length,
           finalUrls,
@@ -113,16 +114,17 @@ const ProductImageUpload = ({
 
         setUploadedUrls(finalUrls);
 
-        // Update parent component
-        if (multiple) {
-          onChange(finalUrls);
-          onUploadComplete?.(finalUrls);
-        } else {
-          onChange(finalUrls[0] || null);
-          onUploadComplete?.(finalUrls);
-        }
+        // CRITICAL: Update parent component with Supabase URLs IMMEDIATELY
+        // This ensures the form has the correct URLs before submission
+        const urlsToSave = multiple ? finalUrls : (finalUrls[0] || null);
+        console.log(`✅ Calling onChange with Supabase URLs:`, urlsToSave);
+        onChange(urlsToSave);
+        onUploadComplete?.(finalUrls);
 
-        toast.success(`Successfully uploaded ${newUrls.length} image${newUrls.length > 1 ? 's' : ''} - URLs saved to form`);
+        toast.success(`Successfully uploaded ${newUrls.length} image${newUrls.length > 1 ? 's' : ''} to Supabase! URLs ready to save.`, {
+          description: 'Click "Save Product" to update the database',
+          duration: 5000,
+        });
       }
 
       // Show errors if any
