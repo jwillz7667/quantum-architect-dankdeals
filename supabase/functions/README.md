@@ -63,6 +63,10 @@ Testing function for admin email functionality.
 
 Handles webhooks from Resend email service.
 
+### launch-waitlist
+
+Captures coming-soon and beta interest, writes to the `launch_waitlist` table, and notifies admins (and users with emails) via Resend. Requires `RESEND_API_KEY`, `FROM_EMAIL`, and `ADMIN_EMAIL`.
+
 ## TypeScript Configuration
 
 The functions use a custom `tsconfig.json` that:
